@@ -93,6 +93,11 @@ ApplicationWindow {
             root.currentPage = 2;
             root.openWindow();
         }
+
+        function displays(): void {
+            root.currentPage = 3;
+            root.openWindow();
+        }
     }
 
     Rectangle {
@@ -276,6 +281,59 @@ ApplicationWindow {
                     }
 
                     Rectangle {
+                        id: displaysTab
+
+                        Layout.fillWidth: true
+                        implicitHeight: Appearance.px(42)
+                        radius: Appearance.px(12)
+                        color: root.currentPage === 3
+                            ? Appearance.secondaryContainer
+                            : displaysMouse.containsMouse
+                                ? Appearance.layer1Hover : "transparent"
+
+                        RowLayout {
+                            anchors {
+                                fill: parent
+                                leftMargin: Appearance.px(12)
+                                rightMargin: Appearance.px(12)
+                            }
+                            spacing: Appearance.px(10)
+
+                            Text {
+                                text: "󰍹"
+                                color: root.currentPage === 3
+                                    ? Appearance.secondaryContainerText
+                                    : Appearance.layer1Text
+                                font {
+                                    family: Appearance.iconFontFamily
+                                    pixelSize: Appearance.px(18)
+                                }
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: I18n.tr("displays")
+                                color: root.currentPage === 3
+                                    ? Appearance.secondaryContainerText
+                                    : Appearance.layer1Text
+                                font {
+                                    family: Appearance.fontFamily
+                                    pixelSize: Appearance.fontSize
+                                    weight: Font.DemiBold
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            id: displaysMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.currentPage = 3
+                        }
+                    }
+
+                    Rectangle {
                         id: styleTab
 
                         Layout.fillWidth: true
@@ -362,6 +420,12 @@ ApplicationWindow {
 
                 StyleContent {
                     visible: root.currentPage === 2
+                    anchors.fill: parent
+                    onCloseRequested: root.closeWindow()
+                }
+
+                DisplayContent {
+                    visible: root.currentPage === 3
                     anchors.fill: parent
                     onCloseRequested: root.closeWindow()
                 }

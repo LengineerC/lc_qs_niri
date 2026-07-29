@@ -44,6 +44,13 @@ Item {
     property int popupBaseWidth: 340
     readonly property int popupWidth: Appearance.px(popupBaseWidth)
     readonly property int popupHeight: {
+        if (page === "launcher") {
+            const availableHeight =
+                (parent?.height ?? Appearance.px(720))
+                    - Appearance.barHeight - Appearance.px(8);
+            return Math.min(Appearance.px(600),
+                Math.max(Appearance.px(390), availableHeight));
+        }
         if (page === "system") {
             return Math.min(Appearance.px(680),
                 Math.max(Appearance.px(420),
@@ -66,6 +73,14 @@ Item {
                     (parent?.height ?? Appearance.px(760))
                         - Appearance.barHeight - Appearance.px(8)));
         }
+        if (page === "media") {
+            const availableHeight =
+                (parent?.height ?? Appearance.px(760))
+                    - Appearance.barHeight - Appearance.px(8);
+            return Math.min(availableHeight,
+                Math.max(Appearance.px(260),
+                    mediaPanel.implicitHeight + Appearance.px(16)));
+        }
         return popupLayout.implicitHeight + Appearance.px(36);
     }
 
@@ -85,16 +100,9 @@ Item {
         switch (pageName) {
         case "launcher":
             popupIcon = "󰣇";
-            popupTitle = I18n.tr("quickShell");
-            popupBaseWidth = 310;
-            popupRows = [
-                { icon: "󰍹", label: I18n.tr("desktop"),
-                    value: I18n.tr("workspaceOne") },
-                { icon: "󰌾", label: I18n.tr("session"),
-                    value: I18n.tr("active") },
-                { icon: "󰐥", label: I18n.tr("powerMenu"),
-                    value: I18n.tr("unavailable") }
-            ];
+            popupTitle = I18n.tr("launcher");
+            popupBaseWidth = 500;
+            popupRows = [];
             break;
         case "resources":
             popupIcon = "󰍛";
@@ -163,6 +171,12 @@ Item {
             popupIcon = "󰂚";
             popupTitle = I18n.tr("notifications");
             popupBaseWidth = 590;
+            popupRows = [];
+            break;
+        case "media":
+            popupIcon = "󰝚";
+            popupTitle = I18n.tr("media");
+            popupBaseWidth = 570;
             popupRows = [];
             break;
         default:
@@ -264,9 +278,10 @@ Item {
         ColumnLayout {
             id: popupLayout
 
-        visible: root.page !== "system" && root.page !== "battery"
+            visible: root.page !== "system" && root.page !== "battery"
                 && root.page !== "calendar" && root.page !== "clipboard"
                 && root.page !== "notifications"
+                && root.page !== "media" && root.page !== "launcher"
             x: Appearance.px(21)
             y: Appearance.px(18)
             width: parent.width - Appearance.px(42)
@@ -359,6 +374,16 @@ Item {
             onCloseRequested: root.close()
         }
 
+        LauncherPanel {
+            visible: root.page === "launcher"
+            active: visible && root.shown
+            anchors {
+                fill: innerSurface
+                margins: 1
+            }
+            onCloseRequested: root.close()
+        }
+
         BatteryPanel {
             id: batteryPanel
 
@@ -392,6 +417,19 @@ Item {
 
         NotificationPanel {
             visible: root.page === "notifications"
+            anchors {
+                fill: innerSurface
+                margins: 1
+            }
+            onCloseRequested: root.close()
+        }
+
+        MediaPanel {
+            id: mediaPanel
+
+            visible: root.page === "media"
+            visualizerActive: root.page === "media"
+                && root.revealProgress > 0
             anchors {
                 fill: innerSurface
                 margins: 1

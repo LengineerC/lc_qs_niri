@@ -22,9 +22,6 @@ Item {
     property real effectsOpacity: 1
     readonly property real compactLevel: width <= Appearance.px(1000) ? 2
         : width <= Appearance.px(1200) ? 1 : 0
-    readonly property real sideGroupWidth: compactLevel === 2
-        ? Appearance.px(190) : compactLevel === 1
-            ? Appearance.px(280) : Appearance.px(360)
     property string outputName: ""
 
     function closePopup() {
@@ -158,7 +155,7 @@ Item {
                     color: Appearance.layer0Text
                     font {
                         family: Appearance.iconFontFamily
-                        pixelSize: Appearance.px(19)
+                        pixelSize: Appearance.px(21)
                     }
                 }
 
@@ -255,20 +252,21 @@ Item {
             outputName: root.outputName
         }
 
-        Item {
-            width: root.sideGroupWidth
-            height: parent.height
+        TimeModule {
+            id: timeModule
 
-            TimeModule {
-                id: timeModule
+            showDate: root.compactLevel < 2
+            anchors.verticalCenter: parent.verticalCenter
+            onActivated: popup.showFor(timeModule, "calendar")
+        }
 
-                showDate: root.compactLevel < 2
-                anchors {
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
-                }
-                onActivated: popup.showFor(timeModule, "calendar")
-            }
+        MediaModule {
+            id: mediaModule
+
+            compact: root.compactLevel > 0
+            visible: root.compactLevel < 2
+            anchors.verticalCenter: parent.verticalCenter
+            onActivated: popup.showFor(mediaModule, "media")
         }
     }
 
