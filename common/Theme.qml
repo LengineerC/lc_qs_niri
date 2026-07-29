@@ -25,7 +25,7 @@ Singleton {
     readonly property bool darkMode: mode === "dark"
     readonly property string stateDirectory: stripFileProtocol(
         StandardPaths.standardLocations(StandardPaths.StateLocation)[0])
-        + "/test"
+        + "/lc_qs_niri"
     readonly property string themeFilePath: stateDirectory + "/theme.json"
     readonly property string wallpaperFilePath: stateDirectory + "/wallpaper.path"
     readonly property string matugenConfigPath: stripFileProtocol(

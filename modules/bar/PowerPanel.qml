@@ -18,6 +18,9 @@ Item {
         closeRequested();
         Qt.callLater(() => {
             switch (action) {
+            case "lock":
+                LockService.lock();
+                break;
             case "poweroff":
                 UserService.powerOff();
                 break;
@@ -234,6 +237,12 @@ Item {
                     }
                 }
             }
+        }
+
+        PowerAction {
+            action: "lock"
+            icon: "󰌾"
+            label: I18n.tr("lock")
         }
 
         PowerAction {

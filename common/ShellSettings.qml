@@ -46,7 +46,7 @@ Singleton {
 
     readonly property string stateDirectory: stripFileProtocol(
         StandardPaths.standardLocations(StandardPaths.StateLocation)[0])
-        + "/test"
+        + "/lc_qs_niri"
     readonly property string settingsFilePath: stateDirectory + "/settings.json"
     readonly property var popupBezierCurve: [
         popupBezierX1, popupBezierY1,

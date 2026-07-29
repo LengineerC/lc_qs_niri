@@ -6,6 +6,7 @@ import qs.modules.ScreenCorners
 import qs.modules.notifications
 import qs.modules.settings
 import qs.modules.wallpaper
+import qs.modules.lock
 import qs.services
 
 ShellRoot {
@@ -19,6 +20,7 @@ ShellRoot {
         SystemService.load();
         ResourceService.load();
         UserService.load();
+        LockService.load();
         WeatherService.load();
         Theme.load();
     }
@@ -33,6 +35,9 @@ ShellRoot {
     }
 
     NotificationToasts {
+    }
+
+    Lock {
     }
 
     Bar {
