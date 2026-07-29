@@ -15,8 +15,9 @@ Scope {
             id: barWindow
 
             required property ShellScreen modelData
-            readonly property real hiddenOffset:
-                -Appearance.barHeight - Appearance.cornerSize
+            // Hide only the bar body. The lower corner pair then stops at the
+            // screen edge instead of moving out of view with the bar.
+            readonly property real hiddenOffset: -Appearance.barHeight
 
             screen: modelData
 
@@ -100,8 +101,7 @@ Scope {
                     id: barContent
 
                     outputName: modelData.name
-                    effectsEnabled: NiriService.overviewProgress <= 0
-                        || NiriService.overviewProgress >= 1
+                    effectsOpacity: 1 - NiriService.overviewProgress
                     anchors {
                         top: parent.top
                         bottom: parent.bottom

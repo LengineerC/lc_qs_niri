@@ -19,7 +19,7 @@ Item {
     readonly property bool hostWindowActive: Window.active
     readonly property int edgeMargin: Appearance.cornerSize
 
-    property bool effectsEnabled: true
+    property real effectsOpacity: 1
     readonly property real compactLevel: width <= Appearance.px(1000) ? 2
         : width <= Appearance.px(1200) ? 1 : 0
     readonly property real sideGroupWidth: compactLevel === 2
@@ -70,12 +70,14 @@ Item {
                 * Appearance.scale)
         layer.enabled: ShellSettings.shadowEnabled
         layer.effect: MultiEffect {
-            shadowEnabled: root.effectsEnabled
+            shadowEnabled: ShellSettings.shadowEnabled
             shadowBlur: 1
             blurMax: Math.max(1, Math.round(
                 ShellSettings.shadowBlurRadius * Appearance.scale))
             shadowColor: Appearance.withAlpha(
-                Theme.palette.m3shadow, ShellSettings.shadowOpacity)
+                Theme.palette.m3shadow,
+                ShellSettings.shadowOpacity
+                    * Math.max(0, Math.min(1, root.effectsOpacity)))
             shadowVerticalOffset: Math.round(
                 ShellSettings.shadowOffsetY * Appearance.scale)
         }
