@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Layouts
 import qs.common
+import qs.common.widgets
 
 Item {
     id: root
@@ -176,9 +177,8 @@ Item {
                 }
             }
 
-            RoundButton {
+            CloseButton {
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                icon: "󰅖"
                 onClicked: root.closeRequested()
             }
         }

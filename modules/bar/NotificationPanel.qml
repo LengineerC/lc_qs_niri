@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Layouts
 import qs.common
+import qs.common.widgets
 import qs.services
 
 Item {
@@ -119,8 +120,7 @@ Item {
                 onClicked: NotificationService.markAllRead()
             }
 
-            HeaderButton {
-                icon: "󰅖"
+            CloseButton {
                 onClicked: root.closeRequested()
             }
         }

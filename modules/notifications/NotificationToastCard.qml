@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 import qs.common
+import qs.common.widgets
 import qs.services
 
 Item {
@@ -184,34 +185,11 @@ Item {
                 }
             }
 
-            Rectangle {
+            CloseButton {
                 Layout.alignment: Qt.AlignTop
-                implicitWidth: Appearance.px(28)
-                implicitHeight: Appearance.px(28)
-                radius: Appearance.fullRadius
-                color: closeArea.containsMouse
-                    ? Appearance.layer1Active : "transparent"
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "󰅖"
-                    color: Appearance.layer1Text
-                    font {
-                        family: Appearance.iconFontFamily
-                        pixelSize: Appearance.px(15)
-                    }
-                }
-
-                MouseArea {
-                    id: closeArea
-                    anchors.fill: parent
-                    z: 2
-                    enabled: !root.notificationEntry.closing
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: NotificationService.markRead(
-                        root.notificationEntry.notificationId)
-                }
+                enabled: !root.notificationEntry.closing
+                onClicked: NotificationService.markRead(
+                    root.notificationEntry.notificationId)
             }
         }
     }

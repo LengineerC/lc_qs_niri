@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.UPower
 import qs.common
+import qs.common.widgets
 import qs.services
 
 Item {
@@ -115,31 +116,8 @@ Item {
                 }
             }
 
-            Rectangle {
-                implicitWidth: Appearance.px(28)
-                implicitHeight: Appearance.px(28)
-                radius: Appearance.fullRadius
-                color: closeMouse.containsMouse
-                    ? Appearance.layer1Active : "transparent"
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "󰅖"
-                    color: Appearance.subtext
-                    font {
-                        family: Appearance.iconFontFamily
-                        pixelSize: Appearance.px(15)
-                    }
-                }
-
-                MouseArea {
-                    id: closeMouse
-
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.closeRequested()
-                }
+            CloseButton {
+                onClicked: root.closeRequested()
             }
         }
 

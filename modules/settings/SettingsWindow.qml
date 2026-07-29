@@ -17,10 +17,10 @@ ApplicationWindow {
     color: Appearance.layer0
     width: Math.min(screen?.width * 0.86 ?? Appearance.px(980),
         Appearance.px(980))
-    height: Math.min(screen?.height * 0.86 ?? Appearance.px(760),
-        Appearance.px(760))
+    height: Math.min(screen?.height * 0.92 ?? Appearance.px(920),
+        Appearance.px(920))
     minimumWidth: Appearance.px(760)
-    minimumHeight: Appearance.px(560)
+    minimumHeight: Appearance.px(620)
 
     function openWindow() {
         show();
@@ -86,6 +86,11 @@ ApplicationWindow {
 
         function quickSettings(): void {
             root.currentPage = 0;
+            root.openWindow();
+        }
+
+        function style(): void {
+            root.currentPage = 2;
             root.openWindow();
         }
     }
@@ -270,6 +275,59 @@ ApplicationWindow {
                         }
                     }
 
+                    Rectangle {
+                        id: styleTab
+
+                        Layout.fillWidth: true
+                        implicitHeight: Appearance.px(42)
+                        radius: Appearance.px(12)
+                        color: root.currentPage === 2
+                            ? Appearance.secondaryContainer
+                            : styleMouse.containsMouse
+                                ? Appearance.layer1Hover : "transparent"
+
+                        RowLayout {
+                            anchors {
+                                fill: parent
+                                leftMargin: Appearance.px(12)
+                                rightMargin: Appearance.px(12)
+                            }
+                            spacing: Appearance.px(10)
+
+                            Text {
+                                text: "󰏘"
+                                color: root.currentPage === 2
+                                    ? Appearance.secondaryContainerText
+                                    : Appearance.layer1Text
+                                font {
+                                    family: Appearance.iconFontFamily
+                                    pixelSize: Appearance.px(18)
+                                }
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: I18n.tr("style")
+                                color: root.currentPage === 2
+                                    ? Appearance.secondaryContainerText
+                                    : Appearance.layer1Text
+                                font {
+                                    family: Appearance.fontFamily
+                                    pixelSize: Appearance.fontSize
+                                    weight: Font.DemiBold
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            id: styleMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.currentPage = 2
+                        }
+                    }
+
                     Item {
                         Layout.fillHeight: true
                     }
@@ -299,6 +357,13 @@ ApplicationWindow {
                         fill: parent
                         margins: Appearance.px(8)
                     }
+                    onCloseRequested: root.closeWindow()
+                }
+
+                StyleContent {
+                    visible: root.currentPage === 2
+                    anchors.fill: parent
+                    onCloseRequested: root.closeWindow()
                 }
             }
         }

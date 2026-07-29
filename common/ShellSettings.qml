@@ -29,6 +29,9 @@ Singleton {
     property int clipboardMaxEntryMb: 10
     property int clipboardMaxEntries: 100
     property bool doNotDisturb: false
+    property string wallpaperDirectory: ""
+    property bool wallpaperAutoTheme: true
+    property string wallpaperFillMode: "PreserveAspectCrop"
 
     property bool ready: false
     property bool storageReady: false
@@ -62,7 +65,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 7,
+            version: 9,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             shadowEnabled: shadowEnabled,
@@ -82,7 +85,10 @@ Singleton {
             dateFormat: dateFormat,
             clipboardMaxEntryMb: clipboardMaxEntryMb,
             clipboardMaxEntries: clipboardMaxEntries,
-            doNotDisturb: doNotDisturb
+            doNotDisturb: doNotDisturb,
+            wallpaperDirectory: wallpaperDirectory,
+            wallpaperAutoTheme: wallpaperAutoTheme,
+            wallpaperFillMode: wallpaperFillMode
         }, null, 2));
     }
 
@@ -162,6 +168,27 @@ Singleton {
                 doNotDisturb = state.doNotDisturb;
             else
                 needsMigration = true;
+            if (typeof state.wallpaperDirectory === "string")
+                wallpaperDirectory = state.wallpaperDirectory;
+            else
+                needsMigration = true;
+            if (typeof state.wallpaperAutoTheme === "boolean")
+                wallpaperAutoTheme = state.wallpaperAutoTheme;
+            else
+                needsMigration = true;
+            if (typeof state.wallpaperFillMode === "string"
+                    && [
+                        "Stretch",
+                        "PreserveAspectFit",
+                        "PreserveAspectCrop",
+                        "Tile",
+                        "TileVertically",
+                        "TileHorizontally",
+                        "Pad"
+                    ].indexOf(state.wallpaperFillMode) >= 0)
+                wallpaperFillMode = state.wallpaperFillMode;
+            else
+                needsMigration = true;
         } catch (error) {
             console.warn("ShellSettings: cannot parse settings:", error);
         }
@@ -192,6 +219,9 @@ Singleton {
         clipboardMaxEntryMb = 10;
         clipboardMaxEntries = 100;
         doNotDisturb = false;
+        wallpaperDirectory = "";
+        wallpaperAutoTheme = true;
+        wallpaperFillMode = "PreserveAspectCrop";
         save();
     }
 
@@ -219,6 +249,9 @@ Singleton {
     onClipboardMaxEntryMbChanged: scheduleSave()
     onClipboardMaxEntriesChanged: scheduleSave()
     onDoNotDisturbChanged: scheduleSave()
+    onWallpaperDirectoryChanged: scheduleSave()
+    onWallpaperAutoThemeChanged: scheduleSave()
+    onWallpaperFillModeChanged: scheduleSave()
 
     Component.onCompleted: directoryProcess.running = true
 
@@ -275,6 +308,19 @@ Singleton {
                 root.dateFormat = value.slice(0, 64);
         }
 
+        function setWallpaperFillMode(mode: string): void {
+            if ([
+                    "Stretch",
+                    "PreserveAspectFit",
+                    "PreserveAspectCrop",
+                    "Tile",
+                    "TileVertically",
+                    "TileHorizontally",
+                    "Pad"
+                ].indexOf(mode) >= 0)
+                root.wallpaperFillMode = mode;
+        }
+
         function reset(): void {
             root.resetDefaults();
         }
@@ -297,7 +343,10 @@ Singleton {
                 dateFormat: root.dateFormat,
                 clipboardMaxEntryMb: root.clipboardMaxEntryMb,
                 clipboardMaxEntries: root.clipboardMaxEntries,
-                doNotDisturb: root.doNotDisturb
+                doNotDisturb: root.doNotDisturb,
+                wallpaperDirectory: root.wallpaperDirectory,
+                wallpaperAutoTheme: root.wallpaperAutoTheme,
+                wallpaperFillMode: root.wallpaperFillMode
             });
         }
     }

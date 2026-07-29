@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Layouts
 import qs.common
+import qs.common.widgets
 import qs.services
 
 Item {
@@ -137,36 +138,9 @@ Item {
                 }
             }
 
-            Rectangle {
+            CloseButton {
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                implicitWidth: Appearance.px(28)
-                implicitHeight: Appearance.px(28)
-                radius: Appearance.fullRadius
-                color: closeMouse.containsMouse
-                    ? Appearance.layer1Active : "transparent"
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "󰅖"
-                    color: Appearance.subtext
-                    font {
-                        family: Appearance.iconFontFamily
-                        pixelSize: Appearance.px(15)
-                    }
-                }
-
-                MouseArea {
-                    id: closeMouse
-
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.closeRequested()
-                }
-
-                Behavior on color {
-                    ColorAnimation { duration: Appearance.fastDuration }
-                }
+                onClicked: root.closeRequested()
             }
         }
 

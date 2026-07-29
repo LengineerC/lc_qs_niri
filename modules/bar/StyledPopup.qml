@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import qs.common
+import qs.common.widgets
 import qs.services
 
 // Horizontal adaptation of Caelestia's popouts/ClipWrapper + Wrapper.
@@ -296,35 +297,8 @@ Item {
                     }
                 }
 
-                Rectangle {
-                    implicitWidth: Appearance.px(24)
-                    implicitHeight: Appearance.px(24)
-                    radius: Appearance.fullRadius
-                    color: closeArea.containsMouse
-                        ? Appearance.layer1Active : "transparent"
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "󰅖"
-                        color: Appearance.subtext
-                        font {
-                            family: Appearance.iconFontFamily
-                            pixelSize: Appearance.px(14)
-                        }
-                    }
-
-                    MouseArea {
-                        id: closeArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onClicked: root.close()
-                    }
-
-                    Behavior on color {
-                        ColorAnimation {
-                            duration: Appearance.fastDuration
-                        }
-                    }
+                CloseButton {
+                    onClicked: root.close()
                 }
             }
 

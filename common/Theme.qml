@@ -203,7 +203,7 @@ Singleton {
             return;
 
         console.warn("Theme: saved palette does not match mode; regenerating");
-        if (wallpaperPath)
+        if (wallpaperPath && ShellSettings.wallpaperAutoTheme)
             runMatugen(["image", wallpaperPath]);
         else
             runMatugen(["color", "hex", sourceColor]);
@@ -293,7 +293,7 @@ Singleton {
             startPendingMatugen();
     }
 
-    function fromWallpaper(path) {
+    function setWallpaper(path, generateTheme = true) {
         const cleanPath = stripFileProtocol(path);
         if (!cleanPath)
             return;
@@ -301,7 +301,13 @@ Singleton {
         wallpaperPath = cleanPath;
         if (storageReady)
             wallpaperStorage.setText(cleanPath + "\n");
-        runMatugen(["image", cleanPath]);
+        save();
+        if (generateTheme)
+            runMatugen(["image", cleanPath]);
+    }
+
+    function fromWallpaper(path) {
+        setWallpaper(path, true);
     }
 
     function fromColor(colorValue) {
@@ -317,7 +323,7 @@ Singleton {
 
         mode = newMode;
         save();
-        if (wallpaperPath)
+        if (wallpaperPath && ShellSettings.wallpaperAutoTheme)
             runMatugen(["image", wallpaperPath]);
         else
             fromColor(sourceColor);
@@ -439,7 +445,8 @@ Singleton {
                 root.wallpaperPath = path;
             root.wallpaperStateLoaded = true;
 
-            if (root.startupThemeChecked && pathChanged)
+            if (root.startupThemeChecked && pathChanged
+                    && ShellSettings.wallpaperAutoTheme)
                 root.runMatugen(["image", path]);
             else
                 Qt.callLater(root.ensureStartupTheme);
