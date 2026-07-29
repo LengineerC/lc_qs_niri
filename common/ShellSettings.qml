@@ -28,6 +28,7 @@ Singleton {
     property string dateFormat: "MMM dd ddd"
     property int clipboardMaxEntryMb: 10
     property int clipboardMaxEntries: 100
+    property bool doNotDisturb: false
 
     property bool ready: false
     property bool storageReady: false
@@ -61,7 +62,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 6,
+            version: 7,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             shadowEnabled: shadowEnabled,
@@ -80,7 +81,8 @@ Singleton {
             timeFormat: timeFormat,
             dateFormat: dateFormat,
             clipboardMaxEntryMb: clipboardMaxEntryMb,
-            clipboardMaxEntries: clipboardMaxEntries
+            clipboardMaxEntries: clipboardMaxEntries,
+            doNotDisturb: doNotDisturb
         }, null, 2));
     }
 
@@ -156,6 +158,10 @@ Singleton {
                     state.clipboardMaxEntries, 10, 500));
             else
                 needsMigration = true;
+            if (typeof state.doNotDisturb === "boolean")
+                doNotDisturb = state.doNotDisturb;
+            else
+                needsMigration = true;
         } catch (error) {
             console.warn("ShellSettings: cannot parse settings:", error);
         }
@@ -185,6 +191,7 @@ Singleton {
         dateFormat = "MMM dd ddd";
         clipboardMaxEntryMb = 10;
         clipboardMaxEntries = 100;
+        doNotDisturb = false;
         save();
     }
 
@@ -211,6 +218,7 @@ Singleton {
     onDateFormatChanged: scheduleSave()
     onClipboardMaxEntryMbChanged: scheduleSave()
     onClipboardMaxEntriesChanged: scheduleSave()
+    onDoNotDisturbChanged: scheduleSave()
 
     Component.onCompleted: directoryProcess.running = true
 
@@ -288,7 +296,8 @@ Singleton {
                 timeFormat: root.timeFormat,
                 dateFormat: root.dateFormat,
                 clipboardMaxEntryMb: root.clipboardMaxEntryMb,
-                clipboardMaxEntries: root.clipboardMaxEntries
+                clipboardMaxEntries: root.clipboardMaxEntries,
+                doNotDisturb: root.doNotDisturb
             });
         }
     }

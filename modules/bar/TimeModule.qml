@@ -109,7 +109,7 @@ MouseArea {
                     font {
                         family: Appearance.fontFamily
                         pixelSize: root.clockFontSize
-                        weight: text === ":" ? Font.Bold : Font.DemiBold
+                        weight: text === ":" ? Font.Bold : Font.ExtraBold
                     }
                 }
             }

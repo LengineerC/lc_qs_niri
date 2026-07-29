@@ -59,6 +59,12 @@ Item {
                     (parent?.height ?? Appearance.px(720))
                         - Appearance.barHeight - Appearance.px(8)));
         }
+        if (page === "notifications") {
+            return Math.min(Appearance.px(650),
+                Math.max(Appearance.px(430),
+                    (parent?.height ?? Appearance.px(760))
+                        - Appearance.barHeight - Appearance.px(8)));
+        }
         return popupLayout.implicitHeight + Appearance.px(36);
     }
 
@@ -150,6 +156,12 @@ Item {
             popupIcon = "󰅇";
             popupTitle = I18n.tr("clipboard");
             popupBaseWidth = 520;
+            popupRows = [];
+            break;
+        case "notifications":
+            popupIcon = "󰂚";
+            popupTitle = I18n.tr("notifications");
+            popupBaseWidth = 590;
             popupRows = [];
             break;
         default:
@@ -251,8 +263,9 @@ Item {
         ColumnLayout {
             id: popupLayout
 
-            visible: root.page !== "system" && root.page !== "battery"
+        visible: root.page !== "system" && root.page !== "battery"
                 && root.page !== "calendar" && root.page !== "clipboard"
+                && root.page !== "notifications"
             x: Appearance.px(21)
             y: Appearance.px(18)
             width: parent.width - Appearance.px(42)
@@ -396,6 +409,15 @@ Item {
 
         ClipboardPanel {
             visible: root.page === "clipboard"
+            anchors {
+                fill: innerSurface
+                margins: 1
+            }
+            onCloseRequested: root.close()
+        }
+
+        NotificationPanel {
+            visible: root.page === "notifications"
             anchors {
                 fill: innerSurface
                 margins: 1

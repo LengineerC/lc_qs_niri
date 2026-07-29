@@ -315,6 +315,18 @@ Item {
             onActivated: popup.showFor(clipboardModule, "clipboard")
         }
 
+        NotificationModule {
+            id: notificationModule
+
+            anchors {
+                right: clipboardModule.left
+                rightMargin: Appearance.px(3)
+                verticalCenter: parent.verticalCenter
+            }
+            onActivated:
+                popup.showFor(notificationModule, "notifications")
+        }
+
         MouseArea {
             id: settingsControl
 

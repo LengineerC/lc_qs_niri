@@ -751,6 +751,42 @@ Item {
                 }
 
                 SectionTitle {
+                    icon: "󰂚"
+                    title: I18n.tr("notifications")
+                }
+
+                SettingCard {
+                    RowLayout {
+                        Layout.fillWidth: true
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(1)
+
+                            PanelText {
+                                text: I18n.tr("doNotDisturb")
+                                color: Appearance.layer0Text
+                            }
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                text: I18n.tr("notificationSettingsHint")
+                                color: Appearance.subtext
+                                wrapMode: Text.WordWrap
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        SettingSwitch {
+                            checked: ShellSettings.doNotDisturb
+                            onToggled: checked => {
+                                ShellSettings.doNotDisturb = checked;
+                            }
+                        }
+                    }
+                }
+
+                SectionTitle {
                     icon: "󰛖"
                     title: I18n.tr("barFontSize")
                 }

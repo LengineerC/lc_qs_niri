@@ -3,6 +3,7 @@ import Quickshell
 import qs.common
 import qs.modules.bar
 import qs.modules.ScreenCorners
+import qs.modules.notifications
 import qs.modules.settings
 import qs.services
 
@@ -12,6 +13,7 @@ ShellRoot {
     Component.onCompleted: {
         ShellSettings.load();
         ClipboardService.load();
+        NotificationService.load();
         SystemService.load();
         Theme.load();
     }
@@ -20,6 +22,9 @@ ShellRoot {
     }
 
     SettingsWindow {
+    }
+
+    NotificationToasts {
     }
 
     Bar {
