@@ -14,9 +14,12 @@ Item {
     readonly property bool popupShown: popup.shown
     readonly property bool hostWindowActive: Window.active
 
-    readonly property real compactLevel: width <= 1000 ? 2 : width <= 1200 ? 1 : 0
-    readonly property real sideGroupWidth: compactLevel === 2 ? 190
-        : compactLevel === 1 ? 280 : 360
+    readonly property real compactLevel: width <= Appearance.px(1000) ? 2
+        : width <= Appearance.px(1200) ? 1 : 0
+    readonly property real sideGroupWidth: compactLevel === 2
+        ? Appearance.px(190) : compactLevel === 1
+            ? Appearance.px(280) : Appearance.px(360)
+    property string outputName: ""
     property string currentTime: Qt.locale().toString(new Date(), "hh:mm")
     property string currentDate: Qt.locale().toString(new Date(), "MMM dd")
 
@@ -29,7 +32,7 @@ Item {
         verticalAlignment: Text.AlignVCenter
         font {
             family: Appearance.fontFamily
-            pixelSize: 13
+            pixelSize: Appearance.fontSize
         }
     }
 
@@ -38,7 +41,7 @@ Item {
         verticalAlignment: Text.AlignVCenter
         font {
             family: Appearance.iconFontFamily
-            pixelSize: 16
+            pixelSize: Appearance.fontSize + Appearance.px(3)
         }
     }
 
@@ -57,7 +60,7 @@ Item {
         id: barBlobGroup
 
         color: Appearance.barBgColor
-        smoothing: 20
+        smoothing: Appearance.px(20)
     }
 
     Blobs.BlobRect {
@@ -103,18 +106,16 @@ Item {
         MouseArea {
             id: launcherControl
             x: Appearance.cornerSize
-            width: root.compactLevel === 0
-                ? Math.min(parent.width - Appearance.cornerSize,
-                    launcherPill.width + 10 + launcherLabels.implicitWidth)
-                : 30
+            width: Appearance.px(30)
             height: parent.height
             hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
             onClicked: popup.showFor(launcherControl, "launcher")
 
             Rectangle {
                 id: launcherPill
-                width: 30
-                height: 30
+                width: Appearance.px(30)
+                height: Appearance.px(30)
                 anchors.verticalCenter: parent.verticalCenter
                 radius: Appearance.fullRadius
                 color: launcherControl.containsMouse
@@ -128,7 +129,7 @@ Item {
                     color: Appearance.layer0Text
                     font {
                         family: Appearance.iconFontFamily
-                        pixelSize: 19
+                        pixelSize: Appearance.px(19)
                     }
                 }
 
@@ -146,33 +147,63 @@ Item {
                 }
             }
 
+        }
+
+        Row {
+            id: focusedWindowInfo
+
+            visible: width >= Appearance.px(110)
+            height: parent.height
+            spacing: Appearance.px(8)
+            anchors {
+                left: launcherControl.right
+                leftMargin: Appearance.px(10)
+                right: parent.right
+                rightMargin: Appearance.px(10)
+            }
+
+            Image {
+                id: focusedWindowIcon
+
+                width: visible ? Appearance.px(20) : 0
+                height: Appearance.px(20)
+                anchors.verticalCenter: parent.verticalCenter
+                source: NiriService.focusedWindow?.iconPath
+                    ? "file://" + NiriService.focusedWindow.iconPath : ""
+                sourceSize.width: Appearance.px(20)
+                sourceSize.height: Appearance.px(20)
+                smooth: true
+                visible: ShellSettings.showActiveWindowIcon && source !== ""
+            }
+
             Column {
-                id: launcherLabels
-                visible: root.compactLevel === 0
+                width: Math.max(0, focusedWindowInfo.width
+                    - (focusedWindowIcon.visible
+                        ? focusedWindowIcon.width + focusedWindowInfo.spacing : 0))
                 anchors {
-                    left: launcherPill.right
-                    leftMargin: 10
                     verticalCenter: parent.verticalCenter
                 }
-                spacing: -2
+                spacing: -Appearance.px(2)
 
                 Text {
-                    text: "Desktop"
+                    width: parent.width
+                    text: NiriService.focusedWindow?.appId ?? "Desktop"
                     color: Appearance.subtext
                     elide: Text.ElideRight
                     font {
                         family: Appearance.fontFamily
-                        pixelSize: 11
+                        pixelSize: Appearance.smallFontSize
                     }
                 }
 
                 Text {
-                    text: "Workspace 1"
+                    width: parent.width
+                    text: NiriService.focusedWindow?.title ?? "No focused window"
                     color: Appearance.layer0Text
                     elide: Text.ElideRight
                     font {
                         family: Appearance.fontFamily
-                        pixelSize: 13
+                        pixelSize: Appearance.fontSize
                     }
                 }
             }
@@ -186,7 +217,7 @@ Item {
             bottom: parent.bottom
             horizontalCenter: parent.horizontalCenter
         }
-        spacing: 4
+        spacing: Appearance.px(4)
 
         Item {
             width: root.sideGroupWidth
@@ -211,7 +242,7 @@ Item {
                 BarIcon {
                     visible: root.compactLevel < 2
                     text: "󰻠"
-                    Layout.leftMargin: 5
+                    Layout.leftMargin: Appearance.px(5)
                 }
 
                 BarText {
@@ -221,9 +252,9 @@ Item {
 
                 Rectangle {
                     visible: root.compactLevel === 0
-                    Layout.leftMargin: 5
-                    implicitWidth: 20
-                    implicitHeight: 20
+                    Layout.leftMargin: Appearance.px(5)
+                    implicitWidth: Appearance.px(20)
+                    implicitHeight: Appearance.px(20)
                     radius: Appearance.fullRadius
                     color: Appearance.secondaryContainer
 
@@ -233,7 +264,7 @@ Item {
                         color: Appearance.secondaryContainerText
                         font {
                             family: Appearance.iconFontFamily
-                            pixelSize: 13
+                            pixelSize: Appearance.fontSize
                         }
                     }
                 }
@@ -246,53 +277,9 @@ Item {
             }
         }
 
-        BarGroup {
-            id: workspaceGroup
+        WorkspaceSwitcher {
             anchors.verticalCenter: parent.verticalCenter
-            padding: 5
-            onClicked: popup.showFor(workspaceGroup, "workspaces")
-
-            Row {
-                spacing: 0
-
-                Repeater {
-                    model: 5
-
-                    delegate: Item {
-                        required property int index
-                        width: 26
-                        height: 26
-
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: 22
-                            height: 22
-                            radius: Appearance.fullRadius
-                            color: index === 0
-                                ? Appearance.secondaryContainer : "transparent"
-
-                            Rectangle {
-                                anchors.centerIn: parent
-                                width: index === 0 ? 7 : 5
-                                height: width
-                                radius: Appearance.fullRadius
-                                color: index === 0
-                                    ? Appearance.secondaryContainerText
-                                    : index < 3 ? Appearance.subtext : Appearance.outline
-
-                                Behavior on width {
-                                    NumberAnimation {
-                                        duration: Appearance.spatialDuration
-                                        easing.type: Easing.BezierSpline
-                                        easing.bezierCurve: Appearance.spatialCurve
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
+            outputName: root.outputName
         }
 
         Item {
@@ -309,7 +296,7 @@ Item {
 
                 BarText {
                     text: root.currentTime
-                    font.pixelSize: 16
+                    font.pixelSize: Appearance.largeFontSize
                 }
 
                 BarText {
@@ -323,30 +310,24 @@ Item {
                     text: root.currentDate
                 }
 
-                BarIcon {
-                    visible: root.compactLevel === 0
-                    Layout.leftMargin: 10
-                    text: "󰒓"
-                }
-
                 Rectangle {
                     visible: root.compactLevel < 2
-                    Layout.leftMargin: 8
-                    implicitWidth: 45
-                    implicitHeight: 20
-                    radius: 5
+                    Layout.leftMargin: Appearance.px(8)
+                    implicitWidth: Appearance.px(45)
+                    implicitHeight: Appearance.px(20)
+                    radius: Appearance.px(5)
                     color: Appearance.secondaryContainer
 
                     Row {
                         anchors.centerIn: parent
-                        spacing: 2
+                        spacing: Appearance.px(2)
 
                         Text {
                             text: "󰁹"
                             color: Appearance.secondaryContainerText
                             font {
                                 family: Appearance.iconFontFamily
-                                pixelSize: 12
+                                pixelSize: Appearance.fontSize - Appearance.px(1)
                             }
                         }
 
@@ -355,7 +336,7 @@ Item {
                             color: Appearance.secondaryContainerText
                             font {
                                 family: Appearance.fontFamily
-                                pixelSize: 10
+                                pixelSize: Appearance.smallFontSize
                             }
                         }
                     }
@@ -376,19 +357,19 @@ Item {
         MouseArea {
             id: statusControl
             width: statusPill.width + (root.compactLevel === 0
-                ? auxiliaryStatusRow.width + 14 : 0)
+                ? auxiliaryStatusRow.width + Appearance.px(14) : 0)
             height: parent.height
             hoverEnabled: true
             onClicked: popup.showFor(statusControl, "status")
             anchors {
                 right: parent.right
-                rightMargin: Appearance.cornerSize
+                rightMargin: Appearance.px(4)
             }
 
             Rectangle {
                 id: statusPill
-                implicitWidth: statusRow.implicitWidth + 20
-                implicitHeight: 30
+                implicitWidth: statusRow.implicitWidth + Appearance.px(20)
+                implicitHeight: Appearance.px(30)
                 anchors {
                     right: parent.right
                     verticalCenter: parent.verticalCenter
@@ -402,7 +383,7 @@ Item {
                 RowLayout {
                     id: statusRow
                     anchors.centerIn: parent
-                    spacing: 14
+                    spacing: Appearance.px(14)
 
                     BarIcon {
                         text: "󰌾"
@@ -440,10 +421,10 @@ Item {
                 visible: root.compactLevel === 0
                 anchors {
                     right: statusPill.left
-                    rightMargin: 14
+                    rightMargin: Appearance.px(14)
                     verticalCenter: parent.verticalCenter
                 }
-                spacing: 13
+                spacing: Appearance.px(13)
 
                 BarIcon {
                     text: "󰂚"
@@ -453,6 +434,53 @@ Item {
                 BarIcon {
                     text: "󰖐"
                     color: Appearance.subtext
+                }
+            }
+        }
+
+        MouseArea {
+            id: settingsControl
+
+            anchors {
+                right: statusControl.left
+                rightMargin: Appearance.cornerSize
+            }
+            width: Appearance.px(30)
+            height: parent.height
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: SettingsLauncher.open()
+
+            Rectangle {
+                width: Appearance.px(30)
+                height: Appearance.px(30)
+                anchors.verticalCenter: parent.verticalCenter
+                radius: Appearance.fullRadius
+                color: settingsControl.containsMouse
+                    ? Appearance.layer1Hover : "transparent"
+                scale: settingsControl.pressed ? 0.88 : 1
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "󰒓"
+                    color: Appearance.layer0Text
+                    font {
+                        family: Appearance.iconFontFamily
+                        pixelSize: Appearance.px(17)
+                    }
+                }
+
+                Behavior on color {
+                    ColorAnimation {
+                        duration: Appearance.fastDuration
+                    }
+                }
+
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: Appearance.fastDuration
+                        easing.type: Easing.OutCubic
+                    }
                 }
             }
         }

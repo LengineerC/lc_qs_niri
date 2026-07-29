@@ -42,18 +42,28 @@ Singleton {
         return Qt.rgba(colorValue.r, colorValue.g, colorValue.b, alpha);
     }
 
-    readonly property string fontFamily: "JetBrainsMono Nerd Font"
+    function px(value) {
+        return Math.max(1, Math.round(value * ShellSettings.scale));
+    }
+
+    readonly property real scale: ShellSettings.scale
+    readonly property string fontFamily: ShellSettings.barFontFamily
     readonly property string iconFontFamily: "Symbols Nerd Font"
+    readonly property int fontSize: Math.max(8,
+        Math.round(ShellSettings.barFontSize * scale))
+    readonly property int smallFontSize: Math.max(7, fontSize - px(2))
+    readonly property int largeFontSize: fontSize + px(3)
 
-    readonly property int barHeight: 40
-    readonly property int cornerSize: 23
-    readonly property int smallRadius: 12
-    readonly property int normalRadius: 17
+    readonly property int barHeight: px(40)
+    readonly property int cornerSize: px(23)
+    readonly property int smallRadius: px(12)
+    readonly property int normalRadius: px(17)
     readonly property int fullRadius: 9999
-    readonly property int elevationMargin: 10
+    readonly property int elevationMargin: px(10)
 
-    readonly property int fastDuration: 200
-    readonly property int spatialDuration: 350
+    readonly property int fastDuration: Math.max(40,
+        Math.round(ShellSettings.animationDuration * 0.4))
+    readonly property int spatialDuration: ShellSettings.animationDuration
     readonly property var fastCurve: [0.34, 0.80, 0.34, 1.00, 1, 1]
     readonly property var spatialCurve: [0.42, 1.67, 0.21, 0.90, 1, 1]
     readonly property var exitCurve: [0.3, 0, 0.8, 0.15, 1, 1]

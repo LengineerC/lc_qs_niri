@@ -5,7 +5,7 @@ import qs.common
 MouseArea {
     id: root
 
-    property real padding: 5
+    property real padding: Appearance.px(5)
     default property alias items: contentLayout.children
 
     hoverEnabled: true
@@ -20,8 +20,8 @@ MouseArea {
 
         anchors {
             fill: parent
-            topMargin: 4
-            bottomMargin: 4
+            topMargin: Appearance.px(4)
+            bottomMargin: Appearance.px(4)
         }
 
         Behavior on color {
@@ -36,7 +36,7 @@ MouseArea {
     RowLayout {
         id: contentLayout
 
-        spacing: 4
+        spacing: Appearance.px(4)
 
         anchors {
             fill: parent

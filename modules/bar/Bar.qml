@@ -87,6 +87,7 @@ Scope {
 
             BarContent {
                 id: barContent
+                outputName: modelData.name
                 anchors {
                     top: parent.top
                     left: parent.left

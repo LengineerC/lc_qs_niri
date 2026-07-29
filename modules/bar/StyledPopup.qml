@@ -10,8 +10,8 @@ Item {
     id: root
 
     readonly property Item popupMaskItem: root
-    readonly property int moveDuration: 500
-    readonly property var moveCurve: [0.38, 1.21, 0.22, 1, 1, 1]
+    readonly property int moveDuration: ShellSettings.animationDuration
+    readonly property var moveCurve: ShellSettings.popupBezierCurve
     readonly property real targetCenter: {
         const screenWidth = parent?.width ?? popupWidth;
         const rawCenter = anchorItem
@@ -32,8 +32,10 @@ Item {
     property string popupIcon: "󰋼"
     property string popupTitle: ""
     property var popupRows: []
-    property int popupWidth: 340
-    property int popupHeight: 150
+    property int popupBaseWidth: 340
+    readonly property int popupWidth: Appearance.px(popupBaseWidth)
+    readonly property int popupHeight: popupLayout.implicitHeight
+        + Appearance.px(36)
 
     x: targetCenter - popupWidth / 2
     y: Appearance.barHeight
@@ -48,8 +50,7 @@ Item {
         case "launcher":
             popupIcon = "󰣇";
             popupTitle = "Quick shell";
-            popupWidth = 310;
-            popupHeight = 164;
+            popupBaseWidth = 310;
             popupRows = [
                 { icon: "󰍹", label: "Desktop", value: "Workspace 1" },
                 { icon: "󰌾", label: "Session", value: "Active" },
@@ -59,8 +60,7 @@ Item {
         case "resources":
             popupIcon = "󰍛";
             popupTitle = "System resources";
-            popupWidth = 410;
-            popupHeight = 164;
+            popupBaseWidth = 410;
             popupRows = [
                 { icon: "󰍛", label: "RAM used", value: "42%" },
                 { icon: "󰓡", label: "Swap used", value: "0%" },
@@ -70,8 +70,7 @@ Item {
         case "workspaces":
             popupIcon = "󰕮";
             popupTitle = "Workspaces";
-            popupWidth = 330;
-            popupHeight = 142;
+            popupBaseWidth = 330;
             popupRows = [
                 { icon: "󰮯", label: "Current workspace", value: "1" },
                 { icon: "󰁍", label: "Scroll on the bar", value: "Switch" }
@@ -80,8 +79,7 @@ Item {
         case "clock":
             popupIcon = "󰃭";
             popupTitle = Qt.locale().toString(new Date(), "dddd, MMMM dd");
-            popupWidth = 380;
-            popupHeight = 164;
+            popupBaseWidth = 380;
             popupRows = [
                 { icon: "󰔛", label: "System uptime", value: "--" },
                 { icon: "󰄬", label: "To do", value: "No pending tasks" },
@@ -91,8 +89,7 @@ Item {
         case "status":
             popupIcon = "󰒓";
             popupTitle = "System status";
-            popupWidth = 370;
-            popupHeight = 208;
+            popupBaseWidth = 370;
             popupRows = [
                 { icon: "󰤨", label: "Network", value: "Connected" },
                 { icon: "󰂯", label: "Bluetooth", value: "On" },
@@ -105,8 +102,7 @@ Item {
         default:
             popupIcon = "󰝚";
             popupTitle = "Media";
-            popupWidth = 370;
-            popupHeight = 142;
+            popupBaseWidth = 370;
             popupRows = [
                 { icon: "󰝚", label: "No media playing", value: "" },
                 { icon: "󰐊", label: "Player controls", value: "Unavailable" }
@@ -193,22 +189,23 @@ Item {
         }
 
         ColumnLayout {
-            x: 21
-            y: 18
-            width: parent.width - 42
-            height: root.popupHeight - 36
-            spacing: 8
+            id: popupLayout
+
+            x: Appearance.px(21)
+            y: Appearance.px(18)
+            width: parent.width - Appearance.px(42)
+            spacing: Appearance.px(8)
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 8
+                spacing: Appearance.px(8)
 
                 Text {
                     text: root.popupIcon
                     color: Appearance.layer1Text
                     font {
                         family: Appearance.iconFontFamily
-                        pixelSize: 18
+                        pixelSize: Appearance.px(18)
                     }
                 }
 
@@ -219,14 +216,14 @@ Item {
                     elide: Text.ElideRight
                     font {
                         family: Appearance.fontFamily
-                        pixelSize: 15
+                        pixelSize: Appearance.fontSize + Appearance.px(2)
                         weight: Font.DemiBold
                     }
                 }
 
                 Rectangle {
-                    implicitWidth: 24
-                    implicitHeight: 24
+                    implicitWidth: Appearance.px(24)
+                    implicitHeight: Appearance.px(24)
                     radius: Appearance.fullRadius
                     color: closeArea.containsMouse
                         ? Appearance.layer1Active : "transparent"
@@ -237,7 +234,7 @@ Item {
                         color: Appearance.subtext
                         font {
                             family: Appearance.iconFontFamily
-                            pixelSize: 14
+                            pixelSize: Appearance.px(14)
                         }
                     }
 
@@ -269,14 +266,14 @@ Item {
                 delegate: RowLayout {
                     required property var modelData
                     Layout.fillWidth: true
-                    spacing: 7
+                    spacing: Appearance.px(7)
 
                     Text {
                         text: modelData.icon
                         color: Appearance.layer1Text
                         font {
                             family: Appearance.iconFontFamily
-                            pixelSize: 16
+                            pixelSize: Appearance.fontSize + Appearance.px(3)
                         }
                     }
 
@@ -287,7 +284,7 @@ Item {
                         elide: Text.ElideRight
                         font {
                             family: Appearance.fontFamily
-                            pixelSize: 13
+                            pixelSize: Appearance.fontSize
                         }
                     }
 
@@ -296,15 +293,13 @@ Item {
                         color: Appearance.subtext
                         font {
                             family: Appearance.fontFamily
-                            pixelSize: 12
+                            pixelSize: Appearance.smallFontSize
                         }
                     }
                 }
             }
 
-            Item {
-                Layout.fillHeight: true
-            }
         }
+
     }
 }
