@@ -2,15 +2,67 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls as Controls
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import qs.common
 import qs.common.widgets
+import qs.services
 
 // Content pane for the Niri-managed settings window.
 Item {
     id: root
 
     signal closeRequested
+    property string weatherLocationDraft:
+        ShellSettings.weatherLocationName
+    property string weatherLatitudeDraft:
+        Number(ShellSettings.weatherLatitude).toFixed(5)
+    property string weatherLongitudeDraft:
+        Number(ShellSettings.weatherLongitude).toFixed(5)
+    readonly property bool weatherCoordinatesValid: {
+        const latitude = Number(weatherLatitudeDraft);
+        const longitude = Number(weatherLongitudeDraft);
+        return weatherLatitudeDraft.trim() !== ""
+            && weatherLongitudeDraft.trim() !== ""
+            && Number.isFinite(latitude)
+            && Number.isFinite(longitude)
+            && latitude >= -90 && latitude <= 90
+            && longitude >= -180 && longitude <= 180;
+    }
+
+    FileDialog {
+        id: avatarFileDialog
+
+        title: I18n.tr("chooseAvatar")
+        fileMode: FileDialog.OpenFile
+        nameFilters: ["Images (*.jpg *.jpeg *.png *.webp)"]
+        onAccepted: {
+            ShellSettings.userAvatarPath =
+                UserService.stripFileProtocol(selectedFile);
+        }
+    }
+
+    Connections {
+        target: ShellSettings
+
+        function onWeatherLocationNameChanged() {
+            if (!weatherLocationInput.activeFocus)
+                root.weatherLocationDraft =
+                    ShellSettings.weatherLocationName;
+        }
+
+        function onWeatherLatitudeChanged() {
+            if (!weatherLatitudeInput.activeFocus)
+                root.weatherLatitudeDraft =
+                    Number(ShellSettings.weatherLatitude).toFixed(5);
+        }
+
+        function onWeatherLongitudeChanged() {
+            if (!weatherLongitudeInput.activeFocus)
+                root.weatherLongitudeDraft =
+                    Number(ShellSettings.weatherLongitude).toFixed(5);
+        }
+    }
 
     component PanelText: Text {
         color: Appearance.layer1Text
@@ -116,6 +168,109 @@ Item {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: control.toggled(!control.checked)
+        }
+    }
+
+    component MetricChoice: Rectangle {
+        id: metricChoice
+
+        required property string icon
+        required property string label
+        required property string value
+        required property bool selected
+        signal toggled
+
+        Layout.fillWidth: true
+        implicitHeight: Appearance.px(68)
+        radius: Appearance.smallRadius
+        color: selected
+            ? Appearance.primaryContainer
+            : metricChoiceArea.containsMouse
+                ? Appearance.layer1Active : Appearance.layer1
+        border.width: 1
+        border.color: selected
+            ? Appearance.primary : Appearance.outline
+        scale: metricChoiceArea.pressed ? 0.98 : 1
+
+        RowLayout {
+            anchors {
+                fill: parent
+                leftMargin: Appearance.px(12)
+                rightMargin: Appearance.px(12)
+            }
+            spacing: Appearance.px(10)
+
+            Rectangle {
+                implicitWidth: Appearance.px(38)
+                implicitHeight: Appearance.px(38)
+                radius: Appearance.fullRadius
+                color: metricChoice.selected
+                    ? Appearance.primary
+                    : Appearance.layer1Active
+
+                Text {
+                    anchors.centerIn: parent
+                    text: metricChoice.icon
+                    color: metricChoice.selected
+                        ? Theme.palette.m3onPrimary
+                        : Appearance.primary
+                    font {
+                        family: Appearance.iconFontFamily
+                        pixelSize: Appearance.px(19)
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 0
+
+                PanelText {
+                    Layout.fillWidth: true
+                    text: metricChoice.label
+                    color: metricChoice.selected
+                        ? Appearance.primaryContainerText
+                        : Appearance.layer0Text
+                    elide: Text.ElideRight
+                    font.weight: Font.DemiBold
+                }
+
+                PanelText {
+                    text: metricChoice.value
+                    color: metricChoice.selected
+                        ? Appearance.primaryContainerText
+                        : Appearance.subtext
+                    font.pixelSize: Appearance.smallFontSize
+                }
+            }
+
+            Text {
+                visible: metricChoice.selected
+                text: "󰄬"
+                color: Appearance.primaryContainerText
+                font {
+                    family: Appearance.iconFontFamily
+                    pixelSize: Appearance.px(15)
+                }
+            }
+        }
+
+        MouseArea {
+            id: metricChoiceArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: metricChoice.toggled()
+        }
+
+        Behavior on color {
+            ColorAnimation { duration: Appearance.fastDuration }
+        }
+        Behavior on scale {
+            NumberAnimation {
+                duration: Appearance.fastDuration
+                easing.type: Easing.OutCubic
+            }
         }
     }
 
@@ -373,6 +528,599 @@ Item {
                 spacing: Appearance.px(9)
 
                 SectionTitle {
+                    icon: "󰀄"
+                    title: I18n.tr("userProfile")
+                }
+
+                SettingCard {
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(14)
+
+                        UserAvatar {
+                            implicitSize: Appearance.px(70)
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(3)
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                text: UserService.displayName
+                                color: Appearance.layer0Text
+                                elide: Text.ElideRight
+                                font {
+                                    pixelSize: Appearance.largeFontSize
+                                    weight: Font.DemiBold
+                                }
+                            }
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                text: UserService.loginName
+                                    ? "@" + UserService.loginName
+                                    : I18n.tr("user")
+                                color: Appearance.subtext
+                                elide: Text.ElideRight
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(8)
+
+                        Rectangle {
+                            implicitWidth: chooseAvatarRow.implicitWidth
+                                + Appearance.px(20)
+                            implicitHeight: Appearance.px(34)
+                            radius: Appearance.px(9)
+                            color: chooseAvatarArea.containsMouse
+                                ? Appearance.layer1Active
+                                : Appearance.layer1
+
+                            RowLayout {
+                                id: chooseAvatarRow
+                                anchors.centerIn: parent
+                                spacing: Appearance.px(6)
+
+                                Text {
+                                    text: "󰈔"
+                                    color: Appearance.primary
+                                    font {
+                                        family:
+                                            Appearance.iconFontFamily
+                                        pixelSize: Appearance.px(15)
+                                    }
+                                }
+
+                                PanelText {
+                                    text: I18n.tr("chooseAvatar")
+                                    font.pixelSize:
+                                        Appearance.smallFontSize
+                                }
+                            }
+
+                            MouseArea {
+                                id: chooseAvatarArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: avatarFileDialog.open()
+                            }
+                        }
+
+                        Rectangle {
+                            implicitWidth: systemProfileRow.implicitWidth
+                                + Appearance.px(20)
+                            implicitHeight: Appearance.px(34)
+                            radius: Appearance.px(9)
+                            color: systemProfileArea.containsMouse
+                                ? Appearance.layer1Active
+                                : Appearance.layer1
+
+                            RowLayout {
+                                id: systemProfileRow
+                                anchors.centerIn: parent
+                                spacing: Appearance.px(6)
+
+                                Text {
+                                    text: "󰑐"
+                                    color: Appearance.primary
+                                    font {
+                                        family:
+                                            Appearance.iconFontFamily
+                                        pixelSize: Appearance.px(15)
+                                    }
+                                }
+
+                                PanelText {
+                                    text:
+                                        I18n.tr("restoreSystemProfile")
+                                    font.pixelSize:
+                                        Appearance.smallFontSize
+                                }
+                            }
+
+                            MouseArea {
+                                id: systemProfileArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    ShellSettings.userAvatarPath = "";
+                                }
+                            }
+                        }
+
+                        Item { Layout.fillWidth: true }
+                    }
+                }
+
+                SectionTitle {
+                    icon: "󰍛"
+                    title: I18n.tr("performanceMonitor")
+                }
+
+                SettingCard {
+                    PanelText {
+                        Layout.fillWidth: true
+                        text: I18n.tr("performanceMonitorHint")
+                        color: Appearance.subtext
+                        wrapMode: Text.WordWrap
+                        font.pixelSize: Appearance.smallFontSize
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(8)
+
+                        MetricChoice {
+                            icon: "󰻠"
+                            label: I18n.tr("cpuUsage")
+                            value: Math.round(
+                                ResourceService.cpuUsage * 100) + "%"
+                            selected: ShellSettings.showCpuUsage
+                            onToggled:
+                                ShellSettings.showCpuUsage = !selected
+                        }
+
+                        MetricChoice {
+                            icon: "󰍛"
+                            label: I18n.tr("memoryUsage")
+                            value: Math.round(
+                                ResourceService.memoryUsage * 100) + "%"
+                            selected: ShellSettings.showMemoryUsage
+                            onToggled:
+                                ShellSettings.showMemoryUsage = !selected
+                        }
+
+                        MetricChoice {
+                            icon: "󰔏"
+                            label: I18n.tr("cpuTemperature")
+                            value: ResourceService.temperatureAvailable
+                                ? Math.round(
+                                    ResourceService.cpuTemperature) + "°C"
+                                : "--°C"
+                            selected: ShellSettings.showCpuTemperature
+                            onToggled:
+                                ShellSettings.showCpuTemperature = !selected
+                        }
+                    }
+                }
+
+                SectionTitle {
+                    icon: "󰖐"
+                    title: I18n.tr("weatherLocation")
+                }
+
+                SettingCard {
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(9)
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(3)
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                implicitHeight: Appearance.px(36)
+                                radius: Appearance.px(9)
+                                color: Appearance.layer1
+                                border.width:
+                                    weatherLocationInput.activeFocus
+                                        ? 1 : 0
+                                border.color: Appearance.primary
+
+                                Controls.TextField {
+                                    id: weatherLocationInput
+
+                                    anchors {
+                                        fill: parent
+                                        leftMargin: Appearance.px(10)
+                                        rightMargin: Appearance.px(10)
+                                    }
+                                    padding: 0
+                                    verticalAlignment:
+                                        TextInput.AlignVCenter
+                                    color: Appearance.layer0Text
+                                    selectionColor:
+                                        Appearance.primaryContainer
+                                    selectedTextColor:
+                                        Appearance.primaryContainerText
+                                    selectByMouse: true
+                                    persistentSelection: true
+                                    text: root.weatherLocationDraft
+                                    placeholderText:
+                                        I18n.tr("weatherLocationHint")
+                                    placeholderTextColor:
+                                        Appearance.subtext
+                                    background: null
+                                    font {
+                                        family: Appearance.fontFamily
+                                        pixelSize: Appearance.fontSize
+                                    }
+                                    onTextEdited:
+                                        root.weatherLocationDraft = text
+                                    onAccepted: {
+                                        WeatherService.searchLocation(
+                                            root.weatherLocationDraft);
+                                    }
+                                }
+                            }
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                text: {
+                                    switch (WeatherService
+                                            .locationSearchStatus) {
+                                    case "searching":
+                                        return I18n.tr(
+                                            "locationSearching");
+                                    case "notFound":
+                                        return I18n.tr(
+                                            "locationNotFound");
+                                    case "failed":
+                                        return I18n.tr(
+                                            "locationSearchFailed");
+                                    default:
+                                        return ShellSettings
+                                            .weatherLocationName;
+                                    }
+                                }
+                                color: WeatherService
+                                        .locationSearchStatus
+                                        === "failed"
+                                        || WeatherService
+                                            .locationSearchStatus
+                                            === "notFound"
+                                    ? Theme.palette.m3error
+                                    : Appearance.subtext
+                                elide: Text.ElideRight
+                                font.pixelSize:
+                                    Appearance.smallFontSize
+                            }
+                        }
+
+                        Rectangle {
+                            implicitWidth: weatherSearchRow.implicitWidth
+                                + Appearance.px(20)
+                            implicitHeight: Appearance.px(36)
+                            radius: Appearance.px(9)
+                            color: weatherSearchArea.containsMouse
+                                    && weatherSearchArea.enabled
+                                ? Appearance.layer1Active
+                                : Appearance.primaryContainer
+                            opacity: weatherSearchArea.enabled ? 1 : 0.5
+
+                            RowLayout {
+                                id: weatherSearchRow
+                                anchors.centerIn: parent
+                                spacing: Appearance.px(6)
+
+                                Item {
+                                    implicitWidth: Appearance.px(16)
+                                    implicitHeight: Appearance.px(16)
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        visible: WeatherService
+                                                .locationSearchStatus
+                                            !== "searching"
+                                        text: "󰍉"
+                                        rotation: 0
+                                        color: Appearance
+                                            .primaryContainerText
+                                        font {
+                                            family: Appearance
+                                                .iconFontFamily
+                                            pixelSize:
+                                                Appearance.px(15)
+                                        }
+                                    }
+
+                                    Text {
+                                        id: locationLoadingIcon
+
+                                        anchors.centerIn: parent
+                                        visible: WeatherService
+                                                .locationSearchStatus
+                                            === "searching"
+                                        text: "󰔟"
+                                        color: Appearance
+                                            .primaryContainerText
+                                        font {
+                                            family: Appearance
+                                                .iconFontFamily
+                                            pixelSize:
+                                                Appearance.px(15)
+                                        }
+
+                                        RotationAnimator {
+                                            target: locationLoadingIcon
+                                            running:
+                                                locationLoadingIcon.visible
+                                            from: 0
+                                            to: 360
+                                            duration: 900
+                                            loops:
+                                                Animation.Infinite
+                                        }
+                                    }
+                                }
+
+                                PanelText {
+                                    text: I18n.tr("searchLocation")
+                                    color:
+                                        Appearance.primaryContainerText
+                                    font.pixelSize:
+                                        Appearance.smallFontSize
+                                }
+                            }
+
+                            MouseArea {
+                                id: weatherSearchArea
+                                anchors.fill: parent
+                                enabled: WeatherService
+                                        .locationSearchStatus
+                                    !== "searching"
+                                    && root.weatherLocationDraft
+                                        .trim().length >= 2
+                                hoverEnabled: true
+                                cursorShape: enabled
+                                    ? Qt.PointingHandCursor
+                                    : Qt.ArrowCursor
+                                onClicked:
+                                    WeatherService.searchLocation(
+                                        root.weatherLocationDraft)
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 1
+                        color: Appearance.outline
+                        opacity: 0.65
+                    }
+
+                    PanelText {
+                        text: I18n.tr("directCoordinates")
+                        color: Appearance.layer0Text
+                        font.weight: Font.DemiBold
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(9)
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(3)
+
+                            PanelText {
+                                text: I18n.tr("latitude")
+                                color: Appearance.subtext
+                                font.pixelSize:
+                                    Appearance.smallFontSize
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                implicitHeight: Appearance.px(36)
+                                radius: Appearance.px(9)
+                                color: Appearance.layer1
+                                border.width:
+                                    weatherLatitudeInput.activeFocus
+                                        ? 1 : 0
+                                border.color: Appearance.primary
+
+                                Controls.TextField {
+                                    id: weatherLatitudeInput
+
+                                    anchors {
+                                        fill: parent
+                                        leftMargin: Appearance.px(10)
+                                        rightMargin: Appearance.px(10)
+                                    }
+                                    padding: 0
+                                    verticalAlignment:
+                                        TextInput.AlignVCenter
+                                    color: Appearance.layer0Text
+                                    selectionColor:
+                                        Appearance.primaryContainer
+                                    selectedTextColor:
+                                        Appearance.primaryContainerText
+                                    selectByMouse: true
+                                    persistentSelection: true
+                                    inputMethodHints:
+                                        Qt.ImhFormattedNumbersOnly
+                                    text: root.weatherLatitudeDraft
+                                    placeholderText: "31.23040"
+                                    placeholderTextColor:
+                                        Appearance.subtext
+                                    background: null
+                                    validator: DoubleValidator {
+                                        bottom: -90
+                                        top: 90
+                                        decimals: 6
+                                        notation:
+                                            DoubleValidator
+                                                .StandardNotation
+                                    }
+                                    font {
+                                        family: Appearance.fontFamily
+                                        pixelSize: Appearance.fontSize
+                                    }
+                                    onTextEdited:
+                                        root.weatherLatitudeDraft = text
+                                    onAccepted: {
+                                        if (root.weatherCoordinatesValid)
+                                            WeatherService.setCoordinates(
+                                                root.weatherLatitudeDraft,
+                                                root.weatherLongitudeDraft);
+                                    }
+                                }
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(3)
+
+                            PanelText {
+                                text: I18n.tr("longitude")
+                                color: Appearance.subtext
+                                font.pixelSize:
+                                    Appearance.smallFontSize
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                implicitHeight: Appearance.px(36)
+                                radius: Appearance.px(9)
+                                color: Appearance.layer1
+                                border.width:
+                                    weatherLongitudeInput.activeFocus
+                                        ? 1 : 0
+                                border.color: Appearance.primary
+
+                                Controls.TextField {
+                                    id: weatherLongitudeInput
+
+                                    anchors {
+                                        fill: parent
+                                        leftMargin: Appearance.px(10)
+                                        rightMargin: Appearance.px(10)
+                                    }
+                                    padding: 0
+                                    verticalAlignment:
+                                        TextInput.AlignVCenter
+                                    color: Appearance.layer0Text
+                                    selectionColor:
+                                        Appearance.primaryContainer
+                                    selectedTextColor:
+                                        Appearance.primaryContainerText
+                                    selectByMouse: true
+                                    persistentSelection: true
+                                    inputMethodHints:
+                                        Qt.ImhFormattedNumbersOnly
+                                    text: root.weatherLongitudeDraft
+                                    placeholderText: "121.47370"
+                                    placeholderTextColor:
+                                        Appearance.subtext
+                                    background: null
+                                    validator: DoubleValidator {
+                                        bottom: -180
+                                        top: 180
+                                        decimals: 6
+                                        notation:
+                                            DoubleValidator
+                                                .StandardNotation
+                                    }
+                                    font {
+                                        family: Appearance.fontFamily
+                                        pixelSize: Appearance.fontSize
+                                    }
+                                    onTextEdited:
+                                        root.weatherLongitudeDraft = text
+                                    onAccepted: {
+                                        if (root.weatherCoordinatesValid)
+                                            WeatherService.setCoordinates(
+                                                root.weatherLatitudeDraft,
+                                                root.weatherLongitudeDraft);
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.alignment: Qt.AlignBottom
+                            implicitWidth: coordinateApplyRow.implicitWidth
+                                + Appearance.px(20)
+                            implicitHeight: Appearance.px(36)
+                            radius: Appearance.px(9)
+                            color: coordinateApplyArea.containsMouse
+                                    && coordinateApplyArea.enabled
+                                ? Appearance.layer1Active
+                                : Appearance.primaryContainer
+                            opacity: coordinateApplyArea.enabled ? 1 : 0.5
+
+                            RowLayout {
+                                id: coordinateApplyRow
+                                anchors.centerIn: parent
+                                spacing: Appearance.px(6)
+
+                                Text {
+                                    text: "󰍎"
+                                    color:
+                                        Appearance.primaryContainerText
+                                    font {
+                                        family:
+                                            Appearance.iconFontFamily
+                                        pixelSize: Appearance.px(15)
+                                    }
+                                }
+
+                                PanelText {
+                                    text: I18n.tr("applyCoordinates")
+                                    color:
+                                        Appearance.primaryContainerText
+                                    font.pixelSize:
+                                        Appearance.smallFontSize
+                                }
+                            }
+
+                            MouseArea {
+                                id: coordinateApplyArea
+                                anchors.fill: parent
+                                enabled: root.weatherCoordinatesValid
+                                hoverEnabled: true
+                                cursorShape: enabled
+                                    ? Qt.PointingHandCursor
+                                    : Qt.ArrowCursor
+                                onClicked:
+                                    WeatherService.setCoordinates(
+                                        root.weatherLatitudeDraft,
+                                        root.weatherLongitudeDraft)
+                            }
+                        }
+                    }
+
+                    PanelText {
+                        Layout.fillWidth: true
+                        text: I18n.tr("coordinateRangeHint")
+                        color: root.weatherCoordinatesValid
+                            ? Appearance.subtext
+                            : Theme.palette.m3error
+                        font.pixelSize: Appearance.smallFontSize
+                    }
+                }
+
+                SectionTitle {
                     icon: "󰗊"
                     title: I18n.tr("language")
                 }
@@ -427,70 +1175,6 @@ Item {
                                     onClicked: {
                                         ShellSettings.language =
                                             parent.modelData.language;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                SectionTitle {
-                    icon: "󰍛"
-                    title: I18n.tr("performanceMonitor")
-                }
-
-                SettingCard {
-                    PanelText {
-                        Layout.fillWidth: true
-                        text: I18n.tr("performanceMonitorHint")
-                        color: Appearance.subtext
-                        wrapMode: Text.WordWrap
-                        font.pixelSize: Appearance.smallFontSize
-                    }
-
-                    Repeater {
-                        model: [
-                            {
-                                key: "cpu",
-                                label: I18n.tr("cpuUsage"),
-                                checked: ShellSettings.showCpuUsage
-                            },
-                            {
-                                key: "memory",
-                                label: I18n.tr("memoryUsage"),
-                                checked: ShellSettings.showMemoryUsage
-                            },
-                            {
-                                key: "temperature",
-                                label: I18n.tr("cpuTemperature"),
-                                checked: ShellSettings.showCpuTemperature
-                            }
-                        ]
-
-                        delegate: RowLayout {
-                            required property var modelData
-                            Layout.fillWidth: true
-
-                            PanelText {
-                                Layout.fillWidth: true
-                                text: parent.modelData.label
-                                color: Appearance.layer0Text
-                            }
-
-                            SettingSwitch {
-                                checked: parent.modelData.checked
-                                onToggled: checked => {
-                                    switch (parent.modelData.key) {
-                                    case "cpu":
-                                        ShellSettings.showCpuUsage = checked;
-                                        break;
-                                    case "memory":
-                                        ShellSettings.showMemoryUsage = checked;
-                                        break;
-                                    case "temperature":
-                                        ShellSettings.showCpuTemperature =
-                                            checked;
-                                        break;
                                     }
                                 }
                             }

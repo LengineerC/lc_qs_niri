@@ -65,6 +65,10 @@ Item {
         }
         if (page === "battery")
             return batteryPanel.implicitHeight + 16;
+        if (page === "power")
+            return powerPanel.implicitHeight + 16;
+        if (page === "weather")
+            return weatherPanel.implicitHeight + 16;
         if (page === "calendar")
             return calendarPanel.implicitHeight + 16;
         if (page === "clipboard") {
@@ -161,6 +165,18 @@ Item {
             popupIcon = BatteryService.powerIcon();
             popupTitle = BatteryService.panelTitle;
             popupBaseWidth = 420;
+            popupRows = [];
+            break;
+        case "power":
+            popupIcon = "󰐥";
+            popupTitle = I18n.tr("powerMenu");
+            popupBaseWidth = 410;
+            popupRows = [];
+            break;
+        case "weather":
+            popupIcon = WeatherService.currentIcon;
+            popupTitle = I18n.tr("weather");
+            popupBaseWidth = 850;
             popupRows = [];
             break;
         case "clipboard":
@@ -281,6 +297,8 @@ Item {
             id: popupLayout
 
             visible: root.page !== "system" && root.page !== "battery"
+                && root.page !== "power"
+                && root.page !== "weather"
                 && root.page !== "calendar" && root.page !== "clipboard"
                 && root.page !== "notifications"
                 && root.page !== "media" && root.page !== "launcher"
@@ -401,6 +419,28 @@ Item {
             id: batteryPanel
 
             visible: root.page === "battery"
+            anchors {
+                fill: innerSurface
+                margins: 1
+            }
+            onCloseRequested: root.close()
+        }
+
+        PowerPanel {
+            id: powerPanel
+
+            visible: root.page === "power"
+            anchors {
+                fill: innerSurface
+                margins: 1
+            }
+            onCloseRequested: root.close()
+        }
+
+        WeatherPanel {
+            id: weatherPanel
+
+            visible: root.page === "weather"
             anchors {
                 fill: innerSurface
                 margins: 1

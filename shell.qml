@@ -18,6 +18,8 @@ ShellRoot {
         WallpaperService.load();
         SystemService.load();
         ResourceService.load();
+        UserService.load();
+        WeatherService.load();
         Theme.load();
     }
 

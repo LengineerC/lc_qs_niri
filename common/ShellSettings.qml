@@ -35,6 +35,10 @@ Singleton {
     property bool showCpuUsage: true
     property bool showMemoryUsage: true
     property bool showCpuTemperature: false
+    property string userAvatarPath: ""
+    property string weatherLocationName: "上海"
+    property real weatherLatitude: 31.2304
+    property real weatherLongitude: 121.4737
 
     property bool ready: false
     property bool storageReady: false
@@ -68,7 +72,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 10,
+            version: 13,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             shadowEnabled: shadowEnabled,
@@ -94,7 +98,11 @@ Singleton {
             wallpaperFillMode: wallpaperFillMode,
             showCpuUsage: showCpuUsage,
             showMemoryUsage: showMemoryUsage,
-            showCpuTemperature: showCpuTemperature
+            showCpuTemperature: showCpuTemperature,
+            userAvatarPath: userAvatarPath,
+            weatherLocationName: weatherLocationName,
+            weatherLatitude: weatherLatitude,
+            weatherLongitude: weatherLongitude
         }, null, 2));
     }
 
@@ -103,6 +111,8 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
+            if (state.version !== 13)
+                needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
             if (typeof state.showEmptyWorkspaces === "boolean")
@@ -207,6 +217,26 @@ Singleton {
                 showCpuTemperature = state.showCpuTemperature;
             else
                 needsMigration = true;
+            if (typeof state.userAvatarPath === "string")
+                userAvatarPath = stripFileProtocol(state.userAvatarPath);
+            else
+                needsMigration = true;
+            if (typeof state.weatherLocationName === "string"
+                    && state.weatherLocationName.trim())
+                weatherLocationName =
+                    state.weatherLocationName.trim().slice(0, 120);
+            else
+                needsMigration = true;
+            if (Number.isFinite(Number(state.weatherLatitude)))
+                weatherLatitude = clamped(
+                    state.weatherLatitude, -90, 90);
+            else
+                needsMigration = true;
+            if (Number.isFinite(Number(state.weatherLongitude)))
+                weatherLongitude = clamped(
+                    state.weatherLongitude, -180, 180);
+            else
+                needsMigration = true;
         } catch (error) {
             console.warn("ShellSettings: cannot parse settings:", error);
         }
@@ -243,6 +273,10 @@ Singleton {
         showCpuUsage = true;
         showMemoryUsage = true;
         showCpuTemperature = false;
+        userAvatarPath = "";
+        weatherLocationName = "上海";
+        weatherLatitude = 31.2304;
+        weatherLongitude = 121.4737;
         save();
     }
 
@@ -276,6 +310,10 @@ Singleton {
     onShowCpuUsageChanged: scheduleSave()
     onShowMemoryUsageChanged: scheduleSave()
     onShowCpuTemperatureChanged: scheduleSave()
+    onUserAvatarPathChanged: scheduleSave()
+    onWeatherLocationNameChanged: scheduleSave()
+    onWeatherLatitudeChanged: scheduleSave()
+    onWeatherLongitudeChanged: scheduleSave()
 
     Component.onCompleted: directoryProcess.running = true
 
@@ -373,7 +411,11 @@ Singleton {
                 wallpaperFillMode: root.wallpaperFillMode,
                 showCpuUsage: root.showCpuUsage,
                 showMemoryUsage: root.showMemoryUsage,
-                showCpuTemperature: root.showCpuTemperature
+                showCpuTemperature: root.showCpuTemperature,
+                userAvatarPath: root.userAvatarPath,
+                weatherLocationName: root.weatherLocationName,
+                weatherLatitude: root.weatherLatitude,
+                weatherLongitude: root.weatherLongitude
             });
         }
     }

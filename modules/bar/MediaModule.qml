@@ -118,7 +118,7 @@ MouseArea {
 
         Text {
             Layout.fillWidth: true
-            Layout.maximumWidth: Appearance.px(root.compact ? 220 : 300)
+            Layout.maximumWidth: Appearance.px(root.compact ? 150 : 200)
             text: {
                 const player = MediaService.activePlayer;
                 const title = MediaService.cleanTitle(player?.trackTitle)

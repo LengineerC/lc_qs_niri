@@ -38,8 +38,8 @@ MouseArea {
                 value: available
                     ? ResourceService.cpuTemperature / 100 : 0,
                 text: available
-                    ? Math.round(ResourceService.cpuTemperature) + "°"
-                    : "--°",
+                    ? Math.round(ResourceService.cpuTemperature) + "°C"
+                    : "--°C",
                 warning: available
                     && ResourceService.cpuTemperature >= 85
             });

@@ -255,6 +255,13 @@ Item {
             outputName: root.outputName
         }
 
+        WeatherModule {
+            id: weatherModule
+
+            anchors.verticalCenter: parent.verticalCenter
+            onActivated: popup.showFor(weatherModule, "weather")
+        }
+
         TimeModule {
             id: timeModule
 
@@ -310,11 +317,22 @@ Item {
 
             compact: root.compactLevel > 0
             anchors {
-                right: parent.right
-                rightMargin: root.edgeMargin
+                right: powerModule.left
+                rightMargin: Appearance.px(4)
             }
             
             onActivated: popup.showFor(systemModule, "system")
+        }
+
+        PowerModule {
+            id: powerModule
+
+            anchors {
+                right: parent.right
+                rightMargin: root.edgeMargin
+                verticalCenter: parent.verticalCenter
+            }
+            onActivated: popup.showFor(powerModule, "power")
         }
 
         ClipboardModule {
