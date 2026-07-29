@@ -1,0 +1,141 @@
+pragma Singleton
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import Quickshell
+
+Singleton {
+    id: root
+
+    readonly property string language: ShellSettings.language
+    readonly property var locale:
+        Qt.locale(language === "en_US" ? "en_US" : "zh_CN")
+
+    readonly property var strings: ({
+        settings: ["设置", "Settings"],
+        quickSettings: ["快速设置", "Quick settings"],
+        networkDevices: ["网络与设备", "Network & devices"],
+        language: ["语言", "Language"],
+        interfaceLanguage: ["界面语言", "Interface language"],
+        appearance: ["外观", "Appearance"],
+        colorMode: ["颜色模式", "Color mode"],
+        light: ["亮色", "Light"],
+        dark: ["暗色", "Dark"],
+        showActiveWindowIcon: ["显示活动窗口图标", "Show active window icon"],
+        activeWindowHint: ["App ID 和标题仍会保留", "App ID and title remain visible"],
+        showEmptyWorkspaces: ["显示空工作区", "Show empty workspaces"],
+        activeWorkspaceHint: ["当前活动工作区始终保留", "The active workspace is always shown"],
+        shadow: ["阴影", "Shadow"],
+        barPopupShadow: ["Bar 与弹窗阴影", "Bar and popup shadow"],
+        shadowHint: ["对粘连后的完整轮廓统一投影", "Shadow the complete attached outline"],
+        blurRadius: ["模糊半径", "Blur radius"],
+        opacity: ["不透明度", "Opacity"],
+        verticalOffset: ["垂直偏移", "Vertical offset"],
+        animation: ["动画", "Animation"],
+        animationDuration: ["动画时长", "Animation duration"],
+        bezierCurve: ["弹窗贝塞尔曲线  cubic-bezier(x₁, y₁, x₂, y₂)",
+            "Popup Bézier curve  cubic-bezier(x₁, y₁, x₂, y₂)"],
+        barFontSize: ["Bar 字体与尺寸", "Bar font & size"],
+        font: ["字体", "Font"],
+        fontSize: ["字号", "Font size"],
+        overallScale: ["整体缩放", "Overall scale"],
+        restoreDefaults: ["恢复默认", "Restore defaults"],
+        clock: ["时间与日期", "Time & date"],
+        timeFormat: ["时间格式", "Time format"],
+        dateFormat: ["日期格式", "Date format"],
+        timeFormatHint: ["Qt 格式，例如 HH:mm 或 hh:mm AP",
+            "Qt format, for example HH:mm or hh:mm AP"],
+        dateFormatHint: ["Qt 格式，例如 MMM dd ddd 或 yyyy-MM-dd",
+            "Qt format, for example MMM dd ddd or yyyy-MM-dd"],
+
+        desktop: ["桌面", "Desktop"],
+        noFocusedWindow: ["没有聚焦窗口", "No focused window"],
+        noMedia: ["无媒体", "No media"],
+        quickShell: ["Quick shell", "Quick shell"],
+        workspace: ["工作区", "Workspace"],
+        workspaceOne: ["工作区 1", "Workspace 1"],
+        session: ["会话", "Session"],
+        active: ["活动", "Active"],
+        powerMenu: ["电源菜单", "Power menu"],
+        unavailable: ["不可用", "Unavailable"],
+        systemResources: ["系统资源", "System resources"],
+        ramUsed: ["内存占用", "RAM used"],
+        swapUsed: ["交换空间占用", "Swap used"],
+        cpuLoad: ["CPU 负载", "CPU load"],
+        workspaces: ["工作区", "Workspaces"],
+        currentWorkspace: ["当前工作区", "Current workspace"],
+        scrollOnBar: ["在 Bar 上滚动", "Scroll on the bar"],
+        switchAction: ["切换", "Switch"],
+        systemUptime: ["系统运行时间", "System uptime"],
+        todo: ["待办事项", "To do"],
+        noPendingTasks: ["没有待办事项", "No pending tasks"],
+        timeZone: ["时区", "Time zone"],
+        local: ["本地", "Local"],
+        systemStatus: ["系统状态", "System status"],
+        network: ["网络", "Network"],
+        connected: ["已连接", "Connected"],
+        bluetooth: ["蓝牙", "Bluetooth"],
+        on: ["开启", "On"],
+        notifications: ["通知", "Notifications"],
+        noUnread: ["没有未读通知", "No unread"],
+        battery: ["电池", "Battery"],
+        wallpaperPalette: ["壁纸配色", "Wallpaper palette"],
+        generating: ["生成中…", "Generating…"],
+        media: ["媒体", "Media"],
+        noMediaPlaying: ["没有正在播放的媒体", "No media playing"],
+        playerControls: ["播放器控制", "Player controls"],
+
+        audioOutput: ["音频输出", "Audio output"],
+        microphone: ["麦克风", "Microphone"],
+        wifiEnabled: ["WiFi 已启用", "WiFi enabled"],
+        wifiDisabled: ["WiFi 已关闭", "WiFi disabled"],
+        clickNetworks: ["点击文字查看网络", "Click text to view networks"],
+        bluetoothEnabled: ["蓝牙已启用", "Bluetooth enabled"],
+        bluetoothDisabled: ["蓝牙已关闭", "Bluetooth disabled"],
+        clickDevices: ["点击文字查看设备", "Click text to view devices"],
+        muted: ["已静音", "Muted"],
+        microphoneDisabled: ["麦克风已关闭", "Microphone disabled"],
+        wifiNetworks: ["WiFi 网络", "WiFi networks"],
+        scanning: ["扫描中…", "Scanning…"],
+        secure: ["安全", "Secured"],
+        connect: ["连接", "Connect"],
+        bluetoothDevices: ["蓝牙设备", "Bluetooth devices"],
+        scan: ["扫描", "Scan"],
+        pairing: ["配对中…", "Pairing…"],
+        paired: ["已配对", "Paired"],
+        availableToConnect: ["可连接", "Available"],
+        disconnect: ["断开", "Disconnect"],
+        audioOutputs: ["音频输出设备", "Audio output devices"],
+        audioInputs: ["音频输入设备", "Audio input devices"],
+        currentDevice: ["当前设备", "Current device"],
+        noAudioDevices: ["没有可用的音频设备", "No audio devices available"],
+
+        charging: ["正在充电", "Charging"],
+        discharging: ["正在放电", "Discharging"],
+        empty: ["电量耗尽", "Empty"],
+        fullyCharged: ["已充满", "Fully charged"],
+        pendingCharge: ["等待充电", "Pending charge"],
+        pendingDischarge: ["等待放电", "Pending discharge"],
+        pluggedIn: ["已连接电源", "Plugged in"],
+        unknownStatus: ["状态未知", "Unknown"],
+        powerSaver: ["省电", "Power saver"],
+        balanced: ["平衡", "Balanced"],
+        performance: ["性能", "Performance"],
+        hour: ["小时", "hour"],
+        hours: ["小时", "hours"],
+        minute: ["分钟", "minute"],
+        minutes: ["分钟", "minutes"],
+        batteryCapacity: ["电池容量", "Battery capacity"],
+        batteryHealth: ["电池健康", "Battery health"],
+        unknown: ["未知", "Unknown"],
+        powerProfile: ["电源策略", "Power profile"],
+        performanceLimited: ["性能受到限制：", "Performance limited: "]
+    })
+
+    function tr(key) {
+        // Reading language here makes every binding using tr() reactive.
+        const languageIndex = root.language === "en_US" ? 1 : 0;
+        const value = root.strings[key];
+        return value ? value[languageIndex] : key;
+    }
+}

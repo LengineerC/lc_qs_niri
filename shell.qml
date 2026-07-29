@@ -10,6 +10,7 @@ ShellRoot {
 
     Component.onCompleted: {
         ShellSettings.load();
+        SystemService.load();
         Theme.load();
     }
 

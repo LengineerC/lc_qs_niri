@@ -11,6 +11,10 @@ Singleton {
 
     property bool showActiveWindowIcon: true
     property bool showEmptyWorkspaces: true
+    property bool shadowEnabled: true
+    property int shadowBlurRadius: 18
+    property real shadowOpacity: 0.45
+    property int shadowOffsetY: 4
     property int animationDuration: 500
     property real popupBezierX1: 0.38
     property real popupBezierY1: 1.21
@@ -19,6 +23,9 @@ Singleton {
     property string barFontFamily: "JetBrainsMono Nerd Font"
     property int barFontSize: 13
     property real scale: 1.00
+    property string language: "zh_CN"
+    property string timeFormat: "HH:mm"
+    property string dateFormat: "MMM dd ddd"
 
     property bool ready: false
     property bool storageReady: false
@@ -52,9 +59,13 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 2,
+            version: 5,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
+            shadowEnabled: shadowEnabled,
+            shadowBlurRadius: shadowBlurRadius,
+            shadowOpacity: shadowOpacity,
+            shadowOffsetY: shadowOffsetY,
             animationDuration: animationDuration,
             popupBezier: [
                 popupBezierX1, popupBezierY1,
@@ -62,7 +73,10 @@ Singleton {
             ],
             barFontFamily: barFontFamily,
             barFontSize: barFontSize,
-            scale: scale
+            scale: scale,
+            language: language,
+            timeFormat: timeFormat,
+            dateFormat: dateFormat
         }, null, 2));
     }
 
@@ -75,6 +89,24 @@ Singleton {
                 showActiveWindowIcon = state.showActiveWindowIcon;
             if (typeof state.showEmptyWorkspaces === "boolean")
                 showEmptyWorkspaces = state.showEmptyWorkspaces;
+            else
+                needsMigration = true;
+            if (typeof state.shadowEnabled === "boolean")
+                shadowEnabled = state.shadowEnabled;
+            else
+                needsMigration = true;
+            if (state.shadowBlurRadius !== undefined)
+                shadowBlurRadius = Math.round(clamped(
+                    state.shadowBlurRadius, 0, 48));
+            else
+                needsMigration = true;
+            if (state.shadowOpacity !== undefined)
+                shadowOpacity = clamped(state.shadowOpacity, 0, 0.9);
+            else
+                needsMigration = true;
+            if (state.shadowOffsetY !== undefined)
+                shadowOffsetY = Math.round(clamped(
+                    state.shadowOffsetY, -12, 24));
             else
                 needsMigration = true;
             if (state.animationDuration !== undefined)
@@ -96,6 +128,20 @@ Singleton {
                 barFontSize = Math.round(clamped(state.barFontSize, 9, 24));
             if (state.scale !== undefined)
                 scale = clamped(state.scale, 0.75, 1.5);
+            if (state.language === "zh_CN" || state.language === "en_US")
+                language = state.language;
+            else
+                needsMigration = true;
+            if (typeof state.timeFormat === "string"
+                    && state.timeFormat.trim())
+                timeFormat = state.timeFormat.trim().slice(0, 64);
+            else
+                needsMigration = true;
+            if (typeof state.dateFormat === "string"
+                    && state.dateFormat.trim())
+                dateFormat = state.dateFormat.trim().slice(0, 64);
+            else
+                needsMigration = true;
         } catch (error) {
             console.warn("ShellSettings: cannot parse settings:", error);
         }
@@ -108,6 +154,10 @@ Singleton {
     function resetDefaults() {
         showActiveWindowIcon = true;
         showEmptyWorkspaces = true;
+        shadowEnabled = true;
+        shadowBlurRadius = 18;
+        shadowOpacity = 0.45;
+        shadowOffsetY = 4;
         animationDuration = 500;
         popupBezierX1 = 0.38;
         popupBezierY1 = 1.21;
@@ -116,6 +166,9 @@ Singleton {
         barFontFamily = "JetBrainsMono Nerd Font";
         barFontSize = 13;
         scale = 1.00;
+        language = "zh_CN";
+        timeFormat = "HH:mm";
+        dateFormat = "MMM dd ddd";
         save();
     }
 
@@ -125,6 +178,10 @@ Singleton {
 
     onShowActiveWindowIconChanged: scheduleSave()
     onShowEmptyWorkspacesChanged: scheduleSave()
+    onShadowEnabledChanged: scheduleSave()
+    onShadowBlurRadiusChanged: scheduleSave()
+    onShadowOpacityChanged: scheduleSave()
+    onShadowOffsetYChanged: scheduleSave()
     onAnimationDurationChanged: scheduleSave()
     onPopupBezierX1Changed: scheduleSave()
     onPopupBezierY1Changed: scheduleSave()
@@ -133,6 +190,9 @@ Singleton {
     onBarFontFamilyChanged: scheduleSave()
     onBarFontSizeChanged: scheduleSave()
     onScaleChanged: scheduleSave()
+    onLanguageChanged: scheduleSave()
+    onTimeFormatChanged: scheduleSave()
+    onDateFormatChanged: scheduleSave()
 
     Component.onCompleted: directoryProcess.running = true
 
@@ -172,6 +232,23 @@ Singleton {
     IpcHandler {
         target: "settings"
 
+        function setLanguage(language: string): void {
+            if (language === "zh_CN" || language === "en_US")
+                root.language = language;
+        }
+
+        function setTimeFormat(format: string): void {
+            const value = format.trim();
+            if (value)
+                root.timeFormat = value.slice(0, 64);
+        }
+
+        function setDateFormat(format: string): void {
+            const value = format.trim();
+            if (value)
+                root.dateFormat = value.slice(0, 64);
+        }
+
         function reset(): void {
             root.resetDefaults();
         }
@@ -180,11 +257,18 @@ Singleton {
             return JSON.stringify({
                 showActiveWindowIcon: root.showActiveWindowIcon,
                 showEmptyWorkspaces: root.showEmptyWorkspaces,
+                shadowEnabled: root.shadowEnabled,
+                shadowBlurRadius: root.shadowBlurRadius,
+                shadowOpacity: root.shadowOpacity,
+                shadowOffsetY: root.shadowOffsetY,
                 animationDuration: root.animationDuration,
                 popupBezier: root.popupBezierCurve,
                 barFontFamily: root.barFontFamily,
                 barFontSize: root.barFontSize,
-                scale: root.scale
+                scale: root.scale,
+                language: root.language,
+                timeFormat: root.timeFormat,
+                dateFormat: root.dateFormat
             });
         }
     }

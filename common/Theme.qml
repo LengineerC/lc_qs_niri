@@ -17,6 +17,10 @@ Singleton {
     property bool generating: false
     property bool storageReady: false
     property string generatedOutput: ""
+    property bool themeStateLoaded: false
+    property bool wallpaperStateLoaded: false
+    property bool startupThemeChecked: false
+    property var pendingSourceArguments: null
 
     readonly property bool darkMode: mode === "dark"
     readonly property string stateDirectory: stripFileProtocol(
@@ -171,6 +175,40 @@ Singleton {
         return colors;
     }
 
+    function relativeLuminance(colorValue) {
+        function linearChannel(value) {
+            return value <= 0.04045
+                ? value / 12.92
+                : Math.pow((value + 0.055) / 1.055, 2.4);
+        }
+
+        return linearChannel(colorValue.r) * 0.2126
+            + linearChannel(colorValue.g) * 0.7152
+            + linearChannel(colorValue.b) * 0.0722;
+    }
+
+    function paletteMatchesMode() {
+        const isLightPalette = relativeLuminance(
+            palette.m3background) >= 0.45;
+        return darkMode ? !isLightPalette : isLightPalette;
+    }
+
+    function ensureStartupTheme() {
+        if (startupThemeChecked || !themeStateLoaded
+                || !wallpaperStateLoaded)
+            return;
+
+        startupThemeChecked = true;
+        if (paletteMatchesMode())
+            return;
+
+        console.warn("Theme: saved palette does not match mode; regenerating");
+        if (wallpaperPath)
+            runMatugen(["image", wallpaperPath]);
+        else
+            runMatugen(["color", "hex", sourceColor]);
+    }
+
     function applySavedTheme(data) {
         try {
             const state = JSON.parse(data);
@@ -189,6 +227,8 @@ Singleton {
             console.warn("Theme: cannot parse saved theme:", error);
             ready = true;
         }
+        themeStateLoaded = true;
+        Qt.callLater(ensureStartupTheme);
     }
 
     function applyMatugen(data) {
@@ -223,21 +263,34 @@ Singleton {
         }, null, 2));
     }
 
-    function runMatugen(sourceArguments) {
+    function startPendingMatugen() {
+        if (pendingSourceArguments === null || matugenProcess.running)
+            return;
+
+        const sourceArguments = pendingSourceArguments;
+        pendingSourceArguments = null;
         generatedOutput = "";
         generating = true;
-        if (matugenProcess.running)
-            matugenProcess.running = false;
+        matugenProcess.requestedMode = mode;
 
         matugenProcess.exec([
             "matugen",
             "--config", matugenConfigPath,
             "--json", "hex",
             "--quiet",
-            "--mode", mode,
+            "--mode", matugenProcess.requestedMode,
             "--type", scheme,
             "--source-color-index", "0"
         ].concat(sourceArguments));
+    }
+
+    function runMatugen(sourceArguments) {
+        pendingSourceArguments = sourceArguments.slice();
+        generating = true;
+        if (matugenProcess.running)
+            matugenProcess.running = false;
+        else
+            startPendingMatugen();
     }
 
     function fromWallpaper(path) {
@@ -263,6 +316,7 @@ Singleton {
             return;
 
         mode = newMode;
+        save();
         if (wallpaperPath)
             runMatugen(["image", wallpaperPath]);
         else
@@ -313,6 +367,7 @@ Singleton {
         id: matugenProcess
 
         property int exitCode: 0
+        property string requestedMode: ""
 
         stdout: StdioCollector {
             onStreamFinished: {
@@ -329,11 +384,17 @@ Singleton {
 
         onExited: (exitCode, exitStatus) => {
             matugenProcess.exitCode = exitCode;
-            root.generating = false;
-            if (exitCode === 0 && root.generatedOutput)
+            if (exitCode === 0 && root.generatedOutput
+                    && matugenProcess.requestedMode === root.mode)
                 root.applyMatugen(root.generatedOutput);
-            else if (exitCode !== 0)
+            else if (exitCode !== 0
+                    && root.pendingSourceArguments === null)
                 console.warn("Theme: matugen exited with", exitCode);
+
+            if (root.pendingSourceArguments !== null)
+                Qt.callLater(root.startPendingMatugen);
+            else
+                root.generating = false;
         }
     }
 
@@ -353,8 +414,11 @@ Singleton {
             if (!root.storageReady)
                 return;
             root.ready = true;
-            if (error === FileViewError.FileNotFound)
+            root.themeStateLoaded = true;
+            if (error === FileViewError.FileNotFound) {
                 Qt.callLater(() => root.save());
+                Qt.callLater(root.ensureStartupTheme);
+            }
         }
     }
 
@@ -370,12 +434,22 @@ Singleton {
             if (!root.storageReady)
                 return;
             const path = text().trim();
-            if (path && path !== root.wallpaperPath)
-                root.fromWallpaper(path);
+            const pathChanged = path && path !== root.wallpaperPath;
+            if (pathChanged)
+                root.wallpaperPath = path;
+            root.wallpaperStateLoaded = true;
+
+            if (root.startupThemeChecked && pathChanged)
+                root.runMatugen(["image", path]);
+            else
+                Qt.callLater(root.ensureStartupTheme);
         }
         onLoadFailed: error => {
-            if (root.storageReady && error === FileViewError.FileNotFound)
+            if (root.storageReady && error === FileViewError.FileNotFound) {
+                root.wallpaperStateLoaded = true;
                 Qt.callLater(() => wallpaperStorage.setText(""));
+                Qt.callLater(root.ensureStartupTheme);
+            }
         }
     }
 

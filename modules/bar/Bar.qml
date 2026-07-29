@@ -99,6 +99,7 @@ Scope {
                 height: Appearance.cornerSize
                 anchors {
                     top: barContent.bottom
+                    topMargin: -1
                     left: parent.left
                     right: parent.right
                 }

@@ -6,12 +6,14 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import qs.common
+import qs.modules.bar
 
 ApplicationWindow {
     id: root
 
+    property int currentPage: 0
     visible: false
-    title: "QuickShell 设置"
+    title: "QuickShell " + I18n.tr("settings")
     color: Appearance.layer0
     width: Math.min(screen?.width * 0.86 ?? Appearance.px(980),
         Appearance.px(980))
@@ -76,6 +78,16 @@ ApplicationWindow {
         function visible(): bool {
             return root.visible;
         }
+
+        function system(): void {
+            root.currentPage = 1;
+            root.openWindow();
+        }
+
+        function quickSettings(): void {
+            root.currentPage = 0;
+            root.openWindow();
+        }
     }
 
     Rectangle {
@@ -91,7 +103,8 @@ ApplicationWindow {
 
             Rectangle {
                 Layout.fillHeight: true
-                Layout.preferredWidth: Appearance.px(190)
+                Layout.preferredWidth: Appearance.px(
+                    I18n.language === "en_US" ? 210 : 190)
                 radius: Appearance.normalRadius
                 color: Appearance.layer1
                 border.width: 1
@@ -141,7 +154,7 @@ ApplicationWindow {
                             }
 
                             Text {
-                                text: "设置"
+                                text: I18n.tr("settings")
                                 color: Appearance.subtext
                                 font {
                                     family: Appearance.fontFamily
@@ -152,10 +165,15 @@ ApplicationWindow {
                     }
 
                     Rectangle {
+                        id: quickSettingsTab
+
                         Layout.fillWidth: true
                         implicitHeight: Appearance.px(42)
                         radius: Appearance.px(12)
-                        color: Appearance.secondaryContainer
+                        color: root.currentPage === 0
+                            ? Appearance.secondaryContainer
+                            : quickSettingsMouse.containsMouse
+                                ? Appearance.layer1Hover : "transparent"
 
                         RowLayout {
                             anchors {
@@ -167,7 +185,9 @@ ApplicationWindow {
 
                             Text {
                                 text: "󰒓"
-                                color: Appearance.secondaryContainerText
+                                color: root.currentPage === 0
+                                    ? Appearance.secondaryContainerText
+                                    : Appearance.layer1Text
                                 font {
                                     family: Appearance.iconFontFamily
                                     pixelSize: Appearance.px(18)
@@ -176,14 +196,77 @@ ApplicationWindow {
 
                             Text {
                                 Layout.fillWidth: true
-                                text: "快速设置"
-                                color: Appearance.secondaryContainerText
+                                text: I18n.tr("quickSettings")
+                                color: root.currentPage === 0
+                                    ? Appearance.secondaryContainerText
+                                    : Appearance.layer1Text
                                 font {
                                     family: Appearance.fontFamily
                                     pixelSize: Appearance.fontSize
                                     weight: Font.DemiBold
                                 }
                             }
+                        }
+
+                        MouseArea {
+                            id: quickSettingsMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.currentPage = 0
+                        }
+                    }
+
+                    Rectangle {
+                        id: networkTab
+
+                        Layout.fillWidth: true
+                        implicitHeight: Appearance.px(42)
+                        radius: Appearance.px(12)
+                        color: root.currentPage === 1
+                            ? Appearance.secondaryContainer
+                            : networkMouse.containsMouse
+                                ? Appearance.layer1Hover : "transparent"
+
+                        RowLayout {
+                            anchors {
+                                fill: parent
+                                leftMargin: Appearance.px(12)
+                                rightMargin: Appearance.px(12)
+                            }
+                            spacing: Appearance.px(10)
+
+                            Text {
+                                text: "󰛳"
+                                color: root.currentPage === 1
+                                    ? Appearance.secondaryContainerText
+                                    : Appearance.layer1Text
+                                font {
+                                    family: Appearance.iconFontFamily
+                                    pixelSize: Appearance.px(18)
+                                }
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: I18n.tr("networkDevices")
+                                color: root.currentPage === 1
+                                    ? Appearance.secondaryContainerText
+                                    : Appearance.layer1Text
+                                font {
+                                    family: Appearance.fontFamily
+                                    pixelSize: Appearance.fontSize
+                                    weight: Font.DemiBold
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            id: networkMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.currentPage = 1
                         }
                     }
 
@@ -204,8 +287,18 @@ ApplicationWindow {
                 clip: true
 
                 SettingsContent {
+                    visible: root.currentPage === 0
                     anchors.fill: parent
                     onCloseRequested: root.closeWindow()
+                }
+
+                SystemPanel {
+                    visible: root.currentPage === 1
+                    embedded: true
+                    anchors {
+                        fill: parent
+                        margins: Appearance.px(8)
+                    }
                 }
             }
         }

@@ -8,6 +8,7 @@ Item {
 
     property string outputName: ""
     property Item activeItem: null
+    property Item hoverItem: null
     readonly property real padding: Appearance.px(5)
 
     implicitWidth: workspaceRow.implicitWidth + padding * 2
@@ -25,6 +26,16 @@ Item {
         // Keep the previous item for that event-loop turn instead of flashing.
     }
 
+    function beginHover(item) {
+        hoverClear.stop();
+        hoverItem = item;
+    }
+
+    function endHover(item) {
+        if (hoverItem === item)
+            hoverClear.restart();
+    }
+
     onOutputNameChanged: activeRefresh.restart()
 
     Timer {
@@ -32,6 +43,13 @@ Item {
 
         interval: 0
         onTriggered: root.refreshActiveItem()
+    }
+
+    Timer {
+        id: hoverClear
+
+        interval: 0
+        onTriggered: root.hoverItem = null
     }
 
     Rectangle {
@@ -78,6 +96,25 @@ Item {
             }
         }
 
+        Rectangle {
+            id: hoverIndicator
+
+            z: 0.5
+            visible: root.hoverItem !== null && root.hoverItem.visible
+            x: root.hoverItem
+                ? workspaceRow.x + root.hoverItem.x
+                    + (root.hoverItem.width - width) / 2
+                : 0
+            anchors.verticalCenter: parent.verticalCenter
+            width: Appearance.px(22)
+            height: Appearance.px(22)
+            radius: Appearance.fullRadius
+            color: root.hoverItem?.selected
+                ? Appearance.mix(Appearance.secondaryContainer,
+                    Appearance.secondaryContainerText, 0.12)
+                : Appearance.layer1Hover
+        }
+
         Row {
             id: workspaceRow
 
@@ -120,20 +157,9 @@ Item {
                         width: Appearance.px(22)
                         height: Appearance.px(22)
                         radius: Appearance.fullRadius
-                        color: workspaceMouse.containsMouse
-                            ? workspaceDelegate.selected
-                                ? Appearance.mix(Appearance.secondaryContainer,
-                                    Appearance.secondaryContainerText, 0.12)
-                                : Appearance.layer1Hover
-                            : "transparent"
+                        color: "transparent"
                         border.width: workspaceDelegate.model.isUrgent ? 1 : 0
                         border.color: Appearance.tertiary
-
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: Appearance.fastDuration
-                            }
-                        }
                     }
 
                     Text {
@@ -158,6 +184,8 @@ Item {
                         enabled: workspaceDelegate.onThisOutput
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
+                        onEntered: root.beginHover(workspaceDelegate)
+                        onExited: root.endHover(workspaceDelegate)
                         onClicked: {
                             NiriService.focusWorkspaceById(
                                 workspaceDelegate.model.id);

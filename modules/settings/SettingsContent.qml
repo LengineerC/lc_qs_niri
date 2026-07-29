@@ -173,7 +173,8 @@ Item {
         spacing: Appearance.px(10)
 
         PanelText {
-            Layout.preferredWidth: Appearance.px(118)
+            Layout.preferredWidth: Appearance.px(
+                I18n.language === "en_US" ? 150 : 118)
             text: row.label
             color: Appearance.layer1Text
         }
@@ -198,6 +199,96 @@ Item {
                     + row.suffix
                 color: Appearance.subtext
                 font.pixelSize: Appearance.smallFontSize
+            }
+        }
+    }
+
+    component FormatRow: RowLayout {
+        id: formatRow
+
+        required property string label
+        required property string currentValue
+        required property string hint
+        property string draftValue: currentValue
+        signal accepted(string value)
+
+        Layout.fillWidth: true
+        spacing: Appearance.px(10)
+
+        function commit() {
+            const format = draftValue.trim();
+            if (format) {
+                draftValue = format;
+                accepted(format);
+            } else {
+                draftValue = currentValue;
+            }
+        }
+
+        onCurrentValueChanged: {
+            if (!formatInput.activeFocus)
+                draftValue = currentValue;
+        }
+
+        ColumnLayout {
+            readonly property int targetWidth: Appearance.px(
+                I18n.language === "en_US" ? 260 : 230)
+
+            Layout.preferredWidth: targetWidth
+            Layout.minimumWidth: Appearance.px(180)
+            Layout.maximumWidth: targetWidth
+            spacing: Appearance.px(1)
+
+            PanelText {
+                Layout.fillWidth: true
+                text: formatRow.label
+                color: Appearance.layer0Text
+            }
+
+            PanelText {
+                Layout.fillWidth: true
+                Layout.maximumWidth: parent.width
+                text: formatRow.hint
+                color: Appearance.subtext
+                wrapMode: Text.WordWrap
+                font.pixelSize: Appearance.smallFontSize
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.minimumWidth: Appearance.px(160)
+            Layout.preferredWidth: Appearance.px(240)
+            implicitHeight: Appearance.px(36)
+            radius: Appearance.px(9)
+            color: Appearance.layer1
+            border.width: formatInput.activeFocus ? 1 : 0
+            border.color: Appearance.primary
+
+            Controls.TextField {
+                id: formatInput
+
+                anchors {
+                    fill: parent
+                    leftMargin: Appearance.px(10)
+                    rightMargin: Appearance.px(10)
+                }
+                padding: 0
+                verticalAlignment: TextInput.AlignVCenter
+                color: Appearance.layer0Text
+                selectionColor: Appearance.primaryContainer
+                selectedTextColor: Appearance.primaryContainerText
+                selectByMouse: true
+                persistentSelection: true
+                text: formatRow.draftValue
+                background: null
+                font {
+                    family: Appearance.fontFamily
+                    pixelSize: Appearance.fontSize
+                }
+                onTextEdited: formatRow.draftValue = text
+                onAccepted: formatRow.commit()
+                onEditingFinished: formatRow.commit()
             }
         }
     }
@@ -228,7 +319,7 @@ Item {
 
             PanelText {
                 Layout.fillWidth: true
-                text: "快速设置"
+                text: I18n.tr("quickSettings")
                 color: Appearance.layer0Text
                 font {
                     pixelSize: Appearance.largeFontSize
@@ -303,8 +394,8 @@ Item {
                 spacing: Appearance.px(9)
 
                 SectionTitle {
-                    icon: "󰔎"
-                    title: "外观"
+                    icon: "󰗊"
+                    title: I18n.tr("language")
                 }
 
                 SettingCard {
@@ -314,14 +405,78 @@ Item {
 
                         PanelText {
                             Layout.fillWidth: true
-                            text: "颜色模式"
+                            text: I18n.tr("interfaceLanguage")
                             color: Appearance.layer0Text
                         }
 
                         Repeater {
                             model: [
-                                { label: "󰖔  亮色", mode: "light" },
-                                { label: "󰖙  暗色", mode: "dark" }
+                                { label: "简体中文", language: "zh_CN" },
+                                { label: "English", language: "en_US" }
+                            ]
+
+                            delegate: Rectangle {
+                                required property var modelData
+                                implicitWidth: Appearance.px(94)
+                                implicitHeight: Appearance.px(32)
+                                radius: Appearance.px(9)
+                                color: ShellSettings.language
+                                        === modelData.language
+                                    ? Appearance.primaryContainer
+                                    : languageArea.containsMouse
+                                        ? Appearance.layer1Active
+                                        : Appearance.layer1
+                                border.width: ShellSettings.language
+                                        === modelData.language ? 1 : 0
+                                border.color: Appearance.primary
+
+                                PanelText {
+                                    anchors.centerIn: parent
+                                    text: modelData.label
+                                    color: ShellSettings.language
+                                            === modelData.language
+                                        ? Appearance.primaryContainerText
+                                        : Appearance.layer1Text
+                                    font.pixelSize: Appearance.smallFontSize
+                                }
+
+                                MouseArea {
+                                    id: languageArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        ShellSettings.language =
+                                            parent.modelData.language;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                SectionTitle {
+                    icon: "󰔎"
+                    title: I18n.tr("appearance")
+                }
+
+                SettingCard {
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(8)
+
+                        PanelText {
+                            Layout.fillWidth: true
+                            text: I18n.tr("colorMode")
+                            color: Appearance.layer0Text
+                        }
+
+                        Repeater {
+                            model: [
+                                { label: "󰖔  " + I18n.tr("light"),
+                                    mode: "light" },
+                                { label: "󰖙  " + I18n.tr("dark"),
+                                    mode: "dark" }
                             ]
 
                             delegate: Rectangle {
@@ -365,11 +520,11 @@ Item {
                             spacing: Appearance.px(1)
 
                             PanelText {
-                                text: "显示活动窗口图标"
+                                text: I18n.tr("showActiveWindowIcon")
                                 color: Appearance.layer0Text
                             }
                             PanelText {
-                                text: "App ID 和标题仍会保留"
+                                text: I18n.tr("activeWindowHint")
                                 color: Appearance.subtext
                                 font.pixelSize: Appearance.smallFontSize
                             }
@@ -391,11 +546,11 @@ Item {
                             spacing: Appearance.px(1)
 
                             PanelText {
-                                text: "显示空工作区"
+                                text: I18n.tr("showEmptyWorkspaces")
                                 color: Appearance.layer0Text
                             }
                             PanelText {
-                                text: "当前活动工作区始终保留"
+                                text: I18n.tr("activeWorkspaceHint")
                                 color: Appearance.subtext
                                 font.pixelSize: Appearance.smallFontSize
                             }
@@ -411,13 +566,88 @@ Item {
                 }
 
                 SectionTitle {
+                    icon: "󰅹"
+                    title: I18n.tr("shadow")
+                }
+
+                SettingCard {
+                    RowLayout {
+                        Layout.fillWidth: true
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(1)
+
+                            PanelText {
+                                text: I18n.tr("barPopupShadow")
+                                color: Appearance.layer0Text
+                            }
+                            PanelText {
+                                text: I18n.tr("shadowHint")
+                                color: Appearance.subtext
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        SettingSwitch {
+                            checked: ShellSettings.shadowEnabled
+                            onToggled: checked => {
+                                ShellSettings.shadowEnabled = checked;
+                            }
+                        }
+                    }
+
+                    SliderRow {
+                        enabled: ShellSettings.shadowEnabled
+                        opacity: enabled ? 1 : 0.45
+                        label: I18n.tr("blurRadius")
+                        currentValue: ShellSettings.shadowBlurRadius
+                        from: 0
+                        to: 48
+                        stepSize: 1
+                        decimals: 0
+                        suffix: " px"
+                        onMoved: value => {
+                            ShellSettings.shadowBlurRadius = Math.round(value);
+                        }
+                    }
+
+                    SliderRow {
+                        enabled: ShellSettings.shadowEnabled
+                        opacity: enabled ? 1 : 0.45
+                        label: I18n.tr("opacity")
+                        currentValue: ShellSettings.shadowOpacity
+                        from: 0
+                        to: 0.9
+                        stepSize: 0.05
+                        decimals: 2
+                        onMoved: value => ShellSettings.shadowOpacity = value
+                    }
+
+                    SliderRow {
+                        enabled: ShellSettings.shadowEnabled
+                        opacity: enabled ? 1 : 0.45
+                        label: I18n.tr("verticalOffset")
+                        currentValue: ShellSettings.shadowOffsetY
+                        from: -12
+                        to: 24
+                        stepSize: 1
+                        decimals: 0
+                        suffix: " px"
+                        onMoved: value => {
+                            ShellSettings.shadowOffsetY = Math.round(value);
+                        }
+                    }
+                }
+
+                SectionTitle {
                     icon: "󰔛"
-                    title: "动画"
+                    title: I18n.tr("animation")
                 }
 
                 SettingCard {
                     SliderRow {
-                        label: "动画时长"
+                        label: I18n.tr("animationDuration")
                         currentValue: ShellSettings.animationDuration
                         from: 100
                         to: 1200
@@ -430,7 +660,7 @@ Item {
                     }
 
                     PanelText {
-                        text: "弹窗贝塞尔曲线  cubic-bezier(x₁, y₁, x₂, y₂)"
+                        text: I18n.tr("bezierCurve")
                         color: Appearance.subtext
                         font.pixelSize: Appearance.smallFontSize
                     }
@@ -462,8 +692,33 @@ Item {
                 }
 
                 SectionTitle {
+                    icon: "󰃭"
+                    title: I18n.tr("clock")
+                }
+
+                SettingCard {
+                    FormatRow {
+                        label: I18n.tr("timeFormat")
+                        currentValue: ShellSettings.timeFormat
+                        hint: I18n.tr("timeFormatHint")
+                        onAccepted: value => {
+                            ShellSettings.timeFormat = value;
+                        }
+                    }
+
+                    FormatRow {
+                        label: I18n.tr("dateFormat")
+                        currentValue: ShellSettings.dateFormat
+                        hint: I18n.tr("dateFormatHint")
+                        onAccepted: value => {
+                            ShellSettings.dateFormat = value;
+                        }
+                    }
+                }
+
+                SectionTitle {
                     icon: "󰛖"
-                    title: "Bar 字体与尺寸"
+                    title: I18n.tr("barFontSize")
                 }
 
                 SettingCard {
@@ -472,8 +727,9 @@ Item {
                         spacing: Appearance.px(10)
 
                         PanelText {
-                            Layout.preferredWidth: Appearance.px(118)
-                            text: "字体"
+                            Layout.preferredWidth: Appearance.px(
+                                I18n.language === "en_US" ? 150 : 118)
+                            text: I18n.tr("font")
                         }
 
                         Rectangle {
@@ -511,7 +767,7 @@ Item {
                     }
 
                     SliderRow {
-                        label: "字号"
+                        label: I18n.tr("fontSize")
                         currentValue: ShellSettings.barFontSize
                         from: 9
                         to: 24
@@ -524,7 +780,7 @@ Item {
                     }
 
                     SliderRow {
-                        label: "整体缩放"
+                        label: I18n.tr("overallScale")
                         currentValue: ShellSettings.scale
                         from: 0.75
                         to: 1.5
@@ -549,7 +805,7 @@ Item {
                     PanelText {
                         id: resetText
                         anchors.centerIn: parent
-                        text: "󰑓  恢复默认"
+                        text: "󰑓  " + I18n.tr("restoreDefaults")
                         color: Appearance.layer1Text
                         font.pixelSize: Appearance.smallFontSize
                     }

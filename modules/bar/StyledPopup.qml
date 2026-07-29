@@ -12,15 +12,17 @@ Item {
     readonly property Item popupMaskItem: root
     readonly property int moveDuration: ShellSettings.animationDuration
     readonly property var moveCurve: ShellSettings.popupBezierCurve
-    readonly property real targetCenter: {
+    readonly property real targetX: {
         const screenWidth = parent?.width ?? popupWidth;
-        const rawCenter = anchorItem
+        const center = anchorItem
             ? anchorItem.mapToItem(parent, anchorItem.width / 2, 0).x
             : screenWidth / 2;
-        const halfWidth = popupWidth / 2;
-        return Math.max(Appearance.elevationMargin + halfWidth,
-            Math.min(screenWidth - Appearance.elevationMargin - halfWidth,
-                rawCenter));
+        const rawX = center - popupWidth / 2;
+        const remaining = screenWidth - Math.floor(rawX + popupWidth);
+
+        if (remaining < 0)
+            return rawX + remaining;
+        return Math.max(rawX, 0);
     }
 
     property Item anchorItem: null
@@ -34,10 +36,19 @@ Item {
     property var popupRows: []
     property int popupBaseWidth: 340
     readonly property int popupWidth: Appearance.px(popupBaseWidth)
-    readonly property int popupHeight: popupLayout.implicitHeight
-        + Appearance.px(36)
+    readonly property int popupHeight: {
+        if (page === "system") {
+            return Math.min(Appearance.px(680),
+                Math.max(Appearance.px(420),
+                    (parent?.height ?? Appearance.px(760))
+                        - Appearance.barHeight - Appearance.px(8)));
+        }
+        if (page === "battery")
+            return batteryPanel.implicitHeight + 16;
+        return popupLayout.implicitHeight + Appearance.px(36);
+    }
 
-    x: targetCenter - popupWidth / 2
+    x: targetX
     y: Appearance.barHeight
     width: popupWidth
     height: popupContent.height * (1 - offsetScale)
@@ -49,63 +60,89 @@ Item {
         switch (pageName) {
         case "launcher":
             popupIcon = "󰣇";
-            popupTitle = "Quick shell";
+            popupTitle = I18n.tr("quickShell");
             popupBaseWidth = 310;
             popupRows = [
-                { icon: "󰍹", label: "Desktop", value: "Workspace 1" },
-                { icon: "󰌾", label: "Session", value: "Active" },
-                { icon: "󰐥", label: "Power menu", value: "Unavailable" }
+                { icon: "󰍹", label: I18n.tr("desktop"),
+                    value: I18n.tr("workspaceOne") },
+                { icon: "󰌾", label: I18n.tr("session"),
+                    value: I18n.tr("active") },
+                { icon: "󰐥", label: I18n.tr("powerMenu"),
+                    value: I18n.tr("unavailable") }
             ];
             break;
         case "resources":
             popupIcon = "󰍛";
-            popupTitle = "System resources";
+            popupTitle = I18n.tr("systemResources");
             popupBaseWidth = 410;
             popupRows = [
-                { icon: "󰍛", label: "RAM used", value: "42%" },
-                { icon: "󰓡", label: "Swap used", value: "0%" },
-                { icon: "󰻠", label: "CPU load", value: "18%" }
+                { icon: "󰍛", label: I18n.tr("ramUsed"), value: "42%" },
+                { icon: "󰓡", label: I18n.tr("swapUsed"), value: "0%" },
+                { icon: "󰻠", label: I18n.tr("cpuLoad"), value: "18%" }
             ];
             break;
         case "workspaces":
             popupIcon = "󰕮";
-            popupTitle = "Workspaces";
+            popupTitle = I18n.tr("workspaces");
             popupBaseWidth = 330;
             popupRows = [
-                { icon: "󰮯", label: "Current workspace", value: "1" },
-                { icon: "󰁍", label: "Scroll on the bar", value: "Switch" }
+                { icon: "󰮯", label: I18n.tr("currentWorkspace"),
+                    value: "1" },
+                { icon: "󰁍", label: I18n.tr("scrollOnBar"),
+                    value: I18n.tr("switchAction") }
             ];
             break;
         case "clock":
             popupIcon = "󰃭";
-            popupTitle = Qt.locale().toString(new Date(), "dddd, MMMM dd");
+            popupTitle = I18n.locale.toString(
+                new Date(), "dddd, MMMM dd");
             popupBaseWidth = 380;
             popupRows = [
-                { icon: "󰔛", label: "System uptime", value: "--" },
-                { icon: "󰄬", label: "To do", value: "No pending tasks" },
-                { icon: "󰥔", label: "Time zone", value: "Local" }
+                { icon: "󰔛", label: I18n.tr("systemUptime"), value: "--" },
+                { icon: "󰄬", label: I18n.tr("todo"),
+                    value: I18n.tr("noPendingTasks") },
+                { icon: "󰥔", label: I18n.tr("timeZone"),
+                    value: I18n.tr("local") }
             ];
             break;
         case "status":
             popupIcon = "󰒓";
-            popupTitle = "System status";
+            popupTitle = I18n.tr("systemStatus");
             popupBaseWidth = 370;
             popupRows = [
-                { icon: "󰤨", label: "Network", value: "Connected" },
-                { icon: "󰂯", label: "Bluetooth", value: "On" },
-                { icon: "󰂚", label: "Notifications", value: "No unread" },
-                { icon: "󰁹", label: "Battery", value: "100%" },
-                { icon: "󰏘", label: "Wallpaper palette",
-                    value: Theme.generating ? "Generating…" : Theme.scheme.replace("scheme-", "") }
+                { icon: "󰤨", label: I18n.tr("network"),
+                    value: I18n.tr("connected") },
+                { icon: "󰂯", label: I18n.tr("bluetooth"),
+                    value: I18n.tr("on") },
+                { icon: "󰂚", label: I18n.tr("notifications"),
+                    value: I18n.tr("noUnread") },
+                { icon: "󰁹", label: I18n.tr("battery"), value: "100%" },
+                { icon: "󰏘", label: I18n.tr("wallpaperPalette"),
+                    value: Theme.generating ? I18n.tr("generating")
+                        : Theme.scheme.replace("scheme-", "") }
             ];
+            break;
+        case "system":
+            popupIcon = "󰒓";
+            popupTitle = I18n.tr("networkDevices");
+            popupBaseWidth = 650;
+            popupRows = [];
+            break;
+        case "battery":
+            popupIcon = BatteryService.batteryIcon();
+            popupTitle = I18n.tr("battery");
+            popupBaseWidth = 420;
+            popupRows = [];
             break;
         default:
             popupIcon = "󰝚";
-            popupTitle = "Media";
+            popupTitle = I18n.tr("media");
             popupBaseWidth = 370;
             popupRows = [
-                { icon: "󰝚", label: "No media playing", value: "" },
-                { icon: "󰐊", label: "Player controls", value: "Unavailable" }
+                { icon: "󰝚", label: I18n.tr("noMediaPlaying"),
+                    value: "" },
+                { icon: "󰐊", label: I18n.tr("playerControls"),
+                    value: I18n.tr("unavailable") }
             ];
         }
     }
@@ -123,6 +160,15 @@ Item {
 
     function close() {
         shown = false;
+    }
+
+    Connections {
+        target: I18n
+
+        function onLanguageChanged() {
+            if (root.page)
+                root.configure(root.page);
+        }
     }
 
     Behavior on offsetScale {
@@ -191,6 +237,7 @@ Item {
         ColumnLayout {
             id: popupLayout
 
+            visible: root.page !== "system" && root.page !== "battery"
             x: Appearance.px(21)
             y: Appearance.px(18)
             width: parent.width - Appearance.px(42)
@@ -299,6 +346,26 @@ Item {
                 }
             }
 
+        }
+
+        SystemPanel {
+            visible: root.page === "system"
+            anchors {
+                fill: innerSurface
+                margins: 1
+            }
+            onCloseRequested: root.close()
+        }
+
+        BatteryPanel {
+            id: batteryPanel
+
+            visible: root.page === "battery"
+            anchors {
+                fill: innerSurface
+                margins: 1
+            }
+            onCloseRequested: root.close()
         }
 
     }

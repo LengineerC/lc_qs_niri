@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import "file:///home/lengineerc/Applications/qs/test/Caelestia/Blobs" as Blobs
@@ -13,6 +14,7 @@ Item {
     readonly property Item popupMask: popup.popupMaskItem
     readonly property bool popupShown: popup.shown
     readonly property bool hostWindowActive: Window.active
+    readonly property int edgeMargin: Appearance.cornerSize
 
     readonly property real compactLevel: width <= Appearance.px(1000) ? 2
         : width <= Appearance.px(1200) ? 1 : 0
@@ -20,8 +22,6 @@ Item {
         ? Appearance.px(190) : compactLevel === 1
             ? Appearance.px(280) : Appearance.px(360)
     property string outputName: ""
-    property string currentTime: Qt.locale().toString(new Date(), "hh:mm")
-    property string currentDate: Qt.locale().toString(new Date(), "MMM dd")
 
     function closePopup() {
         popup.close();
@@ -45,53 +45,66 @@ Item {
         }
     }
 
-    Timer {
-        interval: 1000
-        running: true
-        repeat: true
-        onTriggered: {
-            const now = new Date();
-            root.currentTime = Qt.locale().toString(now, "hh:mm");
-            root.currentDate = Qt.locale().toString(now, "MMM dd");
-        }
-    }
-
-    Blobs.BlobGroup {
-        id: barBlobGroup
-
-        color: Appearance.barBgColor
-        smoothing: Appearance.px(20)
-    }
-
-    Blobs.BlobRect {
-        id: barBackground
+    Item {
+        id: shadowSurface
 
         z: -2
-        anchors.fill: parent
-        group: barBlobGroup
-        radius: 0
-        deformScale: 0
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: popup.close()
+        width: root.width
+        height: Math.max(Appearance.barHeight,
+            popup.y + popup.height)
+            + Math.ceil((ShellSettings.shadowBlurRadius
+                + Math.abs(ShellSettings.shadowOffsetY) + 4)
+                * Appearance.scale)
+        layer.enabled: ShellSettings.shadowEnabled
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowBlur: 1
+            blurMax: Math.max(1, Math.round(
+                ShellSettings.shadowBlurRadius * Appearance.scale))
+            shadowColor: Appearance.withAlpha(
+                Theme.palette.m3shadow, ShellSettings.shadowOpacity)
+            shadowVerticalOffset: Math.round(
+                ShellSettings.shadowOffsetY * Appearance.scale)
         }
-    }
 
-    Blobs.BlobRect {
-        id: popupBackground
+        Blobs.BlobGroup {
+            id: barBlobGroup
 
-        readonly property real extraHeight: 0.2
+            color: Appearance.barBgColor
+            smoothing: Appearance.px(20)
+        }
 
-        z: -2
-        visible: height > 0
-        group: barBlobGroup
-        x: popup.x
-        y: Appearance.barHeight - popup.height * extraHeight
-        width: popup.width
-        height: popup.height * (1 + extraHeight)
-        radius: Appearance.normalRadius
-        deformScale: 0.000015
+        Blobs.BlobRect {
+            id: barBackground
+
+            x: 0
+            y: 0
+            width: parent.width
+            height: Appearance.barHeight
+            group: barBlobGroup
+            radius: 0
+            deformScale: 0
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: popup.close()
+            }
+        }
+
+        Blobs.BlobRect {
+            id: popupBackground
+
+            readonly property real extraHeight: 0.2
+
+            visible: height > 0
+            group: barBlobGroup
+            x: popup.x
+            y: Appearance.barHeight - popup.height * extraHeight
+            width: popup.width
+            height: popup.height * (1 + extraHeight)
+            radius: Appearance.normalRadius
+            deformScale: 0.000015
+        }
     }
 
     Item {
@@ -105,7 +118,7 @@ Item {
 
         MouseArea {
             id: launcherControl
-            x: Appearance.cornerSize
+            x: root.edgeMargin
             width: Appearance.px(30)
             height: parent.height
             hoverEnabled: true
@@ -187,7 +200,8 @@ Item {
 
                 Text {
                     width: parent.width
-                    text: NiriService.focusedWindow?.appId ?? "Desktop"
+                    text: NiriService.focusedWindow?.appId
+                        ?? I18n.tr("desktop")
                     color: Appearance.subtext
                     elide: Text.ElideRight
                     font {
@@ -198,7 +212,8 @@ Item {
 
                 Text {
                     width: parent.width
-                    text: NiriService.focusedWindow?.title ?? "No focused window"
+                    text: NiriService.focusedWindow?.title
+                        ?? I18n.tr("noFocusedWindow")
                     color: Appearance.layer0Text
                     elide: Text.ElideRight
                     font {
@@ -219,64 +234,6 @@ Item {
         }
         spacing: Appearance.px(4)
 
-        Item {
-            width: root.sideGroupWidth
-            height: parent.height
-
-            BarGroup {
-                id: resourcesGroup
-                anchors {
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                }
-                onClicked: popup.showFor(resourcesGroup, "resources")
-
-                BarIcon {
-                    text: "󰍛"
-                }
-
-                BarText {
-                    text: "42"
-                }
-
-                BarIcon {
-                    visible: root.compactLevel < 2
-                    text: "󰻠"
-                    Layout.leftMargin: Appearance.px(5)
-                }
-
-                BarText {
-                    visible: root.compactLevel < 2
-                    text: "18"
-                }
-
-                Rectangle {
-                    visible: root.compactLevel === 0
-                    Layout.leftMargin: Appearance.px(5)
-                    implicitWidth: Appearance.px(20)
-                    implicitHeight: Appearance.px(20)
-                    radius: Appearance.fullRadius
-                    color: Appearance.secondaryContainer
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "󰝚"
-                        color: Appearance.secondaryContainerText
-                        font {
-                            family: Appearance.iconFontFamily
-                            pixelSize: Appearance.fontSize
-                        }
-                    }
-                }
-
-                BarText {
-                    visible: root.compactLevel === 0
-                    text: "No media"
-                    elide: Text.ElideRight
-                }
-            }
-        }
-
         WorkspaceSwitcher {
             anchors.verticalCenter: parent.verticalCenter
             outputName: root.outputName
@@ -286,61 +243,15 @@ Item {
             width: root.sideGroupWidth
             height: parent.height
 
-            BarGroup {
-                id: clockGroup
+            TimeModule {
+                id: timeModule
+
+                showDate: root.compactLevel < 2
                 anchors {
                     left: parent.left
                     verticalCenter: parent.verticalCenter
                 }
-                onClicked: popup.showFor(clockGroup, "clock")
-
-                BarText {
-                    text: root.currentTime
-                    font.pixelSize: Appearance.largeFontSize
-                }
-
-                BarText {
-                    visible: root.compactLevel < 2
-                    text: "•"
-                    color: Appearance.subtext
-                }
-
-                BarText {
-                    visible: root.compactLevel < 2
-                    text: root.currentDate
-                }
-
-                Rectangle {
-                    visible: root.compactLevel < 2
-                    Layout.leftMargin: Appearance.px(8)
-                    implicitWidth: Appearance.px(45)
-                    implicitHeight: Appearance.px(20)
-                    radius: Appearance.px(5)
-                    color: Appearance.secondaryContainer
-
-                    Row {
-                        anchors.centerIn: parent
-                        spacing: Appearance.px(2)
-
-                        Text {
-                            text: "󰁹"
-                            color: Appearance.secondaryContainerText
-                            font {
-                                family: Appearance.iconFontFamily
-                                pixelSize: Appearance.fontSize - Appearance.px(1)
-                            }
-                        }
-
-                        Text {
-                            text: "100"
-                            color: Appearance.secondaryContainerText
-                            font {
-                                family: Appearance.fontFamily
-                                pixelSize: Appearance.smallFontSize
-                            }
-                        }
-                    }
-                }
+                onActivated: popup.showFor(timeModule, "clock")
             }
         }
     }
@@ -354,96 +265,36 @@ Item {
             right: parent.right
         }
 
-        MouseArea {
-            id: statusControl
-            width: statusPill.width + (root.compactLevel === 0
-                ? auxiliaryStatusRow.width + Appearance.px(14) : 0)
-            height: parent.height
-            hoverEnabled: true
-            onClicked: popup.showFor(statusControl, "status")
+        BatteryModule {
+            id: batteryModule
+
+            anchors {
+                right: systemModule.left
+                rightMargin: Appearance.px(4)
+                verticalCenter: parent.verticalCenter
+            }
+            onActivated: popup.showFor(batteryModule, "battery")
+        }
+
+        SystemModule {
+            id: systemModule
+
+            compact: root.compactLevel > 0
             anchors {
                 right: parent.right
-                rightMargin: Appearance.px(4)
+                rightMargin: root.edgeMargin
             }
-
-            Rectangle {
-                id: statusPill
-                implicitWidth: statusRow.implicitWidth + Appearance.px(20)
-                implicitHeight: Appearance.px(30)
-                anchors {
-                    right: parent.right
-                    verticalCenter: parent.verticalCenter
-                }
-                radius: Appearance.fullRadius
-                color: statusControl.containsMouse
-                    || popup.shown && popup.anchorItem === statusControl
-                    ? Appearance.layer1Hover : "transparent"
-                scale: statusControl.pressed ? 0.94 : 1
-
-                RowLayout {
-                    id: statusRow
-                    anchors.centerIn: parent
-                    spacing: Appearance.px(14)
-
-                    BarIcon {
-                        text: "󰌾"
-                        color: Appearance.layer0Text
-                    }
-
-                    BarIcon {
-                        text: "󰤨"
-                        color: Appearance.layer0Text
-                    }
-
-                    BarIcon {
-                        visible: root.compactLevel < 2
-                        text: "󰂯"
-                        color: Appearance.layer0Text
-                    }
-                }
-
-                Behavior on color {
-                    ColorAnimation {
-                        duration: Appearance.fastDuration
-                    }
-                }
-
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: Appearance.fastDuration
-                        easing.type: Easing.OutCubic
-                    }
-                }
-            }
-
-            Row {
-                id: auxiliaryStatusRow
-                visible: root.compactLevel === 0
-                anchors {
-                    right: statusPill.left
-                    rightMargin: Appearance.px(14)
-                    verticalCenter: parent.verticalCenter
-                }
-                spacing: Appearance.px(13)
-
-                BarIcon {
-                    text: "󰂚"
-                    color: Appearance.subtext
-                }
-
-                BarIcon {
-                    text: "󰖐"
-                    color: Appearance.subtext
-                }
-            }
+            
+            onActivated: popup.showFor(systemModule, "system")
         }
 
         MouseArea {
             id: settingsControl
 
             anchors {
-                right: statusControl.left
-                rightMargin: Appearance.cornerSize
+                right: batteryModule.left
+                rightMargin: Appearance.px(4)
+                verticalCenter: parent.verticalCenter
             }
             width: Appearance.px(30)
             height: parent.height
