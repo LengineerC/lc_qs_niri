@@ -51,6 +51,12 @@ Item {
             return Math.min(Appearance.px(600),
                 Math.max(Appearance.px(390), availableHeight));
         }
+        if (page === "resources") {
+            return Math.min(Appearance.px(760),
+                Math.max(Appearance.px(520),
+                    (parent?.height ?? Appearance.px(800))
+                        - Appearance.barHeight - Appearance.px(8)));
+        }
         if (page === "system") {
             return Math.min(Appearance.px(680),
                 Math.max(Appearance.px(420),
@@ -106,13 +112,9 @@ Item {
             break;
         case "resources":
             popupIcon = "󰍛";
-            popupTitle = I18n.tr("systemResources");
-            popupBaseWidth = 410;
-            popupRows = [
-                { icon: "󰍛", label: I18n.tr("ramUsed"), value: "42%" },
-                { icon: "󰓡", label: I18n.tr("swapUsed"), value: "0%" },
-                { icon: "󰻠", label: I18n.tr("cpuLoad"), value: "18%" }
-            ];
+            popupTitle = I18n.tr("systemMonitor");
+            popupBaseWidth = 820;
+            popupRows = [];
             break;
         case "workspaces":
             popupIcon = "󰕮";
@@ -156,8 +158,8 @@ Item {
             popupRows = [];
             break;
         case "battery":
-            popupIcon = BatteryService.batteryIcon();
-            popupTitle = I18n.tr("battery");
+            popupIcon = BatteryService.powerIcon();
+            popupTitle = BatteryService.panelTitle;
             popupBaseWidth = 420;
             popupRows = [];
             break;
@@ -282,6 +284,7 @@ Item {
                 && root.page !== "calendar" && root.page !== "clipboard"
                 && root.page !== "notifications"
                 && root.page !== "media" && root.page !== "launcher"
+                && root.page !== "resources"
             x: Appearance.px(21)
             y: Appearance.px(18)
             width: parent.width - Appearance.px(42)
@@ -376,6 +379,16 @@ Item {
 
         LauncherPanel {
             visible: root.page === "launcher"
+            active: visible && root.shown
+            anchors {
+                fill: innerSurface
+                margins: 1
+            }
+            onCloseRequested: root.close()
+        }
+
+        ResourcePanel {
+            visible: root.page === "resources"
             active: visible && root.shown
             anchors {
                 fill: innerSurface

@@ -203,9 +203,12 @@ Item {
             }
 
             Column {
-                width: Math.max(0, focusedWindowInfo.width
+                width: Math.min(
+                    400,
+                    Math.max(0, focusedWindowInfo.width
                     - (focusedWindowIcon.visible
                         ? focusedWindowIcon.width + focusedWindowInfo.spacing : 0))
+                )
                 anchors {
                     verticalCenter: parent.verticalCenter
                 }
@@ -290,6 +293,18 @@ Item {
             onActivated: popup.showFor(batteryModule, "battery")
         }
 
+        PerformanceModule {
+            id: performanceModule
+
+            anchors {
+                right: batteryModule.left
+                rightMargin: Appearance.px(4)
+                verticalCenter: parent.verticalCenter
+            }
+            onActivated:
+                popup.showFor(performanceModule, "resources")
+        }
+
         SystemModule {
             id: systemModule
 
@@ -329,7 +344,7 @@ Item {
             id: settingsControl
 
             anchors {
-                right: batteryModule.left
+                right: performanceModule.left
                 rightMargin: Appearance.px(4)
                 verticalCenter: parent.verticalCenter
             }

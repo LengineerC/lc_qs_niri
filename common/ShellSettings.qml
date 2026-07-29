@@ -32,6 +32,9 @@ Singleton {
     property string wallpaperDirectory: ""
     property bool wallpaperAutoTheme: true
     property string wallpaperFillMode: "PreserveAspectCrop"
+    property bool showCpuUsage: true
+    property bool showMemoryUsage: true
+    property bool showCpuTemperature: false
 
     property bool ready: false
     property bool storageReady: false
@@ -65,7 +68,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 9,
+            version: 10,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             shadowEnabled: shadowEnabled,
@@ -88,7 +91,10 @@ Singleton {
             doNotDisturb: doNotDisturb,
             wallpaperDirectory: wallpaperDirectory,
             wallpaperAutoTheme: wallpaperAutoTheme,
-            wallpaperFillMode: wallpaperFillMode
+            wallpaperFillMode: wallpaperFillMode,
+            showCpuUsage: showCpuUsage,
+            showMemoryUsage: showMemoryUsage,
+            showCpuTemperature: showCpuTemperature
         }, null, 2));
     }
 
@@ -189,6 +195,18 @@ Singleton {
                 wallpaperFillMode = state.wallpaperFillMode;
             else
                 needsMigration = true;
+            if (typeof state.showCpuUsage === "boolean")
+                showCpuUsage = state.showCpuUsage;
+            else
+                needsMigration = true;
+            if (typeof state.showMemoryUsage === "boolean")
+                showMemoryUsage = state.showMemoryUsage;
+            else
+                needsMigration = true;
+            if (typeof state.showCpuTemperature === "boolean")
+                showCpuTemperature = state.showCpuTemperature;
+            else
+                needsMigration = true;
         } catch (error) {
             console.warn("ShellSettings: cannot parse settings:", error);
         }
@@ -222,6 +240,9 @@ Singleton {
         wallpaperDirectory = "";
         wallpaperAutoTheme = true;
         wallpaperFillMode = "PreserveAspectCrop";
+        showCpuUsage = true;
+        showMemoryUsage = true;
+        showCpuTemperature = false;
         save();
     }
 
@@ -252,6 +273,9 @@ Singleton {
     onWallpaperDirectoryChanged: scheduleSave()
     onWallpaperAutoThemeChanged: scheduleSave()
     onWallpaperFillModeChanged: scheduleSave()
+    onShowCpuUsageChanged: scheduleSave()
+    onShowMemoryUsageChanged: scheduleSave()
+    onShowCpuTemperatureChanged: scheduleSave()
 
     Component.onCompleted: directoryProcess.running = true
 
@@ -346,7 +370,10 @@ Singleton {
                 doNotDisturb: root.doNotDisturb,
                 wallpaperDirectory: root.wallpaperDirectory,
                 wallpaperAutoTheme: root.wallpaperAutoTheme,
-                wallpaperFillMode: root.wallpaperFillMode
+                wallpaperFillMode: root.wallpaperFillMode,
+                showCpuUsage: root.showCpuUsage,
+                showMemoryUsage: root.showMemoryUsage,
+                showCpuTemperature: root.showCpuTemperature
             });
         }
     }

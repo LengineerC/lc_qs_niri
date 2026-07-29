@@ -42,10 +42,10 @@ MouseArea {
         spacing: Appearance.px(5)
 
         Text {
-            text: BatteryService.batteryIcon()
+            text: BatteryService.powerIcon()
             color: BatteryService.low
                 ? Theme.palette.m3error
-                : BatteryService.charging
+                : BatteryService.pluggedIn
                     ? Appearance.primary : Appearance.layer0Text
             font {
                 family: Appearance.iconFontFamily
@@ -54,12 +54,33 @@ MouseArea {
         }
 
         Text {
+            visible: BatteryService.hasBattery
             text: BatteryService.percent + "%"
             color: BatteryService.low
                 ? Theme.palette.m3error : Appearance.layer0Text
             font {
                 family: Appearance.fontFamily
-                pixelSize: Appearance.smallFontSize
+                pixelSize: Appearance.smallFontSize + 1
+            }
+        }
+
+        Rectangle {
+            visible: BatteryService.showPowerStatus
+            implicitWidth: powerStatus.implicitWidth + Appearance.px(12)
+            implicitHeight: Appearance.px(22)
+            radius: Appearance.fullRadius
+            color: Appearance.primaryContainer
+
+            Text {
+                id: powerStatus
+
+                anchors.centerIn: parent
+                text: BatteryService.barStatusText
+                color: Appearance.primaryContainerText
+                font {
+                    family: Appearance.fontFamily
+                    pixelSize: Appearance.smallFontSize
+                }
             }
         }
     }

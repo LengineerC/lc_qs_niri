@@ -17,6 +17,7 @@ ShellRoot {
         NotificationService.load();
         WallpaperService.load();
         SystemService.load();
+        ResourceService.load();
         Theme.load();
     }
 

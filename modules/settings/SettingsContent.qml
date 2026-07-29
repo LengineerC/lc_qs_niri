@@ -435,6 +435,70 @@ Item {
                 }
 
                 SectionTitle {
+                    icon: "󰍛"
+                    title: I18n.tr("performanceMonitor")
+                }
+
+                SettingCard {
+                    PanelText {
+                        Layout.fillWidth: true
+                        text: I18n.tr("performanceMonitorHint")
+                        color: Appearance.subtext
+                        wrapMode: Text.WordWrap
+                        font.pixelSize: Appearance.smallFontSize
+                    }
+
+                    Repeater {
+                        model: [
+                            {
+                                key: "cpu",
+                                label: I18n.tr("cpuUsage"),
+                                checked: ShellSettings.showCpuUsage
+                            },
+                            {
+                                key: "memory",
+                                label: I18n.tr("memoryUsage"),
+                                checked: ShellSettings.showMemoryUsage
+                            },
+                            {
+                                key: "temperature",
+                                label: I18n.tr("cpuTemperature"),
+                                checked: ShellSettings.showCpuTemperature
+                            }
+                        ]
+
+                        delegate: RowLayout {
+                            required property var modelData
+                            Layout.fillWidth: true
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                text: parent.modelData.label
+                                color: Appearance.layer0Text
+                            }
+
+                            SettingSwitch {
+                                checked: parent.modelData.checked
+                                onToggled: checked => {
+                                    switch (parent.modelData.key) {
+                                    case "cpu":
+                                        ShellSettings.showCpuUsage = checked;
+                                        break;
+                                    case "memory":
+                                        ShellSettings.showMemoryUsage = checked;
+                                        break;
+                                    case "temperature":
+                                        ShellSettings.showCpuTemperature =
+                                            checked;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                SectionTitle {
                     icon: "󰔎"
                     title: I18n.tr("appearance")
                 }

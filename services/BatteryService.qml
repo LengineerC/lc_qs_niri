@@ -11,25 +11,50 @@ Singleton {
 
     readonly property UPowerDevice displayDevice: UPower.displayDevice
     readonly property var laptopBatteries:
-        UPower.devices.values.filter(device => device.isLaptopBattery)
+        UPower.devices.values.filter(device =>
+            device.isLaptopBattery && device.isPresent)
+    readonly property var linePowerDevices:
+        UPower.devices.values.filter(device =>
+            device.type === UPowerDeviceType.LinePower)
     readonly property UPowerDevice physicalBattery:
         laptopBatteries.find(device => device.ready) ?? displayDevice
 
-    readonly property bool available:
+    readonly property bool serviceReady:
+        (displayDevice?.ready ?? false)
+            || UPower.devices.values.some(device => device.ready)
+    readonly property bool hasBattery:
         laptopBatteries.length > 0
-            || (displayDevice?.isLaptopBattery ?? false)
+            || ((displayDevice?.isLaptopBattery ?? false)
+                && (displayDevice?.isPresent ?? false))
+    readonly property bool hasLinePower:
+        linePowerDevices.length > 0
+    readonly property bool available:
+        hasBattery || (serviceReady && pluggedIn)
     readonly property real percentage:
-        Math.max(0, Math.min(1, displayDevice?.percentage ?? 0))
+        hasBattery
+            ? Math.max(0, Math.min(1,
+                displayDevice?.percentage ?? 0)) : 0
     readonly property int percent: Math.round(percentage * 100)
     readonly property int state:
-        displayDevice?.state ?? UPowerDeviceState.Unknown
+        hasBattery
+            ? displayDevice?.state ?? UPowerDeviceState.Unknown
+            : UPowerDeviceState.Unknown
     readonly property bool charging:
-        state === UPowerDeviceState.Charging
+        hasBattery && (state === UPowerDeviceState.Charging
             || state === UPowerDeviceState.PendingCharge
+        )
     readonly property bool fullyCharged:
-        state === UPowerDeviceState.FullyCharged
+        hasBattery && state === UPowerDeviceState.FullyCharged
     readonly property bool pluggedIn: !UPower.onBattery
-    readonly property bool low: available && percent <= 20 && !pluggedIn
+    readonly property bool low:
+        hasBattery && percent <= 20 && !pluggedIn
+    readonly property bool showPowerStatus:
+        !hasBattery || charging || fullyCharged
+            || state === UPowerDeviceState.PendingCharge
+    readonly property string barStatusText:
+        hasBattery ? statusText : I18n.tr("externalPower")
+    readonly property string panelTitle:
+        hasBattery ? I18n.tr("battery") : I18n.tr("power")
 
     readonly property real capacityWh:
         displayDevice?.energyCapacity
@@ -57,6 +82,11 @@ Singleton {
         PowerProfiles.degradationReason
 
     readonly property string statusText: {
+        if (!hasBattery) {
+            return pluggedIn
+                ? I18n.tr("connectedToPower")
+                : I18n.tr("noBatteryDetected");
+        }
         switch (state) {
         case UPowerDeviceState.Charging:
             return I18n.tr("charging");
@@ -166,5 +196,9 @@ Singleton {
         if (level >= 5)
             return "󰁺";
         return "󰂎";
+    }
+
+    function powerIcon(value = percent) {
+        return hasBattery ? batteryIcon(value) : "󰚥";
     }
 }

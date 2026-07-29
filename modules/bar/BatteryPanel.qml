@@ -97,7 +97,7 @@ Item {
             spacing: Appearance.px(8)
 
             Text {
-                text: BatteryService.batteryIcon()
+                text: BatteryService.powerIcon()
                 color: BatteryService.low
                     ? Theme.palette.m3error : Appearance.primary
                 font {
@@ -108,7 +108,7 @@ Item {
 
             PanelText {
                 Layout.fillWidth: true
-                text: I18n.tr("battery")
+                text: BatteryService.panelTitle
                 color: Appearance.layer0Text
                 font {
                     pixelSize: Appearance.largeFontSize
@@ -137,7 +137,7 @@ Item {
                 spacing: Appearance.px(14)
 
                 Text {
-                    text: BatteryService.batteryIcon()
+                    text: BatteryService.powerIcon()
                     color: BatteryService.low
                         ? Theme.palette.m3error : Appearance.primary
                     font {
@@ -151,7 +151,9 @@ Item {
                     spacing: 0
 
                     PanelText {
-                        text: BatteryService.percent + "%"
+                        text: BatteryService.hasBattery
+                            ? BatteryService.percent + "%"
+                            : I18n.tr("externalPower")
                         color: BatteryService.low
                             ? Theme.palette.m3error : Appearance.layer0Text
                         font {
@@ -171,6 +173,13 @@ Item {
                         color: Appearance.subtext
                         font.pixelSize: Appearance.smallFontSize
                     }
+
+                    PanelText {
+                        visible: !BatteryService.hasBattery
+                        text: I18n.tr("noBatteryDetected")
+                        color: Appearance.subtext
+                        font.pixelSize: Appearance.smallFontSize
+                    }
                 }
 
                 PanelText {
@@ -182,6 +191,7 @@ Item {
         }
 
         RowLayout {
+            visible: BatteryService.hasBattery
             Layout.fillWidth: true
             spacing: Appearance.px(9)
 
