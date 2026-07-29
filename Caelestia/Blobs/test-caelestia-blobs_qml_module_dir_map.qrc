@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/">
+    <file alias="/qt/qml/Caelestia/Blobs">/home/lengineerc/Applications/qs/test/Caelestia/Blobs</file>
+
+  </qresource>
+</RCC>

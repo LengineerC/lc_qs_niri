@@ -1,0 +1,5 @@
+[config]
+
+# Intentionally no application templates. Quickshell consumes matugen's JSON
+# output directly, so generating a shell palette never rewrites other apps.
+[templates]

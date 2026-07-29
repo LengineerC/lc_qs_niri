@@ -1,0 +1,8 @@
+module Caelestia.Blobs
+linktarget test-caelestia-blobsplugin
+optional plugin test-caelestia-blobsplugin
+classname Caelestia_BlobsPlugin
+typeinfo test-caelestia-blobs.qmltypes
+prefer :/qt/qml/Caelestia/Blobs/
+depends QtQuick
+
