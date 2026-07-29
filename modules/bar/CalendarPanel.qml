@@ -138,10 +138,8 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
+            Layout.minimumWidth: 0
             spacing: Appearance.px(8)
-            // anchors {
-            //     horizontalCenter: parent.horizontalCenter
-            // }
 
             Text {
                 text: "󰃭"
@@ -154,11 +152,14 @@ Item {
 
             ColumnLayout {
                 Layout.fillWidth: true
+                Layout.minimumWidth: 0
                 spacing: 0
 
                 PanelText {
+                    Layout.fillWidth: true
                     text: I18n.tr("calendar")
                     color: Appearance.layer0Text
+                    elide: Text.ElideRight
                     font {
                         pixelSize: Appearance.largeFontSize
                         weight: Font.DemiBold
@@ -166,17 +167,20 @@ Item {
                 }
 
                 PanelText {
+                    Layout.fillWidth: true
                     text: I18n.locale.toString(
                         root.currentDate, "dddd, MMMM dd")
                     color: Appearance.subtext
+                    elide: Text.ElideRight
                     font.pixelSize: Appearance.smallFontSize
                 }
             }
 
-            // RoundButton {
-            //     icon: "󰅖"
-            //     onClicked: root.closeRequested()
-            // }
+            RoundButton {
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                icon: "󰅖"
+                onClicked: root.closeRequested()
+            }
         }
 
         Rectangle {

@@ -6,16 +6,20 @@ import QtQuick.Layouts
 import Quickshell
 import "file:///home/lengineerc/Applications/qs/test/Caelestia/Blobs" as Blobs
 import qs.common
+import qs.services
 
 Item {
     id: root
 
     implicitHeight: Appearance.barHeight
+    readonly property Item barMask: barInputRegion
     readonly property Item popupMask: popup.popupMaskItem
     readonly property bool popupShown: popup.shown
+    readonly property bool popupContainsMouse: popup.pointerInside
     readonly property bool hostWindowActive: Window.active
     readonly property int edgeMargin: Appearance.cornerSize
 
+    property bool effectsEnabled: true
     readonly property real compactLevel: width <= Appearance.px(1000) ? 2
         : width <= Appearance.px(1200) ? 1 : 0
     readonly property real sideGroupWidth: compactLevel === 2
@@ -45,6 +49,15 @@ Item {
         }
     }
 
+    // A full-height root is required for pointer delivery to the popup, while
+    // this smaller item keeps the layer-shell input region limited to the bar.
+    Item {
+        id: barInputRegion
+
+        width: root.width
+        height: Appearance.barHeight
+    }
+
     Item {
         id: shadowSurface
 
@@ -57,7 +70,7 @@ Item {
                 * Appearance.scale)
         layer.enabled: ShellSettings.shadowEnabled
         layer.effect: MultiEffect {
-            shadowEnabled: true
+            shadowEnabled: root.effectsEnabled
             shadowBlur: 1
             blurMax: Math.max(1, Math.round(
                 ShellSettings.shadowBlurRadius * Appearance.scale))
@@ -96,12 +109,13 @@ Item {
 
             readonly property real extraHeight: 0.2
 
-            visible: height > 0
+            visible: popup.revealProgress > 0
             group: barBlobGroup
             x: popup.x
             y: Appearance.barHeight - popup.height * extraHeight
-            width: popup.width
-            height: popup.height * (1 + extraHeight)
+            width: visible ? popup.width : 0
+            height: visible
+                ? popup.height * (1 + extraHeight) : 0
             radius: Appearance.normalRadius
             deformScale: 0.000015
         }
@@ -111,10 +125,10 @@ Item {
         id: leftArea
         anchors {
             top: parent.top
-            bottom: parent.bottom
             left: parent.left
             right: middleSection.left
         }
+        height: Appearance.barHeight
 
         MouseArea {
             id: launcherControl
@@ -229,9 +243,9 @@ Item {
         id: middleSection
         anchors {
             top: parent.top
-            bottom: parent.bottom
             horizontalCenter: parent.horizontalCenter
         }
+        height: Appearance.barHeight
         spacing: Appearance.px(4)
 
         WorkspaceSwitcher {
@@ -260,10 +274,10 @@ Item {
         id: rightArea
         anchors {
             top: parent.top
-            bottom: parent.bottom
             left: middleSection.right
             right: parent.right
         }
+        height: Appearance.barHeight
 
         BatteryModule {
             id: batteryModule
@@ -286,6 +300,17 @@ Item {
             }
             
             onActivated: popup.showFor(systemModule, "system")
+        }
+
+        ClipboardModule {
+            id: clipboardModule
+
+            anchors {
+                right: settingsControl.left
+                rightMargin: Appearance.px(4)
+                verticalCenter: parent.verticalCenter
+            }
+            onActivated: popup.showFor(clipboardModule, "clipboard")
         }
 
         MouseArea {
@@ -339,7 +364,7 @@ Item {
 
     StyledPopup {
         id: popup
-        z: -1
+        z: 10
         deformMatrix: popupBackground.deformMatrix
     }
 }

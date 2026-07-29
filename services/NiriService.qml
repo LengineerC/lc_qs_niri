@@ -4,7 +4,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Niri
+import qs.common
 
+// Shared Niri IPC state for bar and workspace components.
 Singleton {
     id: root
 
@@ -13,7 +15,16 @@ Singleton {
     readonly property var focusedWindow: backend.focusedWindow
 
     property bool connected: false
+    property bool overviewOpen: false
+    property real overviewProgress: overviewOpen ? 1 : 0
     property string lastError: ""
+
+    Behavior on overviewProgress {
+        NumberAnimation {
+            duration: Appearance.spatialDuration / 2
+            easing.type: Easing.Linear
+        }
+    }
 
     function focusWorkspaceById(workspaceId) {
         const result = backend.focusWorkspaceById(workspaceId);
@@ -53,6 +64,14 @@ Singleton {
             root.lastError = error;
             console.warn("Niri IPC connection error:", error);
             reconnectTimer.restart();
+        }
+
+        onRawEventReceived: event => {
+            const overviewEvent = event?.OverviewOpenedOrClosed;
+            if (overviewEvent
+                    && typeof overviewEvent.is_open === "boolean") {
+                root.overviewOpen = overviewEvent.is_open;
+            }
         }
     }
 

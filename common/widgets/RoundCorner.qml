@@ -14,7 +14,8 @@ Item {
     property alias bottomVisualMargin: shape.anchors.bottomMargin
 
     property int implicitSize: 25
-    property color color: "#fff"
+    // Stay transparent until the caller's theme colour binding is evaluated.
+    property color color: "transparent"
 
     implicitWidth: implicitSize
     implicitHeight: implicitSize

@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import qs.common
+import qs.services
 
 // Horizontal adaptation of Caelestia's popouts/ClipWrapper + Wrapper.
 // This item must live in the same layer-shell window as the bar.
@@ -10,6 +11,7 @@ Item {
     id: root
 
     readonly property Item popupMaskItem: root
+    readonly property bool pointerInside: popupHover.hovered
     readonly property int moveDuration: ShellSettings.animationDuration
     readonly property var moveCurve: ShellSettings.popupBezierCurve
     readonly property real targetX: {
@@ -30,6 +32,10 @@ Item {
     property bool shown: false
     property real offsetScale: shown ? 0 : 1
     property var deformMatrix
+    readonly property real revealProgress: {
+        const progress = Math.max(0, Math.min(1, 1 - offsetScale));
+        return progress < 0.008 ? 0 : progress;
+    }
 
     property string popupIcon: "󰋼"
     property string popupTitle: ""
@@ -47,15 +53,25 @@ Item {
             return batteryPanel.implicitHeight + 16;
         if (page === "calendar")
             return calendarPanel.implicitHeight + 16;
+        if (page === "clipboard") {
+            return Math.min(Appearance.px(620),
+                Math.max(Appearance.px(390),
+                    (parent?.height ?? Appearance.px(720))
+                        - Appearance.barHeight - Appearance.px(8)));
+        }
         return popupLayout.implicitHeight + Appearance.px(36);
     }
 
     x: targetX
     y: Appearance.barHeight
     width: popupWidth
-    height: popupContent.height * (1 - offsetScale)
-    visible: width > 0 && height > 0
+    height: popupContent.height * revealProgress
+    visible: width > 0 && revealProgress > 0
     clip: true
+
+    HoverHandler {
+        id: popupHover
+    }
 
     function configure(pageName) {
         page = pageName;
@@ -130,6 +146,12 @@ Item {
             popupBaseWidth = 420;
             popupRows = [];
             break;
+        case "clipboard":
+            popupIcon = "󰅇";
+            popupTitle = I18n.tr("clipboard");
+            popupBaseWidth = 520;
+            popupRows = [];
+            break;
         default:
             popupIcon = "󰝚";
             popupTitle = I18n.tr("media");
@@ -176,7 +198,7 @@ Item {
     }
 
     Behavior on x {
-        enabled: root.offsetScale < 1
+        enabled: root.revealProgress > 0
         NumberAnimation {
             duration: root.moveDuration
             easing.type: Easing.BezierSpline
@@ -185,7 +207,7 @@ Item {
     }
 
     Behavior on width {
-        enabled: root.offsetScale < 1
+        enabled: root.revealProgress > 0
         NumberAnimation {
             duration: root.moveDuration
             easing.type: Easing.BezierSpline
@@ -198,18 +220,14 @@ Item {
 
         width: root.width
         height: root.popupHeight
-        y: (-height - 5) * root.offsetScale
-        opacity: 1 - root.offsetScale
+        y: (-height - 5) * (1 - root.revealProgress)
+        opacity: root.revealProgress
         transform: Matrix4x4 {
             matrix: root.deformMatrix
         }
 
-        MouseArea {
-            anchors.fill: parent
-        }
-
         Behavior on height {
-            enabled: root.offsetScale < 1
+            enabled: root.revealProgress > 0
             NumberAnimation {
                 duration: root.moveDuration
                 easing.type: Easing.BezierSpline
@@ -234,7 +252,7 @@ Item {
             id: popupLayout
 
             visible: root.page !== "system" && root.page !== "battery"
-                && root.page !== "calendar"
+                && root.page !== "calendar" && root.page !== "clipboard"
             x: Appearance.px(21)
             y: Appearance.px(18)
             width: parent.width - Appearance.px(42)
@@ -369,6 +387,15 @@ Item {
             id: calendarPanel
 
             visible: root.page === "calendar"
+            anchors {
+                fill: innerSurface
+                margins: 1
+            }
+            onCloseRequested: root.close()
+        }
+
+        ClipboardPanel {
+            visible: root.page === "clipboard"
             anchors {
                 fill: innerSurface
                 margins: 1

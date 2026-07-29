@@ -717,6 +717,40 @@ Item {
                 }
 
                 SectionTitle {
+                    icon: "󰅇"
+                    title: I18n.tr("clipboardStorage")
+                }
+
+                SettingCard {
+                    SliderRow {
+                        label: I18n.tr("clipboardMaxEntrySize")
+                        currentValue: ShellSettings.clipboardMaxEntryMb
+                        from: 1
+                        to: 100
+                        stepSize: 1
+                        decimals: 0
+                        suffix: " MB"
+                        onMoved: value => {
+                            ShellSettings.clipboardMaxEntryMb =
+                                Math.round(value);
+                        }
+                    }
+
+                    SliderRow {
+                        label: I18n.tr("clipboardMaxEntries")
+                        currentValue: ShellSettings.clipboardMaxEntries
+                        from: 10
+                        to: 500
+                        stepSize: 10
+                        decimals: 0
+                        onMoved: value => {
+                            ShellSettings.clipboardMaxEntries =
+                                Math.round(value);
+                        }
+                    }
+                }
+
+                SectionTitle {
                     icon: "󰛖"
                     title: I18n.tr("barFontSize")
                 }

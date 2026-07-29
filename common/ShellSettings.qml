@@ -26,6 +26,8 @@ Singleton {
     property string language: "zh_CN"
     property string timeFormat: "HH:mm"
     property string dateFormat: "MMM dd ddd"
+    property int clipboardMaxEntryMb: 10
+    property int clipboardMaxEntries: 100
 
     property bool ready: false
     property bool storageReady: false
@@ -59,7 +61,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 5,
+            version: 6,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             shadowEnabled: shadowEnabled,
@@ -76,7 +78,9 @@ Singleton {
             scale: scale,
             language: language,
             timeFormat: timeFormat,
-            dateFormat: dateFormat
+            dateFormat: dateFormat,
+            clipboardMaxEntryMb: clipboardMaxEntryMb,
+            clipboardMaxEntries: clipboardMaxEntries
         }, null, 2));
     }
 
@@ -142,6 +146,16 @@ Singleton {
                 dateFormat = state.dateFormat.trim().slice(0, 64);
             else
                 needsMigration = true;
+            if (state.clipboardMaxEntryMb !== undefined)
+                clipboardMaxEntryMb = Math.round(clamped(
+                    state.clipboardMaxEntryMb, 1, 100));
+            else
+                needsMigration = true;
+            if (state.clipboardMaxEntries !== undefined)
+                clipboardMaxEntries = Math.round(clamped(
+                    state.clipboardMaxEntries, 10, 500));
+            else
+                needsMigration = true;
         } catch (error) {
             console.warn("ShellSettings: cannot parse settings:", error);
         }
@@ -169,6 +183,8 @@ Singleton {
         language = "zh_CN";
         timeFormat = "HH:mm";
         dateFormat = "MMM dd ddd";
+        clipboardMaxEntryMb = 10;
+        clipboardMaxEntries = 100;
         save();
     }
 
@@ -193,6 +209,8 @@ Singleton {
     onLanguageChanged: scheduleSave()
     onTimeFormatChanged: scheduleSave()
     onDateFormatChanged: scheduleSave()
+    onClipboardMaxEntryMbChanged: scheduleSave()
+    onClipboardMaxEntriesChanged: scheduleSave()
 
     Component.onCompleted: directoryProcess.running = true
 
@@ -268,7 +286,9 @@ Singleton {
                 scale: root.scale,
                 language: root.language,
                 timeFormat: root.timeFormat,
-                dateFormat: root.dateFormat
+                dateFormat: root.dateFormat,
+                clipboardMaxEntryMb: root.clipboardMaxEntryMb,
+                clipboardMaxEntries: root.clipboardMaxEntries
             });
         }
     }

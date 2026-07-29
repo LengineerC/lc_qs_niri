@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Bluetooth
 import Quickshell.Io
 import Quickshell.Services.Pipewire
+import qs.common
 
 Singleton {
     id: root
