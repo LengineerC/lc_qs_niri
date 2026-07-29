@@ -9,6 +9,7 @@ Item {
     property string outputName: ""
     property Item activeItem: null
     property Item hoverItem: null
+    property bool wheelLocked: false
     readonly property real padding: Appearance.px(5)
 
     implicitWidth: workspaceRow.implicitWidth + padding * 2
@@ -36,6 +37,33 @@ Item {
             hoverClear.restart();
     }
 
+    function switchRelative(direction) {
+        if (wheelLocked || direction === 0)
+            return;
+
+        const outputWorkspaces = [];
+        let activeIndex = -1;
+        for (let index = 0; index < workspaceRepeater.count; ++index) {
+            const item = workspaceRepeater.itemAt(index);
+            if (!item?.onThisOutput)
+                continue;
+
+            if (item.workspaceActive)
+                activeIndex = outputWorkspaces.length;
+            outputWorkspaces.push(item);
+        }
+
+        const nextIndex = activeIndex + direction;
+        if (activeIndex < 0 || nextIndex < 0
+                || nextIndex >= outputWorkspaces.length)
+            return;
+
+        wheelLocked = true;
+        wheelUnlock.restart();
+        NiriService.focusWorkspaceById(
+            outputWorkspaces[nextIndex].model.id);
+    }
+
     onOutputNameChanged: activeRefresh.restart()
 
     Timer {
@@ -50,6 +78,27 @@ Item {
 
         interval: 0
         onTriggered: root.hoverItem = null
+    }
+
+    Timer {
+        id: wheelUnlock
+
+        interval: 120
+        onTriggered: root.wheelLocked = false
+    }
+
+    WheelHandler {
+        target: null
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => {
+            const delta = event.angleDelta.y !== 0
+                ? event.angleDelta.y : event.pixelDelta.y;
+            if (delta === 0)
+                return;
+
+            root.switchRelative(delta > 0 ? -1 : 1);
+            event.accepted = true;
+        }
     }
 
     Rectangle {

@@ -251,7 +251,7 @@ Item {
                     left: parent.left
                     verticalCenter: parent.verticalCenter
                 }
-                onActivated: popup.showFor(timeModule, "clock")
+                onActivated: popup.showFor(timeModule, "calendar")
             }
         }
     }

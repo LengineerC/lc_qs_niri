@@ -41,6 +41,8 @@ Singleton {
         overallScale: ["整体缩放", "Overall scale"],
         restoreDefaults: ["恢复默认", "Restore defaults"],
         clock: ["时间与日期", "Time & date"],
+        calendar: ["日历", "Calendar"],
+        today: ["今天", "Today"],
         timeFormat: ["时间格式", "Time format"],
         dateFormat: ["日期格式", "Date format"],
         timeFormatHint: ["Qt 格式，例如 HH:mm 或 hh:mm AP",

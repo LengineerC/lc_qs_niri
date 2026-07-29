@@ -45,6 +45,8 @@ Item {
         }
         if (page === "battery")
             return batteryPanel.implicitHeight + 16;
+        if (page === "calendar")
+            return calendarPanel.implicitHeight + 16;
         return popupLayout.implicitHeight + Appearance.px(36);
     }
 
@@ -92,18 +94,12 @@ Item {
                     value: I18n.tr("switchAction") }
             ];
             break;
-        case "clock":
+        case "calendar":
             popupIcon = "󰃭";
             popupTitle = I18n.locale.toString(
                 new Date(), "dddd, MMMM dd");
-            popupBaseWidth = 380;
-            popupRows = [
-                { icon: "󰔛", label: I18n.tr("systemUptime"), value: "--" },
-                { icon: "󰄬", label: I18n.tr("todo"),
-                    value: I18n.tr("noPendingTasks") },
-                { icon: "󰥔", label: I18n.tr("timeZone"),
-                    value: I18n.tr("local") }
-            ];
+            popupBaseWidth = 390;
+            popupRows = [];
             break;
         case "status":
             popupIcon = "󰒓";
@@ -238,6 +234,7 @@ Item {
             id: popupLayout
 
             visible: root.page !== "system" && root.page !== "battery"
+                && root.page !== "calendar"
             x: Appearance.px(21)
             y: Appearance.px(18)
             width: parent.width - Appearance.px(42)
@@ -361,6 +358,17 @@ Item {
             id: batteryPanel
 
             visible: root.page === "battery"
+            anchors {
+                fill: innerSurface
+                margins: 1
+            }
+            onCloseRequested: root.close()
+        }
+
+        CalendarPanel {
+            id: calendarPanel
+
+            visible: root.page === "calendar"
             anchors {
                 fill: innerSurface
                 margins: 1
