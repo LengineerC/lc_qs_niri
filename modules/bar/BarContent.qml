@@ -70,6 +70,20 @@ Item {
         id: barHover
     }
 
+    // 手动添加底色层，修复离屏纹理边缘采样导致bar未贴合屏幕
+    Rectangle {
+        id: solidBarBackground
+
+        z: -3
+
+        x: 0
+        y: 0
+        width: root.width
+        height: Appearance.barHeight
+
+        color: Appearance.barBgColor
+    }
+
     Item {
         id: shadowSurface
 
