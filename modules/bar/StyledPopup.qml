@@ -13,6 +13,7 @@ Item {
 
     readonly property Item popupMaskItem: root
     readonly property bool pointerInside: popupHover.hovered
+        || page === "tray" && trayPanel.menuContainsMouse
     readonly property int moveDuration: ShellSettings.animationDuration
     readonly property var moveCurve: ShellSettings.popupBezierCurve
     readonly property real targetX: {
@@ -83,6 +84,8 @@ Item {
                     (parent?.height ?? Appearance.px(760))
                         - Appearance.barHeight - Appearance.px(8)));
         }
+        if (page === "tray")
+            return trayPanel.implicitHeight + 16;
         if (page === "media") {
             const availableHeight =
                 (parent?.height ?? Appearance.px(760))
@@ -189,6 +192,12 @@ Item {
             popupIcon = "󰂚";
             popupTitle = I18n.tr("notifications");
             popupBaseWidth = 590;
+            popupRows = [];
+            break;
+        case "tray":
+            popupIcon = "󰀻";
+            popupTitle = I18n.tr("systemTray");
+            popupBaseWidth = 330;
             popupRows = [];
             break;
         case "media":
@@ -301,6 +310,7 @@ Item {
                 && root.page !== "weather"
                 && root.page !== "calendar" && root.page !== "clipboard"
                 && root.page !== "notifications"
+                && root.page !== "tray"
                 && root.page !== "media" && root.page !== "launcher"
                 && root.page !== "resources"
             x: Appearance.px(21)
@@ -470,6 +480,18 @@ Item {
 
         NotificationPanel {
             visible: root.page === "notifications"
+            anchors {
+                fill: innerSurface
+                margins: 1
+            }
+            onCloseRequested: root.close()
+        }
+
+        TrayPanel {
+            id: trayPanel
+
+            visible: root.page === "tray"
+            active: root.shown && root.page === "tray"
             anchors {
                 fill: innerSurface
                 margins: 1

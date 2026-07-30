@@ -1,6 +1,7 @@
 pragma Singleton
 pragma ComponentBehavior: Bound
 
+import QtCore
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -16,6 +17,22 @@ Singleton {
     property var commandQueue: []
     property string operationOutput: ""
     property bool refreshAgain: false
+    property var pendingPersistentOutput: null
+    property var persistentOutputs: ({})
+    property bool persistenceDirectoryReady: false
+    property bool persistenceStateReady: false
+    property bool persistenceWritePending: false
+
+    readonly property bool persistenceReady:
+        persistenceDirectoryReady && persistenceStateReady
+    readonly property string niriConfigDirectory:
+        stripFileProtocol(StandardPaths.standardLocations(
+            StandardPaths.ConfigLocation)[0])
+            + "/niri/lc_qs_niri"
+    readonly property string persistentConfigFile:
+        niriConfigDirectory + "/outputs.kdl"
+    readonly property string persistentStateFile:
+        ShellSettings.stateDirectory + "/outputs.json"
 
     readonly property int enabledCount:
         outputs.filter(output => output.enabled).length
@@ -24,6 +41,10 @@ Singleton {
 
     function load() {
         // Forces singleton construction from shell.qml.
+    }
+
+    function stripFileProtocol(path) {
+        return String(path || "").replace(/^file:\/\//, "");
     }
 
     function refresh() {
@@ -140,6 +161,195 @@ Singleton {
         return Math.max(0.5, Math.min(4, Number(value) || 1));
     }
 
+    function stableOutputName(output) {
+        const make = String(output?.make || "").trim();
+        const model = String(output?.model || "").trim();
+        const serial = String(output?.serial || "").trim();
+        if (make && model && serial)
+            return make + " " + model + " " + serial;
+        return String(output?.name || "").trim();
+    }
+
+    function allowedMaxBpc(value) {
+        const number = Math.round(Number(value) || 8);
+        return [6, 8, 10, 12, 14, 16].includes(number)
+            ? number : 8;
+    }
+
+    function outputRecord(output, enabled = undefined,
+            mode = undefined, scale = undefined,
+            transform = undefined, automaticPosition = undefined,
+            x = undefined, y = undefined, vrrEnabled = undefined,
+            maxBpc = undefined) {
+        return {
+            name: String(output.name),
+            matchName: stableOutputName(output),
+            make: String(output.make || ""),
+            model: String(output.model || ""),
+            serial: String(output.serial || ""),
+            enabled: enabled === undefined
+                ? Boolean(output.enabled) : Boolean(enabled),
+            mode: String(mode === undefined
+                ? output.currentMode : mode || "auto"),
+            scale: clampedScale(scale === undefined
+                ? output.scale : scale),
+            transform: normalizeTransform(transform === undefined
+                ? output.transform : transform),
+            automaticPosition: automaticPosition === undefined
+                ? !output.enabled : Boolean(automaticPosition),
+            x: Math.round(Number(x === undefined ? output.x : x) || 0),
+            y: Math.round(Number(y === undefined ? output.y : y) || 0),
+            vrrEnabled: vrrEnabled === undefined
+                ? Boolean(output.vrrEnabled) : Boolean(vrrEnabled),
+            maxBpc: allowedMaxBpc(maxBpc === undefined
+                ? output.maxBpc : maxBpc)
+        };
+    }
+
+    function escapeKdlString(value) {
+        return String(value || "")
+            .replace(/\\/g, "\\\\")
+            .replace(/"/g, "\\\"");
+    }
+
+    function formatConfigNumber(value) {
+        const number = Number(value);
+        if (!Number.isFinite(number))
+            return "1";
+        return Number(number.toFixed(4)).toString();
+    }
+
+    function serializeOutput(record) {
+        const lines = [
+            "output \"" + escapeKdlString(
+                record.matchName || record.name) + "\" {"
+        ];
+        if (!record.enabled)
+            lines.push("    off");
+        if (record.mode && record.mode !== "auto")
+            lines.push("    mode \""
+                + escapeKdlString(record.mode) + "\"");
+        lines.push("    scale "
+            + formatConfigNumber(record.scale));
+        lines.push("    transform \""
+            + escapeKdlString(normalizeTransform(
+                record.transform)) + "\"");
+        if (!record.automaticPosition) {
+            lines.push("    position x="
+                + Math.round(Number(record.x) || 0)
+                + " y=" + Math.round(Number(record.y) || 0));
+        }
+        if (record.vrrEnabled)
+            lines.push("    variable-refresh-rate");
+        lines.push("    max-bpc "
+            + allowedMaxBpc(record.maxBpc));
+        lines.push("}");
+        return lines.join("\n");
+    }
+
+    function persistentRecords() {
+        return Object.keys(persistentOutputs)
+            .map(key => persistentOutputs[key])
+            .filter(record => record && record.name)
+            .sort((first, second) =>
+                String(first.matchName || first.name).localeCompare(
+                    String(second.matchName || second.name)));
+    }
+
+    function writePersistentFiles() {
+        if (!persistenceReady) {
+            persistenceWritePending = true;
+            return;
+        }
+
+        persistenceWritePending = false;
+        const records = persistentRecords();
+        const configText = [
+            "// Auto-generated by QuickShell display settings.",
+            "// Changes made here can be overwritten from the settings window.",
+            ""
+        ].concat(records.map(record =>
+            serializeOutput(record) + "\n")).join("\n");
+        persistentConfigStorage.setText(configText);
+        persistentStateStorage.setText(JSON.stringify({
+            version: 1,
+            outputs: records
+        }, null, 2));
+    }
+
+    function seedPersistentOutputs() {
+        const next = Object.assign({}, persistentOutputs);
+        for (const output of outputs) {
+            if (!output?.name || next[output.name])
+                continue;
+            const record = outputRecord(output);
+            const duplicateKey = Object.keys(next).find(key =>
+                next[key]?.matchName === record.matchName);
+            if (!duplicateKey)
+                next[record.name] = record;
+        }
+        persistentOutputs = next;
+    }
+
+    function persistOutput(record) {
+        if (!record)
+            return;
+
+        seedPersistentOutputs();
+        const next = Object.assign({}, persistentOutputs);
+        for (const key of Object.keys(next)) {
+            if (key === record.name
+                    || next[key]?.matchName === record.matchName)
+                delete next[key];
+        }
+        next[record.name] = record;
+        persistentOutputs = next;
+        writePersistentFiles();
+    }
+
+    function loadPersistentState(text) {
+        try {
+            const payload = JSON.parse(String(text));
+            const records = Array.isArray(payload)
+                ? payload : payload.outputs;
+            if (!Array.isArray(records))
+                throw new Error("Invalid output state");
+            const restored = {};
+            for (const record of records) {
+                if (!record?.name)
+                    continue;
+                restored[String(record.name)] = {
+                    name: String(record.name),
+                    matchName: String(record.matchName
+                        || record.name),
+                    make: String(record.make || ""),
+                    model: String(record.model || ""),
+                    serial: String(record.serial || ""),
+                    enabled: Boolean(record.enabled),
+                    mode: String(record.mode || "auto"),
+                    scale: clampedScale(record.scale),
+                    transform: normalizeTransform(
+                        record.transform),
+                    automaticPosition:
+                        Boolean(record.automaticPosition),
+                    x: Math.round(Number(record.x) || 0),
+                    y: Math.round(Number(record.y) || 0),
+                    vrrEnabled: Boolean(record.vrrEnabled),
+                    maxBpc: allowedMaxBpc(record.maxBpc)
+                };
+            }
+            persistentOutputs = restored;
+        } catch (error) {
+            console.warn(
+                "OutputService: cannot parse persistent state:",
+                error);
+            persistentOutputs = ({});
+        }
+        persistenceStateReady = true;
+        if (persistenceWritePending)
+            writePersistentFiles();
+    }
+
     function applyOutput(name, enabled, mode, scale,
             transform, automaticPosition, x, y, vrrEnabled, maxBpc) {
         const current = outputs.find(output => output.name === name);
@@ -155,6 +365,9 @@ Singleton {
         errorMessage = "";
         operationOutput = name;
         commandQueue = [];
+        pendingPersistentOutput = outputRecord(
+            current, enabled, mode, scale, transform,
+            automaticPosition, x, y, vrrEnabled, maxBpc);
 
         if (!enabled) {
             commandQueue.push(["niri", "msg", "output", name, "off"]);
@@ -206,6 +419,8 @@ Singleton {
     function runNextCommand() {
         if (commandQueue.length === 0) {
             applying = false;
+            persistOutput(pendingPersistentOutput);
+            pendingPersistentOutput = null;
             applyFinished(true, "");
             applyRefreshTimer.restart();
             return;
@@ -216,7 +431,10 @@ Singleton {
         commandProcess.running = true;
     }
 
-    Component.onCompleted: refresh()
+    Component.onCompleted: {
+        persistenceDirectoryProcess.running = true;
+        refresh();
+    }
 
     Timer {
         id: applyRefreshTimer
@@ -264,6 +482,7 @@ Singleton {
             if (exitCode !== 0) {
                 root.commandQueue = [];
                 root.applying = false;
+                root.pendingPersistentOutput = null;
                 root.errorMessage = commandProcess.errorOutput
                     || I18n.tr("displayApplyFailed");
                 root.applyFinished(false, root.errorMessage);
@@ -271,6 +490,74 @@ Singleton {
                 return;
             }
             root.runNextCommand();
+        }
+    }
+
+    Process {
+        id: persistenceDirectoryProcess
+
+        command: [
+            "mkdir", "-p",
+            root.niriConfigDirectory,
+            ShellSettings.stateDirectory
+        ]
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                root.errorMessage =
+                    I18n.tr("displayPersistenceFailed");
+                return;
+            }
+            root.persistenceDirectoryReady = true;
+            Qt.callLater(() =>
+                persistentStateStorage.reload());
+        }
+    }
+
+    FileView {
+        id: persistentStateStorage
+
+        path: root.persistentStateFile
+        printErrors: false
+
+        onLoaded: {
+            if (root.persistenceDirectoryReady)
+                root.loadPersistentState(text());
+        }
+        onLoadFailed: error => {
+            if (!root.persistenceDirectoryReady)
+                return;
+            root.persistentOutputs = ({});
+            root.persistenceStateReady = true;
+            if (root.persistenceWritePending)
+                root.writePersistentFiles();
+        }
+    }
+
+    FileView {
+        id: persistentConfigStorage
+
+        path: root.persistentConfigFile
+        printErrors: false
+    }
+
+    IpcHandler {
+        target: "outputs"
+
+        function saveCurrent(): void {
+            root.seedPersistentOutputs();
+            root.writePersistentFiles();
+        }
+
+        function configPath(): string {
+            return root.persistentConfigFile;
+        }
+
+        function statePath(): string {
+            return root.persistentStateFile;
+        }
+
+        function persistentCount(): int {
+            return root.persistentRecords().length;
         }
     }
 }

@@ -782,6 +782,8 @@ Item {
                                             : I18n.tr("apply")
                                         enabled: !OutputService.applying
                                             && !OutputService.refreshing
+                                            && OutputService
+                                                .persistenceReady
                                         onClicked:
                                             OutputService.applyOutput(
                                                 outputCard.modelData.name,

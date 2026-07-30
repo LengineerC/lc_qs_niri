@@ -1,3 +1,5 @@
+//@ pragma UseQApplication
+
 import QtQuick
 import Quickshell
 import qs.common
@@ -19,6 +21,7 @@ ShellRoot {
         WallpaperService.load();
         SystemService.load();
         ResourceService.load();
+        OutputService.load();
         UserService.load();
         LockService.load();
         WeatherService.load();

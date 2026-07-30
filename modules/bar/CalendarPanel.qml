@@ -106,9 +106,10 @@ Item {
     }
 
     Timer {
-        interval: 30000
+        interval: 1000
         running: root.visible
         repeat: true
+        triggeredOnStart: true
         onTriggered: root.currentDate = new Date()
     }
 
@@ -188,6 +189,68 @@ Item {
             implicitHeight: 1
             color: Appearance.outline
             opacity: 0.55
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: Appearance.px(74)
+            radius: Appearance.smallRadius
+            color: Appearance.layer3
+            border.width: 1
+            border.color: Appearance.outline
+
+            RowLayout {
+                anchors.centerIn: parent
+                spacing: Appearance.px(3)
+
+                PanelText {
+                    text: I18n.locale.toString(
+                        root.currentDate, "HH")
+                    color: Appearance.layer0Text
+                    font {
+                        pixelSize: Appearance.px(34)
+                        weight: Font.Bold
+                    }
+                }
+
+                PanelText {
+                    text: ":"
+                    color: Appearance.primary
+                    font {
+                        pixelSize: Appearance.px(32)
+                        weight: Font.Bold
+                    }
+                }
+
+                PanelText {
+                    text: I18n.locale.toString(
+                        root.currentDate, "mm")
+                    color: Appearance.layer0Text
+                    font {
+                        pixelSize: Appearance.px(34)
+                        weight: Font.Bold
+                    }
+                }
+
+                PanelText {
+                    text: ":"
+                    color: Appearance.primary
+                    font {
+                        pixelSize: Appearance.px(32)
+                        weight: Font.Bold
+                    }
+                }
+
+                PanelText {
+                    text: I18n.locale.toString(
+                        root.currentDate, "ss")
+                    color: Appearance.tertiary
+                    font {
+                        pixelSize: Appearance.px(34)
+                        weight: Font.Bold
+                    }
+                }
+            }
         }
 
         RowLayout {

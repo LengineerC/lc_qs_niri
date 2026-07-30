@@ -38,6 +38,7 @@ Scope {
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.namespace: "quickshell:bar"
             WlrLayershell.keyboardFocus: barContent.popupShown
+                    || barContent.barContainsMouse
                 ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             Region {
@@ -68,6 +69,19 @@ Scope {
 
             Connections {
                 target: barContent
+
+                function onPopupShownChanged() {
+                    if (!barContent.popupShown)
+                        return;
+
+                    // The hover binding above lets Niri focus this surface
+                    // on the opening click. Also request activation after
+                    // bindings have settled for keyboard/touch activation.
+                    focusDismissTimer.stop();
+                    barContent.requestHostWindowFocus();
+                    Qt.callLater(
+                        () => barContent.requestHostWindowFocus());
+                }
 
                 function onHostWindowActiveChanged() {
                     if (barContent.hostWindowActive)
