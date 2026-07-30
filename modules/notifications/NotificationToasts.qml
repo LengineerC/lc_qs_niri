@@ -10,6 +10,10 @@ Scope {
     PanelWindow {
         id: toastWindow
 
+        // Negative values move the notification stack upward; positive
+        // values move it downward.
+        readonly property int verticalOffset: -Appearance.px(40)
+
         screen: Quickshell.screens.length > 0
             ? Quickshell.screens[0] : null
         visible: NotificationService.popupEntries.length > 0
@@ -39,7 +43,8 @@ Scope {
                 top: parent.top
                 left: parent.left
                 right: parent.right
-                topMargin: Appearance.barHeight + Appearance.px(2)
+                topMargin: Appearance.barHeight
+                    + toastWindow.verticalOffset
                 rightMargin: Appearance.px(5)
             }
             spacing: Appearance.px(4)

@@ -43,6 +43,9 @@ ShellRoot {
     Lock {
     }
 
+    UtilityWindows {
+    }
+
     Bar {
     }
 

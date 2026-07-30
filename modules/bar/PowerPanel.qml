@@ -52,20 +52,24 @@ Item {
         required property string icon
         required property string label
         property bool destructive: false
+        readonly property bool hovered: actionHover.hovered
 
         Layout.fillWidth: true
         implicitHeight: Appearance.px(54)
         radius: Appearance.smallRadius
-        color: actionArea.containsMouse
+        // Keep the animated surface opaque. Animating from layer1 to an
+        // alpha-only error color exposed the popup background mid-transition
+        // and looked like a one-frame hover flash.
+        color: hovered
             ? destructive
-                ? Appearance.withAlpha(
+                ? Appearance.mix(Appearance.layer1,
                     Theme.palette.m3error, 0.14)
                 : Appearance.layer1Hover
             : Appearance.layer1
         border.width: 1
-        border.color: actionArea.containsMouse && destructive
+        border.color: hovered && destructive
             ? Theme.palette.m3error : Appearance.outline
-        scale: actionArea.pressed ? 0.985 : 1
+        scale: actionTap.pressed ? 0.985 : 1
 
         RowLayout {
             anchors {
@@ -115,12 +119,17 @@ Item {
             }
         }
 
-        MouseArea {
-            id: actionArea
-            anchors.fill: parent
-            hoverEnabled: true
+        // Keep hover and click tracking independent. MouseArea.containsMouse
+        // can briefly flip while an animated delegate is being re-evaluated,
+        // which was visible as a flash on the destructive power-off action.
+        HoverHandler {
+            id: actionHover
             cursorShape: Qt.PointingHandCursor
-            onClicked: root.perform(actionButton.action)
+        }
+
+        TapHandler {
+            id: actionTap
+            onTapped: root.perform(actionButton.action)
         }
 
         Behavior on color {

@@ -14,14 +14,17 @@ Item {
     implicitHeight: Appearance.barHeight
     readonly property Item barMask: barInputRegion
     readonly property Item popupMask: popup.popupMaskItem
-    readonly property bool barContainsMouse: barHover.hovered && barHover.point.position.y >= 0 && barHover.point.position.y < Appearance.barHeight
+    readonly property bool barContainsMouse: barHover.hovered
+        && barHover.point.position.y >= 0
+        && barHover.point.position.y < Appearance.barHeight
     readonly property bool popupShown: popup.shown
     readonly property bool popupContainsMouse: popup.pointerInside
     readonly property bool hostWindowActive: Window.active
     readonly property int edgeMargin: Appearance.cornerSize
 
     property real effectsOpacity: 1
-    readonly property real compactLevel: width <= Appearance.px(1000) ? 2 : width <= Appearance.px(1200) ? 1 : 0
+    readonly property real compactLevel: width <= Appearance.px(1000) ? 2
+        : width <= Appearance.px(1200) ? 1 : 0
     property string outputName: ""
 
     function closePopup() {
@@ -72,14 +75,23 @@ Item {
 
         z: -2
         width: root.width
-        height: Math.max(Appearance.barHeight, popup.y + popup.height) + Math.ceil((ShellSettings.shadowBlurRadius + Math.abs(ShellSettings.shadowOffsetY) + 4) * Appearance.scale)
+        height: Math.max(Appearance.barHeight,
+            popup.y + popup.height)
+            + Math.ceil((ShellSettings.shadowBlurRadius
+                + Math.abs(ShellSettings.shadowOffsetY) + 4)
+                * Appearance.scale)
         layer.enabled: ShellSettings.shadowEnabled
         layer.effect: MultiEffect {
             shadowEnabled: ShellSettings.shadowEnabled
             shadowBlur: 1
-            blurMax: Math.max(1, Math.round(ShellSettings.shadowBlurRadius * Appearance.scale))
-            shadowColor: Appearance.withAlpha(Theme.palette.m3shadow, ShellSettings.shadowOpacity * Math.max(0, Math.min(1, root.effectsOpacity)))
-            shadowVerticalOffset: Math.round(ShellSettings.shadowOffsetY * Appearance.scale)
+            blurMax: Math.max(1, Math.round(
+                ShellSettings.shadowBlurRadius * Appearance.scale))
+            shadowColor: Appearance.withAlpha(
+                Theme.palette.m3shadow,
+                ShellSettings.shadowOpacity
+                    * Math.max(0, Math.min(1, root.effectsOpacity)))
+            shadowVerticalOffset: Math.round(
+                ShellSettings.shadowOffsetY * Appearance.scale)
         }
 
         Blobs.BlobGroup {
@@ -116,7 +128,8 @@ Item {
             x: popup.x
             y: Appearance.barHeight - popup.height * extraHeight
             width: visible ? popup.width : 0
-            height: visible ? popup.height * (1 + extraHeight) : 0
+            height: visible
+                ? popup.height * (1 + extraHeight) : 0
             radius: Appearance.normalRadius
             deformScale: 0.000015
         }
@@ -146,7 +159,9 @@ Item {
                 height: Appearance.px(30)
                 anchors.verticalCenter: parent.verticalCenter
                 radius: Appearance.fullRadius
-                color: launcherControl.containsMouse || popup.shown && popup.anchorItem === launcherControl ? Appearance.secondaryContainer : "transparent"
+                color: launcherControl.containsMouse
+                    || popup.shown && popup.anchorItem === launcherControl
+                    ? Appearance.secondaryContainer : "transparent"
                 scale: launcherControl.pressed ? 0.88 : 1
 
                 Text {
@@ -172,6 +187,7 @@ Item {
                     }
                 }
             }
+
         }
 
         Row {
@@ -193,7 +209,8 @@ Item {
                 width: visible ? Appearance.px(20) : 0
                 height: Appearance.px(20)
                 anchors.verticalCenter: parent.verticalCenter
-                source: NiriService.focusedWindow?.iconPath ? "file://" + NiriService.focusedWindow.iconPath : ""
+                source: NiriService.focusedWindow?.iconPath
+                    ? "file://" + NiriService.focusedWindow.iconPath : ""
                 sourceSize.width: Appearance.px(20)
                 sourceSize.height: Appearance.px(20)
                 smooth: true
@@ -201,7 +218,12 @@ Item {
             }
 
             Column {
-                width: Math.min(400, Math.max(0, focusedWindowInfo.width - (focusedWindowIcon.visible ? focusedWindowIcon.width + focusedWindowInfo.spacing : 0)))
+                width: Math.min(
+                    400,
+                    Math.max(0, focusedWindowInfo.width
+                    - (focusedWindowIcon.visible
+                        ? focusedWindowIcon.width + focusedWindowInfo.spacing : 0))
+                )
                 anchors {
                     verticalCenter: parent.verticalCenter
                 }
@@ -209,7 +231,8 @@ Item {
 
                 Text {
                     width: parent.width
-                    text: NiriService.focusedWindow?.appId ?? I18n.tr("desktop")
+                    text: NiriService.focusedWindow?.appId
+                        ?? I18n.tr("desktop")
                     color: Appearance.subtext
                     elide: Text.ElideRight
                     font {
@@ -220,7 +243,8 @@ Item {
 
                 Text {
                     width: parent.width
-                    text: NiriService.focusedWindow?.title ?? I18n.tr("noFocusedWindow")
+                    text: NiriService.focusedWindow?.title
+                        ?? I18n.tr("noFocusedWindow")
                     color: Appearance.layer0Text
                     elide: Text.ElideRight
                     font {
@@ -299,7 +323,8 @@ Item {
                 rightMargin: Appearance.px(4)
                 verticalCenter: parent.verticalCenter
             }
-            onActivated: popup.showFor(performanceModule, "resources")
+            onActivated:
+                popup.showFor(performanceModule, "resources")
         }
 
         SystemModule {
@@ -310,7 +335,7 @@ Item {
                 right: powerModule.left
                 rightMargin: Appearance.px(4)
             }
-
+            
             onActivated: popup.showFor(systemModule, "system")
         }
 
@@ -344,19 +369,23 @@ Item {
                 rightMargin: Appearance.px(3)
                 verticalCenter: parent.verticalCenter
             }
-            onActivated: popup.showFor(notificationModule, "notifications")
+            onActivated:
+                popup.showFor(notificationModule, "notifications")
         }
 
         TrayModule {
             id: trayModule
 
-            expanded: popup.shown && popup.anchorItem === trayModule && popup.page === "tray"
+            expanded: popup.shown
+                && popup.anchorItem === trayModule
+                && popup.page === "tray"
             anchors {
                 right: notificationModule.left
                 rightMargin: Appearance.px(3)
                 verticalCenter: parent.verticalCenter
             }
-            onActivated: popup.showFor(trayModule, "tray")
+            onActivated:
+                popup.showFor(trayModule, "tray")
         }
 
         MouseArea {
@@ -378,7 +407,8 @@ Item {
                 height: Appearance.px(30)
                 anchors.verticalCenter: parent.verticalCenter
                 radius: Appearance.fullRadius
-                color: settingsControl.containsMouse ? Appearance.layer1Hover : "transparent"
+                color: settingsControl.containsMouse
+                    ? Appearance.layer1Hover : "transparent"
                 scale: settingsControl.pressed ? 0.88 : 1
 
                 Text {
