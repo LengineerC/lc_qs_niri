@@ -34,8 +34,9 @@ Item {
                 fill: parent
                 margins: root.hasProfileImage ? 0 : root.iconPadding
             }
-            asynchronous: true
-            cache: false
+            asynchronous: false
+            cache: true
+            retainWhileLoading: true
             sourceSize {
                 width: width
                 height: height
