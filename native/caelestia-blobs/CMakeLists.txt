@@ -1,4 +1,3 @@
-# 模块已经存在，不需要重新构建，如需自己构建需自行修改路径并下拉Caelestia仓库
 cmake_minimum_required(VERSION 3.19)
 
 project(test-caelestia-blobs LANGUAGES CXX)

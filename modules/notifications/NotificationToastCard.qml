@@ -15,7 +15,7 @@ Item {
     required property var notificationEntry
 
     implicitWidth: Appearance.px(400)
-    implicitHeight: toastSurface.implicitHeight + Appearance.px(16)
+    implicitHeight: toastSurface.implicitHeight + Appearance.px(20)
     property bool entered: false
     property bool componentReady: false
     property bool animateTransitions: false
@@ -110,22 +110,10 @@ Item {
             }
             spacing: Appearance.px(11)
 
-            Rectangle {
+            NotificationAvatar {
                 Layout.alignment: Qt.AlignTop
-                implicitWidth: Appearance.px(54)
-                implicitHeight: Appearance.px(54)
-                radius: Appearance.fullRadius
-                color: Appearance.primaryContainer
-                clip: true
-
-                IconImage {
-                    anchors {
-                        fill: parent
-                        margins: Appearance.px(6)
-                    }
-                    source: NotificationService.iconSource(
-                        root.notificationEntry)
-                }
+                implicitSize: Appearance.px(54)
+                notificationEntry: root.notificationEntry
             }
 
             ColumnLayout {
@@ -177,7 +165,7 @@ Item {
                     color: Appearance.layer1Text
                     wrapMode: Text.Wrap
                     elide: Text.ElideRight
-                    maximumLineCount: 2
+                    maximumLineCount: 3
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Appearance.fontSize

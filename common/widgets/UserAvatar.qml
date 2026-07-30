@@ -10,7 +10,7 @@ Item {
 
     property real implicitSize: Appearance.px(64)
     property url source: UserService.avatarUrl
-    property real imageInset: 0
+    property real imageInset: 1
 
     implicitWidth: implicitSize
     implicitHeight: implicitSize

@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 import qs.common
+import qs.common.widgets
 import qs.services
 
 Rectangle {
@@ -53,22 +54,10 @@ Rectangle {
         }
         spacing: Appearance.px(10)
 
-        Rectangle {
+        NotificationAvatar {
             Layout.alignment: Qt.AlignTop
-            implicitWidth: Appearance.px(42)
-            implicitHeight: Appearance.px(42)
-            radius: Appearance.fullRadius
-            color: Appearance.primaryContainer
-            clip: true
-
-            IconImage {
-                anchors {
-                    fill: parent
-                    margins: Appearance.px(5)
-                }
-                source: NotificationService.iconSource(
-                    root.notificationEntry)
-            }
+            implicitSize: Appearance.px(42)
+            notificationEntry: root.notificationEntry
         }
 
         ColumnLayout {

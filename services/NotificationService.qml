@@ -120,6 +120,28 @@ Singleton {
         return desktop?.name ?? I18n.tr("unknownApplication");
     }
 
+    function normaliseImageSource(source) {
+        const value = String(source ?? "").trim();
+        if (!value)
+            return "";
+        if (value.startsWith("/"))
+            return "file://" + value;
+        return value;
+    }
+
+    function resolveNotificationImage(notification) {
+        const image = normaliseImageSource(notification?.image);
+        if (image)
+            return image;
+
+        // Quickshell normally promotes the freedesktop image hints to
+        // notification.image. Keep these path fallbacks for clients that
+        // expose a non-standard spelling instead.
+        const hints = notification?.hints ?? {};
+        return normaliseImageSource(
+            hints["image-path"] ?? hints["image_path"] ?? "");
+    }
+
     function serialiseEntry(entry) {
         return {
             notificationId: entry.notificationId,
@@ -224,7 +246,7 @@ Singleton {
             desktopEntry: notification.desktopEntry ?? "",
             summary: plainText(notification.summary),
             body: plainText(notification.body),
-            image: notification.image ?? "",
+            image: resolveNotificationImage(notification),
             urgency: notification.urgency,
             actions: actionData,
             timestamp: Date.now(),
@@ -432,6 +454,23 @@ Singleton {
         return desktop?.icon
             ? Quickshell.iconPath(desktop.icon, "dialog-information")
             : Quickshell.iconPath("dialog-information");
+    }
+
+    function hasApplicationIcon(entry) {
+        if (!entry)
+            return false;
+        if (entry.appIcon)
+            return true;
+        return Boolean(desktopEntryFor(entry)?.icon);
+    }
+
+    function hasNotificationImage(entry) {
+        return normaliseImageSource(entry?.image) !== "";
+    }
+
+    function avatarSource(entry) {
+        const image = normaliseImageSource(entry?.image);
+        return image || iconSource(entry);
     }
 
     function activate(entry) {

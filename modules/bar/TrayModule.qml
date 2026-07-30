@@ -31,7 +31,7 @@ MouseArea {
 
         Text {
             anchors.centerIn: parent
-            text: "▼"
+            text: ""
             rotation: root.expanded ? 180 : 0
             color: root.needsAttention
                 ? Appearance.primary : Appearance.layer0Text

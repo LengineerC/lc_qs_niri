@@ -19,7 +19,7 @@ Scope {
         visible: NotificationService.popupEntries.length > 0
             && !NotificationService.doNotDisturb
         color: "transparent"
-        implicitWidth: Appearance.px(470)
+        implicitWidth: Appearance.px(435)
         exclusiveZone: 0
 
         anchors {
