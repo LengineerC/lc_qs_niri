@@ -231,6 +231,31 @@ Singleton {
             ? Math.max(1000, notification.expireTimeout) : 7000;
     }
 
+    function watchNotificationLifecycle(entry) {
+        if (!entry?.notification)
+            return;
+
+        const liveNotification = entry.notification;
+        const entryId = entry.notificationId;
+
+        liveNotification.closed.connect(reason => {
+            const currentEntry = root.entryById(entryId);
+            if (!currentEntry)
+                return;
+
+            console.debug(
+                "NotificationService: notification closed:",
+                entryId,
+                NotificationCloseReason.toString(reason)
+            );
+
+            currentEntry.notification = null;
+
+            if (reason === NotificationCloseReason.CloseRequested)
+                root.markRead(entryId);
+        });
+    }
+
     function addNotification(notification) {
         notification.tracked = true;
         const timeout = popupTimeout(notification);
@@ -258,6 +283,7 @@ Singleton {
         });
 
         entries = [entry, ...entries].slice(0, maxHistoryEntries);
+        watchNotificationLifecycle(entry);
         if (!doNotDisturb)
             queuePopup(entry);
         scheduleSave();
@@ -477,22 +503,28 @@ Singleton {
         if (!entry)
             return;
 
-        let invoked = false;
-        const liveActions = entry.notification?.actions ?? [];
-        if (liveActions.length > 0) {
-            const defaultAction = liveActions.find(action =>
-                action.identifier === "default") ?? liveActions[0];
-            if (defaultAction) {
+        const notification = entry.notification;
+        const liveActions = notification?.actions ?? [];
+
+        const defaultAction = liveActions.find(action =>
+            action.identifier === "default");
+
+        if (defaultAction) {
+            try {
                 defaultAction.invoke();
-                invoked = true;
+            } catch (error) {
+                console.warn(
+                    "NotificationService: action invocation failed:",
+                    error
+                );
             }
+        } else {
+            console.debug(
+                "NotificationService: notification is no longer actionable:",
+                entry.notificationId
+            );
         }
 
-        if (!invoked) {
-            const desktop = desktopEntryFor(entry);
-            if (desktop)
-                desktop.execute();
-        }
         markRead(entry.notificationId);
     }
 
