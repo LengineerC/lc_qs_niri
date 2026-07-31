@@ -4,8 +4,9 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
-import "file:///home/lengineerc/.config/quickshell/lc_qs_niri/Caelestia/Blobs" as Blobs
+import "file:///home/lengineerc/Applications/qs/test/Caelestia/Blobs" as Blobs
 import qs.common
+import qs.modules.sidebar
 import qs.services
 
 Item {
@@ -14,11 +15,14 @@ Item {
     implicitHeight: Appearance.barHeight
     readonly property Item barMask: barInputRegion
     readonly property Item popupMask: popup.popupMaskItem
+    readonly property Item sidebarMask: leftSidebar.maskItem
     readonly property bool barContainsMouse: barHover.hovered
         && barHover.point.position.y >= 0
         && barHover.point.position.y < Appearance.barHeight
     readonly property bool popupShown: popup.shown
     readonly property bool popupContainsMouse: popup.pointerInside
+    readonly property bool sidebarShown: leftSidebar.shown
+    readonly property bool sidebarContainsMouse: leftSidebar.pointerInside
     readonly property bool hostWindowActive: Window.active
     readonly property int edgeMargin: Appearance.cornerSize
 
@@ -29,6 +33,20 @@ Item {
 
     function closePopup() {
         popup.close();
+    }
+
+    function closeSidebar() {
+        leftSidebar.close();
+    }
+
+    function closeOverlays() {
+        popup.close();
+        leftSidebar.close();
+    }
+
+    function showPopup(target, pageName) {
+        leftSidebar.close();
+        popup.showFor(target, pageName);
     }
 
     function requestHostWindowFocus() {
@@ -68,20 +86,6 @@ Item {
     // the visual bar because this root also contains the popup area.
     HoverHandler {
         id: barHover
-    }
-
-    // 手动添加底色层，修复离屏纹理边缘采样导致bar未贴合屏幕
-    Rectangle {
-        id: solidBarBackground
-
-        z: -3
-
-        x: 0
-        y: 0
-        width: root.width
-        height: Appearance.barHeight
-
-        color: Appearance.barBgColor
     }
 
     Item {
@@ -128,7 +132,7 @@ Item {
 
             MouseArea {
                 anchors.fill: parent
-                onClicked: popup.close()
+                onClicked: root.closeOverlays()
             }
         }
 
@@ -145,7 +149,7 @@ Item {
             height: visible
                 ? popup.height * (1 + extraHeight) : 0
             radius: Appearance.normalRadius
-            deformScale: 0.000005
+            deformScale: 0.000015
         }
     }
 
@@ -164,8 +168,16 @@ Item {
             width: Appearance.px(30)
             height: parent.height
             hoverEnabled: true
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
             cursorShape: Qt.PointingHandCursor
-            onClicked: popup.showFor(launcherControl, "launcher")
+            onClicked: event => {
+                if (event.button === Qt.RightButton) {
+                    popup.close();
+                    leftSidebar.toggle();
+                } else {
+                    root.showPopup(launcherControl, "launcher");
+                }
+            }
 
             Rectangle {
                 id: launcherPill
@@ -175,6 +187,7 @@ Item {
                 radius: Appearance.fullRadius
                 color: launcherControl.containsMouse
                     || popup.shown && popup.anchorItem === launcherControl
+                    || leftSidebar.shown
                     ? Appearance.secondaryContainer : "transparent"
                 scale: launcherControl.pressed ? 0.88 : 1
 
@@ -288,7 +301,7 @@ Item {
             id: weatherModule
 
             anchors.verticalCenter: parent.verticalCenter
-            onActivated: popup.showFor(weatherModule, "weather")
+            onActivated: root.showPopup(weatherModule, "weather")
         }
 
         TimeModule {
@@ -296,7 +309,7 @@ Item {
 
             showDate: root.compactLevel < 2
             anchors.verticalCenter: parent.verticalCenter
-            onActivated: popup.showFor(timeModule, "calendar")
+            onActivated: root.showPopup(timeModule, "calendar")
         }
 
         MediaModule {
@@ -305,7 +318,7 @@ Item {
             compact: root.compactLevel > 0
             visible: root.compactLevel < 2
             anchors.verticalCenter: parent.verticalCenter
-            onActivated: popup.showFor(mediaModule, "media")
+            onActivated: root.showPopup(mediaModule, "media")
         }
     }
 
@@ -326,7 +339,7 @@ Item {
                 rightMargin: Appearance.px(4)
                 verticalCenter: parent.verticalCenter
             }
-            onActivated: popup.showFor(batteryModule, "battery")
+            onActivated: root.showPopup(batteryModule, "battery")
         }
 
         PerformanceModule {
@@ -338,7 +351,7 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
             onActivated:
-                popup.showFor(performanceModule, "resources")
+                root.showPopup(performanceModule, "resources")
         }
 
         SystemModule {
@@ -350,7 +363,7 @@ Item {
                 rightMargin: Appearance.px(4)
             }
             
-            onActivated: popup.showFor(systemModule, "system")
+            onActivated: root.showPopup(systemModule, "system")
         }
 
         PowerModule {
@@ -361,7 +374,7 @@ Item {
                 rightMargin: root.edgeMargin
                 verticalCenter: parent.verticalCenter
             }
-            onActivated: popup.showFor(powerModule, "power")
+            onActivated: root.showPopup(powerModule, "power")
         }
 
         ClipboardModule {
@@ -372,7 +385,7 @@ Item {
                 rightMargin: Appearance.px(4)
                 verticalCenter: parent.verticalCenter
             }
-            onActivated: popup.showFor(clipboardModule, "clipboard")
+            onActivated: root.showPopup(clipboardModule, "clipboard")
         }
 
         NotificationModule {
@@ -384,7 +397,7 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
             onActivated:
-                popup.showFor(notificationModule, "notifications")
+                root.showPopup(notificationModule, "notifications")
         }
 
         TrayModule {
@@ -399,7 +412,7 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
             onActivated:
-                popup.showFor(trayModule, "tray")
+                root.showPopup(trayModule, "tray")
         }
 
         MouseArea {
@@ -455,5 +468,20 @@ Item {
         id: popup
         z: 10
         deformMatrix: popupBackground.deformMatrix
+    }
+
+    LeftSidebar {
+        id: leftSidebar
+
+        z: 20
+        y: Appearance.barHeight + Appearance.px(5)
+        height: Math.max(0,
+            root.height - y - Appearance.px(5))
+        modules: [
+            SidebarClockCard {
+            },
+            SidebarResourceCard {
+            }
+        ]
     }
 }
