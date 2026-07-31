@@ -14,6 +14,7 @@ Singleton {
     readonly property var strings: ({
         settings: ["设置", "Settings"],
         launcher: ["启动台", "Launcher"],
+        sidebarModuleCount: ["%1 个模块", "%1 modules"],
         applications: ["应用程序", "Applications"],
         searchApplications: ["搜索应用程序…", "Search applications…"],
         noApplicationsFound: ["没有找到匹配的应用",

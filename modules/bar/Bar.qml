@@ -38,6 +38,7 @@ Scope {
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.namespace: "quickshell:bar"
             WlrLayershell.keyboardFocus: barContent.popupShown
+                    || barContent.sidebarShown
                     || barContent.barContainsMouse
                 ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
@@ -50,6 +51,9 @@ Scope {
                 Region {
                     item: barContent.popupMask
                 }
+                Region {
+                    item: barContent.sidebarMask
+                }
             }
 
             mask: normalMask
@@ -59,10 +63,12 @@ Scope {
 
                 interval: 120
                 onTriggered: {
-                    if (barContent.popupShown
+                    if ((barContent.popupShown
+                            || barContent.sidebarShown)
                             && !barContent.hostWindowActive
-                            && !barContent.popupContainsMouse) {
-                        barContent.closePopup();
+                            && !barContent.popupContainsMouse
+                            && !barContent.sidebarContainsMouse) {
+                        barContent.closeOverlays();
                     }
                 }
             }
@@ -83,17 +89,41 @@ Scope {
                         () => barContent.requestHostWindowFocus());
                 }
 
+                function onSidebarShownChanged() {
+                    if (!barContent.sidebarShown)
+                        return;
+
+                    focusDismissTimer.stop();
+                    barContent.requestHostWindowFocus();
+                    Qt.callLater(
+                        () => barContent.requestHostWindowFocus());
+                }
+
                 function onHostWindowActiveChanged() {
                     if (barContent.hostWindowActive)
                         focusDismissTimer.stop();
-                    else if (barContent.popupShown)
+                    else if (barContent.popupShown
+                            || barContent.sidebarShown)
                         focusDismissTimer.restart();
                 }
 
                 function onPopupContainsMouseChanged() {
                     if (barContent.popupContainsMouse)
                         focusDismissTimer.stop();
-                    else if (barContent.popupShown
+                    else if ((barContent.popupShown
+                            || barContent.sidebarShown)
+                        && !barContent.sidebarContainsMouse
+                        && !barContent.hostWindowActive) {
+                        focusDismissTimer.restart();
+                    }
+                }
+
+                function onSidebarContainsMouseChanged() {
+                    if (barContent.sidebarContainsMouse)
+                        focusDismissTimer.stop();
+                    else if ((barContent.popupShown
+                            || barContent.sidebarShown)
+                        && !barContent.popupContainsMouse
                         && !barContent.hostWindowActive) {
                         focusDismissTimer.restart();
                     }
@@ -157,7 +187,7 @@ Scope {
 
                 function onOverviewOpenChanged() {
                     if (NiriService.overviewOpen)
-                        barContent.closePopup();
+                        barContent.closeOverlays();
                 }
             }
         }
