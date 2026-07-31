@@ -4,10 +4,11 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell.Services.Mpris
+import Quickshell.Widgets
 import qs.common
 import qs.services
 
-Rectangle {
+ClippingRectangle {
     id: root
 
     required property MprisPlayer player
@@ -21,7 +22,6 @@ Rectangle {
     border.width: MediaService.activePlayer === player ? 2 : 1
     border.color: MediaService.activePlayer === player
         ? Appearance.primary : Appearance.outline
-    clip: true
 
     Image {
         id: backgroundArt
