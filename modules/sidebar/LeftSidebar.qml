@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Effects
 import QtQuick.Layouts
+import Quickshell
 import qs.common
 import qs.common.widgets
 import qs.services
@@ -11,13 +12,18 @@ import qs.services
 Item {
     id: root
 
-    readonly property bool shown: LeftSidebarService.shown
+    required property string outputName
+    readonly property bool shown:
+        LeftSidebarService.shown
+        && root.outputName.length > 0
+        && LeftSidebarService.targetOutputName
+            === root.outputName
     property alias modules: moduleColumn.data
     readonly property bool pointerInside: sidebarHover.hovered
     readonly property Item maskItem: root
     readonly property real hiddenX:
         -width - Appearance.px(24)
-
+    
     signal closeRequested
 
     function open() {

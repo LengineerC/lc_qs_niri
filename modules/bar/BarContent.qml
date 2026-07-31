@@ -486,7 +486,7 @@ Item {
 
     LeftSidebar {
         id: leftSidebar
-
+        outputName: root.outputName
         z: 20
         y: Appearance.barHeight + Appearance.px(5)
         height: Math.max(0,
