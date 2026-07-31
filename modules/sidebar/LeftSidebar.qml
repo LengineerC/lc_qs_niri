@@ -88,6 +88,11 @@ Item {
                 Controls.ScrollBar.vertical.policy:
                     Controls.ScrollBar.AlwaysOff
 
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: forceActiveFocus()
+                }
+                
                 ColumnLayout {
                     id: moduleColumn
 

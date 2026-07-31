@@ -492,7 +492,7 @@ Item {
         height: Math.max(0,
             root.height - y - Appearance.px(5))
         modules: [
-            SidebarClockCard {},
+            QuickNote {},
         ]
     }
 }

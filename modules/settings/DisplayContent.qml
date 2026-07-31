@@ -412,6 +412,11 @@ Item {
                         delegate: Rectangle {
                             id: outputCard
 
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: forceActiveFocus()
+                            }
+
                             required property var modelData
                             property bool draftEnabled: modelData.enabled
                             property string draftMode:

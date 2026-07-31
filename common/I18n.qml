@@ -228,7 +228,6 @@ Singleton {
         schemeRainbow: ["彩虹", "Rainbow"],
         schemeTonalSpot: ["色调聚焦", "Tonal Spot"],
         schemeVibrant: ["活力", "Vibrant"],
-
         desktop: ["桌面", "Desktop"],
         noFocusedWindow: ["没有聚焦窗口", "No focused window"],
         noMedia: ["无媒体", "No media"],
@@ -347,7 +346,24 @@ Singleton {
         batteryHealth: ["电池健康", "Battery health"],
         unknown: ["未知", "Unknown"],
         powerProfile: ["电源策略", "Power profile"],
-        performanceLimited: ["性能受到限制：", "Performance limited: "]
+        performanceLimited: ["性能受到限制：", "Performance limited: "],
+
+        quickNote: ["快速笔记","Quick Note"],
+        loading: ["正在加载","Loading"],
+        working: ["正在处理","Working"],
+        saving: ["正在保存…","Saving…"],
+        saved: ["已保存","Saved"],
+        unsaved: ["未保存","Unsaved"],
+        noNotes: ["暂无笔记","No notes"],
+        markdownNotePlaceholder: ["使用 Markdown 记录一些内容…","Write something in Markdown…"],
+        emptyNote: ["暂无内容","No content"],
+        invalidNoteName: ["文件名无效","Invalid name"],
+        noteNameExists: ["文件名已存在","Name already exists"],
+        noteDirectoryError: ["无法创建笔记目录","Cannot create note folder"],
+        noteCreateError: ["无法新建笔记","Cannot create note"],
+        noteLoadError: ["无法读取笔记","Cannot open note"],
+        noteSaveError: ["无法保存笔记","Cannot save note"],
+        noteRenameError: ["无法重命名笔记","Cannot rename note"],
     })
 
     function tr(key) {

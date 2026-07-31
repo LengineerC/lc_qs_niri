@@ -70,6 +70,11 @@ Item {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
         }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: forceActiveFocus()
+        }
     }
 
     component SectionTitle: RowLayout {
@@ -97,6 +102,11 @@ Item {
                 weight: Font.DemiBold
             }
         }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: forceActiveFocus()
+        }
     }
 
     component SettingCard: Rectangle {
@@ -109,6 +119,11 @@ Item {
         color: Appearance.layer3
         border.width: 1
         border.color: Appearance.outline
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: forceActiveFocus()
+        }
 
         ColumnLayout {
             id: cardLayout
@@ -169,6 +184,11 @@ Item {
             cursorShape: Qt.PointingHandCursor
             onClicked: control.toggled(!control.checked)
         }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: forceActiveFocus()
+        }
     }
 
     component MetricChoice: Rectangle {
@@ -191,6 +211,11 @@ Item {
         border.color: selected
             ? Appearance.primary : Appearance.outline
         scale: metricChoiceArea.pressed ? 0.98 : 1
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: forceActiveFocus()
+        }
 
         RowLayout {
             anchors {
@@ -297,6 +322,11 @@ Item {
             }
         }
 
+        MouseArea {
+            anchors.fill: parent
+            onClicked: forceActiveFocus()
+        }
+
         handle: Rectangle {
             x: slider.leftPadding + slider.visualPosition
                 * (slider.availableWidth - width)
@@ -327,6 +357,11 @@ Item {
 
         Layout.fillWidth: true
         spacing: Appearance.px(10)
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: forceActiveFocus()
+        }
 
         PanelText {
             Layout.preferredWidth: Appearance.px(
@@ -384,6 +419,11 @@ Item {
         onCurrentValueChanged: {
             if (!formatInput.activeFocus)
                 draftValue = currentValue;
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: forceActiveFocus()
         }
 
         ColumnLayout {
@@ -453,6 +493,11 @@ Item {
         anchors.fill: parent
         color: "transparent"
 
+        MouseArea {
+            anchors.fill: parent
+            onClicked: forceActiveFocus()
+        }
+
         RowLayout {
             id: titleRow
             anchors {
@@ -520,6 +565,11 @@ Item {
 
             Controls.ScrollBar.vertical: Controls.ScrollBar {
                 policy: Controls.ScrollBar.AsNeeded
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: forceActiveFocus()
             }
 
             ColumnLayout {

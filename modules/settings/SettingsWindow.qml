@@ -100,6 +100,11 @@ ApplicationWindow {
         }
     }
 
+    MouseArea {
+        anchors.fill: parent
+        onClicked: forceActiveFocus()
+    }
+
     Rectangle {
         anchors.fill: parent
         color: Appearance.layer0

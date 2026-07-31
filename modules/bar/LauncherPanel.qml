@@ -227,10 +227,6 @@ Item {
                         onClicked: searchInput.clear()
                     }
                 }
-
-                CloseButton {
-                    onClicked: root.closeRequested()
-                }
             }
         }
 

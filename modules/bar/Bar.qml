@@ -56,6 +56,11 @@ Scope {
                 }
             }
 
+            MouseArea {
+                anchors.fill: parent
+                onClicked: forceActiveFocus()
+            }
+
             mask: normalMask
 
             Timer {
