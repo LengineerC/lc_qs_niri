@@ -184,11 +184,6 @@ Item {
             cursorShape: Qt.PointingHandCursor
             onClicked: control.toggled(!control.checked)
         }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: forceActiveFocus()
-        }
     }
 
     component MetricChoice: Rectangle {
@@ -211,11 +206,6 @@ Item {
         border.color: selected
             ? Appearance.primary : Appearance.outline
         scale: metricChoiceArea.pressed ? 0.98 : 1
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: forceActiveFocus()
-        }
 
         RowLayout {
             anchors {
@@ -320,11 +310,6 @@ Item {
                 radius: parent.radius
                 color: Appearance.primary
             }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: forceActiveFocus()
         }
 
         handle: Rectangle {

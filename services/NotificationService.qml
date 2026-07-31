@@ -243,12 +243,6 @@ Singleton {
             if (!currentEntry)
                 return;
 
-            console.debug(
-                "NotificationService: notification closed:",
-                entryId,
-                NotificationCloseReason.toString(reason)
-            );
-
             currentEntry.notification = null;
 
             if (reason === NotificationCloseReason.CloseRequested)

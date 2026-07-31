@@ -21,21 +21,18 @@ Rectangle {
     property bool dirty: false
     property bool saving: false
 
-    property int editorHeight: Appearance.px(300)
+    property bool confirmingDelete: false
+
+    property string deleteTargetFileName: ""
+    property string deleteTargetPath: ""
+
+    property int editorHeight: Appearance.px(500)
     readonly property int outlineWidth: Math.max(1, Math.round(Appearance.px(1)))
 
     property string currentFileName: ""
     property string currentPath: ""
     property string operationError: ""
 
-    /*
-     * 在保存完成后执行的操作。
-     *
-     * action:
-     *   open
-     *   create
-     *   rename
-     */
     property string pendingAction: ""
     property var pendingActionData: ({})
 
@@ -47,6 +44,9 @@ Rectangle {
     property string renameTargetFileName: ""
     property string renameTargetPath: ""
 
+    property string savingPath: ""
+    property string savingText: ""
+
     readonly property string notesDirectory:
         ShellSettings.stateDirectory + "/quicknote"
 
@@ -57,16 +57,23 @@ Rectangle {
         ensureDirectoryProcess.running
         || createProcess.running
         || renameProcess.running
+        || deleteProcess.running
 
     readonly property string statusText: {
         if (operationError.length > 0)
             return operationError;
 
+        if (confirmingDelete)
+            return I18n.tr("deleteNoteConfirm");
+
         if (!directoryReady)
             return I18n.tr("loading");
 
-        if (createProcess.running || renameProcess.running)
+        if (createProcess.running
+                || renameProcess.running
+                || deleteProcess.running) {
             return I18n.tr("working");
+        }
 
         if (!initialized)
             return I18n.tr("loading");
@@ -265,35 +272,45 @@ Rectangle {
      * 用户输入后延迟保存。
      */
     function scheduleSave(): void {
-        if (!initialized || currentPath.length === 0)
+        if (!root.initialized
+                || root.currentPath.length === 0) {
             return;
+        }
 
-        operationError = "";
-        dirty = true;
-        saveTimer.restart();
+        root.operationError = "";
+        root.dirty = true;
+
+        if (!root.saving)
+            saveTimer.restart();
     }
 
     function saveNow(): void {
-        if (!initialized
-                || currentPath.length === 0
-                || !dirty
-                || saving) {
-            if (!dirty && !saving)
-                executePendingAction();
+        if (!root.initialized
+                || root.currentPath.length === 0) {
+            return;
+        }
 
+        if (root.saving)
+            return;
+
+        if (!root.dirty) {
+            root.executePendingAction();
             return;
         }
 
         saveTimer.stop();
 
         /*
-         * 写入过程中继续输入时，onTextChanged 会重新把
-         * dirty 设置为 true。
-         */
-        dirty = false;
-        saving = true;
+        * 记录这一次实际写入的文件和文本。
+        * 后续可以判断保存期间是否又发生了编辑。
+        */
+        root.savingPath = root.currentPath;
+        root.savingText = editor.text;
 
-        noteFile.setText(editor.text);
+        root.dirty = false;
+        root.saving = true;
+
+        noteFile.setText(root.savingText);
     }
 
     /*
@@ -342,6 +359,10 @@ Rectangle {
         case "rename":
             performRename(data);
             break;
+
+        case "delete":
+            performDelete(data);
+            break;
         }
     }
 
@@ -373,6 +394,7 @@ Rectangle {
             return;
         }
 
+        root.confirmingDelete = false;
         root.operationError = "";
         root.initialized = false;
         root.dirty = false;
@@ -437,6 +459,7 @@ Rectangle {
             return;
         }
 
+        root.confirmingDelete = false;
         operationError = "";
         renameEditor.text = currentFileName;
         renaming = true;
@@ -520,6 +543,95 @@ Rectangle {
             "quicknote-rename",
             renameOldPath,
             renameTargetPath
+        ]);
+    }
+
+    function togglePreviewMode(): void {
+        if (!root.initialized)
+            return;
+
+        root.previewMode = !root.previewMode;
+
+        if (root.previewMode) {
+            editor.deselect();
+            root.saveNow();
+        } else {
+            Qt.callLater(() => {
+                editor.forceActiveFocus(
+                    Qt.OtherFocusReason
+                );
+            });
+        }
+    }
+
+    function requestDelete(): void {
+        if (!root.initialized
+                || root.currentPath.length === 0
+                || root.fileOperationRunning) {
+            return;
+        }
+
+        root.operationError = "";
+        root.confirmingDelete = true;
+    }
+
+    function cancelDelete(): void {
+        root.confirmingDelete = false;
+    }
+
+    function confirmDelete(): void {
+        if (!root.confirmingDelete
+                || root.currentPath.length === 0
+                || root.fileOperationRunning) {
+            return;
+        }
+
+        root.confirmingDelete = false;
+
+        root.runAfterSave("delete", {
+            fileName: root.currentFileName,
+            filePath: root.currentPath
+        });
+    }
+
+    function performDelete(data): void {
+        if (!data || !data.filePath)
+            return;
+
+        const targetPath =
+            root.normalizePath(data.filePath);
+
+        /*
+        * 只允许删除 quicknote 目录内的直接子文件。
+        */
+        const directoryPrefix =
+            root.notesDirectory + "/";
+
+        if (!targetPath.startsWith(directoryPrefix)
+                || targetPath.slice(
+                    directoryPrefix.length
+                ).includes("/")) {
+            root.operationError =
+                I18n.tr("noteDeleteError");
+
+            console.warn(
+                "Refusing to delete path outside note directory:",
+                targetPath
+            );
+
+            return;
+        }
+
+        root.deleteTargetFileName =
+            String(data.fileName ?? "");
+
+        root.deleteTargetPath = targetPath;
+        root.operationError = "";
+
+        deleteProcess.exec([
+            "rm",
+            "--",
+            root.deleteTargetPath
         ]);
     }
 
@@ -728,6 +840,60 @@ Rectangle {
         }
     }
 
+    Process {
+        id: deleteProcess
+
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode === 0) {
+                root.operationError = "";
+                root.confirmingDelete = false;
+
+                /*
+                * 先禁用初始化状态，避免清空编辑器时
+                * 被 onTextChanged 识别为用户修改。
+                */
+                root.initialized = false;
+                root.dirty = false;
+                root.saving = false;
+                root.renaming = false;
+
+                root.currentFileName = "";
+                root.currentPath = "";
+
+                editor.text = "";
+                renameEditor.text = "";
+
+                /*
+                * 允许 selectInitialNote() 再运行一次：
+                *
+                * - 尚有文件：打开最新的一份
+                * - 没有文件：自动新建一份
+                */
+                root.initialSelectionDone = false;
+                root.refreshFolderModel();
+            } else {
+                /*
+                * 删除失败时继续保留当前文件和编辑内容。
+                */
+                root.initialized =
+                    root.currentPath.length > 0;
+
+                root.confirmingDelete = false;
+                root.operationError =
+                    I18n.tr("noteDeleteError");
+
+                console.warn(
+                    "Failed to delete quick note:",
+                    root.deleteTargetPath,
+                    exitCode,
+                    exitStatus
+                );
+
+                root.refreshFolderModel();
+            }
+        }
+    }
+
     FileView {
         id: noteFile
 
@@ -755,10 +921,17 @@ Rectangle {
         }
 
         onLoadFailed: error => {
+            root.saving = false;
+            root.savingPath = "";
+            root.savingText = "";
+            saveTimer.stop();
+
             if (root.currentPath.length === 0)
                 return;
 
             root.initialized = false;
+            root.dirty = false;
+
             root.operationError =
                 I18n.tr("noteLoadError");
 
@@ -770,29 +943,60 @@ Rectangle {
         }
 
         onSaved: {
+            const savedPath = root.savingPath;
+            const savedText = root.savingText;
+
             root.saving = false;
+            root.savingPath = "";
+            root.savingText = "";
             root.operationError = "";
 
             /*
-             * 保存期间如果继续输入，立即再保存一次。
-             */
-            if (root.dirty) {
-                Qt.callLater(root.saveNow);
-            } else {
-                root.executePendingAction();
+            * 正常情况下保存过程中不会切换 path。
+            * 加这个检查可以防止异步结果污染新文件状态。
+            */
+            if (!root.samePath(
+                    savedPath,
+                    root.currentPath)) {
+                return;
+            }
+
+            /*
+            * 保存期间编辑器内容发生变化，说明磁盘中的内容
+            * 已经落后，需要再保存一次。
+            */
+            root.dirty = editor.text !== savedText;
+
+            if (root.pendingAction.length > 0) {
+                /*
+                * 文件切换、重命名、删除等操作正在等待，
+                * 此时必须立即保存最新内容。
+                */
+                if (root.dirty) {
+                    Qt.callLater(root.saveNow);
+                } else {
+                    root.executePendingAction();
+                }
+            } else if (root.dirty) {
+                /*
+                * 普通输入继续走 700ms 防抖，
+                * 不再形成连续写入循环。
+                */
+                saveTimer.restart();
             }
         }
 
         onSaveFailed: error => {
             root.saving = false;
+            root.savingPath = "";
+            root.savingText = "";
             root.dirty = true;
 
-            /*
-             * 保存失败时不执行文件切换，防止未保存
-             * 内容丢失。
-             */
+            saveTimer.stop();
+
             root.pendingAction = "";
             root.pendingActionData = ({});
+
             root.operationError =
                 I18n.tr("noteSaveError");
 
@@ -827,7 +1031,7 @@ Rectangle {
          */
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.px(10)
+            spacing: Appearance.px(5)
 
             Text {
                 text: "󰠮"
@@ -892,8 +1096,8 @@ Rectangle {
                 icon: "󰈔"
 
                 enabled: root.directoryReady
-                    && !createProcess.running
-                    && !renameProcess.running
+                    && !root.confirmingDelete
+                    && !root.fileOperationRunning
 
                 onClicked: root.requestNewNote()
             }
@@ -906,30 +1110,45 @@ Rectangle {
 
                 enabled: root.initialized
                     && root.currentPath.length > 0
+                    && !root.confirmingDelete
                     && !root.fileOperationRunning
 
                 onClicked: root.beginRename()
             }
 
             HeaderButton {
-                icon: root.previewMode
-                    ? "󰏫"
-                    : "󰈈"
+                visible: !root.confirmingDelete
+                icon: "󰆴"
 
                 enabled: root.initialized
+                    && root.currentPath.length > 0
+                    && !root.fileOperationRunning
 
-                onClicked: {
-                    root.previewMode =
-                        !root.previewMode;
+                onClicked: root.requestDelete()
+            }
 
-                    if (root.previewMode) {
-                        root.saveNow();
-                    } else {
-                        Qt.callLater(() => {
-                            editor.forceActiveFocus();
-                        });
-                    }
-                }
+            HeaderButton {
+                /*
+                * 确认删除
+                */
+                visible: root.confirmingDelete
+                icon: "󰄬"
+
+                enabled: !root.fileOperationRunning
+
+                onClicked: root.confirmDelete()
+            }
+
+            HeaderButton {
+                /*
+                * 取消删除
+                */
+                visible: root.confirmingDelete
+                icon: "󰅖"
+
+                enabled: !root.fileOperationRunning
+
+                onClicked: root.cancelDelete()
             }
         }
 
@@ -1319,6 +1538,12 @@ Rectangle {
             Rectangle {
                 id: noteSurface
 
+                readonly property real scrollBeyondLastLine:
+                    Math.max(
+                        Appearance.px(80),
+                        height * 0.38
+                    )
+
                 anchors.fill: parent
                 anchors.margins: root.outlineWidth
 
@@ -1340,8 +1565,9 @@ Rectangle {
                     contentWidth: width
                     contentHeight: Math.max(
                         height,
-                        editor.implicitHeight
-                            + Appearance.px(24)
+                        editor.y
+                            + editor.implicitHeight
+                            + noteSurface.scrollBeyondLastLine
                     )
 
                     boundsBehavior:
@@ -1381,6 +1607,7 @@ Rectangle {
                         selectByMouse: true
                         persistentSelection: true
                         activeFocusOnPress: true
+                        focus: !root.previewMode
 
                         font {
                             family:
@@ -1445,8 +1672,9 @@ Rectangle {
                     contentWidth: width
                     contentHeight: Math.max(
                         height,
-                        previewText.implicitHeight
-                            + Appearance.px(24)
+                        previewText.y
+                            + previewText.implicitHeight
+                            + noteSurface.scrollBeyondLastLine
                     )
 
                     boundsBehavior:
@@ -1486,6 +1714,93 @@ Rectangle {
 
                         onLinkActivated: link =>
                             Qt.openUrlExternally(link)
+                    }
+                }
+
+                Rectangle {
+                    id: floatingModeButton
+
+                    anchors {
+                        right: parent.right
+                        bottom: parent.bottom
+                        rightMargin: Appearance.px(7)
+                        bottomMargin: Appearance.px(7)
+                    }
+
+                    width: Appearance.px(28)
+                    height: Appearance.px(28)
+                    z: 100
+
+                    radius: Appearance.fullRadius
+                    color: Appearance.layer3
+
+                    border.width: 1
+                    border.color: root.previewMode
+                        ? Appearance.primary
+                        : Appearance.outline
+
+                    /*
+                    * 平时保持低透明度，悬停时变清晰。
+                    */
+                    opacity: !root.initialized
+                        ? 0.25
+                        : modeButtonMouse.containsMouse
+                            ? 0.9
+                            : 0.48
+
+                    scale: modeButtonMouse.pressed
+                        ? 0.86
+                        : 1
+
+                    Text {
+                        anchors.centerIn: parent
+
+                        text: root.previewMode
+                            ? "󰏫"
+                            : "󰈈"
+
+                        color: root.previewMode
+                            ? Appearance.primary
+                            : Appearance.layer0Text
+
+                        font {
+                            family: Appearance.iconFontFamily
+                            pixelSize: Appearance.px(15)
+                        }
+                    }
+
+                    MouseArea {
+                        id: modeButtonMouse
+
+                        anchors.fill: parent
+                        enabled: root.initialized
+                        hoverEnabled: true
+
+                        cursorShape: enabled
+                            ? Qt.PointingHandCursor
+                            : Qt.ArrowCursor
+
+                        onClicked:
+                            root.togglePreviewMode()
+                    }
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Appearance.fastDuration
+                        }
+                    }
+
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Appearance.fastDuration
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
+                    Behavior on border.color {
+                        ColorAnimation {
+                            duration: Appearance.fastDuration
+                        }
                     }
                 }
             }
