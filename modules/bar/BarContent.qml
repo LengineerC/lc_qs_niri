@@ -15,7 +15,10 @@ Item {
     implicitHeight: Appearance.barHeight
     readonly property Item barMask: barInputRegion
     readonly property Item popupMask: popup.popupMaskItem
-    readonly property Item sidebarMask: leftSidebar.maskItem
+    readonly property Item sidebarMask:
+    leftSidebar.shown
+        ? sidebarFullScreenMask
+        : leftSidebar.maskItem
     readonly property bool barContainsMouse: barHover.hovered
         && barHover.point.position.y >= 0
         && barHover.point.position.y < Appearance.barHeight
@@ -79,6 +82,12 @@ Item {
 
         width: root.width
         height: Appearance.barHeight
+    }
+
+    Item {
+        id: sidebarFullScreenMask
+
+        anchors.fill: parent
     }
 
     // This handler belongs to the common ancestor of every bar control, so
@@ -164,6 +173,27 @@ Item {
                 ? popup.height * (1 + extraHeight) : 0
             radius: Appearance.normalRadius
             deformScale: 0.000005
+        }
+    }
+
+    MouseArea {
+        id: sidebarOutsideDismissArea
+
+        anchors.fill: parent
+
+        z: -1
+
+        enabled: leftSidebar.shown
+        visible: enabled
+
+        acceptedButtons:
+            Qt.LeftButton
+            | Qt.RightButton
+            | Qt.MiddleButton
+
+        onPressed: event => {
+            root.closeSidebar();
+            event.accepted = true;
         }
     }
 

@@ -68,12 +68,10 @@ Scope {
 
                 interval: 120
                 onTriggered: {
-                    if ((barContent.popupShown
-                            || barContent.sidebarShown)
+                    if (barContent.popupShown
                             && !barContent.hostWindowActive
-                            && !barContent.popupContainsMouse
-                            && !barContent.sidebarContainsMouse) {
-                        barContent.closeOverlays();
+                            && !barContent.popupContainsMouse) {
+                        barContent.closePopup();
                     }
                 }
             }
@@ -95,41 +93,23 @@ Scope {
                 }
 
                 function onSidebarShownChanged() {
-                    if (!barContent.sidebarShown)
-                        return;
-
-                    focusDismissTimer.stop();
-                    barContent.requestHostWindowFocus();
-                    Qt.callLater(
-                        () => barContent.requestHostWindowFocus());
+                    if (barContent.sidebarShown)
+                        focusDismissTimer.stop();
                 }
 
                 function onHostWindowActiveChanged() {
-                    if (barContent.hostWindowActive)
+                    if (barContent.hostWindowActive) {
                         focusDismissTimer.stop();
-                    else if (barContent.popupShown
-                            || barContent.sidebarShown)
-                        focusDismissTimer.restart();
-                }
-
-                function onPopupContainsMouseChanged() {
-                    if (barContent.popupContainsMouse)
-                        focusDismissTimer.stop();
-                    else if ((barContent.popupShown
-                            || barContent.sidebarShown)
-                        && !barContent.sidebarContainsMouse
-                        && !barContent.hostWindowActive) {
+                    } else if (barContent.popupShown) {
                         focusDismissTimer.restart();
                     }
                 }
 
-                function onSidebarContainsMouseChanged() {
-                    if (barContent.sidebarContainsMouse)
+                function onPopupContainsMouseChanged() {
+                    if (barContent.popupContainsMouse) {
                         focusDismissTimer.stop();
-                    else if ((barContent.popupShown
-                            || barContent.sidebarShown)
-                        && !barContent.popupContainsMouse
-                        && !barContent.hostWindowActive) {
+                    } else if (barContent.popupShown
+                            && !barContent.hostWindowActive) {
                         focusDismissTimer.restart();
                     }
                 }
