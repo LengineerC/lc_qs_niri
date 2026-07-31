@@ -262,35 +262,12 @@ Pad
 显示器分辨率、刷新率、缩放、方向、位置、VRR 和启用状态的具体修改在设置
 窗口中完成；IPC 当前只暴露保存与状态查询。
 
-## 13. 快速诊断
+## 12. 侧边栏
 
-```bash
-# 配置是否能加载
-qs -n -p /absolute/path/test
-
-# IPC 是否已注册
-qs ipc -p /absolute/path/test show
-
-# 独立窗口 toggle 是否正常
-qs ipc -p /absolute/path/test call launcher toggle
-qs ipc -p /absolute/path/test call launcher visible
-
-# Niri IPC 是否可用
-niri msg -j workspaces
-
-# 常用外部命令是否存在
-command -v qs niri python3 wl-copy wl-paste magick matugen \
-    nmcli sensors ps cava curl systemctl
-```
-
-IPC 的实现位置：
-
-- `modules/bar/UtilityWindows.qml`
-- `modules/settings/SettingsWindow.qml`
-- `services/LockService.qml`
-- `services/MediaService.qml`
-- `services/NotificationService.qml`
-- `services/OutputService.qml`
-- `services/WallpaperService.qml`
-- `common/ShellSettings.qml`
-- `common/Theme.qml`
+### `leftsidebar`
+| 命令 | 说明 |
+| --- | --- |
+| `qs ipc call leftsidebar open` | 打开左侧侧边栏 |
+| `qs ipc call leftsidebar close` | 关闭左侧侧边栏 |
+| `qs ipc call leftsidebar toggle` | 切换左侧侧边栏显示状态 |
+| `qs ipc call leftsidebar isShown` | 返回左侧侧边栏的显示状态 |
