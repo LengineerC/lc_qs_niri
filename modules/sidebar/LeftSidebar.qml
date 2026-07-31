@@ -6,11 +6,12 @@ import QtQuick.Effects
 import QtQuick.Layouts
 import qs.common
 import qs.common.widgets
+import qs.services
 
 Item {
     id: root
 
-    property bool shown: false
+    readonly property bool shown: LeftSidebarService.shown
     property alias modules: moduleColumn.data
     readonly property bool pointerInside: sidebarHover.hovered
     readonly property Item maskItem: root
@@ -20,22 +21,18 @@ Item {
     signal closeRequested
 
     function open() {
-        shown = true;
-        forceActiveFocus(Qt.ShortcutFocusReason);
+        LeftSidebarService.open();
     }
 
     function close() {
-        shown = false;
+        LeftSidebarService.close();
     }
 
     function toggle() {
-        if (shown)
-            close();
-        else
-            open();
+        LeftSidebarService.toggle();
     }
 
-    x: shown ? 0 : hiddenX
+    x: shown ? 5 : hiddenX
     opacity: shown ? 1 : 0
     visible: shown || x > hiddenX + 0.5
     width: Math.min(Appearance.px(390),
@@ -43,7 +40,10 @@ Item {
             (parent?.width ?? Appearance.px(390)) * 0.32))
 
     focus: shown
-    Keys.onEscapePressed: close()
+    Keys.onEscapePressed: event => {
+        root.close();
+        event.accepted = true;
+    }
 
     HoverHandler {
         id: sidebarHover
@@ -75,71 +75,6 @@ Item {
             }
             spacing: Appearance.px(12)
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.px(9)
-
-                Rectangle {
-                    implicitWidth: Appearance.px(36)
-                    implicitHeight: Appearance.px(36)
-                    radius: Appearance.px(11)
-                    color: Appearance.primaryContainer
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "󰣇"
-                        color: Appearance.primaryContainerText
-                        font {
-                            family: Appearance.iconFontFamily
-                            pixelSize: Appearance.px(21)
-                        }
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: "QuickShell"
-                        color: Appearance.layer0Text
-                        elide: Text.ElideRight
-                        font {
-                            family: Appearance.fontFamily
-                            pixelSize: Appearance.largeFontSize
-                            weight: Font.DemiBold
-                        }
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: I18n.tr("sidebarModuleCount")
-                            .arg(root.modules.length)
-                        color: Appearance.subtext
-                        elide: Text.ElideRight
-                        font {
-                            family: Appearance.fontFamily
-                            pixelSize: Appearance.smallFontSize
-                        }
-                    }
-                }
-
-                CloseButton {
-                    onClicked: {
-                        root.close();
-                        root.closeRequested();
-                    }
-                }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 1
-                color: Appearance.outline
-                opacity: 0.65
-            }
-
             Controls.ScrollView {
                 id: moduleScroll
 
@@ -151,7 +86,7 @@ Item {
                 Controls.ScrollBar.horizontal.policy:
                     Controls.ScrollBar.AlwaysOff
                 Controls.ScrollBar.vertical.policy:
-                    Controls.ScrollBar.AsNeeded
+                    Controls.ScrollBar.AlwaysOff
 
                 ColumnLayout {
                     id: moduleColumn
@@ -172,7 +107,7 @@ Item {
 
     Behavior on opacity {
         NumberAnimation {
-            duration: Appearance.fastDuration
+            duration: Appearance.spatialDuration
             easing.type: Easing.OutCubic
         }
     }

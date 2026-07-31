@@ -4,7 +4,7 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
-import "file:///home/lengineerc/Applications/qs/test/Caelestia/Blobs" as Blobs
+import "file:///home/lengineerc/.config/quickshell/lc_qs_niri/Caelestia/Blobs" as Blobs
 import qs.common
 import qs.modules.sidebar
 import qs.services
@@ -88,6 +88,20 @@ Item {
         id: barHover
     }
 
+    // 手动添加底色层，修复离屏纹理边缘采样导致bar未贴合屏幕
+    Rectangle {
+        id: solidBarBackground
+
+        z: -3
+
+        x: 0
+        y: 0
+        width: root.width
+        height: Appearance.barHeight
+
+        color: Appearance.barBgColor
+    }
+
     Item {
         id: shadowSurface
 
@@ -149,7 +163,7 @@ Item {
             height: visible
                 ? popup.height * (1 + extraHeight) : 0
             radius: Appearance.normalRadius
-            deformScale: 0.000015
+            deformScale: 0.000005
         }
     }
 
@@ -478,10 +492,7 @@ Item {
         height: Math.max(0,
             root.height - y - Appearance.px(5))
         modules: [
-            SidebarClockCard {
-            },
-            SidebarResourceCard {
-            }
+            SidebarClockCard {},
         ]
     }
 }
