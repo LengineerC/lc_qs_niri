@@ -277,7 +277,6 @@ Item {
                     required property int index
 
                     width: ListView.view.width
-                        - Appearance.px(8)
                     height: Appearance.px(58)
                     radius: Appearance.px(12)
                     color: applicationEntry.ListView.isCurrentItem
@@ -286,6 +285,7 @@ Item {
                     border.width:
                         applicationEntry.ListView.isCurrentItem ? 1 : 0
                     border.color: Appearance.primary
+                    scale: 0.99
 
                     MouseArea {
                         id: entryArea
