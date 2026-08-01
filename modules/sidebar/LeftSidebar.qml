@@ -61,7 +61,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Appearance.cornerSize
-        color: Appearance.layer2
+        color: Appearance.barBgColor
         border.width: 1
         border.color: Appearance.layer0Border
 
