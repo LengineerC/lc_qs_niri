@@ -11,6 +11,9 @@ Item {
 
     signal closeRequested
 
+    // StyledPopup disables this after closing so the Canvas does no idle work.
+    property bool active: visible
+
     implicitWidth: Appearance.px(850)
     implicitHeight: contentColumn.implicitHeight
         + Appearance.px(28)
@@ -115,9 +118,9 @@ Item {
         implicitHeight: Appearance.px(48)
 
         radius: Appearance.px(9)
-        color: Appearance.layer2
+        color: Appearance.withAlpha(Appearance.layer2, 0.86)
         border.width: 1
-        border.color: Appearance.outline
+        border.color: Appearance.withAlpha(Appearance.outline, 0.82)
 
         RowLayout {
             anchors {
@@ -172,6 +175,392 @@ Item {
                 }
             }
         }
+    }
+
+    /*
+     * 当前天气的轻量动态背景。所有粒子位置都由时间和固定种子计算，
+     * 因此天气面板重新显示时不会出现随机闪烁。
+     */
+    component WeatherBackdrop: Canvas {
+        id: backdrop
+
+        required property int weatherCode
+        required property bool daytime
+        required property bool animationsActive
+
+        property real phase: 0
+
+        readonly property string weatherKind: {
+            const code = Number(weatherCode);
+            if (code === 0)
+                return "clear";
+            if (code === 1 || code === 2)
+                return "partlyCloudy";
+            if (code === 3)
+                return "cloudy";
+            if (code === 45 || code === 48)
+                return "fog";
+            if (code >= 51 && code <= 57)
+                return "drizzle";
+            if ((code >= 61 && code <= 67)
+                    || (code >= 80 && code <= 82))
+                return "rain";
+            if ((code >= 71 && code <= 77)
+                    || code === 85 || code === 86)
+                return "snow";
+            if (code >= 95)
+                return "thunder";
+            return "cloudy";
+        }
+
+        antialiasing: true
+
+        function positiveModulo(value, divisor) {
+            return ((value % divisor) + divisor) % divisor;
+        }
+
+        function roundedPath(context, x, y, pathWidth,
+                pathHeight, radius) {
+            const safeRadius = Math.min(radius,
+                pathWidth / 2, pathHeight / 2);
+
+            context.beginPath();
+            context.moveTo(x + safeRadius, y);
+            context.lineTo(x + pathWidth - safeRadius, y);
+            context.quadraticCurveTo(
+                x + pathWidth, y,
+                x + pathWidth, y + safeRadius);
+            context.lineTo(x + pathWidth,
+                y + pathHeight - safeRadius);
+            context.quadraticCurveTo(
+                x + pathWidth, y + pathHeight,
+                x + pathWidth - safeRadius, y + pathHeight);
+            context.lineTo(x + safeRadius, y + pathHeight);
+            context.quadraticCurveTo(
+                x, y + pathHeight,
+                x, y + pathHeight - safeRadius);
+            context.lineTo(x, y + safeRadius);
+            context.quadraticCurveTo(x, y, x + safeRadius, y);
+            context.closePath();
+        }
+
+        function drawCelestial(context) {
+            const centerX = width * 0.19;
+            const centerY = height * 0.34;
+            const radius = Math.min(width, height) * 0.105;
+
+            if (daytime) {
+                context.save();
+                context.translate(centerX, centerY);
+                context.rotate(phase * 0.045);
+                context.strokeStyle = Appearance.withAlpha(
+                    Appearance.primary, 0.18);
+                context.lineWidth = Appearance.px(2);
+                context.lineCap = "round";
+
+                for (let index = 0; index < 12; ++index) {
+                    const angle = Math.PI * 2 * index / 12;
+                    context.beginPath();
+                    context.moveTo(
+                        Math.cos(angle) * radius * 1.45,
+                        Math.sin(angle) * radius * 1.45);
+                    context.lineTo(
+                        Math.cos(angle) * radius * 1.85,
+                        Math.sin(angle) * radius * 1.85);
+                    context.stroke();
+                }
+                context.restore();
+
+                const glow = context.createRadialGradient(
+                    centerX, centerY, 0,
+                    centerX, centerY, radius * 2.4);
+                glow.addColorStop(0, Appearance.withAlpha(
+                    Appearance.primary, 0.22));
+                glow.addColorStop(0.42, Appearance.withAlpha(
+                    Appearance.primary, 0.09));
+                glow.addColorStop(1, Appearance.withAlpha(
+                    Appearance.primary, 0));
+                context.fillStyle = glow;
+                context.beginPath();
+                context.arc(centerX, centerY,
+                    radius * 2.4, 0, Math.PI * 2);
+                context.fill();
+            } else {
+                for (let index = 0; index < 18; ++index) {
+                    const x = positiveModulo(
+                        index * 83 + 29, Math.max(1, width));
+                    const y = positiveModulo(
+                        index * 47 + 17, Math.max(1, height * 0.72));
+                    const pulse = 0.35 + 0.25 * Math.sin(
+                        phase * 1.4 + index * 1.7);
+                    context.fillStyle = Appearance.withAlpha(
+                        Appearance.primary, pulse);
+                    context.beginPath();
+                    context.arc(x, y,
+                        Appearance.px(index % 5 === 0 ? 1.3 : 0.8),
+                        0, Math.PI * 2);
+                    context.fill();
+                }
+
+                context.fillStyle = Appearance.withAlpha(
+                    Appearance.primary, 0.2);
+                context.beginPath();
+                context.arc(centerX, centerY,
+                    radius * 1.12, 0, Math.PI * 2);
+                context.fill();
+                context.fillStyle = Appearance.withAlpha(
+                    Appearance.layer3, 0.95);
+                context.beginPath();
+                context.arc(centerX + radius * 0.48,
+                    centerY - radius * 0.18,
+                    radius, 0, Math.PI * 2);
+                context.fill();
+            }
+        }
+
+        function drawCloud(context, centerX, centerY,
+                cloudScale, alpha) {
+            const unit = Appearance.px(18) * cloudScale;
+            context.fillStyle = Appearance.withAlpha(
+                Appearance.layer0Text, alpha);
+            context.beginPath();
+            context.arc(centerX - unit * 0.8, centerY,
+                unit * 0.72, Math.PI, Math.PI * 2);
+            context.arc(centerX, centerY - unit * 0.28,
+                unit, Math.PI, Math.PI * 2);
+            context.arc(centerX + unit * 0.95, centerY,
+                unit * 0.68, Math.PI, Math.PI * 2);
+            context.lineTo(centerX + unit * 1.63,
+                centerY + unit * 0.48);
+            context.lineTo(centerX - unit * 1.52,
+                centerY + unit * 0.48);
+            context.closePath();
+            context.fill();
+        }
+
+        function drawCloudLayer(context, dense) {
+            // 每条纵向轨道只放一朵云，避免不同速度的云彼此追上。
+            const count = dense ? 3 : 2;
+            const laneHeights = dense
+                ? [0.2, 0.48, 0.75]
+                : [0.26, 0.66];
+            for (let index = 0; index < count; ++index) {
+                const scale = dense
+                    ? 0.78 + index * 0.16
+                    : 0.82 + index * 0.2;
+                const cloudWidth = Appearance.px(78) * scale;
+                const travelWidth = width + cloudWidth * 2;
+                const x = positiveModulo(
+                    index * travelWidth / count
+                        + phase * (3.2 + index * 0.38),
+                    travelWidth) - cloudWidth;
+                const y = height * laneHeights[index];
+                drawCloud(context, x, y, scale,
+                    dense ? 0.068 : 0.052);
+            }
+        }
+
+        function drawRain(context, lightRain) {
+            const count = lightRain ? 24 : 42;
+            context.strokeStyle = Appearance.withAlpha(
+                Appearance.primary, lightRain ? 0.22 : 0.32);
+            context.lineWidth = Appearance.px(1.25);
+            context.lineCap = "round";
+
+            for (let index = 0; index < count; ++index) {
+                const x = positiveModulo(
+                    index * 67 + 19, Math.max(1, width + 24)) - 12;
+                const speed = lightRain ? 62 : 105;
+                const y = positiveModulo(
+                    index * 43 + phase * speed,
+                    height + Appearance.px(28)) - Appearance.px(20);
+                const length = Appearance.px(
+                    lightRain ? 7 : 11 + index % 4);
+                context.beginPath();
+                context.moveTo(x, y);
+                context.lineTo(x - length * 0.22, y + length);
+                context.stroke();
+            }
+        }
+
+        function drawSnow(context) {
+            for (let index = 0; index < 30; ++index) {
+                const drift = Math.sin(
+                    phase * 0.85 + index * 1.31)
+                    * Appearance.px(8);
+                const x = positiveModulo(
+                    index * 79 + 23, Math.max(1, width)) + drift;
+                const y = positiveModulo(
+                    index * 37 + phase * (16 + index % 5),
+                    height + Appearance.px(16)) - Appearance.px(8);
+                const radius = Appearance.px(1 + index % 3 * 0.45);
+                context.fillStyle = Appearance.withAlpha(
+                    Appearance.layer0Text, 0.25 + (index % 4) * 0.04);
+                context.beginPath();
+                context.arc(x, y, radius, 0, Math.PI * 2);
+                context.fill();
+            }
+        }
+
+        function drawFogWisp(context, centerX, centerY,
+                wispWidth, thickness, alpha) {
+            const left = centerX - wispWidth / 2;
+            const right = centerX + wispWidth / 2;
+            const gradient = context.createLinearGradient(
+                left, centerY, right, centerY);
+            gradient.addColorStop(0,
+                Appearance.withAlpha(Appearance.layer0Text, 0));
+            gradient.addColorStop(0.18,
+                Appearance.withAlpha(Appearance.layer0Text,
+                    alpha * 0.62));
+            gradient.addColorStop(0.5,
+                Appearance.withAlpha(Appearance.layer0Text, alpha));
+            gradient.addColorStop(0.82,
+                Appearance.withAlpha(Appearance.layer0Text,
+                    alpha * 0.62));
+            gradient.addColorStop(1,
+                Appearance.withAlpha(Appearance.layer0Text, 0));
+
+            context.fillStyle = gradient;
+            context.beginPath();
+            context.moveTo(left, centerY);
+            context.bezierCurveTo(
+                left + wispWidth * 0.23,
+                centerY - thickness * 0.72,
+                left + wispWidth * 0.7,
+                centerY + thickness * 0.32,
+                right, centerY - thickness * 0.18);
+            context.bezierCurveTo(
+                left + wispWidth * 0.72,
+                centerY + thickness * 0.9,
+                left + wispWidth * 0.28,
+                centerY + thickness * 0.55,
+                left, centerY);
+            context.closePath();
+            context.fill();
+        }
+
+        function drawFog(context) {
+            const count = 4;
+            for (let index = 0; index < count; ++index) {
+                const wispWidth = width * (0.48 + index % 2 * 0.12);
+                const travelWidth = width + wispWidth;
+                const direction = index % 2 === 0 ? 1 : -1;
+                const rawPosition = index * travelWidth / count
+                    + direction * phase * (2.2 + index * 0.28);
+                const centerX = positiveModulo(
+                    rawPosition, travelWidth) - wispWidth / 2;
+                const centerY = height * (0.25 + index * 0.16)
+                    + Math.sin(phase * 0.18 + index)
+                        * Appearance.px(3);
+                const thickness = Appearance.px(13 + index % 2 * 4);
+
+                drawFogWisp(context, centerX, centerY,
+                    wispWidth, thickness, 0.065 + index * 0.008);
+                // 在循环边缘补绘同一雾团，避免突然整片消失。
+                drawFogWisp(context, centerX + travelWidth,
+                    centerY, wispWidth, thickness,
+                    0.065 + index * 0.008);
+            }
+        }
+
+        function drawLightning(context) {
+            const cycle = positiveModulo(phase, 6.4);
+            if (cycle > 0.16)
+                return;
+
+            const strength = Math.sin(cycle / 0.16 * Math.PI);
+            context.fillStyle = Appearance.withAlpha(
+                Appearance.primary, 0.055 * strength);
+            context.fillRect(0, 0, width, height);
+
+            context.strokeStyle = Appearance.withAlpha(
+                Appearance.primary, 0.55 * strength);
+            context.lineWidth = Appearance.px(1.7);
+            context.lineJoin = "round";
+            context.beginPath();
+            context.moveTo(width * 0.72, height * 0.14);
+            context.lineTo(width * 0.67, height * 0.43);
+            context.lineTo(width * 0.72, height * 0.43);
+            context.lineTo(width * 0.65, height * 0.78);
+            context.stroke();
+        }
+
+        onPaint: {
+            const context = getContext("2d");
+            context.clearRect(0, 0, width, height);
+
+            context.save();
+            roundedPath(context, 0, 0, width, height,
+                Math.max(0, Appearance.smallRadius - 1));
+            context.clip();
+
+            const baseStart = Appearance.mix(
+                Appearance.layer3,
+                daytime ? Appearance.primaryContainer
+                    : Appearance.layer0,
+                daytime ? 0.22 : 0.34);
+            const baseEnd = Appearance.mix(
+                Appearance.layer3,
+                weatherKind === "thunder"
+                    ? Appearance.tertiary
+                    : Appearance.primaryContainer,
+                weatherKind === "thunder" ? 0.14 : 0.1);
+            const gradient = context.createLinearGradient(
+                0, 0, width, height);
+            gradient.addColorStop(0, baseStart);
+            gradient.addColorStop(1, baseEnd);
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, width, height);
+
+            if (weatherKind === "clear"
+                    || weatherKind === "partlyCloudy")
+                drawCelestial(context);
+
+            if (weatherKind === "partlyCloudy"
+                    || weatherKind === "cloudy"
+                    || weatherKind === "drizzle"
+                    || weatherKind === "rain"
+                    || weatherKind === "snow"
+                    || weatherKind === "thunder") {
+                drawCloudLayer(context,
+                    weatherKind !== "partlyCloudy");
+            }
+
+            if (weatherKind === "fog")
+                drawFog(context);
+            else if (weatherKind === "drizzle")
+                drawRain(context, true);
+            else if (weatherKind === "rain")
+                drawRain(context, false);
+            else if (weatherKind === "snow")
+                drawSnow(context);
+            else if (weatherKind === "thunder") {
+                drawRain(context, false);
+                drawLightning(context);
+            }
+
+            context.restore();
+        }
+
+        onWeatherCodeChanged: requestPaint()
+        onDaytimeChanged: requestPaint()
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
+
+        Timer {
+            interval: 40
+            repeat: true
+            running: backdrop.visible
+                && backdrop.animationsActive
+                && WeatherService.ready
+            onTriggered: {
+                backdrop.phase += interval / 1000;
+                backdrop.requestPaint();
+            }
+        }
+
+        Component.onCompleted: requestPaint()
     }
 
     /*
@@ -1202,6 +1591,8 @@ Item {
          * 当前天气
          */
         Rectangle {
+            id: currentWeatherCard
+
             Layout.fillWidth: true
             implicitHeight: Appearance.px(190)
 
@@ -1209,6 +1600,20 @@ Item {
             color: Appearance.layer3
             border.width: 1
             border.color: Appearance.outline
+
+            WeatherBackdrop {
+                anchors {
+                    fill: parent
+                    margins: 1
+                }
+
+                visible: WeatherService.ready
+                weatherCode: Number(
+                    WeatherService.current.weatherCode ?? -1)
+                daytime: Number(
+                    WeatherService.current.isDay ?? 1) !== 0
+                animationsActive: root.active
+            }
 
             RowLayout {
                 anchors {

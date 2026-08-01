@@ -4,10 +4,11 @@ import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Layouts
 import QtQuick.Shapes
+import Quickshell.Widgets
 import qs.common
 import qs.services
 
-Rectangle {
+ClippingRectangle {
     id: root
 
     readonly property string timeText: {
@@ -74,6 +75,142 @@ Rectangle {
         function onCurrentDurationSecondsChanged() {
             root.syncDurationFields();
         }
+    }
+
+    Canvas {
+        id: oceanCanvas
+
+        anchors.fill: parent
+        antialiasing: true
+
+        // progress 从 1 降到 0，Behavior 让每秒一次的水位变化保持连续。
+        property real waterLevel: FocusTimerService.progress
+        property real phase: 0
+
+        Behavior on waterLevel {
+            NumberAnimation {
+                duration: 720
+                easing.type: Easing.InOutSine
+            }
+        }
+
+        function waveSurfaceY(amplitude) {
+            const fullSurface = height * 0.22;
+            const emptySurface = height + amplitude * 1.25;
+            return emptySurface
+                + (fullSurface - emptySurface) * waterLevel;
+        }
+
+        function drawWave(context, surfaceY, amplitude,
+                wavelength, phaseOffset, fillColor) {
+            const step = Math.max(2, Appearance.px(3));
+
+            context.beginPath();
+            context.moveTo(0, height);
+            context.lineTo(0, surfaceY);
+
+            for (let x = 0; x <= width + step; x += step) {
+                const primaryWave = Math.sin(
+                    x / wavelength * Math.PI * 2
+                        + phase + phaseOffset);
+                const detailWave = Math.sin(
+                    x / (wavelength * 0.53) * Math.PI * 2
+                        - phase * 0.62 + phaseOffset * 1.7);
+                const y = surfaceY
+                    + primaryWave * amplitude
+                    + detailWave * amplitude * 0.22;
+                context.lineTo(x, y);
+            }
+
+            context.lineTo(width, height);
+            context.closePath();
+            context.fillStyle = fillColor;
+            context.fill();
+        }
+
+        function drawBubbles(context, surfaceY) {
+            if (waterLevel <= 0.04)
+                return;
+
+            const waterHeight = Math.max(1, height - surfaceY);
+            for (let index = 0; index < 13; ++index) {
+                const x = ((index * 53 + 17) % Math.max(1, width));
+                const travel = waterHeight + Appearance.px(18);
+                const y = height - ((index * 31
+                    + phase * (8 + index % 4) * Appearance.px(1))
+                    % travel);
+                if (y < surfaceY + Appearance.px(8))
+                    continue;
+
+                const radius = Appearance.px(
+                    index % 3 === 0 ? 1.5 : 0.9);
+                context.strokeStyle = Appearance.withAlpha(
+                    Appearance.primaryContainerText,
+                    0.08 + index % 4 * 0.015);
+                context.lineWidth = Appearance.px(0.8);
+                context.beginPath();
+                context.arc(x, y, radius, 0, Math.PI * 2);
+                context.stroke();
+            }
+        }
+
+        onPaint: {
+            const context = getContext("2d");
+            context.clearRect(0, 0, width, height);
+
+            const rearAmplitude = Appearance.px(5.5);
+            const frontAmplitude = Appearance.px(4);
+            const rearSurface = waveSurfaceY(rearAmplitude)
+                - Appearance.px(3);
+            const frontSurface = waveSurfaceY(frontAmplitude);
+
+            // 水下的轻微纵向渐变，避免大面积纯色压住卡片内容。
+            const depthGradient = context.createLinearGradient(
+                0, frontSurface, 0, height);
+            depthGradient.addColorStop(0,
+                Appearance.withAlpha(Appearance.primary, 0.09));
+            depthGradient.addColorStop(1,
+                Appearance.withAlpha(
+                    Appearance.primaryContainer, 0.22));
+            context.fillStyle = depthGradient;
+            context.fillRect(0, Math.max(0, frontSurface),
+                width, Math.max(0, height - frontSurface));
+
+            drawWave(
+                context,
+                rearSurface,
+                rearAmplitude,
+                Appearance.px(92),
+                1.45,
+                Appearance.withAlpha(Appearance.tertiary, 0.1)
+            );
+            drawWave(
+                context,
+                frontSurface,
+                frontAmplitude,
+                Appearance.px(74),
+                0,
+                Appearance.withAlpha(Appearance.primary, 0.13)
+            );
+            drawBubbles(context, frontSurface);
+        }
+
+        onWaterLevelChanged: requestPaint()
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
+
+        Timer {
+            interval: 40
+            repeat: true
+            running: FocusTimerService.running && oceanCanvas.visible
+            onTriggered: {
+                oceanCanvas.phase = (oceanCanvas.phase + 0.045)
+                    % (Math.PI * 2);
+                oceanCanvas.requestPaint();
+            }
+        }
+
+        Component.onCompleted: requestPaint()
     }
 
     ColumnLayout {

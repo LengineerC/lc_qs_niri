@@ -451,6 +451,7 @@ Item {
             id: weatherPanel
 
             visible: root.page === "weather"
+            active: visible && root.shown
             anchors {
                 fill: innerSurface
                 margins: 1
