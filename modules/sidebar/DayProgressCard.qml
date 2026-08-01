@@ -63,6 +63,11 @@ ClippingRectangle {
         skyCanvas.requestPaint();
     }
 
+    MouseArea {
+        anchors.fill: parent
+        onClicked: forceActiveFocus()
+    }
+
     Canvas {
         id: skyCanvas
 

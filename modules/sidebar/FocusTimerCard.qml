@@ -11,6 +11,11 @@ import qs.services
 ClippingRectangle {
     id: root
 
+    MouseArea {
+        anchors.fill: parent
+        onClicked: forceActiveFocus()
+    }
+    
     readonly property string timeText: {
         const total = FocusTimerService.remainingSeconds;
         const hours = Math.floor(total / 3600);

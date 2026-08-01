@@ -27,6 +27,11 @@ Rectangle {
         Appearance.outline, 0.58)
     clip: true
 
+    MouseArea {
+        anchors.fill: parent
+        onClicked: forceActiveFocus()
+    }
+
     ColumnLayout {
         anchors {
             fill: parent

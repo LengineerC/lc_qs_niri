@@ -113,6 +113,11 @@ Rectangle {
             Appearance.primary, 0.045)
     }
 
+    MouseArea {
+        anchors.fill: parent
+        onClicked: forceActiveFocus()
+    }
+
     /*
      * 将单个数字补齐为两位。
      */

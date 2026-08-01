@@ -8,6 +8,11 @@ import qs.services
 Rectangle {
     id: root
 
+    MouseArea {
+        anchors.fill: parent
+        onClicked: forceActiveFocus()
+    }
+
     readonly property string unknownValue: "—"
     readonly property var informationRows: [
         {

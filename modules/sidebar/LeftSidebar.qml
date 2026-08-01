@@ -381,7 +381,7 @@ Item {
                             ? moduleLoader.item.implicitHeight : 1
                         implicitHeight: Layout.preferredHeight
                         z: dragging ? 20 : 1
-                        scale: dragging ? 1.025
+                        scale: dragging ? 0.935
                             : (root.editMode ? 0.985 : 1)
 
                         transform: Translate {
