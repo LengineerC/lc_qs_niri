@@ -40,6 +40,7 @@ Singleton {
     property string weatherLocationName: "上海"
     property real weatherLatitude: 31.2304
     property real weatherLongitude: 121.4737
+    property var sidebarModuleOrder: defaultSidebarModuleOrder()
 
     property bool ready: false
     property bool storageReady: false
@@ -65,6 +66,37 @@ Singleton {
         return Math.max(minimum, Math.min(maximum, Number(value)));
     }
 
+    function defaultSidebarModuleOrder() {
+        return [
+            "fastfetch",
+            "focusTimer",
+            "todo",
+            "quickNote",
+            "dayProgress"
+        ];
+    }
+
+    function sanitizedSidebarModuleOrder(value) {
+        const validModules = defaultSidebarModuleOrder();
+        const result = [];
+
+        if (Array.isArray(value)) {
+            for (const entry of value) {
+                const moduleKey = String(entry);
+                if (validModules.indexOf(moduleKey) >= 0
+                        && result.indexOf(moduleKey) < 0) {
+                    result.push(moduleKey);
+                }
+            }
+        }
+
+        for (const moduleKey of validModules) {
+            if (result.indexOf(moduleKey) < 0)
+                result.push(moduleKey);
+        }
+        return result;
+    }
+
     function scheduleSave() {
         if (ready && storageReady && !applyingState)
             saveTimer.restart();
@@ -75,7 +107,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 14,
+            version: 15,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             shadowEnabled: shadowEnabled,
@@ -106,7 +138,8 @@ Singleton {
             userAvatarPath: userAvatarPath,
             weatherLocationName: weatherLocationName,
             weatherLatitude: weatherLatitude,
-            weatherLongitude: weatherLongitude
+            weatherLongitude: weatherLongitude,
+            sidebarModuleOrder: sidebarModuleOrder
         }, null, 2));
     }
 
@@ -115,7 +148,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 14)
+            if (state.version !== 15)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -246,6 +279,17 @@ Singleton {
                     state.weatherLongitude, -180, 180);
             else
                 needsMigration = true;
+            if (Array.isArray(state.sidebarModuleOrder)) {
+                const sanitizedOrder = sanitizedSidebarModuleOrder(
+                    state.sidebarModuleOrder);
+                sidebarModuleOrder = sanitizedOrder;
+                if (JSON.stringify(state.sidebarModuleOrder)
+                        !== JSON.stringify(sanitizedOrder)) {
+                    needsMigration = true;
+                }
+            } else {
+                needsMigration = true;
+            }
         } catch (error) {
             console.warn("ShellSettings: cannot parse settings:", error);
         }
@@ -287,6 +331,7 @@ Singleton {
         weatherLocationName = "上海";
         weatherLatitude = 31.2304;
         weatherLongitude = 121.4737;
+        sidebarModuleOrder = defaultSidebarModuleOrder();
         save();
     }
 
@@ -325,6 +370,7 @@ Singleton {
     onWeatherLocationNameChanged: scheduleSave()
     onWeatherLatitudeChanged: scheduleSave()
     onWeatherLongitudeChanged: scheduleSave()
+    onSidebarModuleOrderChanged: scheduleSave()
 
     Component.onCompleted: directoryProcess.running = true
 
@@ -427,7 +473,8 @@ Singleton {
                 userAvatarPath: root.userAvatarPath,
                 weatherLocationName: root.weatherLocationName,
                 weatherLatitude: root.weatherLatitude,
-                weatherLongitude: root.weatherLongitude
+                weatherLongitude: root.weatherLongitude,
+                sidebarModuleOrder: root.sidebarModuleOrder
             });
         }
     }

@@ -170,7 +170,7 @@ Rectangle {
                     elide: Text.ElideRight
                     font {
                         family: Appearance.monospaceFontFamily
-                        pixelSize: Appearance.px(13)
+                        pixelSize: Appearance.px(15)
                         weight: Font.DemiBold
                     }
                 }

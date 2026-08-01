@@ -35,6 +35,14 @@ ClippingRectangle {
     }
     readonly property string periodIcon:
         decimalHour >= 6 && decimalHour < 18 ? "󰖙" : "󰖔"
+    readonly property color sceneText: "#F5F8FC"
+    readonly property color sceneSubtext: "#D2DCE7"
+    readonly property color starColor: "#E6F0FF"
+    readonly property color cloudColor: "#F0F5F8"
+    readonly property color sunColor: "#FFD27A"
+    readonly property color moonColor: "#CBDCFF"
+    readonly property color farLandscapeColor: "#172536"
+    readonly property color nearLandscapeColor: "#101B29"
 
     function percentText(value): string {
         return Math.floor(Math.max(0, Math.min(1, value)) * 100)
@@ -72,26 +80,15 @@ ClippingRectangle {
         }
 
         function skyColors(hour) {
-            const nightTop = Appearance.mix(
-                Appearance.layer0, Appearance.primaryContainer, 0.2);
-            const nightBottom = Appearance.mix(
-                Appearance.layer3, Appearance.layer0, 0.42);
-            const dawnTop = Appearance.mix(
-                Appearance.layer3,
-                Theme.palette.m3tertiaryContainer, 0.3);
-            const dawnBottom = Appearance.mix(
-                Appearance.layer3,
-                Theme.palette.m3secondaryContainer, 0.38);
-            const dayTop = Appearance.mix(
-                Appearance.layer3, Appearance.primaryContainer, 0.3);
-            const dayBottom = Appearance.mix(
-                Appearance.layer3,
-                Theme.palette.m3secondaryContainer, 0.17);
-            const duskTop = Appearance.mix(
-                Appearance.layer3,
-                Theme.palette.m3tertiaryContainer, 0.37);
-            const duskBottom = Appearance.mix(
-                Appearance.layer3, Appearance.primaryContainer, 0.2);
+            // 场景使用固定的自然色相，避免壁纸强调色改变昼夜观感。
+            const nightTop = "#101827";
+            const nightBottom = "#1D2A3B";
+            const dawnTop = "#5B6075";
+            const dawnBottom = "#9B6E68";
+            const dayTop = "#315F7A";
+            const dayBottom = "#527985";
+            const duskTop = "#66465F";
+            const duskBottom = "#965A50";
 
             if (hour >= 5 && hour < 8) {
                 const amount = (hour - 5) / 3;
@@ -148,7 +145,7 @@ ClippingRectangle {
                 const pulse = 0.34 + 0.22 * Math.sin(
                     phase * 1.3 + index * 1.67);
                 context.fillStyle = Appearance.withAlpha(
-                    Appearance.primaryContainerText,
+                    root.starColor,
                     opacity * pulse);
                 context.beginPath();
                 context.arc(x, y,
@@ -172,18 +169,22 @@ ClippingRectangle {
             const glow = context.createRadialGradient(
                 x, y, 0, x, y, radius * 3.2);
             glow.addColorStop(0, Appearance.withAlpha(
-                Appearance.primary, sunVisible ? 0.38 : 0.28));
+                sunVisible ? root.sunColor : root.moonColor,
+                sunVisible ? 0.42 : 0.3));
             glow.addColorStop(0.42, Appearance.withAlpha(
-                Appearance.primary, sunVisible ? 0.13 : 0.08));
+                sunVisible ? root.sunColor : root.moonColor,
+                sunVisible ? 0.15 : 0.09));
             glow.addColorStop(1,
-                Appearance.withAlpha(Appearance.primary, 0));
+                Appearance.withAlpha(
+                    sunVisible ? root.sunColor : root.moonColor, 0));
             context.fillStyle = glow;
             context.beginPath();
             context.arc(x, y, radius * 3.2, 0, Math.PI * 2);
             context.fill();
 
             context.fillStyle = Appearance.withAlpha(
-                Appearance.primary, sunVisible ? 0.72 : 0.5);
+                sunVisible ? root.sunColor : root.moonColor,
+                sunVisible ? 0.86 : 0.72);
             context.beginPath();
             context.arc(x, y, radius, 0, Math.PI * 2);
             context.fill();
@@ -203,7 +204,7 @@ ClippingRectangle {
                 scale, opacity) {
             const unit = Appearance.px(13) * scale;
             context.fillStyle = Appearance.withAlpha(
-                Appearance.layer0Text, opacity);
+                root.cloudColor, opacity);
             context.beginPath();
             context.arc(centerX - unit * 0.78, centerY,
                 unit * 0.64, Math.PI, Math.PI * 2);
@@ -239,7 +240,7 @@ ClippingRectangle {
             const horizon = height * 0.72;
 
             context.fillStyle = Appearance.withAlpha(
-                Appearance.layer0, 0.22);
+                root.farLandscapeColor, 0.52);
             context.beginPath();
             context.moveTo(0, height);
             context.lineTo(0, horizon + Appearance.px(7));
@@ -256,7 +257,7 @@ ClippingRectangle {
             context.fill();
 
             context.fillStyle = Appearance.withAlpha(
-                Appearance.layer0, 0.36);
+                root.nearLandscapeColor, 0.7);
             context.beginPath();
             context.moveTo(0, height);
             context.lineTo(0, horizon + Appearance.px(17));
@@ -335,7 +336,7 @@ ClippingRectangle {
                 Text {
                     text: I18n.locale.toString(
                         root.now, ShellSettings.timeFormat)
-                    color: Appearance.layer0Text
+                    color: root.sceneText
                     font {
                         family: Appearance.monospaceFontFamily
                         pixelSize: Appearance.px(27)
@@ -347,7 +348,7 @@ ClippingRectangle {
                     Layout.fillWidth: true
                     text: I18n.locale.toString(
                         root.now, ShellSettings.dateFormat)
-                    color: Appearance.subtext
+                    color: root.sceneSubtext
                     elide: Text.ElideRight
                     font {
                         family: Appearance.fontFamily

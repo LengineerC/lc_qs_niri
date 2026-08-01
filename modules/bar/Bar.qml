@@ -281,14 +281,6 @@ Scope {
                 y: Appearance.px(5)
                 height: Math.max(0,
                     parent.height - Appearance.px(10))
-                modules: [
-                    FastfetchCard {},
-                    SidebarUtilityRow {},
-                    QuickNote {},
-                    DayProgressCard {
-                        active: leftSidebar.shown
-                    },
-                ]
             }
         }
     }

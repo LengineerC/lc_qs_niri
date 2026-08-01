@@ -68,6 +68,8 @@ Singleton {
         start: ["开始", "Start"],
         pause: ["暂停", "Pause"],
         reset: ["重置", "Reset"],
+        editWidgets: ["编辑小组件", "Edit widgets"],
+        finishEditing: ["完成编辑", "Done editing"],
         networkDevices: ["网络与设备", "Network & devices"],
         user: ["用户", "User"],
         userProfile: ["用户资料", "User profile"],
