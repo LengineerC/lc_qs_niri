@@ -1598,6 +1598,56 @@ Item {
                         }
                     }
 
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(10)
+
+                        PanelText {
+                            Layout.preferredWidth: Appearance.px(
+                                I18n.language === "en_US" ? 150 : 118)
+                            text: I18n.tr("monospaceFont")
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            implicitHeight: Appearance.px(34)
+                            radius: Appearance.px(9)
+                            color: Appearance.layer1
+                            border.width: monospaceFontInput.activeFocus
+                                ? 1 : 0
+                            border.color: Appearance.primary
+
+                            TextInput {
+                                id: monospaceFontInput
+                                anchors {
+                                    fill: parent
+                                    leftMargin: Appearance.px(10)
+                                    rightMargin: Appearance.px(10)
+                                }
+                                verticalAlignment: TextInput.AlignVCenter
+                                color: Appearance.layer0Text
+                                selectionColor: Appearance.primaryContainer
+                                selectedTextColor:
+                                    Appearance.primaryContainerText
+                                text: ShellSettings.monospaceFontFamily
+                                font {
+                                    family:
+                                        ShellSettings.monospaceFontFamily
+                                    pixelSize: Appearance.fontSize
+                                }
+                                onEditingFinished: {
+                                    if (text.trim()) {
+                                        ShellSettings.monospaceFontFamily =
+                                            text.trim();
+                                    } else {
+                                        text = ShellSettings
+                                            .monospaceFontFamily;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     SliderRow {
                         label: I18n.tr("fontSize")
                         currentValue: ShellSettings.barFontSize

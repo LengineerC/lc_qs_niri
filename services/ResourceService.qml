@@ -27,6 +27,19 @@ Singleton {
     property real downloadBytesPerSecond: 0
     property real uploadBytesPerSecond: 0
     property var previousNetworkStats: null
+    property var filesystems: []
+    property string selectedFilesystemKey: ""
+    property string filesystemError: ""
+    readonly property int selectedFilesystemIndex: {
+        for (let index = 0; index < filesystems.length; index++) {
+            if (filesystems[index].key === selectedFilesystemKey)
+                return index;
+        }
+        return filesystems.length > 0 ? 0 : -1;
+    }
+    readonly property var selectedFilesystem:
+        selectedFilesystemIndex >= 0
+            ? filesystems[selectedFilesystemIndex] : null
 
     property var processes: []
     property int activeViewerCount: 0
@@ -36,6 +49,7 @@ Singleton {
     property string actionMessage: ""
 
     readonly property int updateInterval: 2000
+    readonly property int filesystemUpdateInterval: 10000
 
     function load() {
         // Forces singleton construction from shell.qml.
@@ -63,6 +77,13 @@ Singleton {
         if (value >= 1024)
             return (value / 1024).toFixed(1) + " KB/s";
         return Math.round(value) + " B/s";
+    }
+
+    function formatBytes(bytes, decimals = 1) {
+        return formatBytesFromKb(
+            Math.max(0, Number(bytes) || 0) / 1024,
+            decimals
+        );
     }
 
     function parseMemory(text) {
@@ -199,6 +220,86 @@ Singleton {
         };
     }
 
+    function filesystemKey(entry) {
+        return String(entry?.source ?? "") + "\u001f"
+            + String(entry?.target ?? "");
+    }
+
+    function parseFilesystems(text) {
+        try {
+            const payload = JSON.parse(String(text ?? ""));
+            const rawEntries = Array.isArray(payload?.filesystems)
+                ? payload.filesystems : [];
+            const entries = rawEntries.map(entry => {
+                const totalBytes = Number(entry?.size);
+                const usedBytes = Number(entry?.used);
+                const availableBytes = Number(entry?.avail);
+                const target = String(entry?.target ?? "");
+                const source = String(entry?.source ?? "");
+                const filesystemType = String(entry?.fstype ?? "");
+                const percentText = String(entry?.["use%"] ?? "");
+                const parsedPercent = Number.parseFloat(percentText);
+                const usage = Number.isFinite(parsedPercent)
+                    ? parsedPercent / 100
+                    : totalBytes > 0 && Number.isFinite(usedBytes)
+                        ? usedBytes / totalBytes : 0;
+
+                return {
+                    key: filesystemKey({
+                        source: source,
+                        target: target
+                    }),
+                    source: source,
+                    target: target,
+                    filesystemType: filesystemType,
+                    totalBytes: Number.isFinite(totalBytes)
+                        ? Math.max(0, totalBytes) : 0,
+                    usedBytes: Number.isFinite(usedBytes)
+                        ? Math.max(0, usedBytes) : 0,
+                    availableBytes: Number.isFinite(availableBytes)
+                        ? Math.max(0, availableBytes) : 0,
+                    usage: clamp(usage)
+                };
+            }).filter(entry =>
+                entry.target.length > 0
+                && entry.totalBytes > 0
+                // AppImage loop mounts are applications, not selectable
+                // storage volumes. Keep other FUSE and network mounts.
+                && !entry.target.startsWith("/tmp/.mount_")
+            );
+
+            entries.sort((first, second) => {
+                if (first.target === "/")
+                    return -1;
+                if (second.target === "/")
+                    return 1;
+                return first.target.localeCompare(second.target);
+            });
+
+            const previousKey = selectedFilesystemKey;
+            filesystems = entries;
+            if (entries.some(entry => entry.key === previousKey)) {
+                selectedFilesystemKey = previousKey;
+            } else {
+                selectedFilesystemKey = entries.length > 0
+                    ? entries[0].key : "";
+            }
+            filesystemError = "";
+        } catch (error) {
+            filesystemError = String(error);
+            console.warn("Failed to parse filesystem usage:", error);
+        }
+    }
+
+    function selectFilesystemRelative(offset) {
+        const count = filesystems.length;
+        if (count <= 0)
+            return;
+        const current = Math.max(0, selectedFilesystemIndex);
+        const next = (current + Number(offset) % count + count) % count;
+        selectedFilesystemKey = filesystems[next].key;
+    }
+
     function temperatureCandidateScore(chipName, label) {
         const chip = String(chipName).toLocaleLowerCase();
         const sensor = String(label).toLocaleLowerCase();
@@ -257,17 +358,16 @@ Singleton {
 
     function parseProcessLine(line) {
         const fields = String(line).split("|");
-        if (fields.length < 8)
+        if (fields.length < 7)
             return null;
 
         const pid = Number(fields[0].trim());
         const ppid = Number(fields[1].trim());
         const uid = Number(fields[2].trim());
         const cpu = Number(fields[3].trim());
-        const memoryPercent = Number(fields[4].trim());
-        const rssKb = Number(fields[5].trim());
-        const name = fields[6].trim();
-        const command = fields.slice(7).join("|").trim();
+        const pssKb = Number(fields[4].trim());
+        const name = fields[5].trim();
+        const command = fields.slice(6).join("|").trim();
         if (!Number.isInteger(pid) || pid <= 0)
             return null;
         if (name === "ps" && command.includes("--delimiter"))
@@ -278,9 +378,10 @@ Singleton {
             ppid: Number.isInteger(ppid) ? ppid : 0,
             uid: Number.isInteger(uid) ? uid : -1,
             cpu: Number.isFinite(cpu) ? cpu : 0,
-            memoryPercent:
-                Number.isFinite(memoryPercent) ? memoryPercent : 0,
-            rssKb: Number.isFinite(rssKb) ? rssKb : 0,
+            memoryPercent: memoryTotalKb > 0
+                && Number.isFinite(pssKb)
+                ? pssKb / memoryTotalKb * 100 : 0,
+            pssKb: Number.isFinite(pssKb) ? pssKb : 0,
             name: name || I18n.tr("unknown"),
             command: command || name,
             canSignal: uid === currentUid && pid > 1
@@ -344,6 +445,7 @@ Singleton {
         networkFile.reload();
         identityProcess.running = true;
         sensorProcess.running = true;
+        filesystemProcess.running = true;
     }
 
     Timer {
@@ -358,6 +460,16 @@ Singleton {
             networkFile.reload();
             if (!sensorProcess.running)
                 sensorProcess.running = true;
+        }
+    }
+
+    Timer {
+        interval: root.filesystemUpdateInterval
+        running: true
+        repeat: true
+        onTriggered: {
+            if (!filesystemProcess.running)
+                filesystemProcess.running = true;
         }
     }
 
@@ -437,11 +549,31 @@ Singleton {
     }
 
     Process {
+        id: filesystemProcess
+        command: [
+            "findmnt", "--real", "--list", "--json", "--bytes",
+            "--output", "SOURCE,TARGET,FSTYPE,SIZE,USED,AVAIL,USE%"
+        ]
+        stdout: StdioCollector {
+            onStreamFinished: root.parseFilesystems(text)
+        }
+        stderr: StdioCollector {
+            id: filesystemErrorOutput
+        }
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                root.filesystemError = filesystemErrorOutput.text.trim()
+                    || "findmnt exited with code " + exitCode;
+            }
+        }
+    }
+
+    Process {
         id: processListProcess
         property var buffer: []
         command: [
             "ps", "-ww", "--no-headers", "--delimiter", "|",
-            "-eo", "pid=,ppid=,uid=,pcpu=,pmem=,rss=,comm=,args=",
+            "-eo", "pid=,ppid=,uid=,pcpu=,pss=,comm=,args=",
             "--sort=-pcpu"
         ]
         stdout: SplitParser {

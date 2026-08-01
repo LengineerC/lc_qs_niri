@@ -41,44 +41,49 @@ Item {
 
             LockCard {
                 Layout.fillWidth: true
-                Layout.preferredHeight: parent.height * 0.28
+                Layout.preferredHeight: root.height * 0.33
                 topLeftRadius: Appearance.px(30)
 
                 ColumnLayout {
                     anchors {
                         fill: parent
-                        margins: Appearance.px(16)
+                        margins: Appearance.px(14)
                     }
-                    spacing: Appearance.px(7)
+                    spacing: Appearance.px(6)
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: I18n.tr("weather")
+                        color: Appearance.primary
+                        horizontalAlignment: Text.AlignHCenter
+                        elide: Text.ElideRight
+                        font {
+                            family: Appearance.fontFamily
+                            pixelSize: Appearance.px(25)
+                            weight: Font.Bold
+                        }
+                    }
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(9)
+                        Layout.preferredHeight: Appearance.px(55)
+                        spacing: Appearance.px(10)
 
                         Text {
+                            Layout.preferredWidth: Appearance.px(58)
                             text: WeatherService.currentIcon
                             color: Appearance.primary
+                            horizontalAlignment: Text.AlignHCenter
                             font {
                                 family: Appearance.iconFontFamily
-                                pixelSize: Appearance.px(36)
+                                pixelSize: Appearance.px(48)
+                                weight: Font.Bold
                             }
                         }
 
                         ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: 0
-
-                            Text {
-                                Layout.fillWidth: true
-                                text: WeatherService.currentTemperature
-                                color: Appearance.layer0Text
-                                elide: Text.ElideRight
-                                font {
-                                    family: Appearance.fontFamily
-                                    pixelSize: Appearance.px(28)
-                                    weight: Font.DemiBold
-                                }
-                            }
+                            spacing: Appearance.px(2)
 
                             Text {
                                 Layout.fillWidth: true
@@ -87,144 +92,23 @@ Item {
                                         WeatherService.current
                                             .weatherCode)
                                     : I18n.tr("weatherUnavailable")
-                                color: Appearance.subtext
-                                elide: Text.ElideRight
-                                font {
-                                    family: Appearance.fontFamily
-                                    pixelSize: Appearance.smallFontSize
-                                }
-                            }
-                        }
-                    }
-
-                    Item { Layout.fillHeight: true }
-
-                    DetailLine {
-                        icon: "󰖝"
-                        label: I18n.tr("humidity")
-                        value: WeatherService.ready
-                            ? WeatherService.formatPercent(
-                                WeatherService.current.humidity)
-                            : "--%"
-                    }
-
-                    DetailLine {
-                        icon: "󰖌"
-                        label: I18n.tr("windSpeed")
-                        value: WeatherService.ready
-                            ? WeatherService.formatWind(
-                                WeatherService.current.windSpeed)
-                            : "-- km/h"
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: "󰍎  " + (WeatherService.locationName
-                            || I18n.tr("weatherLocation"))
-                        color: Appearance.subtext
-                        elide: Text.ElideRight
-                        font {
-                            family: Appearance.fontFamily
-                            pixelSize: Appearance.smallFontSize
-                        }
-                    }
-                }
-            }
-
-            LockCard {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                ColumnLayout {
-                    anchors {
-                        fill: parent
-                        margins: Appearance.px(16)
-                    }
-                    spacing: Appearance.px(12)
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: I18n.tr("systemResources")
-                        color: Appearance.layer0Text
-                        elide: Text.ElideRight
-                        font {
-                            family: Appearance.fontFamily
-                            pixelSize: Appearance.largeFontSize
-                            weight: Font.DemiBold
-                        }
-                    }
-
-                    ResourceGauge {
-                        Layout.fillWidth: true
-                        icon: "󰻠"
-                        label: I18n.tr("cpuUsage")
-                        value: ResourceService.cpuUsage
-                        valueText: Math.round(
-                            ResourceService.cpuUsage * 100) + "%"
-                    }
-
-                    ResourceGauge {
-                        Layout.fillWidth: true
-                        icon: "󰍛"
-                        label: I18n.tr("memoryUsage")
-                        value: ResourceService.memoryUsage
-                        valueText: Math.round(
-                            ResourceService.memoryUsage * 100) + "%"
-                    }
-
-                    ResourceGauge {
-                        Layout.fillWidth: true
-                        icon: "󰔏"
-                        label: I18n.tr("cpuTemperature")
-                        value: ResourceService.temperatureAvailable
-                            ? Math.min(1,
-                                ResourceService.cpuTemperature / 100)
-                            : 0
-                        valueText:
-                            ResourceService.temperatureAvailable
-                                ? Math.round(
-                                    ResourceService.cpuTemperature)
-                                    + "°C"
-                                : "--°C"
-                    }
-
-                    Item { Layout.fillHeight: true }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Appearance.px(10)
-
-                        Text {
-                            text: "󰓅"
-                            color: Appearance.primary
-                            font {
-                                family: Appearance.iconFontFamily
-                                pixelSize: Appearance.px(17)
-                            }
-                        }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 1
-
-                            Text {
-                                Layout.fillWidth: true
-                                text: ResourceService.formatRate(
-                                    ResourceService
-                                        .downloadBytesPerSecond)
                                 color: Appearance.layer0Text
                                 elide: Text.ElideRight
                                 font {
                                     family: Appearance.fontFamily
-                                    pixelSize: Appearance.smallFontSize
+                                    pixelSize: Appearance.px(18)
+                                    weight: Font.DemiBold
                                 }
                             }
 
                             Text {
                                 Layout.fillWidth: true
-                                text: ResourceService.formatRate(
-                                    ResourceService
-                                        .uploadBytesPerSecond)
+                                text: I18n.tr("humidity") + ": "
+                                    + (WeatherService.ready
+                                        ? WeatherService.formatPercent(
+                                            WeatherService.current
+                                                .humidity)
+                                        : "--%")
                                 color: Appearance.subtext
                                 elide: Text.ElideRight
                                 font {
@@ -233,13 +117,118 @@ Item {
                                 }
                             }
                         }
+
+                        ColumnLayout {
+                            Layout.preferredWidth: Appearance.px(68)
+                            spacing: 0
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: WeatherService.currentTemperature
+                                color: Appearance.primary
+                                horizontalAlignment: Text.AlignRight
+                                font {
+                                    family: Appearance.fontFamily
+                                    pixelSize: Appearance.px(26)
+                                    weight: Font.Medium
+                                }
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: I18n.tr("feelsLike") + ": "
+                                    + (WeatherService.ready
+                                        ? WeatherService
+                                            .formatTemperature(
+                                                WeatherService.current
+                                                    .apparentTemperature)
+                                        : "--°C")
+                                color: Appearance.subtext
+                                horizontalAlignment: Text.AlignRight
+                                elide: Text.ElideLeft
+                                font {
+                                    family: Appearance.fontFamily
+                                    pixelSize: Appearance.smallFontSize
+                                }
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        spacing: Appearance.px(40)
+
+                        Repeater {
+                            model: WeatherService.hourlyForecast
+
+                            delegate: ColumnLayout {
+                                id: forecastItem
+
+                                required property var modelData
+
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                Layout.preferredWidth: 1
+                                spacing: 10
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: WeatherService.timeFromIso(
+                                        forecastItem.modelData.time)
+                                    color: Appearance.subtext
+                                    horizontalAlignment: Text.AlignHCenter
+                                    font {
+                                        family: Appearance.fontFamily
+                                        pixelSize: Appearance.px(15)
+                                    }
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: WeatherService.icon(
+                                        forecastItem.modelData.weatherCode,
+                                        forecastItem.modelData.isDay)
+                                    color: Appearance.layer0Text
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                    font {
+                                        family: Appearance.iconFontFamily
+                                        pixelSize: Appearance.px(40)
+                                    }
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: WeatherService.formatTemperature(
+                                        forecastItem.modelData.temperature)
+                                    color: Appearance.layer1Text
+                                    horizontalAlignment: Text.AlignHCenter
+                                    font {
+                                        family: Appearance.fontFamily
+                                        pixelSize: Appearance.px(15)
+                                        weight: Font.Medium
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
 
+            LockFastfetchCard {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                fontScale: 1.35
+                iconScale: 1.4
+                contentPadding: Appearance.px(10)
+                sectionSpacing: -Appearance.px(3)
+                rowSpacing: Appearance.px(7)
+            }
+
             LockMediaCard {
                 Layout.fillWidth: true
-                Layout.preferredHeight: parent.height * 0.27
+                Layout.preferredHeight: root.height * 0.3
                 bottomLeftRadius: Appearance.px(30)
             }
         }
@@ -310,7 +299,7 @@ Item {
 
             UserAvatar {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: Appearance.px(10)
+                Layout.topMargin: Appearance.px(100)
                 implicitSize: Math.min(
                     Appearance.px(150),
                     root.height * 0.22)
@@ -334,6 +323,7 @@ Item {
                 id: authCard
 
                 Layout.fillWidth: true
+                Layout.topMargin: Appearance.px(40)
                 Layout.leftMargin: Appearance.px(18)
                 Layout.rightMargin: Appearance.px(18)
                 implicitHeight: Appearance.px(58)
@@ -393,6 +383,7 @@ Item {
                         font {
                             family: Appearance.fontFamily
                             pixelSize: Appearance.fontSize
+                            letterSpacing: Appearance.px(4)
                         }
 
                         onTextChanged: {
@@ -416,7 +407,10 @@ Item {
                             color: Appearance.subtext
                             verticalAlignment: Text.AlignVCenter
                             elide: Text.ElideRight
-                            font: passwordInput.font
+                            font {
+                                family: Appearance.fontFamily
+                                pixelSize: Appearance.fontSize
+                            }
                         }
                     }
 
@@ -525,7 +519,7 @@ Item {
 
             LockCard {
                 Layout.fillWidth: true
-                Layout.preferredHeight: parent.height * 0.31
+                Layout.preferredHeight: root.height * 0.38
                 bottomRightRadius: Appearance.px(30)
 
                 ColumnLayout {
@@ -533,12 +527,13 @@ Item {
                         fill: parent
                         margins: Appearance.px(16)
                     }
-                    spacing: Appearance.px(10)
+                    spacing: Appearance.px(15)
 
                     Text {
                         Layout.fillWidth: true
-                        text: I18n.tr("systemStatus")
+                        text: I18n.tr("systemResources")
                         color: Appearance.layer0Text
+                        elide: Text.ElideRight
                         font {
                             family: Appearance.fontFamily
                             pixelSize: Appearance.largeFontSize
@@ -546,39 +541,75 @@ Item {
                         }
                     }
 
-                    DetailLine {
-                        icon: "󰖩"
-                        label: I18n.tr("networkSpeed")
-                        value: "↓ "
-                            + ResourceService.formatRate(
-                                ResourceService
-                                    .downloadBytesPerSecond)
+                    ResourceGauge {
+                        Layout.fillWidth: true
+                        icon: "󰻠"
+                        label: I18n.tr("cpuUsage")
+                        value: ResourceService.cpuUsage
+                        valueText: Math.round(
+                            ResourceService.cpuUsage * 100) + "%"
                     }
 
-                    DetailLine {
-                        icon: "󰕒"
-                        label: I18n.tr("systemUptime")
-                        value: UserService.formatUptime()
-                    }
-
-                    DetailLine {
+                    ResourceGauge {
+                        Layout.fillWidth: true
                         icon: "󰍛"
-                        label: I18n.tr("memory")
-                        value: ResourceService.formatBytesFromKb(
-                            ResourceService.memoryUsedKb)
+                        label: I18n.tr("memoryUsage")
+                        value: ResourceService.memoryUsage
+                        valueText: Math.round(
+                            ResourceService.memoryUsage * 100) + "%"
+                    }
+
+                    ResourceGauge {
+                        Layout.fillWidth: true
+                        icon: "󰔏"
+                        label: I18n.tr("cpuTemperature")
+                        value: ResourceService.temperatureAvailable
+                            ? Math.min(1,
+                                ResourceService.cpuTemperature / 100)
+                            : 0
+                        valueText:
+                            ResourceService.temperatureAvailable
+                                ? Math.round(
+                                    ResourceService.cpuTemperature)
+                                    + "°C"
+                                : "--°C"
+                    }
+
+                    ResourceGauge {
+                        readonly property var filesystem:
+                            ResourceService.selectedFilesystem
+
+                        Layout.fillWidth: true
+                        icon: "󰋊"
+                        label: I18n.tr("disk")
+                            + (filesystem?.target
+                                ? " · " + filesystem.target : "")
+                        value: filesystem?.usage ?? 0
+                        valueText: filesystem
+                            ? Math.round(filesystem.usage * 100) + "%"
+                            : "--%"
                     }
 
                     Item { Layout.fillHeight: true }
 
-                    Text {
+                    RowLayout {
                         Layout.fillWidth: true
-                        text: I18n.tr("sessionProtected")
-                        color: Appearance.subtext
-                        horizontalAlignment: Text.AlignHCenter
-                        elide: Text.ElideRight
-                        font {
-                            family: Appearance.fontFamily
-                            pixelSize: Appearance.smallFontSize
+                        spacing: Appearance.px(8)
+
+                        NetworkRate {
+                            Layout.fillWidth: true
+                            icon: "󰁅"
+                            label: I18n.tr("download")
+                            value: ResourceService.formatRate(
+                                ResourceService.downloadBytesPerSecond)
+                        }
+
+                        NetworkRate {
+                            Layout.fillWidth: true
+                            icon: "󰁝"
+                            label: I18n.tr("upload")
+                            value: ResourceService.formatRate(
+                                ResourceService.uploadBytesPerSecond)
                         }
                     }
                 }
@@ -735,6 +766,66 @@ Item {
                     NumberAnimation {
                         duration: Appearance.spatialDuration
                         easing.type: Easing.OutCubic
+                    }
+                }
+            }
+        }
+    }
+
+    component NetworkRate: Rectangle {
+        id: networkRate
+
+        required property string icon
+        required property string label
+        required property string value
+
+        implicitHeight: Appearance.px(40)
+        radius: Appearance.px(10)
+        color: Appearance.layer3
+        border.width: 1
+        border.color: Appearance.layer0Border
+
+        RowLayout {
+            anchors {
+                fill: parent
+                leftMargin: Appearance.px(9)
+                rightMargin: Appearance.px(9)
+            }
+            spacing: Appearance.px(7)
+
+            Text {
+                text: networkRate.icon
+                color: Appearance.primary
+                font {
+                    family: Appearance.iconFontFamily
+                    pixelSize: Appearance.px(16)
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 0
+
+                Text {
+                    Layout.fillWidth: true
+                    text: networkRate.label
+                    color: Appearance.subtext
+                    elide: Text.ElideRight
+                    font {
+                        family: Appearance.fontFamily
+                        pixelSize: Appearance.px(9)
+                    }
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    text: networkRate.value
+                    color: Appearance.layer0Text
+                    elide: Text.ElideRight
+                    font {
+                        family: Appearance.monospaceFontFamily
+                        pixelSize: Appearance.smallFontSize
+                        weight: Font.DemiBold
                     }
                 }
             }

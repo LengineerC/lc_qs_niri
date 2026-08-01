@@ -80,9 +80,9 @@ Item {
         ColumnLayout {
             anchors {
                 fill: parent
-                margins: Appearance.px(14)
+                margins: Appearance.px(10)
             }
-            spacing: Appearance.px(12)
+            spacing: Appearance.px(10)
 
             Controls.ScrollView {
                 id: moduleScroll

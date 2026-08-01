@@ -21,6 +21,7 @@ Singleton {
     property real popupBezierX2: 0.22
     property real popupBezierY2: 1.00
     property string barFontFamily: "JetBrainsMono Nerd Font"
+    property string monospaceFontFamily: "monospace"
     property int barFontSize: 13
     property real scale: 1.00
     property string language: "zh_CN"
@@ -72,7 +73,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 13,
+            version: 14,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             shadowEnabled: shadowEnabled,
@@ -85,6 +86,7 @@ Singleton {
                 popupBezierX2, popupBezierY2
             ],
             barFontFamily: barFontFamily,
+            monospaceFontFamily: monospaceFontFamily,
             barFontSize: barFontSize,
             scale: scale,
             language: language,
@@ -111,7 +113,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 13)
+            if (state.version !== 14)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -152,6 +154,11 @@ Singleton {
             if (typeof state.barFontFamily === "string"
                     && state.barFontFamily.trim())
                 barFontFamily = state.barFontFamily.trim();
+            if (typeof state.monospaceFontFamily === "string"
+                    && state.monospaceFontFamily.trim())
+                monospaceFontFamily = state.monospaceFontFamily.trim();
+            else
+                needsMigration = true;
             if (state.barFontSize !== undefined)
                 barFontSize = Math.round(clamped(state.barFontSize, 9, 24));
             if (state.scale !== undefined)
@@ -259,6 +266,7 @@ Singleton {
         popupBezierX2 = 0.22;
         popupBezierY2 = 1.00;
         barFontFamily = "JetBrainsMono Nerd Font";
+        monospaceFontFamily = "monospace";
         barFontSize = 13;
         scale = 1.00;
         language = "zh_CN";
@@ -296,6 +304,7 @@ Singleton {
     onPopupBezierX2Changed: scheduleSave()
     onPopupBezierY2Changed: scheduleSave()
     onBarFontFamilyChanged: scheduleSave()
+    onMonospaceFontFamilyChanged: scheduleSave()
     onBarFontSizeChanged: scheduleSave()
     onScaleChanged: scheduleSave()
     onLanguageChanged: scheduleSave()
@@ -398,6 +407,7 @@ Singleton {
                 animationDuration: root.animationDuration,
                 popupBezier: root.popupBezierCurve,
                 barFontFamily: root.barFontFamily,
+                monospaceFontFamily: root.monospaceFontFamily,
                 barFontSize: root.barFontSize,
                 scale: root.scale,
                 language: root.language,

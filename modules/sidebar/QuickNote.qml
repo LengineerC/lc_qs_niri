@@ -26,7 +26,7 @@ Rectangle {
     property string deleteTargetFileName: ""
     property string deleteTargetPath: ""
 
-    property int editorHeight: Appearance.px(500)
+    property int editorHeight: Appearance.px(400)
     readonly property int outlineWidth: Math.max(1, Math.round(Appearance.px(1)))
 
     property string currentFileName: ""
@@ -90,13 +90,26 @@ Rectangle {
     Layout.fillWidth: true
 
     implicitHeight:
-        content.implicitHeight + Appearance.px(28)
+        content.implicitHeight + Appearance.px(24)
 
-    radius: Appearance.smallRadius
+    radius: Appearance.px(24)
     color: Appearance.layer3
 
     border.width: 1
-    border.color: Appearance.outline
+    border.color: Appearance.withAlpha(
+        Appearance.outline, 0.58)
+
+    Rectangle {
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+        height: Appearance.px(92)
+        radius: root.radius
+        color: Appearance.withAlpha(
+            Appearance.primary, 0.045)
+    }
 
     /*
      * 将单个数字补齐为两位。
@@ -1021,71 +1034,44 @@ Rectangle {
 
         anchors {
             fill: parent
-            margins: Appearance.px(14)
+            margins: Appearance.px(10)
         }
 
-        spacing: Appearance.px(12)
+        spacing: Appearance.px(10)
 
         /*
-         * 标题栏
+         * 小组件状态与操作区。标题由下面的当前笔记卡片承担，
+         * 这里不再保留独立标题栏。
          */
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.px(5)
+            Layout.leftMargin: Appearance.px(3)
+            Layout.rightMargin: Appearance.px(1)
+            spacing: Appearance.px(4)
 
-            Text {
-                text: "󰠮"
-                color: Appearance.primary
-
-                font {
-                    family:
-                        Appearance.iconFontFamily
-                    pixelSize: Appearance.px(28)
-                }
+            Rectangle {
+                implicitWidth: Appearance.px(7)
+                implicitHeight: Appearance.px(7)
+                radius: Appearance.fullRadius
+                color: root.operationError.length > 0
+                    ? Theme.palette.m3error
+                    : root.dirty || root.saving
+                        ? Appearance.primary
+                        : Appearance.withAlpha(
+                            Appearance.layer0Text, 0.42)
             }
 
-            ColumnLayout {
+            Text {
                 Layout.fillWidth: true
-                spacing: Appearance.px(1)
-
-                Text {
-                    Layout.fillWidth: true
-
-                    text: I18n.tr("quickNote")
-                    color: Appearance.layer0Text
-                    elide: Text.ElideRight
-
-                    font {
-                        family:
-                            Appearance.fontFamily
-                        pixelSize:
-                            Appearance.largeFontSize
-                        weight: Font.DemiBold
-                    }
-                }
-
-                Text {
-                    Layout.fillWidth: true
-
-                    text: root.currentFileName.length > 0
-                        ? root.statusText
-                            + " · "
-                            + root.currentFileName
-                        : root.statusText
-
-                    color: root.dirty
-                            || root.operationError.length > 0
-                        ? Appearance.primary
-                        : Appearance.subtext
-
-                    elide: Text.ElideMiddle
-
-                    font {
-                        family:
-                            Appearance.fontFamily
-                        pixelSize:
-                            Appearance.smallFontSize
-                    }
+                text: root.statusText
+                color: root.operationError.length > 0
+                    ? Theme.palette.m3error
+                    : Appearance.subtext
+                elide: Text.ElideRight
+                font {
+                    family: Appearance.fontFamily
+                    pixelSize: Appearance.smallFontSize
+                    weight: Font.Medium
                 }
             }
 
@@ -1094,6 +1080,7 @@ Rectangle {
                  * file-plus
                  */
                 icon: "󰈔"
+                accent: true
 
                 enabled: root.directoryReady
                     && !root.confirmingDelete
@@ -1119,6 +1106,7 @@ Rectangle {
             HeaderButton {
                 visible: !root.confirmingDelete
                 icon: "󰆴"
+                destructive: true
 
                 enabled: root.initialized
                     && root.currentPath.length > 0
@@ -1133,6 +1121,7 @@ Rectangle {
                 */
                 visible: root.confirmingDelete
                 icon: "󰄬"
+                destructive: true
 
                 enabled: !root.fileOperationRunning
 
@@ -1162,24 +1151,24 @@ Rectangle {
 
             Rectangle {
                 Layout.fillWidth: true
-                implicitHeight: Appearance.px(38)
+                implicitHeight: Appearance.px(42)
 
-                radius: Appearance.smallRadius
-                color: Appearance.layer2
+                radius: Appearance.px(14)
+                color: Appearance.layer1
 
                 border.width: 1
                 border.color:
                     renameEditor.activeFocus
                         ? Appearance.primary
-                        : Appearance.outline
+                        : Appearance.layer0Border
 
                 TextInput {
                     id: renameEditor
 
                     anchors {
                         fill: parent
-                        leftMargin: Appearance.px(11)
-                        rightMargin: Appearance.px(11)
+                        leftMargin: Appearance.px(14)
+                        rightMargin: Appearance.px(14)
                     }
 
                     verticalAlignment:
@@ -1187,16 +1176,15 @@ Rectangle {
 
                     color: Appearance.layer0Text
                     selectionColor:
-                        Appearance.primary
+                        Appearance.primaryContainer
                     selectedTextColor:
-                        Appearance.primaryText
+                        Appearance.primaryContainerText
 
                     selectByMouse: true
                     clip: true
 
                     font {
-                        family:
-                            Appearance.monospaceFontFamily
+                        family: Appearance.fontFamily
                         pixelSize:
                             Appearance.fontSize
                     }
@@ -1216,6 +1204,7 @@ Rectangle {
 
             HeaderButton {
                 icon: "󰄬"
+                accent: true
                 onClicked: root.commitRename()
             }
 
@@ -1232,13 +1221,15 @@ Rectangle {
             id: noteSelectorBox
 
             Layout.fillWidth: true
-            implicitHeight: Appearance.px(44)
+            implicitHeight: Appearance.px(54)
 
-            radius: Appearance.smallRadius
-            color: Appearance.layer2
+            radius: Appearance.px(17)
+            color: Appearance.layer1
 
             border.width: 1
-            border.color: Appearance.outline
+            border.color: noteSelectorPopup.opened
+                ? Appearance.withAlpha(Appearance.primary, 0.72)
+                : Appearance.layer0Border
 
             RowLayout {
                 anchors {
@@ -1249,14 +1240,20 @@ Rectangle {
 
                 spacing: Appearance.px(8)
 
-                Text {
-                    text: "󰈙"
-                    color: Appearance.subtext
+                Rectangle {
+                    implicitWidth: Appearance.px(34)
+                    implicitHeight: Appearance.px(34)
+                    radius: Appearance.px(11)
+                    color: Appearance.primaryContainer
 
-                    font {
-                        family:
-                            Appearance.iconFontFamily
-                        pixelSize: Appearance.px(16)
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰠮"
+                        color: Appearance.primaryContainerText
+                        font {
+                            family: Appearance.iconFontFamily
+                            pixelSize: Appearance.px(18)
+                        }
                     }
                 }
 
@@ -1265,9 +1262,9 @@ Rectangle {
 
                     Layout.fillWidth: true
                     Layout.preferredHeight:
-                        Appearance.px(32)
+                        Appearance.px(40)
 
-                    radius: Appearance.smallRadius
+                    radius: Appearance.px(12)
 
                     color: selectorMouse.containsMouse
                         || noteSelectorPopup.opened
@@ -1282,7 +1279,7 @@ Rectangle {
                                 parent.verticalCenter
 
                             leftMargin:
-                                Appearance.px(10)
+                                Appearance.px(6)
 
                             rightMargin:
                                 Appearance.px(8)
@@ -1299,10 +1296,10 @@ Rectangle {
                             Text.AlignVCenter
 
                         font {
-                            family:
-                                Appearance.monospaceFontFamily
+                            family: Appearance.fontFamily
                             pixelSize:
                                 Appearance.fontSize
+                            weight: Font.DemiBold
                         }
                     }
 
@@ -1357,14 +1354,16 @@ Rectangle {
                 }
 
                 Text {
-                    text: String(noteFolderModel.count)
+                    text: noteFolderModel.count > 0
+                        ? String(noteFolderModel.count) : ""
                     visible: noteFolderModel.count > 0
-                    color: Appearance.subtext
+                    color: Appearance.primary
 
                     font {
                         family: Appearance.fontFamily
                         pixelSize:
                             Appearance.smallFontSize
+                        weight: Font.DemiBold
                     }
                 }
             }
@@ -1384,7 +1383,7 @@ Rectangle {
                     + Appearance.px(6)
 
                 width: selectorButton.width
-                padding: Appearance.px(6)
+                padding: Appearance.px(8)
 
                 modal: false
                 focus: true
@@ -1394,18 +1393,18 @@ Rectangle {
                     | Controls.Popup.CloseOnPressOutsideParent
 
                 background: Rectangle {
-                    radius: Appearance.smallRadius
-                    color: Appearance.layer2
+                    radius: Appearance.px(16)
+                    color: Appearance.layer3
 
                     border.width: 1
-                    border.color: Appearance.outline
+                    border.color: Appearance.layer0Border
                 }
 
                 contentItem: ListView {
                     id: noteSelectorList
 
                     readonly property real rowHeight:
-                        Appearance.px(36)
+                        Appearance.px(42)
 
                     implicitHeight: Math.min(
                         noteFolderModel.count
@@ -1439,7 +1438,7 @@ Rectangle {
                         /*
                         * 不用 fullRadius，避免变成胶囊形。
                         */
-                        radius: Appearance.smallRadius
+                        radius: Appearance.px(12)
 
                         color: noteOption.selected
                             ? Appearance.primaryContainer
@@ -1451,9 +1450,9 @@ Rectangle {
                             anchors {
                                 fill: parent
                                 leftMargin:
-                                    Appearance.px(11)
+                                    Appearance.px(13)
                                 rightMargin:
-                                    Appearance.px(11)
+                                    Appearance.px(13)
                             }
 
                             text: root.displayFileName(
@@ -1470,10 +1469,11 @@ Rectangle {
                                 Text.AlignVCenter
 
                             font {
-                                family:
-                                    Appearance.monospaceFontFamily
+                                family: Appearance.fontFamily
                                 pixelSize:
                                     Appearance.fontSize
+                                weight: noteOption.selected
+                                    ? Font.DemiBold : Font.Normal
                             }
                         }
 
@@ -1520,12 +1520,13 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: root.editorHeight
 
-            radius: Appearance.smallRadius
+            radius: Appearance.px(20)
 
             // 外层本身就是边框。
             color: editor.activeFocus
-                ? Appearance.primary
-                : Appearance.outline
+                ? Appearance.withAlpha(
+                    Appearance.primary, 0.78)
+                : Appearance.layer0Border
 
             antialiasing: true
 
@@ -1553,7 +1554,7 @@ Rectangle {
                         - root.outlineWidth
                 )
 
-                color: Appearance.layer2
+                color: Appearance.layer1
                 clip: true
 
                 Flickable {
@@ -1578,19 +1579,19 @@ Rectangle {
                     TextEdit {
                         id: editor
 
-                        x: Appearance.px(12)
-                        y: Appearance.px(10)
+                        x: Appearance.px(16)
+                        y: Appearance.px(15)
 
                         width: Math.max(
                             0,
                             editorFlickable.width
-                                - Appearance.px(24)
+                                - Appearance.px(32)
                         )
 
                         height: Math.max(
                             implicitHeight,
                             editorFlickable.height
-                                - Appearance.px(20)
+                                - Appearance.px(30)
                         )
 
                         enabled: root.initialized
@@ -1600,9 +1601,10 @@ Rectangle {
                         wrapMode: TextEdit.Wrap
 
                         color: Appearance.layer0Text
-                        selectionColor: Appearance.primary
+                        selectionColor:
+                            Appearance.primaryContainer
                         selectedTextColor:
-                            Appearance.primaryText
+                            Appearance.primaryContainerText
 
                         selectByMouse: true
                         persistentSelection: true
@@ -1610,8 +1612,7 @@ Rectangle {
                         focus: !root.previewMode
 
                         font {
-                            family:
-                                Appearance.monospaceFontFamily
+                            family: Appearance.fontFamily
                             pixelSize: Appearance.fontSize
                         }
 
@@ -1641,8 +1642,8 @@ Rectangle {
                         anchors {
                             left: parent.left
                             top: parent.top
-                            leftMargin: Appearance.px(12)
-                            topMargin: Appearance.px(10)
+                            leftMargin: Appearance.px(16)
+                            topMargin: Appearance.px(15)
                         }
 
                         visible: root.initialized
@@ -1656,8 +1657,7 @@ Rectangle {
                         color: Appearance.subtext
 
                         font {
-                            family:
-                                Appearance.monospaceFontFamily
+                            family: Appearance.fontFamily
                             pixelSize: Appearance.fontSize
                         }
                     }
@@ -1685,13 +1685,13 @@ Rectangle {
                     Text {
                         id: previewText
 
-                        x: Appearance.px(12)
-                        y: Appearance.px(10)
+                        x: Appearance.px(16)
+                        y: Appearance.px(15)
 
                         width: Math.max(
                             0,
                             previewFlickable.width
-                                - Appearance.px(24)
+                                - Appearance.px(32)
                         )
 
                         text: editor.text.length > 0
@@ -1711,6 +1711,8 @@ Rectangle {
                             family: Appearance.fontFamily
                             pixelSize: Appearance.fontSize
                         }
+                        lineHeight: 1.38
+                        lineHeightMode: Text.ProportionalHeight
 
                         onLinkActivated: link =>
                             Qt.openUrlExternally(link)
@@ -1723,21 +1725,23 @@ Rectangle {
                     anchors {
                         right: parent.right
                         bottom: parent.bottom
-                        rightMargin: Appearance.px(7)
-                        bottomMargin: Appearance.px(7)
+                        rightMargin: Appearance.px(10)
+                        bottomMargin: Appearance.px(10)
                     }
 
-                    width: Appearance.px(28)
-                    height: Appearance.px(28)
+                    width: Appearance.px(32)
+                    height: Appearance.px(32)
                     z: 100
 
                     radius: Appearance.fullRadius
-                    color: Appearance.layer3
+                    color: root.previewMode
+                        ? Appearance.primaryContainer
+                        : Appearance.layer2
 
                     border.width: 1
                     border.color: root.previewMode
                         ? Appearance.primary
-                        : Appearance.outline
+                        : Appearance.layer0Border
 
                     /*
                     * 平时保持低透明度，悬停时变清晰。
@@ -1745,8 +1749,8 @@ Rectangle {
                     opacity: !root.initialized
                         ? 0.25
                         : modeButtonMouse.containsMouse
-                            ? 0.9
-                            : 0.48
+                            ? 1
+                            : 0.72
 
                     scale: modeButtonMouse.pressed
                         ? 0.86
@@ -1760,7 +1764,7 @@ Rectangle {
                             : "󰈈"
 
                         color: root.previewMode
-                            ? Appearance.primary
+                            ? Appearance.primaryContainerText
                             : Appearance.layer0Text
 
                         font {
@@ -1811,18 +1815,28 @@ Rectangle {
         id: button
 
         required property string icon
+        property bool accent: false
+        property bool destructive: false
 
         signal clicked
 
-        implicitWidth: Appearance.px(34)
-        implicitHeight: Appearance.px(34)
+        implicitWidth: Appearance.px(32)
+        implicitHeight: Appearance.px(32)
 
-        radius: Appearance.fullRadius
+        radius: Appearance.smallRadius
 
-        color: buttonMouse.containsMouse
-                && button.enabled
-            ? Appearance.layer1Active
-            : "transparent"
+        color: !button.enabled
+            ? "transparent"
+            : button.destructive
+                ? Appearance.withAlpha(
+                    Theme.palette.m3error,
+                    buttonMouse.containsMouse ? 0.18 : 0.1)
+                : button.accent
+                    ? Appearance.primaryContainer
+                    : buttonMouse.containsMouse
+                        ? Appearance.layer1Active
+                        : Appearance.withAlpha(
+                            Appearance.layer1, 0.72)
 
         scale: buttonMouse.pressed
             ? 0.88
@@ -1836,12 +1850,16 @@ Rectangle {
             anchors.centerIn: parent
 
             text: button.icon
-            color: Appearance.layer0Text
+            color: button.destructive
+                ? Theme.palette.m3error
+                : button.accent
+                    ? Appearance.primaryContainerText
+                    : Appearance.layer0Text
 
             font {
                 family:
                     Appearance.iconFontFamily
-                pixelSize: Appearance.px(18)
+                pixelSize: Appearance.px(17)
             }
         }
 

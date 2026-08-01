@@ -53,7 +53,7 @@ Rectangle {
             fill: parent
             margins: Appearance.px(14)
         }
-        spacing: Appearance.px(5)
+        spacing: Appearance.px(15)
 
         Text {
             Layout.fillWidth: true

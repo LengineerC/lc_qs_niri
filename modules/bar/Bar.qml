@@ -282,6 +282,7 @@ Scope {
                 height: Math.max(0,
                     parent.height - Appearance.px(10))
                 modules: [
+                    FastfetchCard {},
                     QuickNote {},
                 ]
             }

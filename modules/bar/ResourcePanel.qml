@@ -40,9 +40,9 @@ Item {
         });
         return entries.sort((first, second) => {
             const firstValue = sortKey === "memory"
-                ? first.rssKb : first.cpu;
+                ? first.pssKb : first.cpu;
             const secondValue = sortKey === "memory"
-                ? second.rssKb : second.cpu;
+                ? second.pssKb : second.cpu;
             const difference = firstValue - secondValue;
             if (difference !== 0)
                 return sortDescending ? -difference : difference;
@@ -64,6 +64,7 @@ Item {
     }
 
     function setSort(key) {
+        resetProcessScroll();
         if (sortKey === key)
             sortDescending = !sortDescending;
         else {
@@ -101,6 +102,25 @@ Item {
 
     function memoryText(kilobytes) {
         return ResourceService.formatBytesFromKb(kilobytes, 1);
+    }
+
+    function diskText(bytes) {
+        const value = Math.max(0, Number(bytes) || 0);
+        const units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB"];
+        let unitIndex = 0;
+        let scaledValue = value;
+        while (scaledValue >= 1024 && unitIndex < units.length - 1) {
+            scaledValue /= 1024;
+            unitIndex += 1;
+        }
+        if (unitIndex === 0)
+            return Math.round(scaledValue) + " " + units[unitIndex];
+        return scaledValue.toFixed(1) + " " + units[unitIndex];
+    }
+
+    function resetProcessScroll() {
+        processList.retainedScrollOffset = 0;
+        processList.positionViewAtBeginning();
     }
 
     function desktopEntryForProcess(name) {
@@ -151,7 +171,7 @@ Item {
             color: Appearance.primary
             font {
                 family: Appearance.iconFontFamily
-                pixelSize: Appearance.px(14)
+                pixelSize: Appearance.px(18)
             }
         }
 
@@ -194,6 +214,101 @@ Item {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: scopeButton.clicked()
+        }
+    }
+
+    component DiskSwitchButton: Rectangle {
+        id: diskSwitchButton
+
+        required property string icon
+        signal clicked
+
+        implicitWidth: Appearance.px(30)
+        implicitHeight: Appearance.px(30)
+        radius: Appearance.px(9)
+        color: diskSwitchArea.containsMouse && enabled
+            ? Appearance.layer1Active : Appearance.layer1
+        opacity: enabled ? 1 : 0.38
+
+        Text {
+            anchors.centerIn: parent
+            text: diskSwitchButton.icon
+            color: Appearance.layer1Text
+            font {
+                family: Appearance.iconFontFamily
+                pixelSize: Appearance.px(14)
+            }
+        }
+
+        MouseArea {
+            id: diskSwitchArea
+            anchors.fill: parent
+            enabled: diskSwitchButton.enabled
+            hoverEnabled: true
+            cursorShape: enabled
+                ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: diskSwitchButton.clicked()
+        }
+    }
+
+    component NetworkRateCard: Rectangle {
+        id: networkRateCard
+
+        required property string icon
+        required property string label
+        required property real bytesPerSecond
+
+        Layout.preferredWidth: Appearance.px(220)
+        implicitHeight: Appearance.px(60)
+        radius: Appearance.px(12)
+        color: Appearance.layer1
+        border.width: 1
+        border.color: Appearance.layer0Border
+
+        RowLayout {
+            anchors {
+                fill: parent
+                leftMargin: Appearance.px(9)
+                rightMargin: Appearance.px(11)
+            }
+            spacing: Appearance.px(10)
+
+            Rectangle {
+                implicitWidth: Appearance.px(30)
+                implicitHeight: Appearance.px(30)
+                radius: Appearance.fullRadius
+                color: Appearance.primaryContainer
+
+                Text {
+                    anchors.centerIn: parent
+                    text: networkRateCard.icon
+                    color: Appearance.primaryContainerText
+                    font {
+                        family: Appearance.iconFontFamily
+                        pixelSize: Appearance.px(15)
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.px(1)
+
+                PanelText {
+                    text: networkRateCard.label
+                    color: Appearance.subtext
+                    font.pixelSize: Appearance.smallFontSize
+                }
+
+                PanelText {
+                    Layout.fillWidth: true
+                    text: ResourceService.formatRate(
+                        networkRateCard.bytesPerSecond)
+                    color: Appearance.layer0Text
+                    elide: Text.ElideRight
+                    font.weight: Font.DemiBold
+                }
+            }
         }
     }
 
@@ -416,8 +531,132 @@ Item {
         }
 
         Rectangle {
+            id: filesystemCard
+
+            readonly property var filesystem:
+                ResourceService.selectedFilesystem
+
             Layout.fillWidth: true
-            implicitHeight: Appearance.px(56)
+            implicitHeight: Appearance.px(82)
+            radius: Appearance.smallRadius
+            color: Appearance.layer3
+            border.width: 1
+            border.color: Appearance.outline
+
+            WheelHandler {
+                enabled: ResourceService.filesystems.length > 1
+                acceptedDevices: PointerDevice.Mouse
+                    | PointerDevice.TouchPad
+                onWheel: event => {
+                    ResourceService.selectFilesystemRelative(
+                        event.angleDelta.y < 0 ? 1 : -1);
+                    event.accepted = true;
+                }
+            }
+
+            RowLayout {
+                anchors {
+                    fill: parent
+                    leftMargin: Appearance.px(14)
+                    rightMargin: Appearance.px(14)
+                }
+                spacing: Appearance.px(10)
+
+                ResourceRing {
+                    implicitSize: Appearance.px(46)
+                    icon: "󰋊"
+                    iconSize: 22
+                    value: filesystemCard.filesystem?.usage ?? 0
+                    warning: (filesystemCard.filesystem?.usage ?? 0) >= 0.9
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    spacing: Appearance.px(2)
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(10)
+
+                        PanelText {
+                            text: filesystemCard.filesystem
+                                ? I18n.tr("disk") + "  "
+                                    + filesystemCard.filesystem.target
+                                : I18n.tr("noFilesystems")
+                            color: Appearance.layer0Text
+                            elide: Text.ElideMiddle
+                            font.weight: Font.DemiBold
+                        }
+
+                        PanelText {
+                            Layout.fillWidth: true
+                            text: (
+                                filesystemCard.filesystem.totalBytes > 0
+                                    ? filesystemCard.filesystem.usedBytes
+                                        / filesystemCard.filesystem.totalBytes
+                                        * 100
+                                    : 0
+                            ).toFixed(1) + "%"
+                            color: Appearance.subtext
+                        }
+                    }
+
+                    PanelText {
+                        Layout.fillWidth: true
+                        text: filesystemCard.filesystem
+                            ? filesystemCard.filesystem.filesystemType
+                                .toLocaleUpperCase()
+                                + "  ·  "
+                                + filesystemCard.filesystem.source
+                            : ResourceService.filesystemError
+                        color: Appearance.subtext
+                        elide: Text.ElideMiddle
+                        font.pixelSize: Appearance.smallFontSize
+                    }
+                }
+
+                Metric {
+                    visible: filesystemCard.filesystem !== null
+                    icon: "󰆼"
+                    label: I18n.tr("used") + " "
+                        + root.diskText(
+                            filesystemCard.filesystem?.usedBytes ?? 0)
+                        + "  /  "
+                        + root.diskText(
+                            filesystemCard.filesystem?.totalBytes ?? 0)
+                }
+
+                DiskSwitchButton {
+                    icon: "󰅁"
+                    enabled: ResourceService.filesystems.length > 1
+                    onClicked:
+                        ResourceService.selectFilesystemRelative(-1)
+                }
+
+                PanelText {
+                    Layout.preferredWidth: Appearance.px(42)
+                    text: ResourceService.filesystems.length > 0
+                        ? (ResourceService.selectedFilesystemIndex + 1)
+                            + "/" + ResourceService.filesystems.length
+                        : "0/0"
+                    color: Appearance.subtext
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize: Appearance.smallFontSize
+                }
+
+                DiskSwitchButton {
+                    icon: "󰅂"
+                    enabled: ResourceService.filesystems.length > 1
+                    onClicked:
+                        ResourceService.selectFilesystemRelative(1)
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: Appearance.px(82)
             radius: Appearance.smallRadius
             color: Appearance.layer3
             border.width: 1
@@ -429,14 +668,22 @@ Item {
                     leftMargin: Appearance.px(14)
                     rightMargin: Appearance.px(14)
                 }
-                spacing: Appearance.px(10)
+                spacing: Appearance.px(12)
 
-                Text {
-                    text: "󰛳"
-                    color: Appearance.primary
-                    font {
-                        family: Appearance.iconFontFamily
-                        pixelSize: Appearance.px(20)
+                Rectangle {
+                    implicitWidth: Appearance.px(46)
+                    implicitHeight: Appearance.px(46)
+                    radius: Appearance.fullRadius
+                    color: Appearance.primaryContainer
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰛳"
+                        color: Appearance.primaryContainerText
+                        font {
+                            family: Appearance.iconFontFamily
+                            pixelSize: Appearance.px(21)
+                        }
                     }
                 }
 
@@ -458,64 +705,18 @@ Item {
                     }
                 }
 
-                Rectangle {
-                    implicitWidth: downloadRow.implicitWidth
-                        + Appearance.px(20)
-                    implicitHeight: Appearance.px(34)
-                    radius: Appearance.fullRadius
-                    color: Appearance.layer1
-
-                    RowLayout {
-                        id: downloadRow
-                        anchors.centerIn: parent
-                        spacing: Appearance.px(6)
-
-                        Text {
-                            text: "󰁅"
-                            color: Appearance.primary
-                            font {
-                                family: Appearance.iconFontFamily
-                                pixelSize: Appearance.px(15)
-                            }
-                        }
-
-                        PanelText {
-                            text: ResourceService.formatRate(
-                                ResourceService.downloadBytesPerSecond)
-                            color: Appearance.layer0Text
-                            font.weight: Font.DemiBold
-                        }
-                    }
+                NetworkRateCard {
+                    icon: "󰁅"
+                    label: I18n.tr("download")
+                    bytesPerSecond:
+                        ResourceService.downloadBytesPerSecond
                 }
 
-                Rectangle {
-                    implicitWidth: uploadRow.implicitWidth
-                        + Appearance.px(20)
-                    implicitHeight: Appearance.px(34)
-                    radius: Appearance.fullRadius
-                    color: Appearance.layer1
-
-                    RowLayout {
-                        id: uploadRow
-                        anchors.centerIn: parent
-                        spacing: Appearance.px(6)
-
-                        Text {
-                            text: "󰁝"
-                            color: Appearance.primary
-                            font {
-                                family: Appearance.iconFontFamily
-                                pixelSize: Appearance.px(15)
-                            }
-                        }
-
-                        PanelText {
-                            text: ResourceService.formatRate(
-                                ResourceService.uploadBytesPerSecond)
-                            color: Appearance.layer0Text
-                            font.weight: Font.DemiBold
-                        }
-                    }
+                NetworkRateCard {
+                    icon: "󰁝"
+                    label: I18n.tr("upload")
+                    bytesPerSecond:
+                        ResourceService.uploadBytesPerSecond
                 }
             }
         }
@@ -585,6 +786,7 @@ Item {
                                     pixelSize: Appearance.smallFontSize
                                 }
                                 Keys.onEscapePressed: clear()
+                                onTextChanged: root.resetProcessScroll()
                             }
 
                             Text {
@@ -613,13 +815,19 @@ Item {
                     ScopeButton {
                         label: I18n.tr("allProcesses")
                         selected: root.processScope === "all"
-                        onClicked: root.processScope = "all"
+                        onClicked: {
+                            root.processScope = "all";
+                            root.resetProcessScroll();
+                        }
                     }
 
                     ScopeButton {
                         label: I18n.tr("userProcesses")
                         selected: root.processScope === "user"
-                        onClicked: root.processScope = "user"
+                        onClicked: {
+                            root.processScope = "user";
+                            root.resetProcessScroll();
+                        }
                     }
                 }
 
@@ -655,8 +863,7 @@ Item {
 
                     PanelText {
                         Layout.preferredWidth: Appearance.px(112)
-                        text: I18n.tr("memory")
-                            + root.sortArrow("memory")
+                        text: "PSS" + root.sortArrow("memory")
                         color: root.sortKey === "memory"
                             ? Appearance.primary : Appearance.subtext
                         horizontalAlignment: Text.AlignHCenter
@@ -696,12 +903,45 @@ Item {
 
                     ListView {
                         id: processList
+
+                        property real retainedScrollOffset: 0
+
+                        function rememberScrollPosition() {
+                            retainedScrollOffset = Math.max(
+                                0, contentY - originY);
+                        }
+
+                        function restoreScrollPosition() {
+                            const maximumOffset = Math.max(
+                                0, contentHeight - height);
+                            contentY = originY + Math.min(
+                                retainedScrollOffset, maximumOffset);
+                        }
+
                         anchors.fill: parent
                         visible: count > 0
                         clip: true
                         spacing: Appearance.px(5)
                         model: root.filteredProcesses
                         boundsBehavior: Flickable.StopAtBounds
+
+                        onMovementEnded: {
+                            if (!ResourceService.processRefreshing)
+                                rememberScrollPosition();
+                        }
+
+                        Connections {
+                            target: ResourceService
+
+                            function onProcessRefreshingChanged() {
+                                if (ResourceService.processRefreshing) {
+                                    processList.rememberScrollPosition();
+                                } else {
+                                    Qt.callLater(() =>
+                                        processList.restoreScrollPosition());
+                                }
+                            }
+                        }
 
                         Controls.ScrollBar.vertical: Controls.ScrollBar {
                             policy: Controls.ScrollBar.AsNeeded
@@ -826,7 +1066,7 @@ Item {
                                             Appearance.px(112)
                                         implicitHeight: Appearance.px(30)
                                         radius: Appearance.fullRadius
-                                        color: processEntry.modelData.rssKb
+                                        color: processEntry.modelData.pssKb
                                                 >= 1024 * 1024
                                             ? Theme.palette
                                                 .m3tertiaryContainer
@@ -836,9 +1076,9 @@ Item {
                                             anchors.centerIn: parent
                                             text: root.memoryText(
                                                 processEntry
-                                                    .modelData.rssKb)
+                                                    .modelData.pssKb)
                                             color: processEntry.modelData
-                                                    .rssKb >= 1024 * 1024
+                                                    .pssKb >= 1024 * 1024
                                                 ? Theme.palette
                                                     .m3onTertiaryContainer
                                                 : Appearance.layer0Text
@@ -935,10 +1175,14 @@ Item {
                                         PanelText {
                                             text: "PPID: "
                                                 + processEntry.modelData.ppid
-                                                + "    Mem: "
+                                                + "    PSS: "
+                                                + root.memoryText(
+                                                    processEntry.modelData
+                                                        .pssKb)
+                                                + "  ("
                                                 + processEntry.modelData
                                                     .memoryPercent.toFixed(1)
-                                                + "%"
+                                                + "%)"
                                             color: Appearance.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
