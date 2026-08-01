@@ -346,6 +346,8 @@ Item {
                     spacing: Appearance.px(10)
 
                     Text {
+                        id: authStateIcon
+
                         text: root.context?.unlockInProgress
                             ? "󰔟" : "󰌾"
                         color: root.context?.showFailure
@@ -363,6 +365,7 @@ Item {
                             from: 0
                             to: 360
                             duration: 800
+                            onStopped: authStateIcon.rotation = 0
                         }
                     }
 
