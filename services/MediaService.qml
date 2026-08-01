@@ -28,6 +28,35 @@ Singleton {
         activePlayer?.playbackState === MprisPlaybackState.Playing
     readonly property real progress: ratioFor(activePlayer)
 
+    function hasMediaMetadata(player) {
+        if (!player)
+            return false;
+
+        return String(player.trackTitle || "").trim().length > 0
+            || String(player.trackArtist || "").trim().length > 0
+            || String(player.trackAlbum || "").trim().length > 0
+            || String(player.trackArtUrl || "").trim().length > 0
+            || (player.lengthSupported && player.length > 0);
+    }
+
+    function hasPlaybackCapability(player) {
+        return Boolean(player && (
+            player.canPlay
+            || player.canPause
+            || player.canTogglePlaying
+            || player.canSeek
+            || player.canGoPrevious
+            || player.canGoNext
+        ));
+    }
+
+    function isEmptyStoppedPlayer(player) {
+        return player
+            && player.playbackState === MprisPlaybackState.Stopped
+            && !hasMediaMetadata(player)
+            && !hasPlaybackCapability(player);
+    }
+
     function isRealPlayer(player) {
         if (!player)
             return false;
@@ -42,6 +71,10 @@ Singleton {
                 && (name.startsWith("org.mpris.MediaPlayer2.firefox")
                     || name.startsWith(
                         "org.mpris.MediaPlayer2.chromium")))
+            return false;
+        // Some apps keep their MPRIS name after a call or media session
+        // ends. Do not expose the resulting empty, uncontrollable card.
+        if (isEmptyStoppedPlayer(player))
             return false;
         return true;
     }

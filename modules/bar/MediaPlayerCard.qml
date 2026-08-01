@@ -221,7 +221,7 @@ ClippingRectangle {
 
             RowLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: Appearance.px(2)
+                Layout.topMargin: Appearance.px(4)
                 spacing: Appearance.px(9)
 
                 Item { Layout.fillWidth: true }

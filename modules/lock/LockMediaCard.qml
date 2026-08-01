@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import qs.common
+import qs.modules.bar
 import qs.services
 
 Rectangle {
@@ -97,6 +98,53 @@ Rectangle {
             font {
                 family: Appearance.fontFamily
                 pixelSize: Appearance.smallFontSize
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            visible: root.hasMedia
+                && (root.player?.lengthSupported ?? false)
+                && (root.player?.length ?? 0) > 0
+            spacing: Appearance.px(7)
+
+            Text {
+                text: MediaService.formatTime(
+                    lockSeekBar.displayValue
+                        * Math.max(0, root.player?.length ?? 0))
+                color: Appearance.subtext
+                font {
+                    family: Appearance.monospaceFontFamily
+                    pixelSize: Appearance.smallFontSize
+                }
+            }
+
+            WavySeekBar {
+                id: lockSeekBar
+
+                Layout.fillWidth: true
+                implicitHeight: Appearance.px(18)
+                value: MediaService.ratioFor(root.player)
+                playing: root.player?.isPlaying ?? false
+                seekable: root.hasMedia
+                    && (root.player?.canSeek ?? false)
+                    && (root.player?.lengthSupported ?? false)
+                    && (root.player?.length ?? 0) > 0
+                onSeekRequested: ratio => {
+                    if (root.player)
+                        root.player.position = Math.max(0.1,
+                            ratio * root.player.length);
+                }
+            }
+
+            Text {
+                text: MediaService.formatTime(
+                    root.player?.length ?? 0)
+                color: Appearance.subtext
+                font {
+                    family: Appearance.monospaceFontFamily
+                    pixelSize: Appearance.smallFontSize
+                }
             }
         }
 
