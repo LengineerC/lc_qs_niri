@@ -6,7 +6,6 @@ import QtQuick.Layouts
 import Quickshell
 import "file:///home/lengineerc/.config/quickshell/lc_qs_niri/Caelestia/Blobs" as Blobs
 import qs.common
-import qs.modules.sidebar
 import qs.services
 
 Item {
@@ -15,17 +14,14 @@ Item {
     implicitHeight: Appearance.barHeight
     readonly property Item barMask: barInputRegion
     readonly property Item popupMask: popup.popupMaskItem
-    readonly property Item sidebarMask:
-    leftSidebar.shown
-        ? sidebarFullScreenMask
-        : leftSidebar.maskItem
     readonly property bool barContainsMouse: barHover.hovered
         && barHover.point.position.y >= 0
         && barHover.point.position.y < Appearance.barHeight
     readonly property bool popupShown: popup.shown
     readonly property bool popupContainsMouse: popup.pointerInside
-    readonly property bool sidebarShown: leftSidebar.shown
-    readonly property bool sidebarContainsMouse: leftSidebar.pointerInside
+    readonly property bool sidebarShown:
+        LeftSidebarService.shown
+        && LeftSidebarService.targetOutputName === root.outputName
     readonly property bool hostWindowActive: Window.active
     readonly property int edgeMargin: Appearance.cornerSize
 
@@ -39,16 +35,16 @@ Item {
     }
 
     function closeSidebar() {
-        leftSidebar.close();
+        LeftSidebarService.close();
     }
 
     function closeOverlays() {
         popup.close();
-        leftSidebar.close();
+        LeftSidebarService.close();
     }
 
     function showPopup(target, pageName) {
-        leftSidebar.close();
+        LeftSidebarService.close();
         popup.showFor(target, pageName);
     }
 
@@ -82,12 +78,6 @@ Item {
 
         width: root.width
         height: Appearance.barHeight
-    }
-
-    Item {
-        id: sidebarFullScreenMask
-
-        anchors.fill: parent
     }
 
     // This handler belongs to the common ancestor of every bar control, so
@@ -176,27 +166,6 @@ Item {
         }
     }
 
-    MouseArea {
-        id: sidebarOutsideDismissArea
-
-        anchors.fill: parent
-
-        z: -1
-
-        enabled: leftSidebar.shown
-        visible: enabled
-
-        acceptedButtons:
-            Qt.LeftButton
-            | Qt.RightButton
-            | Qt.MiddleButton
-
-        onPressed: event => {
-            root.closeSidebar();
-            event.accepted = true;
-        }
-    }
-
     Item {
         id: leftArea
         anchors {
@@ -217,7 +186,7 @@ Item {
             onClicked: event => {
                 if (event.button === Qt.RightButton) {
                     popup.close();
-                    leftSidebar.toggle();
+                    LeftSidebarService.toggle();
                 } else {
                     root.showPopup(launcherControl, "launcher");
                 }
@@ -231,7 +200,7 @@ Item {
                 radius: Appearance.fullRadius
                 color: launcherControl.containsMouse
                     || popup.shown && popup.anchorItem === launcherControl
-                    || leftSidebar.shown
+                    || root.sidebarShown
                     ? Appearance.secondaryContainer : "transparent"
                 scale: launcherControl.pressed ? 0.88 : 1
 
@@ -514,15 +483,4 @@ Item {
         deformMatrix: popupBackground.deformMatrix
     }
 
-    LeftSidebar {
-        id: leftSidebar
-        outputName: root.outputName
-        z: 20
-        y: Appearance.barHeight + Appearance.px(5)
-        height: Math.max(0,
-            root.height - y - Appearance.px(5))
-        modules: [
-            QuickNote {},
-        ]
-    }
 }

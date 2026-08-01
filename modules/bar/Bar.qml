@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.common
 import qs.common.widgets
+import qs.modules.sidebar
 import qs.services
 
 Scope {
@@ -38,7 +39,6 @@ Scope {
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.namespace: "quickshell:bar"
             WlrLayershell.keyboardFocus: barContent.popupShown
-                    || barContent.sidebarShown
                     || barContent.barContainsMouse
                 ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
@@ -50,9 +50,6 @@ Scope {
                 }
                 Region {
                     item: barContent.popupMask
-                }
-                Region {
-                    item: barContent.sidebarMask
                 }
             }
 
@@ -90,11 +87,6 @@ Scope {
                     barContent.requestHostWindowFocus();
                     Qt.callLater(
                         () => barContent.requestHostWindowFocus());
-                }
-
-                function onSidebarShownChanged() {
-                    if (barContent.sidebarShown)
-                        focusDismissTimer.stop();
                 }
 
                 function onHostWindowActiveChanged() {
@@ -174,6 +166,124 @@ Scope {
                     if (NiriService.overviewOpen)
                         barContent.closeOverlays();
                 }
+            }
+        }
+    }
+
+    // Keep the sidebar on its own layer-shell surface. Niri automatically
+    // focuses a newly mapped OnDemand surface, including when it was opened
+    // through Quickshell IPC. The always-mapped bar surface cannot trigger
+    // that compositor behaviour by changing an Item's visibility alone.
+    Variants {
+        model: Quickshell.screens
+
+        PanelWindow {
+            id: sidebarWindow
+
+            required property ShellScreen modelData
+            readonly property real sidebarWidth:
+                Math.min(Appearance.px(390),
+                    Math.max(Appearance.px(320),
+                        modelData.width * 0.32))
+            property bool mappingEnabled: true
+            property bool acquiredFocus: false
+
+            screen: modelData
+            visible: mappingEnabled && leftSidebar.surfaceVisible
+            implicitWidth: sidebarWidth + Appearance.px(24)
+
+            anchors {
+                top: true
+                bottom: true
+                left: true
+            }
+
+            margins.top: Appearance.barHeight
+            exclusionMode: ExclusionMode.Ignore
+            color: "transparent"
+
+            WlrLayershell.layer: WlrLayer.Top
+            WlrLayershell.namespace: "quickshell:left-sidebar"
+            WlrLayershell.keyboardFocus: leftSidebar.shown
+                ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
+            Region {
+                id: sidebarMask
+
+                Region {
+                    item: leftSidebar.maskItem
+                }
+            }
+
+            mask: sidebarMask
+
+            Timer {
+                id: sidebarFocusDismissTimer
+
+                interval: 120
+                onTriggered: {
+                    if (leftSidebar.shown
+                            && sidebarWindow.acquiredFocus
+                            && !leftSidebar.hostWindowActive
+                            && !leftSidebar.pointerInside) {
+                        leftSidebar.close();
+                    }
+                }
+            }
+
+            Connections {
+                target: leftSidebar
+
+                function onShownChanged() {
+                    sidebarFocusDismissTimer.stop();
+
+                    if (!leftSidebar.shown) {
+                        sidebarWindow.acquiredFocus = false;
+                        return;
+                    }
+
+                    sidebarWindow.acquiredFocus = false;
+                    sidebarWindow.mappingEnabled = false;
+                    Qt.callLater(() => {
+                        if (leftSidebar.shown)
+                            sidebarWindow.mappingEnabled = true;
+                    });
+                }
+
+                function onPointerInsideChanged() {
+                    if (leftSidebar.pointerInside) {
+                        sidebarFocusDismissTimer.stop();
+                    } else if (leftSidebar.shown
+                            && sidebarWindow.acquiredFocus
+                            && !leftSidebar.hostWindowActive) {
+                        sidebarFocusDismissTimer.restart();
+                    }
+                }
+
+                function onHostWindowActiveChanged() {
+                    if (leftSidebar.hostWindowActive
+                            && leftSidebar.shown) {
+                        sidebarWindow.acquiredFocus = true;
+                        sidebarFocusDismissTimer.stop();
+                    } else if (leftSidebar.shown
+                            && sidebarWindow.acquiredFocus
+                            && !leftSidebar.pointerInside) {
+                        sidebarFocusDismissTimer.restart();
+                    }
+                }
+            }
+
+            LeftSidebar {
+                id: leftSidebar
+
+                outputName: modelData.name
+                width: sidebarWindow.sidebarWidth
+                y: Appearance.px(5)
+                height: Math.max(0,
+                    parent.height - Appearance.px(10))
+                modules: [
+                    QuickNote {},
+                ]
             }
         }
     }

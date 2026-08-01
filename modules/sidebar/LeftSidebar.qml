@@ -20,7 +20,10 @@ Item {
             === root.outputName
     property alias modules: moduleColumn.data
     readonly property bool pointerInside: sidebarHover.hovered
+    readonly property bool hostWindowActive: Window.active
     readonly property Item maskItem: root
+    readonly property bool surfaceVisible:
+        shown || x > hiddenX + 0.5
     readonly property real hiddenX:
         -width - Appearance.px(24)
     
@@ -40,7 +43,7 @@ Item {
 
     x: shown ? 5 : hiddenX
     opacity: shown ? 1 : 0
-    visible: shown || x > hiddenX + 0.5
+    visible: surfaceVisible
     width: Math.min(Appearance.px(390),
         Math.max(Appearance.px(320),
             (parent?.width ?? Appearance.px(390)) * 0.32))
