@@ -68,66 +68,66 @@ Rectangle {
         }
         spacing: -Appearance.px(1)
 
+        // RowLayout {
+        //     Layout.fillWidth: true
+        //     spacing: Appearance.px(10)
+
+        //     Rectangle {
+        //         Layout.preferredWidth: Appearance.px(34)
+        //         Layout.preferredHeight: Appearance.px(34)
+        //         radius: Appearance.px(11)
+        //         color: Appearance.primaryContainer
+
+        //         Text {
+        //             anchors.centerIn: parent
+        //             text: ">"
+        //             color: Appearance.primaryContainerText
+        //             font {
+        //                 family: Appearance.monospaceFontFamily
+        //                 pixelSize: Appearance.px(16)
+        //                 weight: Font.Bold
+        //             }
+        //         }
+        //     }
+
+        //     Text {
+        //         Layout.fillWidth: true
+        //         text: "fastfetch"
+        //         color: Appearance.layer0Text
+        //         font {
+        //             family: Appearance.monospaceFontFamily
+        //             pixelSize: Appearance.px(15)
+        //             weight: Font.DemiBold
+        //         }
+        //     }
+
+        //     Rectangle {
+        //         Layout.preferredWidth: Appearance.px(7)
+        //         Layout.preferredHeight: Appearance.px(7)
+        //         radius: Appearance.fullRadius
+        //         color: FastfetchService.errorMessage
+        //             ? Theme.palette.m3error
+        //             : FastfetchService.loading
+        //                 ? Appearance.tertiary : Appearance.primary
+
+        //         SequentialAnimation on opacity {
+        //             running: FastfetchService.loading
+        //             loops: Animation.Infinite
+        //             NumberAnimation {
+        //                 to: 0.3
+        //                 duration: 550
+        //             }
+        //             NumberAnimation {
+        //                 to: 1
+        //                 duration: 550
+        //             }
+        //         }
+        //     }
+        // }
+
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.px(10)
-
-            Rectangle {
-                Layout.preferredWidth: Appearance.px(34)
-                Layout.preferredHeight: Appearance.px(34)
-                radius: Appearance.px(11)
-                color: Appearance.primaryContainer
-
-                Text {
-                    anchors.centerIn: parent
-                    text: ">"
-                    color: Appearance.primaryContainerText
-                    font {
-                        family: Appearance.monospaceFontFamily
-                        pixelSize: Appearance.px(16)
-                        weight: Font.Bold
-                    }
-                }
-            }
-
-            Text {
-                Layout.fillWidth: true
-                text: "fastfetch"
-                color: Appearance.layer0Text
-                font {
-                    family: Appearance.monospaceFontFamily
-                    pixelSize: Appearance.px(15)
-                    weight: Font.DemiBold
-                }
-            }
-
-            Rectangle {
-                Layout.preferredWidth: Appearance.px(7)
-                Layout.preferredHeight: Appearance.px(7)
-                radius: Appearance.fullRadius
-                color: FastfetchService.errorMessage
-                    ? Theme.palette.m3error
-                    : FastfetchService.loading
-                        ? Appearance.tertiary : Appearance.primary
-
-                SequentialAnimation on opacity {
-                    running: FastfetchService.loading
-                    loops: Animation.Infinite
-                    NumberAnimation {
-                        to: 0.3
-                        duration: 550
-                    }
-                    NumberAnimation {
-                        to: 1
-                        duration: 550
-                    }
-                }
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: Appearance.px(190)
+            Layout.preferredHeight: Appearance.px(170)
             spacing: Appearance.px(16)
 
             Item {

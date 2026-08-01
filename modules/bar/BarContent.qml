@@ -162,7 +162,7 @@ Item {
             height: visible
                 ? popup.height * (1 + extraHeight) : 0
             radius: Appearance.normalRadius
-            deformScale: 0.000005
+            deformScale: 0.000002
         }
     }
 

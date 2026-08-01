@@ -49,6 +49,8 @@ Singleton {
         StandardPaths.standardLocations(StandardPaths.StateLocation)[0])
         + "/lc_qs_niri"
     readonly property string settingsFilePath: stateDirectory + "/settings.json"
+    readonly property string sidebarTasksFilePath:
+        stateDirectory + "/sidebar-tasks.json"
     readonly property var popupBezierCurve: [
         popupBezierX1, popupBezierY1,
         popupBezierX2, popupBezierY2,

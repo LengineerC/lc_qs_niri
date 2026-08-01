@@ -145,7 +145,7 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            spacing: Appearance.px(10)
+            spacing: Appearance.px(15)
 
             Item {
                 // 占位宽度与 Logo 一起缩放，右侧内容因此同步移动。

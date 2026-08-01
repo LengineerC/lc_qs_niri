@@ -283,6 +283,7 @@ Scope {
                     parent.height - Appearance.px(10))
                 modules: [
                     FastfetchCard {},
+                    SidebarUtilityRow {},
                     QuickNote {},
                 ]
             }

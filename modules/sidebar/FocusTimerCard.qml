@@ -1,0 +1,393 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Controls as Controls
+import QtQuick.Layouts
+import QtQuick.Shapes
+import qs.common
+import qs.services
+
+Rectangle {
+    id: root
+
+    readonly property string timeText: {
+        const total = FocusTimerService.remainingSeconds;
+        const hours = Math.floor(total / 3600);
+        const minutes = Math.floor((total % 3600) / 60);
+        const seconds = total % 60;
+        const minuteText = String(minutes).padStart(2, "0");
+        const secondText = String(seconds).padStart(2, "0");
+        return hours > 0
+            ? String(hours).padStart(2, "0") + ":"
+                + minuteText + ":" + secondText
+            : minuteText + ":" + secondText;
+    }
+
+    function syncDurationFields(): void {
+        if (hourInput.activeFocus
+                || minuteInput.activeFocus
+                || secondInput.activeFocus) {
+            return;
+        }
+
+        const total = FocusTimerService.currentDurationSeconds;
+        hourInput.text = String(Math.floor(total / 3600))
+            .padStart(2, "0");
+        minuteInput.text = String(Math.floor((total % 3600) / 60))
+            .padStart(2, "0");
+        secondInput.text = String(total % 60).padStart(2, "0");
+    }
+
+    function inputNumber(input): int {
+        const value = Number.parseInt(input.text, 10);
+        return Number.isFinite(value) ? value : 0;
+    }
+
+    function applyCustomDuration(): void {
+        const hours = Math.max(0, Math.min(99,
+            inputNumber(hourInput)));
+        const minutes = Math.max(0, Math.min(59,
+            inputNumber(minuteInput)));
+        const seconds = Math.max(0, Math.min(59,
+            inputNumber(secondInput)));
+        const total = hours * 3600 + minutes * 60 + seconds;
+
+        FocusTimerService.setDuration(Math.max(1, total));
+        forceActiveFocus();
+        syncDurationFields();
+    }
+
+    Layout.fillWidth: true
+    implicitHeight: Appearance.px(175)
+    radius: Appearance.px(24)
+    color: Appearance.layer3
+    border.width: 1
+    border.color: Appearance.withAlpha(
+        Appearance.outline, 0.58)
+    clip: true
+
+    Component.onCompleted: syncDurationFields()
+
+    Connections {
+        target: FocusTimerService
+
+        function onCurrentDurationSecondsChanged() {
+            root.syncDurationFields();
+        }
+    }
+
+    ColumnLayout {
+        anchors {
+            fill: parent
+            margins: Appearance.px(9)
+        }
+        spacing: Appearance.px(4)
+
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            MouseArea {
+                id: resetButton
+
+                anchors {
+                    top: parent.top
+                    left: parent.left
+                    topMargin: Appearance.px(4)
+                    leftMargin: Appearance.px(2)
+                }
+                width: Appearance.px(28)
+                height: width
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: FocusTimerService.reset()
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "󰑓"
+                    color: resetButton.containsMouse
+                        ? Appearance.primary : Appearance.layer1Text
+                    scale: resetButton.pressed ? 0.86 : 1
+                    font {
+                        family: Appearance.iconFontFamily
+                        pixelSize: Appearance.px(15)
+                    }
+
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Appearance.fastDuration
+                        }
+                    }
+                }
+
+                Controls.ToolTip.visible: containsMouse
+                Controls.ToolTip.text: I18n.tr("reset")
+                Controls.ToolTip.delay: 500
+            }
+
+            Rectangle {
+                anchors {
+                    top: parent.top
+                    right: parent.right
+                    topMargin: Appearance.px(13)
+                    rightMargin: Appearance.px(11)
+                }
+                width: Appearance.px(7)
+                height: width
+                radius: Appearance.fullRadius
+                color: FocusTimerService.running
+                    ? Appearance.primary : Appearance.outline
+
+                SequentialAnimation on opacity {
+                    running: FocusTimerService.running
+                    loops: Animation.Infinite
+                    NumberAnimation {
+                        to: 0.3
+                        duration: 650
+                    }
+                    NumberAnimation {
+                        to: 1
+                        duration: 650
+                    }
+                }
+            }
+
+            Item {
+                id: timerDial
+
+                width: Appearance.px(96)
+                height: width
+                anchors.centerIn: parent
+
+                Shape {
+                    anchors.fill: parent
+
+                    ShapePath {
+                        fillColor: "transparent"
+                        strokeColor: Appearance.withAlpha(
+                            Appearance.outline, 0.42)
+                        strokeWidth: Appearance.px(5)
+                        capStyle: ShapePath.RoundCap
+
+                        PathAngleArc {
+                            centerX: timerDial.width / 2
+                            centerY: timerDial.height / 2
+                            radiusX: Appearance.px(41)
+                            radiusY: Appearance.px(41)
+                            startAngle: -90
+                            sweepAngle: 360
+                        }
+                    }
+
+                    ShapePath {
+                        fillColor: "transparent"
+                        strokeColor: Appearance.primary
+                        strokeWidth: Appearance.px(5)
+                        capStyle: ShapePath.RoundCap
+
+                        PathAngleArc {
+                            centerX: timerDial.width / 2
+                            centerY: timerDial.height / 2
+                            radiusX: Appearance.px(41)
+                            radiusY: Appearance.px(41)
+                            startAngle: -90
+                            sweepAngle: 360 * FocusTimerService.progress
+                        }
+                    }
+                }
+
+                Column {
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: -Appearance.px(1)
+                    spacing: -Appearance.px(1)
+
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: root.timeText
+                        color: Appearance.layer0Text
+                        font {
+                            family: Appearance.monospaceFontFamily
+                            pixelSize: Appearance.px(
+                                FocusTimerService.remainingSeconds >= 3600
+                                    ? 15 : 19)
+                            weight: Font.DemiBold
+                        }
+                    }
+
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: FocusTimerService.mode === "custom"
+                            ? I18n.tr("customTime") : "5 min"
+                        color: Appearance.subtext
+                        font {
+                            family: Appearance.fontFamily
+                            pixelSize: Appearance.px(9)
+                            weight: Font.Medium
+                        }
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: FocusTimerService.toggle()
+
+                    Controls.ToolTip.visible: containsMouse
+                    Controls.ToolTip.text: FocusTimerService.running
+                        ? I18n.tr("pause") : I18n.tr("start")
+                    Controls.ToolTip.delay: 500
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: false
+            Layout.minimumHeight: Appearance.px(29)
+            Layout.preferredHeight: Appearance.px(29)
+            Layout.maximumHeight: Appearance.px(29)
+            spacing: Appearance.px(3)
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                radius: Appearance.px(8)
+                color: Appearance.layer1
+                border.width: 1
+                border.color: hourInput.activeFocus
+                    ? Appearance.primary
+                    : Appearance.withAlpha(Appearance.outline, 0.4)
+
+                TextInput {
+                    id: hourInput
+
+                    anchors.fill: parent
+                    color: Appearance.layer0Text
+                    selectionColor: Appearance.primaryContainer
+                    selectedTextColor: Appearance.primaryContainerText
+                    horizontalAlignment: TextInput.AlignHCenter
+                    verticalAlignment: TextInput.AlignVCenter
+                    inputMethodHints: Qt.ImhDigitsOnly
+                    maximumLength: 2
+                    validator: IntValidator { bottom: 0; top: 99 }
+                    font {
+                        family: Appearance.monospaceFontFamily
+                        pixelSize: Appearance.px(11)
+                    }
+                    Keys.onReturnPressed: root.applyCustomDuration()
+                    Keys.onEnterPressed: root.applyCustomDuration()
+                }
+            }
+
+            Text {
+                text: ":"
+                color: Appearance.subtext
+                font.family: Appearance.monospaceFontFamily
+                font.pixelSize: Appearance.px(11)
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                radius: Appearance.px(8)
+                color: Appearance.layer1
+                border.width: 1
+                border.color: minuteInput.activeFocus
+                    ? Appearance.primary
+                    : Appearance.withAlpha(Appearance.outline, 0.4)
+
+                TextInput {
+                    id: minuteInput
+
+                    anchors.fill: parent
+                    color: Appearance.layer0Text
+                    selectionColor: Appearance.primaryContainer
+                    selectedTextColor: Appearance.primaryContainerText
+                    horizontalAlignment: TextInput.AlignHCenter
+                    verticalAlignment: TextInput.AlignVCenter
+                    inputMethodHints: Qt.ImhDigitsOnly
+                    maximumLength: 2
+                    validator: IntValidator { bottom: 0; top: 59 }
+                    font {
+                        family: Appearance.monospaceFontFamily
+                        pixelSize: Appearance.px(11)
+                    }
+                    Keys.onReturnPressed: root.applyCustomDuration()
+                    Keys.onEnterPressed: root.applyCustomDuration()
+                }
+            }
+
+            Text {
+                text: ":"
+                color: Appearance.subtext
+                font.family: Appearance.monospaceFontFamily
+                font.pixelSize: Appearance.px(11)
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                radius: Appearance.px(8)
+                color: Appearance.layer1
+                border.width: 1
+                border.color: secondInput.activeFocus
+                    ? Appearance.primary
+                    : Appearance.withAlpha(Appearance.outline, 0.4)
+
+                TextInput {
+                    id: secondInput
+
+                    anchors.fill: parent
+                    color: Appearance.layer0Text
+                    selectionColor: Appearance.primaryContainer
+                    selectedTextColor: Appearance.primaryContainerText
+                    horizontalAlignment: TextInput.AlignHCenter
+                    verticalAlignment: TextInput.AlignVCenter
+                    inputMethodHints: Qt.ImhDigitsOnly
+                    maximumLength: 2
+                    validator: IntValidator { bottom: 0; top: 59 }
+                    font {
+                        family: Appearance.monospaceFontFamily
+                        pixelSize: Appearance.px(11)
+                    }
+                    Keys.onReturnPressed: root.applyCustomDuration()
+                    Keys.onEnterPressed: root.applyCustomDuration()
+                }
+            }
+
+            MouseArea {
+                id: applyButton
+
+                Layout.preferredWidth: Appearance.px(28)
+                Layout.fillHeight: true
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.applyCustomDuration()
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Appearance.px(9)
+                    color: applyButton.containsMouse
+                        ? Appearance.primaryContainer
+                        : Appearance.withAlpha(Appearance.primary, 0.1)
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰄬"
+                        color: Appearance.primary
+                        font {
+                            family: Appearance.iconFontFamily
+                            pixelSize: Appearance.px(14)
+                        }
+                    }
+                }
+
+                Controls.ToolTip.visible: containsMouse
+                Controls.ToolTip.text: I18n.tr("apply")
+                Controls.ToolTip.delay: 500
+            }
+        }
+
+    }
+}

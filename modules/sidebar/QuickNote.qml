@@ -46,6 +46,8 @@ Rectangle {
 
     property string savingPath: ""
     property string savingText: ""
+    property int editRevision: 0
+    property int savingRevision: 0
 
     readonly property string notesDirectory:
         ShellSettings.stateDirectory + "/quicknote"
@@ -292,6 +294,7 @@ Rectangle {
 
         root.operationError = "";
         root.dirty = true;
+        root.editRevision++;
 
         if (!root.saving)
             saveTimer.restart();
@@ -319,11 +322,69 @@ Rectangle {
         */
         root.savingPath = root.currentPath;
         root.savingText = editor.text;
+        root.savingRevision = root.editRevision;
 
         root.dirty = false;
         root.saving = true;
 
-        noteFile.setText(root.savingText);
+        saveProcess.stdinEnabled = true;
+        saveProcess.exec([
+            "sh",
+            "-c",
+            "set -eu; target=$1; temp=\"${target}.tmp.$$\"; "
+                + "trap 'rm -f -- \"$temp\"' EXIT HUP INT TERM; "
+                + "umask 077; cat > \"$temp\"; "
+                + "if [ -e \"$target\" ]; then "
+                + "chmod --reference=\"$target\" \"$temp\"; fi; "
+                + "mv -f -- \"$temp\" \"$target\"; "
+                + "trap - EXIT HUP INT TERM",
+            "quicknote-save",
+            root.savingPath
+        ]);
+    }
+
+    function finishSaveSuccess(): void {
+        const savedPath = root.savingPath;
+        const savedRevision = root.savingRevision;
+
+        root.saving = false;
+        root.savingPath = "";
+        root.savingText = "";
+        root.savingRevision = 0;
+        root.operationError = "";
+
+        if (!root.samePath(savedPath, root.currentPath))
+            return;
+
+        root.dirty = root.editRevision !== savedRevision;
+
+        if (root.pendingAction.length > 0) {
+            if (root.dirty)
+                Qt.callLater(root.saveNow);
+            else
+                root.executePendingAction();
+        } else if (root.dirty) {
+            saveTimer.restart();
+        }
+    }
+
+    function finishSaveFailure(errorText): void {
+        root.saving = false;
+        root.savingPath = "";
+        root.savingText = "";
+        root.savingRevision = 0;
+        root.dirty = true;
+
+        saveTimer.stop();
+        root.pendingAction = "";
+        root.pendingActionData = ({});
+        root.operationError = I18n.tr("noteSaveError");
+
+        console.warn(
+            "Failed to save quick note:",
+            root.currentPath,
+            errorText
+        );
     }
 
     /*
@@ -411,6 +472,8 @@ Rectangle {
         root.operationError = "";
         root.initialized = false;
         root.dirty = false;
+        root.editRevision = 0;
+        root.savingRevision = 0;
 
         root.currentFileName =
             String(data.fileName);
@@ -868,6 +931,8 @@ Rectangle {
                 root.initialized = false;
                 root.dirty = false;
                 root.saving = false;
+                root.editRevision = 0;
+                root.savingRevision = 0;
                 root.renaming = false;
 
                 root.currentFileName = "";
@@ -907,6 +972,46 @@ Rectangle {
         }
     }
 
+    Process {
+        id: saveProcess
+
+        stdinEnabled: true
+
+        stdout: StdioCollector {}
+
+        stderr: StdioCollector {
+            id: saveError
+        }
+
+        onStarted: {
+            if (!root.saving) {
+                stdinEnabled = false;
+                return;
+            }
+
+            write(root.savingText);
+            stdinEnabled = false;
+
+            // QProcess 已复制待写数据，尽早释放大文本快照。
+            root.savingText = "";
+        }
+
+        onExited: (exitCode, exitStatus) => {
+            if (!root.saving)
+                return;
+
+            if (exitCode === 0) {
+                root.finishSaveSuccess();
+            } else {
+                root.finishSaveFailure(
+                    saveError.text.trim()
+                        || "exit " + exitCode
+                        + " (status " + exitStatus + ")"
+                );
+            }
+        }
+    }
+
     FileView {
         id: noteFile
 
@@ -926,6 +1031,8 @@ Rectangle {
 
             root.dirty = false;
             root.saving = false;
+            root.editRevision = 0;
+            root.savingRevision = 0;
             root.operationError = "";
             root.initialized = true;
 
@@ -937,6 +1044,7 @@ Rectangle {
             root.saving = false;
             root.savingPath = "";
             root.savingText = "";
+            root.savingRevision = 0;
             saveTimer.stop();
 
             if (root.currentPath.length === 0)
@@ -955,70 +1063,6 @@ Rectangle {
             );
         }
 
-        onSaved: {
-            const savedPath = root.savingPath;
-            const savedText = root.savingText;
-
-            root.saving = false;
-            root.savingPath = "";
-            root.savingText = "";
-            root.operationError = "";
-
-            /*
-            * 正常情况下保存过程中不会切换 path。
-            * 加这个检查可以防止异步结果污染新文件状态。
-            */
-            if (!root.samePath(
-                    savedPath,
-                    root.currentPath)) {
-                return;
-            }
-
-            /*
-            * 保存期间编辑器内容发生变化，说明磁盘中的内容
-            * 已经落后，需要再保存一次。
-            */
-            root.dirty = editor.text !== savedText;
-
-            if (root.pendingAction.length > 0) {
-                /*
-                * 文件切换、重命名、删除等操作正在等待，
-                * 此时必须立即保存最新内容。
-                */
-                if (root.dirty) {
-                    Qt.callLater(root.saveNow);
-                } else {
-                    root.executePendingAction();
-                }
-            } else if (root.dirty) {
-                /*
-                * 普通输入继续走 700ms 防抖，
-                * 不再形成连续写入循环。
-                */
-                saveTimer.restart();
-            }
-        }
-
-        onSaveFailed: error => {
-            root.saving = false;
-            root.savingPath = "";
-            root.savingText = "";
-            root.dirty = true;
-
-            saveTimer.stop();
-
-            root.pendingAction = "";
-            root.pendingActionData = ({});
-
-            root.operationError =
-                I18n.tr("noteSaveError");
-
-            console.warn(
-                "Failed to save quick note:",
-                root.currentPath,
-                error
-            );
-        }
     }
 
     Timer {
