@@ -31,7 +31,7 @@ Item {
 
     implicitWidth: Appearance.px(330)
     readonly property int baseImplicitHeight:
-        contentColumn.implicitHeight + Appearance.px(28)
+        contentColumn.implicitHeight + Appearance.px(8)
 
     implicitHeight: baseImplicitHeight
 
@@ -76,48 +76,20 @@ Item {
             top: parent.top
             left: parent.left
             right: parent.right
-            margins: Appearance.px(14)
+            margins: Appearance.px(5)
         }
         spacing: Appearance.px(10)
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.px(8)
-
-            Text {
-                text: "󰀻"
-                color: Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    pixelSize: Appearance.px(20)
-                }
-            }
-
-            PanelText {
-                Layout.fillWidth: true
-                text: I18n.tr("systemTray")
-                color: Appearance.layer0Text
-                elide: Text.ElideRight
-                font {
-                    pixelSize: Appearance.largeFontSize
-                    weight: Font.DemiBold
-                }
-            }
-
-            CloseButton {
-                onClicked: {
-                    root.closeActiveMenu();
-                    root.closeRequested();
-                }
-            }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 1
-            color: Appearance.outline
-            opacity: 0.55
-        }
+        // PopupHeader {
+        //     icon: "󰀻"
+        //     iconSize: Appearance.px(20)
+        //     title: I18n.tr("systemTray")
+        //     dividerSpacing: Appearance.px(10)
+        //     onCloseClicked: {
+        //         root.closeActiveMenu();
+        //         root.closeRequested();
+        //     }
+        // }
 
         Item {
             Layout.fillWidth: true
@@ -162,8 +134,8 @@ Item {
 
                     width: trayFlickable.width
                     columns: root.columnCount
-                    columnSpacing: Appearance.px(7)
-                    rowSpacing: Appearance.px(7)
+                    columnSpacing: Appearance.px(5)
+                    rowSpacing: Appearance.px(5)
 
                     Repeater {
                         // UntypedObjectModel keeps delegates stable while
@@ -194,7 +166,7 @@ Item {
                                     === Status.NeedsAttention
                                 ? Appearance.primary
                                 : Appearance.outline
-                            scale: trayMouse.pressed ? 0.94 : 1
+                            scale: trayMouse.pressed ? 0.8 : 0.85
 
                             function openMenu() {
                                 return root.openContextMenu(

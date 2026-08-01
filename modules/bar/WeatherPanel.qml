@@ -1509,31 +1509,12 @@ Item {
 
         spacing: Appearance.px(10)
 
-        /*
-         * 标题栏
-         */
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.px(8)
-
-            Text {
-                text: WeatherService.currentIcon
-                color: Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    pixelSize: Appearance.px(22)
-                }
-            }
-
-            PanelText {
-                Layout.fillWidth: true
-                text: I18n.tr("weather")
-                color: Appearance.layer0Text
-                font {
-                    pixelSize: Appearance.largeFontSize
-                    weight: Font.DemiBold
-                }
-            }
+        PopupHeader {
+            icon: WeatherService.currentIcon
+            iconSize: Appearance.px(22)
+            title: I18n.tr("weather")
+            dividerSpacing: Appearance.px(10)
+            onCloseClicked: root.closeRequested()
 
             Rectangle {
                 implicitWidth: Appearance.px(30)
@@ -1574,16 +1555,6 @@ Item {
                     onClicked: WeatherService.refresh()
                 }
             }
-
-            CloseButton {
-                onClicked: root.closeRequested()
-            }
-        }
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 1
-            color: Appearance.outline
-            opacity: 0.55
         }
 
 

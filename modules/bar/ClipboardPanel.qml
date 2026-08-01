@@ -64,47 +64,12 @@ Item {
         }
         spacing: Appearance.px(10)
 
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.minimumWidth: 0
-            spacing: Appearance.px(8)
-
-            Text {
-                text: "󰅇"
-                color: Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    pixelSize: Appearance.px(21)
-                }
-            }
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.minimumWidth: 0
-                spacing: 0
-
-                PanelText {
-                    Layout.fillWidth: true
-                    text: I18n.tr("clipboard")
-                    color: Appearance.layer0Text
-                    elide: Text.ElideRight
-                    font {
-                        pixelSize: Appearance.largeFontSize
-                        weight: Font.DemiBold
-                    }
-                }
-
-                PanelText {
-                    Layout.fillWidth: true
-                    text: I18n.tr("clipboardHistoryHint")
-                    color: Appearance.subtext
-                    elide: Text.ElideRight
-                    font.pixelSize: Appearance.smallFontSize
-                }
-            }
+        PopupHeader {
+            icon: "󰅇"
+            title: I18n.tr("clipboard")
+            subtitle: I18n.tr("clipboardHistoryHint")
 
             Rectangle {
-                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                 implicitWidth: clearLabel.implicitWidth + Appearance.px(18)
                 implicitHeight: Appearance.px(28)
                 radius: Appearance.fullRadius
@@ -136,11 +101,6 @@ Item {
                 Behavior on color {
                     ColorAnimation { duration: Appearance.fastDuration }
                 }
-            }
-
-            CloseButton {
-                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                onClicked: root.closeRequested()
             }
         }
 

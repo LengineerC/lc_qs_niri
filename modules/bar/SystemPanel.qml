@@ -209,30 +209,9 @@ Item {
             width: scroll.width - Appearance.px(32)
             spacing: Appearance.px(10)
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.px(8)
-
-                Text {
-                    text: "󰒓"
-                    color: Appearance.primary
-                    font {
-                        family: Appearance.iconFontFamily
-                        pixelSize: Appearance.px(21)
-                    }
-                }
-                PanelText {
-                    Layout.fillWidth: true
-                    text: I18n.tr("networkDevices")
-                    color: Appearance.layer0Text
-                    font {
-                        pixelSize: Appearance.largeFontSize
-                        weight: Font.DemiBold
-                    }
-                }
-                CloseButton {
-                    onClicked: root.closeRequested()
-                }
+            PopupHeader {
+                icon: "󰒓"
+                title: I18n.tr("networkDevices")
             }
 
             RowLayout {

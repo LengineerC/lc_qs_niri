@@ -80,28 +80,14 @@ Item {
         }
         spacing: Appearance.px(9)
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.px(7)
-
-            Text {
-                text: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
-                color: Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    pixelSize: Appearance.px(19)
-                }
-            }
-
-            PanelText {
-                Layout.fillWidth: true
-                text: I18n.tr("notifications")
-                color: Appearance.layer0Text
-                font {
-                    pixelSize: Appearance.fontSize + Appearance.px(2)
-                    weight: Font.DemiBold
-                }
-            }
+        PopupHeader {
+            icon: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
+            iconSize: Appearance.px(19)
+            title: I18n.tr("notifications")
+            contentSpacing: Appearance.px(7)
+            dividerSpacing: Appearance.px(9)
+            dividerOpacity: 1
+            onCloseClicked: root.closeRequested()
 
             HeaderButton {
                 icon: NotificationService.doNotDisturb ? "󰂚" : "󰂛"
@@ -119,16 +105,6 @@ Item {
                 opacity: enabled ? 1 : 0.4
                 onClicked: NotificationService.markAllRead()
             }
-
-            CloseButton {
-                onClicked: root.closeRequested()
-            }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 1
-            color: Appearance.outline
         }
 
         Flickable {

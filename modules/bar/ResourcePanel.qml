@@ -372,38 +372,15 @@ Item {
         }
         spacing: Appearance.px(10)
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.px(8)
-
-            Text {
-                text: "󰍛"
-                color: Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    pixelSize: Appearance.px(21)
-                }
-            }
+        PopupHeader {
+            icon: "󰍛"
+            title: I18n.tr("systemMonitor")
+            showActions: ResourceService.actionMessage.length > 0
 
             PanelText {
-                Layout.fillWidth: true
-                text: I18n.tr("systemMonitor")
-                color: Appearance.layer0Text
-                font {
-                    pixelSize: Appearance.largeFontSize
-                    weight: Font.DemiBold
-                }
-            }
-
-            PanelText {
-                visible: ResourceService.actionMessage.length > 0
                 text: ResourceService.actionMessage
                 color: Appearance.subtext
                 font.pixelSize: Appearance.smallFontSize
-            }
-
-            CloseButton {
-                onClicked: root.closeRequested()
             }
         }
 

@@ -5,7 +5,6 @@ import QtQuick.Controls as Controls
 import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Widgets
 import qs.common
 import qs.common.widgets
 
@@ -215,59 +214,20 @@ PopupWindow {
                 }
                 spacing: Appearance.px(4)
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: Appearance.px(6)
-                    spacing: Appearance.px(8)
-
-                    Item {
-                        Layout.preferredWidth: Appearance.px(24)
-                        Layout.preferredHeight: Appearance.px(24)
-
-                        IconImage {
-                            anchors.centerIn: parent
-                            source: root.menuIcon
-                            visible: String(source).length > 0
-                            implicitSize: Appearance.px(22)
-                            asynchronous: true
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            visible: String(root.menuIcon).length === 0
-                            text: "󰀻"
-                            color: Appearance.primary
-                            font {
-                                family: Appearance.iconFontFamily
-                                pixelSize: Appearance.px(17)
-                            }
-                        }
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: root.menuTitle
-                        color: Appearance.layer0Text
-                        elide: Text.ElideRight
-                        font {
-                            family: Appearance.fontFamily
-                            pixelSize: Appearance.fontSize
-                            weight: Font.DemiBold
-                        }
-                    }
-
-                    CloseButton {
-                        onClicked: root.closeMenu()
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: Appearance.px(5)
-                    Layout.rightMargin: Appearance.px(5)
-                    implicitHeight: 1
-                    color: Appearance.outline
-                    opacity: 0.6
+                PopupHeader {
+                    icon: "󰀻"
+                    iconSource: root.menuIcon
+                    iconSize: String(root.menuIcon).length > 0
+                        ? Appearance.px(22) : Appearance.px(17)
+                    iconSlotSize: Appearance.px(24)
+                    title: root.menuTitle
+                    titleFontSize: Appearance.fontSize
+                    contentLeftMargin: Appearance.px(6)
+                    dividerLeftMargin: Appearance.px(5)
+                    dividerRightMargin: Appearance.px(5)
+                    dividerSpacing: Appearance.px(4)
+                    dividerOpacity: 0.6
+                    onCloseClicked: root.closeMenu()
                 }
 
                 Controls.StackView {

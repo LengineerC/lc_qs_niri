@@ -318,41 +318,15 @@ Item {
             width: parent.width - Appearance.px(42)
             spacing: Appearance.px(8)
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.px(8)
-
-                Text {
-                    text: root.popupIcon
-                    color: Appearance.layer1Text
-                    font {
-                        family: Appearance.iconFontFamily
-                        pixelSize: Appearance.px(18)
-                    }
-                }
-
-                Text {
-                    Layout.fillWidth: true
-                    text: root.popupTitle
-                    color: Appearance.layer1Text
-                    elide: Text.ElideRight
-                    font {
-                        family: Appearance.fontFamily
-                        pixelSize: Appearance.fontSize + Appearance.px(2)
-                        weight: Font.DemiBold
-                    }
-                }
-
-                CloseButton {
-                    onClicked: root.close()
-                }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 1
-                color: Appearance.outline
-                opacity: 0.55
+            PopupHeader {
+                icon: root.popupIcon
+                iconColor: Appearance.layer1Text
+                iconSize: Appearance.px(18)
+                title: root.popupTitle
+                titleColor: Appearance.layer1Text
+                titleFontSize: Appearance.fontSize + Appearance.px(2)
+                dividerSpacing: Appearance.px(8)
+                onCloseClicked: root.close()
             }
 
             Repeater {

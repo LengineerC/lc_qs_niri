@@ -92,33 +92,13 @@ Item {
         }
         spacing: Appearance.px(10)
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.px(8)
-
-            Text {
-                text: BatteryService.powerIcon()
-                color: BatteryService.low
-                    ? Theme.palette.m3error : Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    pixelSize: Appearance.px(23)
-                }
-            }
-
-            PanelText {
-                Layout.fillWidth: true
-                text: BatteryService.panelTitle
-                color: Appearance.layer0Text
-                font {
-                    pixelSize: Appearance.largeFontSize
-                    weight: Font.DemiBold
-                }
-            }
-
-            CloseButton {
-                onClicked: root.closeRequested()
-            }
+        PopupHeader {
+            icon: BatteryService.powerIcon()
+            iconColor: BatteryService.low
+                ? Theme.palette.m3error : Appearance.primary
+            iconSize: Appearance.px(23)
+            title: BatteryService.panelTitle
+            // onCloseClicked: root.closeRequested()
         }
 
         Rectangle {

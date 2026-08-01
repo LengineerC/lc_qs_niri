@@ -33,32 +33,15 @@ Item {
         }
         spacing: Appearance.px(9)
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.px(8)
+        PopupHeader {
+            icon: "󰝚"
+            iconSize: Appearance.px(22)
+            title: I18n.tr("media")
+            showActions: MediaService.players.length > 0
+            dividerSpacing: Appearance.px(9)
+            onCloseClicked: root.closeRequested()
 
             Text {
-                text: "󰝚"
-                color: Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    pixelSize: Appearance.px(22)
-                }
-            }
-
-            Text {
-                Layout.fillWidth: true
-                text: I18n.tr("media")
-                color: Appearance.layer0Text
-                font {
-                    family: Appearance.fontFamily
-                    pixelSize: Appearance.largeFontSize
-                    weight: Font.DemiBold
-                }
-            }
-
-            Text {
-                visible: MediaService.players.length > 0
                 text: MediaService.players.length
                     + " " + I18n.tr(
                         MediaService.players.length === 1
@@ -69,17 +52,6 @@ Item {
                     pixelSize: Appearance.smallFontSize
                 }
             }
-
-            CloseButton {
-                onClicked: root.closeRequested()
-            }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 1
-            color: Appearance.outline
-            opacity: 0.55
         }
 
         Item {

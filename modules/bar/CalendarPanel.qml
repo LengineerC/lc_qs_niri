@@ -138,57 +138,13 @@ Item {
         }
         spacing: Appearance.px(8)
 
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.minimumWidth: 0
-            spacing: Appearance.px(8)
-
-            Text {
-                text: "󰃭"
-                color: Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    pixelSize: Appearance.px(21)
-                }
-            }
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.minimumWidth: 0
-                spacing: 0
-
-                PanelText {
-                    Layout.fillWidth: true
-                    text: I18n.tr("calendar")
-                    color: Appearance.layer0Text
-                    elide: Text.ElideRight
-                    font {
-                        pixelSize: Appearance.largeFontSize
-                        weight: Font.DemiBold
-                    }
-                }
-
-                PanelText {
-                    Layout.fillWidth: true
-                    text: I18n.locale.toString(
-                        root.currentDate, "dddd, MMMM dd")
-                    color: Appearance.subtext
-                    elide: Text.ElideRight
-                    font.pixelSize: Appearance.smallFontSize
-                }
-            }
-
-            CloseButton {
-                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                onClicked: root.closeRequested()
-            }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: 1
-            color: Appearance.outline
-            opacity: 0.55
+        PopupHeader {
+            icon: "󰃭"
+            title: I18n.tr("calendar")
+            subtitle: I18n.locale.toString(
+                root.currentDate, "dddd, MMMM dd")
+            dividerSpacing: Appearance.px(8)
+            onCloseClicked: root.closeRequested()
         }
 
         Rectangle {

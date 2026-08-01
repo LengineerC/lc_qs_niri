@@ -91,7 +91,8 @@ Item {
                 Layout.fillHeight: true
                 clip: true
                 contentWidth: availableWidth
-
+                contentHeight: moduleColumn.implicitHeight
+                
                 Controls.ScrollBar.horizontal.policy:
                     Controls.ScrollBar.AlwaysOff
                 Controls.ScrollBar.vertical.policy:

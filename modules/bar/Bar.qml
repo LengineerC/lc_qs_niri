@@ -285,6 +285,9 @@ Scope {
                     FastfetchCard {},
                     SidebarUtilityRow {},
                     QuickNote {},
+                    DayProgressCard {
+                        active: leftSidebar.shown
+                    },
                 ]
             }
         }
