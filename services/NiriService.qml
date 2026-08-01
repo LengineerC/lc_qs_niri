@@ -35,6 +35,23 @@ Singleton {
         return result;
     }
 
+    function moveWorkspaceToIndex(workspaceId, targetIndex) {
+        const index = Math.max(1, Math.round(Number(targetIndex)));
+        const result = backend.sendRawAction({
+            MoveWorkspaceToIndex: {
+                index: index,
+                reference: {
+                    Id: Number(workspaceId)
+                }
+            }
+        });
+        if (!result.ok) {
+            lastError = result.error ?? "Unknown Niri IPC error";
+            console.warn("Failed to reorder Niri workspace:", lastError);
+        }
+        return result;
+    }
+
     function focusWindow(windowId) {
         const result = backend.focusWindow(windowId);
         if (!result.ok) {
