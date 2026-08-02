@@ -40,12 +40,21 @@ ClippingRectangle {
     }
     readonly property string periodIcon:
         decimalHour >= 6 && decimalHour < 18 ? "󰖙" : "󰖔"
+
+    readonly property color nightTopColor: "#101827"
+    readonly property color nightBottomColor: "#1D2A3B"
+    readonly property color dawnTopColor: "#5B6075"
+    readonly property color dawnBottomColor: "#9B6E68"
+    readonly property color dayTopColor: "#315F7A"
+    readonly property color dayBottomColor: "#527985"
+    readonly property color duskTopColor: "#66465F"
+    readonly property color duskBottomColor: "#965A50"
     readonly property color sceneText: "#F5F8FC"
     readonly property color sceneSubtext: "#D2DCE7"
     readonly property color starColor: "#E6F0FF"
     readonly property color cloudColor: "#F0F5F8"
     readonly property color sunColor: "#FFD27A"
-    readonly property color moonColor: "#CBDCFF"
+    readonly property color moonColor: '#ebf2ff'
     readonly property color farLandscapeColor: "#172536"
     readonly property color nearLandscapeColor: "#101B29"
 
@@ -57,7 +66,9 @@ ClippingRectangle {
     Layout.fillWidth: true
     implicitHeight: Appearance.px(184)
     radius: Appearance.px(24)
-    color: Appearance.layer3
+    // Also use the current time while Canvas is preparing its first frame.
+    color: decimalHour >= 6 && decimalHour < 18
+        ? dayTopColor : nightTopColor
     border.width: 1
     border.color: Appearance.withAlpha(Appearance.outline, 0.58)
 
@@ -91,14 +102,14 @@ ClippingRectangle {
 
         function skyColors(hour) {
             // 场景使用固定的自然色相，避免壁纸强调色改变昼夜观感。
-            const nightTop = "#101827";
-            const nightBottom = "#1D2A3B";
-            const dawnTop = "#5B6075";
-            const dawnBottom = "#9B6E68";
-            const dayTop = "#315F7A";
-            const dayBottom = "#527985";
-            const duskTop = "#66465F";
-            const duskBottom = "#965A50";
+            const nightTop = root.nightTopColor;
+            const nightBottom = root.nightBottomColor;
+            const dawnTop = root.dawnTopColor;
+            const dawnBottom = root.dawnBottomColor;
+            const dayTop = root.dayTopColor;
+            const dayBottom = root.dayBottomColor;
+            const duskTop = root.duskTopColor;
+            const duskBottom = root.duskBottomColor;
 
             if (hour >= 5 && hour < 8) {
                 const amount = (hour - 5) / 3;
@@ -123,7 +134,7 @@ ClippingRectangle {
                     transition(dayBottom, duskBottom, amount)
                 ];
             }
-            if (hour >= 20 && hour < 22) {
+            if (hour >= 20 && hour < 21) {
                 const amount = (hour - 20) / 2;
                 return [
                     transition(duskTop, nightTop, amount),

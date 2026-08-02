@@ -186,7 +186,10 @@ Item {
             onClicked: event => {
                 if (event.button === Qt.RightButton) {
                     popup.close();
-                    LeftSidebarService.toggle();
+                    // This Bar already knows its output. Avoid the async
+                    // focused-output query, whose stale result could reopen
+                    // the sidebar after a rapid close.
+                    LeftSidebarService.toggleOnOutput(root.outputName);
                 } else {
                     root.showPopup(launcherControl, "launcher");
                 }

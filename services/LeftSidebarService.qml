@@ -13,11 +13,23 @@ Singleton {
     property string targetOutputName: ""
 
     property string pendingAction: ""
+    property int requestRevision: 0
+    property int activeRequestRevision: -1
+
+    function load(): void {
+        // Forces singleton construction from shell.qml.
+    }
+
+    function cancelFocusedOutputRequest(): void {
+        ++root.requestRevision;
+        root.pendingAction = "";
+    }
 
     function showOnOutput(outputName: string): void {
         if (outputName.length === 0)
             return;
 
+        root.cancelFocusedOutputRequest();
         root.targetOutputName = outputName;
         root.shown = true;
     }
@@ -26,6 +38,7 @@ Singleton {
         if (outputName.length === 0)
             return;
 
+        root.cancelFocusedOutputRequest();
         if (root.shown
                 && root.targetOutputName === outputName) {
             root.close();
@@ -37,8 +50,23 @@ Singleton {
     }
 
     function requestFocusedOutput(action: string): void {
+        ++root.requestRevision;
         root.pendingAction = action;
 
+        if (focusedOutputProcess.running)
+            return;
+
+        root.startFocusedOutputRequest();
+    }
+
+    function startFocusedOutputRequest(): void {
+        if (root.pendingAction.length === 0
+                || focusedOutputProcess.running) {
+            return;
+        }
+
+        root.activeRequestRevision = root.requestRevision;
+        focusedOutputProcess.output = "";
         focusedOutputProcess.exec([
             "niri",
             "msg",
@@ -55,7 +83,7 @@ Singleton {
         /*
          * 防止查询仍在执行时，查询结果又把侧边栏打开。
          */
-        root.pendingAction = "";
+        root.cancelFocusedOutputRequest();
         root.shown = false;
     }
 
@@ -63,7 +91,13 @@ Singleton {
         root.requestFocusedOutput("toggle");
     }
 
-    function handleFocusedOutputResult(outputText): void {
+    function handleFocusedOutputResult(
+            outputText: string, completedRevision: int): void {
+        if (completedRevision !== root.requestRevision
+                || completedRevision !== root.activeRequestRevision) {
+            return;
+        }
+
         const action = root.pendingAction;
         root.pendingAction = "";
 
@@ -114,11 +148,11 @@ Singleton {
     Process {
         id: focusedOutputProcess
 
+        property string output: ""
+
         stdout: StdioCollector {
             onStreamFinished: {
-                root.handleFocusedOutputResult(
-                    this.text
-                );
+                focusedOutputProcess.output = this.text;
             }
         }
 
@@ -127,17 +161,29 @@ Singleton {
         }
 
         onExited: (exitCode, exitStatus) => {
-            if (exitCode === 0)
-                return;
+            const completedRevision = root.activeRequestRevision;
 
-            root.pendingAction = "";
+            if (exitCode === 0) {
+                root.handleFocusedOutputResult(
+                    focusedOutputProcess.output,
+                    completedRevision
+                );
+            } else {
+                if (completedRevision === root.requestRevision)
+                    root.pendingAction = "";
 
-            console.warn(
-                "Failed to query niri focused output:",
-                exitCode,
-                exitStatus,
-                focusedOutputError.text
-            );
+                console.warn(
+                    "Failed to query niri focused output:",
+                    exitCode,
+                    exitStatus,
+                    focusedOutputError.text
+                );
+            }
+
+            root.activeRequestRevision = -1;
+
+            if (root.pendingAction.length > 0)
+                Qt.callLater(() => root.startFocusedOutputRequest());
         }
     }
 

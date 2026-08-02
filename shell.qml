@@ -26,7 +26,7 @@ ShellRoot {
         LockService.load();
         WeatherService.load();
         Theme.load();
-        LeftSideBarService.load();
+        LeftSidebarService.load();
     }
 
     ScreenCornersWrapper {
