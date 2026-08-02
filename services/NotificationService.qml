@@ -27,6 +27,7 @@ Singleton {
         property bool pendingPopup: false
         property bool closing: false
         property bool toastPresented: false
+        property bool disposalQueued: false
         property int popupTimeoutMs: 7000
         property Timer popupTimer: null
         property Timer exitTimer: null
@@ -53,16 +54,18 @@ Singleton {
     }
 
     property var entries: []
+    // View models are refreshed at most once per frame. Keeping these as
+    // cached arrays prevents every entry property change in a bulk operation
+    // from re-running filters and resetting all QML delegates.
+    property var unreadEntries: []
+    property var historyEntries: []
+    property var popupEntries: []
+    property var centerEntries: []
+    property var pendingEntryDisposals: []
     property bool historyReady: false
     property bool directoryReady: false
     property int sequence: 0
 
-    readonly property var unreadEntries:
-        entries.filter(entry => entry && !entry.read)
-    readonly property var historyEntries:
-        entries.filter(entry => entry && entry.read)
-    readonly property var popupEntries:
-        entries.filter(entry => entry && entry.popup)
     readonly property int unreadCount: unreadEntries.length
     readonly property int maxVisiblePopups: 5
     readonly property int toastExitDuration: Math.max(160,
@@ -142,6 +145,19 @@ Singleton {
             hints["image-path"] ?? hints["image_path"] ?? "");
     }
 
+    function invalidateImage(entry, failedSource) {
+        if (!entry)
+            return;
+        const current = normaliseImageSource(entry.image);
+        if (!current || current !== normaliseImageSource(failedSource))
+            return;
+
+        // Do not retry a broken or half-written image every time a toast is
+        // recycled or the notification center is opened.
+        entry.image = "";
+        scheduleSave();
+    }
+
     function serialiseEntry(entry) {
         return {
             notificationId: entry.notificationId,
@@ -161,6 +177,77 @@ Singleton {
     function scheduleSave() {
         if (historyReady && directoryReady)
             saveTimer.restart();
+    }
+
+    function sameEntryList(first, second) {
+        if (first.length !== second.length)
+            return false;
+        for (let index = 0; index < first.length; ++index) {
+            if (first[index] !== second[index])
+                return false;
+        }
+        return true;
+    }
+
+    function scheduleViewRefresh() {
+        if (!viewRefreshTimer.running)
+            viewRefreshTimer.start();
+    }
+
+    function flushEntryViews() {
+        viewRefreshTimer.stop();
+
+        const unread = [];
+        const history = [];
+        const popups = [];
+        for (let index = 0; index < entries.length; ++index) {
+            const entry = entries[index];
+            if (!entry)
+                continue;
+            if (entry.read)
+                history.push(entry);
+            else
+                unread.push(entry);
+            if (entry.popup)
+                popups.push(entry);
+        }
+
+        if (!sameEntryList(unreadEntries, unread))
+            unreadEntries = unread;
+        if (!sameEntryList(historyEntries, history))
+            historyEntries = history;
+        if (!sameEntryList(popupEntries, popups))
+            popupEntries = popups;
+
+        const centered = unread.concat(history);
+        if (!sameEntryList(centerEntries, centered))
+            centerEntries = centered;
+
+        const disposals = pendingEntryDisposals;
+        pendingEntryDisposals = [];
+        if (disposals.length > 0) {
+            // Let Repeaters/ListViews release their references first.
+            Qt.callLater(() => {
+                disposals.forEach(entry => {
+                    if (entry)
+                        entry.destroy();
+                });
+            });
+        }
+    }
+
+    function queueEntryDisposal(entry) {
+        if (!entry || entry.disposalQueued)
+            return;
+        entry.disposalQueued = true;
+        stopPopupTimer(entry);
+        stopExitTimer(entry);
+        entry.popup = false;
+        entry.pendingPopup = false;
+        dismissLiveNotification(entry);
+        // This array is internal and has no bindings, so mutate it in place
+        // to avoid repeatedly copying an increasingly large disposal queue.
+        pendingEntryDisposals.push(entry);
     }
 
     function saveHistory() {
@@ -205,17 +292,20 @@ Singleton {
             // still loading during shell startup.
             const liveEntries = entries.filter(entry =>
                 entry && entry.notification);
-            entries = [...liveEntries, ...restored]
-                .slice(0, maxHistoryEntries);
+            const combined = [...liveEntries, ...restored];
+            entries = combined.slice(0, maxHistoryEntries);
+            combined.slice(maxHistoryEntries)
+                .forEach(entry => queueEntryDisposal(entry));
         } catch (error) {
             console.warn("NotificationService: cannot load history:", error);
             entries = [];
         }
         historyReady = true;
+        flushEntryViews();
     }
 
     function touchEntries() {
-        entries = entries.slice();
+        scheduleViewRefresh();
         scheduleSave();
     }
 
@@ -276,7 +366,10 @@ Singleton {
             popupTimeoutMs: timeout
         });
 
-        entries = [entry, ...entries].slice(0, maxHistoryEntries);
+        const combined = [entry, ...entries];
+        entries = combined.slice(0, maxHistoryEntries);
+        combined.slice(maxHistoryEntries)
+            .forEach(oldEntry => queueEntryDisposal(oldEntry));
         watchNotificationLifecycle(entry);
         if (!doNotDisturb)
             queuePopup(entry);
@@ -303,26 +396,27 @@ Singleton {
         if (!entry || doNotDisturb)
             return;
 
-        const visible = popupEntries;
+        // The published popup model is frame-coalesced, so derive the small
+        // internal working set from the authoritative entries array.
+        const visible = entries.filter(item => item && item.popup);
         if (visible.length < maxVisiblePopups) {
             startPopup(entry);
             return;
         }
 
         entry.pendingPopup = true;
-        const removable = visible.filter(item => !item.closing);
-        if (removable.length > 0) {
+        const hasClosingPopup = visible.some(item => item.closing);
+        if (!hasClosingPopup) {
             // entries and popupEntries are newest-first, so the final
-            // non-closing item is the oldest visible notification.
-            requestHidePopup(removable[removable.length - 1].notificationId);
+            // item is the oldest visible notification. Only retire one card
+            // at a time so a burst cannot start five simultaneous effects.
+            requestHidePopup(visible[visible.length - 1].notificationId);
         } else {
-            // Every visible slot is already leaving. Keep only the newest
-            // pending items instead of creating a delayed second batch.
+            // Keep only the newest waiting toast. Every notification remains
+            // in the center, but stale popups are not animated after a burst.
             const pending = entries.filter(item =>
                 item && item.pendingPopup && item !== entry);
-            const allowedPending = visible.length;
-            if (pending.length >= allowedPending)
-                pending[pending.length - 1].pendingPopup = false;
+            pending.forEach(item => item.pendingPopup = false);
             touchEntries();
         }
     }
@@ -330,7 +424,8 @@ Singleton {
     function showPendingPopups() {
         if (doNotDisturb)
             return;
-        let freeSlots = maxVisiblePopups - popupEntries.length;
+        const visible = entries.filter(entry => entry && entry.popup);
+        let freeSlots = maxVisiblePopups - visible.length;
         if (freeSlots <= 0)
             return;
 
@@ -359,11 +454,24 @@ Singleton {
         entry.exitTimer = null;
     }
 
-    function requestHidePopup(notificationId) {
+    function requestHidePopup(notificationId, showPending = true) {
         const entry = entryById(notificationId);
         if (!entry || !entry.popup || entry.closing)
             return;
         stopPopupTimer(entry);
+
+        // A burst can replace a toast before its delegate reached the screen.
+        // There is nothing to animate in that case, so release the slot now
+        // instead of creating an exit timer and an invisible animation.
+        if (!entry.toastPresented) {
+            entry.popup = false;
+            entry.closing = false;
+            touchEntries();
+            if (showPending)
+                showPendingPopups();
+            return;
+        }
+
         entry.closing = true;
         entry.exitTimer = exitTimerComponent.createObject(entry, {
             notificationId: entry.notificationId
@@ -406,11 +514,14 @@ Singleton {
             entry.read = true;
             entry.pendingPopup = false;
             if (entry.popup)
-                requestHidePopup(entry.notificationId);
+                requestHidePopup(entry.notificationId, false);
             else
                 stopPopupTimer(entry);
         });
-        touchEntries();
+        // Publish one model change for the complete batch instead of one
+        // change per entry.
+        flushEntryViews();
+        scheduleSave();
     }
 
     function dismissLiveNotification(entry) {
@@ -432,23 +543,19 @@ Singleton {
         const entry = entryById(notificationId);
         if (!entry)
             return;
-        stopPopupTimer(entry);
-        stopExitTimer(entry);
-        dismissLiveNotification(entry);
         entries = entries.filter(item =>
             item.notificationId !== notificationId);
+        queueEntryDisposal(entry);
+        scheduleViewRefresh();
         scheduleSave();
         showPendingPopups();
     }
 
     function clearHistory() {
         const removed = entries.filter(entry => entry && entry.read);
-        removed.forEach(entry => {
-            stopPopupTimer(entry);
-            stopExitTimer(entry);
-            dismissLiveNotification(entry);
-        });
         entries = entries.filter(entry => entry && !entry.read);
+        removed.forEach(entry => queueEntryDisposal(entry));
+        flushEntryViews();
         scheduleSave();
         showPendingPopups();
     }
@@ -531,16 +638,26 @@ Singleton {
             stopPopupTimer(entry);
             entry.pendingPopup = false;
             if (entry.popup)
-                requestHidePopup(entry.notificationId);
+                requestHidePopup(entry.notificationId, false);
         });
-        touchEntries();
+        flushEntryViews();
+        scheduleSave();
     }
 
     Component.onCompleted: directoryProcess.running = true
 
     Timer {
+        id: viewRefreshTimer
+        interval: 16
+        repeat: false
+        onTriggered: root.flushEntryViews()
+    }
+
+    Timer {
         id: saveTimer
-        interval: 120
+        // Bursty clients can otherwise start many asynchronous history writes
+        // while images and toast delegates are being created.
+        interval: 1000
         onTriggered: root.saveHistory()
     }
 
@@ -564,6 +681,7 @@ Singleton {
                 return;
             root.entries = [];
             root.historyReady = true;
+            root.flushEntryViews();
             if (error === FileViewError.FileNotFound)
                 Qt.callLater(() => root.saveHistory());
         }

@@ -22,6 +22,9 @@ Item {
     property int entryGeneration: 0
     readonly property bool showing:
         entered && !notificationEntry.closing
+    readonly property bool transitionRunning:
+        opacityAnimation.running || slideAnimation.running
+            || scaleAnimation.running || stackAnimation.running
 
     function prepareEntry() {
         if (!notificationEntry)
@@ -81,7 +84,11 @@ Item {
         border.color: root.notificationEntry.urgency === 2
             ? Theme.palette.m3error : Appearance.outline
 
+        // MultiEffect allocates an offscreen texture. Render the shadow only
+        // after movement has settled so a burst cannot allocate and blur many
+        // short-lived textures on every animation frame.
         layer.enabled: ShellSettings.shadowEnabled
+            && root.showing && !root.transitionRunning
         layer.effect: MultiEffect {
             shadowEnabled: true
             shadowBlur: 1
@@ -189,6 +196,7 @@ Item {
     Behavior on opacity {
         enabled: root.animateTransitions
         NumberAnimation {
+            id: opacityAnimation
             duration: root.notificationEntry.closing
                 ? NotificationService.toastExitDuration
                 : Appearance.spatialDuration
@@ -199,6 +207,7 @@ Item {
     Behavior on x {
         enabled: root.animateTransitions
         NumberAnimation {
+            id: slideAnimation
             duration: root.notificationEntry.closing
                 ? NotificationService.toastExitDuration
                 : Appearance.spatialDuration
@@ -209,6 +218,7 @@ Item {
     Behavior on scale {
         enabled: root.animateTransitions
         NumberAnimation {
+            id: scaleAnimation
             duration: root.notificationEntry.closing
                 ? NotificationService.toastExitDuration
                 : Appearance.spatialDuration
@@ -218,6 +228,7 @@ Item {
 
     Behavior on y {
         NumberAnimation {
+            id: stackAnimation
             duration: Appearance.spatialDuration
             easing.type: Easing.OutCubic
         }

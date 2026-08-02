@@ -11,6 +11,7 @@ Item {
     required property var notificationEntry
     property real implicitSize: Appearance.px(44)
     property real iconPadding: Appearance.px(5)
+    property bool profileImageReady: false
 
     readonly property bool hasProfileImage:
         NotificationService.hasNotificationImage(notificationEntry)
@@ -21,6 +22,26 @@ Item {
     implicitWidth: implicitSize
     implicitHeight: implicitSize
 
+    function prepareProfileImage() {
+        profileImageReady = false;
+        imageDelay.stop();
+        if (hasProfileImage)
+            imageDelay.start();
+    }
+
+    onNotificationEntryChanged: prepareProfileImage()
+    onHasProfileImageChanged: prepareProfileImage()
+    Component.onCompleted: prepareProfileImage()
+
+    Timer {
+        id: imageDelay
+        // Screenshot tools may emit the notification just before the image
+        // file has finished being written.
+        interval: 180
+        repeat: false
+        onTriggered: root.profileImageReady = true
+    }
+
     ClippingRectangle {
         id: avatarClip
 
@@ -30,21 +51,34 @@ Item {
         clip: true
 
         Image {
+            id: avatarImage
+
             anchors {
                 fill: parent
                 margins: root.hasProfileImage ? 0 : root.iconPadding
             }
-            asynchronous: false
-            cache: true
-            retainWhileLoading: true
+            // File thumbnails decode off the GUI thread. Theme icons stay on
+            // the GUI thread because concurrent QIcon::fromTheme calls can
+            // crash in Qt's icon loader under a notification burst.
+            asynchronous: root.hasProfileImage
+            cache: !root.hasProfileImage
+            retainWhileLoading: false
             sourceSize {
                 width: width
                 height: height
             }
-            source: NotificationService.avatarSource(
-                root.notificationEntry)
+            source: root.hasProfileImage && !root.profileImageReady
+                ? "" : NotificationService.avatarSource(
+                    root.notificationEntry)
             fillMode: root.hasProfileImage
                 ? Image.PreserveAspectCrop : Image.PreserveAspectFit
+
+            onStatusChanged: {
+                if (status === Image.Error && root.hasProfileImage) {
+                    NotificationService.invalidateImage(
+                        root.notificationEntry, source);
+                }
+            }
         }
     }
 
@@ -66,7 +100,8 @@ Item {
                 fill: parent
                 margins: Appearance.px(2)
             }
-            asynchronous: true
+            // See avatarImage above: avoid concurrent QIcon theme lookups.
+            asynchronous: false
             source: NotificationService.iconSource(
                 root.notificationEntry)
         }

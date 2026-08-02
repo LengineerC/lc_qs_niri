@@ -455,6 +455,7 @@ Item {
 
         NotificationPanel {
             visible: root.page === "notifications"
+            active: visible && root.shown
             anchors {
                 fill: innerSurface
                 margins: 1
