@@ -13,7 +13,16 @@ MouseArea {
     implicitHeight: Appearance.barHeight
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
-    onClicked: activated()
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
+    onClicked: event => {
+        if (event.button === Qt.RightButton) {
+            if (NotificationService.unreadCount > 0) {
+                NotificationService.markAllRead();
+            }
+        } else {
+            activated();
+        }
+    }
 
     Rectangle {
         width: Appearance.px(30)
