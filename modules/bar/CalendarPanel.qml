@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls as Controls
 import QtQuick.Layouts
 import qs.common
 import qs.common.widgets
@@ -21,6 +20,24 @@ Item {
     readonly property bool displayingCurrentMonth:
         displayedMonth === currentDate.getMonth()
         && displayedYear === currentDate.getFullYear()
+    readonly property int firstDayOfWeek:
+        ShellSettings.calendarWeekStart >= 0
+            ? ShellSettings.calendarWeekStart
+            : Number(I18n.locale.firstDayOfWeek)
+    readonly property var weekDayOrder: {
+        const result = [];
+        for (let offset = 0; offset < 7; ++offset)
+            result.push((firstDayOfWeek + offset) % 7);
+        return result;
+    }
+    readonly property date firstGridDate: {
+        const firstOfMonth = new Date(
+            displayedYear, displayedMonth, 1);
+        const leadingDays = (firstOfMonth.getDay()
+            - firstDayOfWeek + 7) % 7;
+        return new Date(displayedYear, displayedMonth,
+            1 - leadingDays);
+    }
 
     implicitWidth: Appearance.px(390)
     implicitHeight: contentColumn.implicitHeight + Appearance.px(28)
@@ -46,6 +63,19 @@ Item {
         return first.getFullYear() === second.getFullYear()
             && first.getMonth() === second.getMonth()
             && first.getDate() === second.getDate();
+    }
+
+    function dateForCell(index) {
+        return new Date(
+            firstGridDate.getFullYear(),
+            firstGridDate.getMonth(),
+            firstGridDate.getDate() + index);
+    }
+
+    function shortWeekDayName(day) {
+        // 2024-01-07 was a Sunday; JS weekdays use Sunday = 0.
+        return I18n.locale.toString(
+            new Date(2024, 0, 7 + day), "ddd");
     }
 
     component PanelText: Text {
@@ -256,95 +286,114 @@ Item {
             }
         }
 
-        Controls.DayOfWeekRow {
-            id: weekDays
-
+        GridLayout {
             Layout.fillWidth: true
-            locale: I18n.locale
+            columns: 7
+            columnSpacing: Appearance.px(2)
+            rowSpacing: 0
+            uniformCellWidths: true
 
-            delegate: PanelText {
-                required property var model
+            Repeater {
+                model: root.weekDayOrder
 
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                text: model.shortName
-                color: model.day === Qt.Saturday
-                    || model.day === Qt.Sunday
-                    ? Appearance.tertiary : Appearance.subtext
-                font {
-                    pixelSize: Appearance.smallFontSize
-                    weight: Font.DemiBold
+                delegate: PanelText {
+                    required property int modelData
+
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Appearance.px(22)
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    text: root.shortWeekDayName(modelData)
+                    color: modelData === 0 || modelData === 6
+                        ? Appearance.tertiary : Appearance.subtext
+                    font {
+                        pixelSize: Appearance.smallFontSize
+                        weight: Font.DemiBold
+                    }
                 }
             }
         }
 
-        Controls.MonthGrid {
-            id: monthGrid
-
+        GridLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: Appearance.px(222)
-            month: root.displayedMonth
-            year: root.displayedYear
-            locale: I18n.locale
-            spacing: Appearance.px(2)
+            columns: 7
+            columnSpacing: Appearance.px(2)
+            rowSpacing: Appearance.px(2)
+            uniformCellWidths: true
+            uniformCellHeights: true
 
-            delegate: Rectangle {
-                id: dayCell
+            Repeater {
+                model: 42
 
-                required property var model
+                delegate: Rectangle {
+                    id: dayCell
 
-                readonly property bool selected:
-                    root.sameDate(model.date, root.selectedDate)
-                readonly property bool weekend:
-                    model.date.getDay() === 0
-                    || model.date.getDay() === 6
+                    required property int index
+                    readonly property date cellDate:
+                        root.dateForCell(index)
+                    readonly property bool selected:
+                        root.sameDate(cellDate, root.selectedDate)
+                    readonly property bool today:
+                        root.sameDate(cellDate, root.currentDate)
+                    readonly property bool inDisplayedMonth:
+                        cellDate.getMonth() === root.displayedMonth
+                        && cellDate.getFullYear() === root.displayedYear
+                    readonly property bool weekend:
+                        cellDate.getDay() === 0
+                        || cellDate.getDay() === 6
 
-                implicitWidth: Appearance.px(42)
-                implicitHeight: Appearance.px(34)
-                radius: Appearance.px(10)
-                color: model.today
-                    ? Appearance.primary
-                    : selected
-                        ? Appearance.secondaryContainer
-                        : dayMouse.containsMouse
-                            ? Appearance.layer1Hover : "transparent"
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    implicitWidth: Appearance.px(42)
+                    implicitHeight: Appearance.px(34)
+                    radius: Appearance.px(10)
+                    color: today
+                        ? Appearance.primary
+                        : selected
+                            ? Appearance.secondaryContainer
+                            : dayMouse.containsMouse
+                                ? Appearance.layer1Hover : "transparent"
 
-                PanelText {
-                    anchors.centerIn: parent
-                    text: dayCell.model.day
-                    color: dayCell.model.today
-                        ? Theme.palette.m3onPrimary
-                        : dayCell.selected
-                            ? Appearance.secondaryContainerText
-                            : dayCell.weekend
-                                ? Appearance.tertiary
-                                : Appearance.layer1Text
-                    opacity: dayCell.model.month === monthGrid.month ? 1 : 0.38
-                    font {
-                        pixelSize: Appearance.fontSize
-                        weight: dayCell.model.today
-                            || dayCell.selected ? Font.DemiBold : Font.Normal
-                    }
-                }
-
-                MouseArea {
-                    id: dayMouse
-
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        root.selectedDate = dayCell.model.date;
-                        if (dayCell.model.month !== monthGrid.month) {
-                            root.displayedDate = new Date(
-                                dayCell.model.year,
-                                dayCell.model.month, 1);
+                    PanelText {
+                        anchors.centerIn: parent
+                        text: dayCell.cellDate.getDate()
+                        color: dayCell.today
+                            ? Theme.palette.m3onPrimary
+                            : dayCell.selected
+                                ? Appearance.secondaryContainerText
+                                : dayCell.weekend
+                                    ? Appearance.tertiary
+                                    : Appearance.layer1Text
+                        opacity: dayCell.inDisplayedMonth ? 1 : 0.38
+                        font {
+                            pixelSize: Appearance.fontSize
+                            weight: dayCell.today || dayCell.selected
+                                ? Font.DemiBold : Font.Normal
                         }
                     }
-                }
 
-                Behavior on color {
-                    ColorAnimation { duration: Appearance.fastDuration }
+                    MouseArea {
+                        id: dayMouse
+
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.selectedDate = dayCell.cellDate;
+                            if (!dayCell.inDisplayedMonth) {
+                                root.displayedDate = new Date(
+                                    dayCell.cellDate.getFullYear(),
+                                    dayCell.cellDate.getMonth(), 1);
+                            }
+                        }
+                    }
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: Appearance.fastDuration
+                        }
+                    }
                 }
             }
         }

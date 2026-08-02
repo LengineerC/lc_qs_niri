@@ -18,10 +18,15 @@ ClippingRectangle {
             + now.getMilliseconds() / 1000
     readonly property real dayProgress:
         Math.max(0, Math.min(1, secondsOfDay / 86400))
+    readonly property int firstDayOfWeek:
+        ShellSettings.calendarWeekStart >= 0
+            ? ShellSettings.calendarWeekStart
+            : Number(I18n.locale.firstDayOfWeek)
     readonly property real weekProgress: {
-        // JavaScript 以周日为 0；这里改为周一开始。
-        const mondayBasedDay = (now.getDay() + 6) % 7;
-        return (mondayBasedDay + dayProgress) / 7;
+        // JavaScript 和 Locale 都使用周日 = 0 的星期编号。
+        const elapsedDays = (now.getDay()
+            - firstDayOfWeek + 7) % 7;
+        return (elapsedDays + dayProgress) / 7;
     }
     readonly property real decimalHour: secondsOfDay / 3600
     readonly property string periodLabel: {

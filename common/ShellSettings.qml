@@ -27,6 +27,8 @@ Singleton {
     property string language: "zh_CN"
     property string timeFormat: "HH:mm"
     property string dateFormat: "MMM dd ddd"
+    // -1 follows the active locale; 0/1/6 use JS weekday numbering.
+    property int calendarWeekStart: -1
     property int clipboardMaxEntryMb: 10
     property int clipboardMaxEntries: 100
     property bool doNotDisturb: false
@@ -107,7 +109,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 15,
+            version: 16,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             shadowEnabled: shadowEnabled,
@@ -126,6 +128,7 @@ Singleton {
             language: language,
             timeFormat: timeFormat,
             dateFormat: dateFormat,
+            calendarWeekStart: calendarWeekStart,
             clipboardMaxEntryMb: clipboardMaxEntryMb,
             clipboardMaxEntries: clipboardMaxEntries,
             doNotDisturb: doNotDisturb,
@@ -148,7 +151,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 15)
+            if (state.version !== 16)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -212,6 +215,12 @@ Singleton {
                 dateFormat = state.dateFormat.trim().slice(0, 64);
             else
                 needsMigration = true;
+            if ([-1, 0, 1, 6].indexOf(
+                    Number(state.calendarWeekStart)) >= 0) {
+                calendarWeekStart = Number(state.calendarWeekStart);
+            } else {
+                needsMigration = true;
+            }
             if (state.clipboardMaxEntryMb !== undefined)
                 clipboardMaxEntryMb = Math.round(clamped(
                     state.clipboardMaxEntryMb, 1, 100));
@@ -318,6 +327,7 @@ Singleton {
         language = "zh_CN";
         timeFormat = "HH:mm";
         dateFormat = "MMM dd ddd";
+        calendarWeekStart = -1;
         clipboardMaxEntryMb = 10;
         clipboardMaxEntries = 100;
         doNotDisturb = false;
@@ -357,6 +367,7 @@ Singleton {
     onLanguageChanged: scheduleSave()
     onTimeFormatChanged: scheduleSave()
     onDateFormatChanged: scheduleSave()
+    onCalendarWeekStartChanged: scheduleSave()
     onClipboardMaxEntryMbChanged: scheduleSave()
     onClipboardMaxEntriesChanged: scheduleSave()
     onDoNotDisturbChanged: scheduleSave()
@@ -427,6 +438,11 @@ Singleton {
                 root.dateFormat = value.slice(0, 64);
         }
 
+        function setCalendarWeekStart(day: int): void {
+            if ([-1, 0, 1, 6].indexOf(day) >= 0)
+                root.calendarWeekStart = day;
+        }
+
         function setWallpaperFillMode(mode: string): void {
             if ([
                     "Stretch",
@@ -461,6 +477,7 @@ Singleton {
                 language: root.language,
                 timeFormat: root.timeFormat,
                 dateFormat: root.dateFormat,
+                calendarWeekStart: root.calendarWeekStart,
                 clipboardMaxEntryMb: root.clipboardMaxEntryMb,
                 clipboardMaxEntries: root.clipboardMaxEntries,
                 doNotDisturb: root.doNotDisturb,

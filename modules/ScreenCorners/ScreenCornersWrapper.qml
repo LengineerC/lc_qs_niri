@@ -13,6 +13,8 @@ Variants {
         screen: modelData
         color: "transparent"
         WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.namespace: "quickshell:screen-corners"
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
         anchors {
             top: true

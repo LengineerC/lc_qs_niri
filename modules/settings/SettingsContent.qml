@@ -29,6 +29,12 @@ Item {
             && latitude >= -90 && latitude <= 90
             && longitude >= -180 && longitude <= 180;
     }
+    readonly property var weekStartOptions: [
+        { value: -1, label: I18n.tr("followLocale") },
+        { value: 1, label: I18n.tr("monday") },
+        { value: 0, label: I18n.tr("sunday") },
+        { value: 6, label: I18n.tr("saturday") }
+    ]
 
     FileDialog {
         id: avatarFileDialog
@@ -281,6 +287,65 @@ Item {
         Behavior on color {
             ColorAnimation { duration: Appearance.fastDuration }
         }
+        Behavior on scale {
+            NumberAnimation {
+                duration: Appearance.fastDuration
+                easing.type: Easing.OutCubic
+            }
+        }
+    }
+
+    component ChoiceChip: Rectangle {
+        id: choiceChip
+
+        required property string label
+        required property bool selected
+        signal chosen
+
+        Layout.fillWidth: true
+        implicitHeight: Appearance.px(36)
+        radius: Appearance.px(9)
+        color: selected
+            ? Appearance.primaryContainer
+            : choiceMouse.containsMouse
+                ? Appearance.layer1Active : Appearance.layer1
+        border.width: 1
+        border.color: selected
+            ? Appearance.primary : Appearance.outline
+        scale: choiceMouse.pressed ? 0.97 : 1
+
+        PanelText {
+            anchors {
+                fill: parent
+                leftMargin: Appearance.px(7)
+                rightMargin: Appearance.px(7)
+            }
+            text: choiceChip.label
+            color: choiceChip.selected
+                ? Appearance.primaryContainerText
+                : Appearance.layer1Text
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+            font {
+                pixelSize: Appearance.smallFontSize
+                weight: choiceChip.selected
+                    ? Font.DemiBold : Font.Normal
+            }
+        }
+
+        MouseArea {
+            id: choiceMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: choiceChip.chosen()
+        }
+
+        Behavior on color {
+            ColorAnimation { duration: Appearance.fastDuration }
+        }
+
         Behavior on scale {
             NumberAnimation {
                 duration: Appearance.fastDuration
@@ -1474,6 +1539,58 @@ Item {
                         hint: I18n.tr("dateFormatHint")
                         onAccepted: value => {
                             ShellSettings.dateFormat = value;
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(10)
+
+                        ColumnLayout {
+                            readonly property int targetWidth: Appearance.px(
+                                I18n.language === "en_US" ? 260 : 230)
+
+                            Layout.preferredWidth: targetWidth
+                            Layout.minimumWidth: Appearance.px(180)
+                            Layout.maximumWidth: targetWidth
+                            spacing: Appearance.px(1)
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                text: I18n.tr("weekStartsOn")
+                                color: Appearance.layer0Text
+                            }
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                Layout.maximumWidth: parent.width
+                                text: I18n.tr("weekStartsOnHint")
+                                color: Appearance.subtext
+                                wrapMode: Text.WordWrap
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(6)
+
+                            Repeater {
+                                model: root.weekStartOptions
+
+                                delegate: ChoiceChip {
+                                    required property var modelData
+
+                                    label: modelData.label
+                                    selected:
+                                        ShellSettings.calendarWeekStart
+                                            === modelData.value
+                                    onChosen: {
+                                        ShellSettings.calendarWeekStart =
+                                            modelData.value;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
