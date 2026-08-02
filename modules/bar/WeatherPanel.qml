@@ -305,15 +305,31 @@ Item {
                 context.fillStyle = Appearance.withAlpha(
                     Appearance.primary, 0.2);
                 context.beginPath();
-                context.arc(centerX, centerY,
-                    radius * 1.12, 0, Math.PI * 2);
-                context.fill();
-                context.fillStyle = Appearance.withAlpha(
-                    Appearance.layer3, 0.95);
-                context.beginPath();
-                context.arc(centerX + radius * 0.48,
-                    centerY - radius * 0.18,
-                    radius, 0, Math.PI * 2);
+                const moonRadius = radius * 1.12;
+                context.moveTo(centerX + moonRadius * 0.32,
+                    centerY - moonRadius * 0.92);
+                context.bezierCurveTo(
+                    centerX - moonRadius * 0.42,
+                    centerY - moonRadius * 1.02,
+                    centerX - moonRadius * 0.9,
+                    centerY - moonRadius * 0.48,
+                    centerX - moonRadius * 0.9,
+                    centerY);
+                context.bezierCurveTo(
+                    centerX - moonRadius * 0.9,
+                    centerY + moonRadius * 0.48,
+                    centerX - moonRadius * 0.42,
+                    centerY + moonRadius * 1.02,
+                    centerX + moonRadius * 0.32,
+                    centerY + moonRadius * 0.92);
+                context.bezierCurveTo(
+                    centerX - moonRadius * 0.34,
+                    centerY + moonRadius * 0.48,
+                    centerX - moonRadius * 0.34,
+                    centerY - moonRadius * 0.48,
+                    centerX + moonRadius * 0.32,
+                    centerY - moonRadius * 0.92);
+                context.closePath();
                 context.fill();
             }
         }

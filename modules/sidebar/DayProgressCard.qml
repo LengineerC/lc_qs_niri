@@ -54,9 +54,16 @@ ClippingRectangle {
     readonly property color starColor: "#E6F0FF"
     readonly property color cloudColor: "#F0F5F8"
     readonly property color sunColor: "#FFD27A"
-    readonly property color moonColor: '#ebf2ff'
-    readonly property color farLandscapeColor: "#172536"
-    readonly property color nearLandscapeColor: "#101B29"
+    readonly property color moonColor: "#EBF2FF"
+    readonly property color moonCraterColor: "#AAB8D2"
+    readonly property color nightFarLandscapeColor: "#172536"
+    readonly property color nightNearLandscapeColor: "#101B29"
+    readonly property color dawnFarLandscapeColor: "#665A5C"
+    readonly property color dawnNearLandscapeColor: "#403D45"
+    readonly property color dayFarLandscapeColor: "#55766B"
+    readonly property color dayNearLandscapeColor: "#31584F"
+    readonly property color duskFarLandscapeColor: "#66505A"
+    readonly property color duskNearLandscapeColor: "#3D3442"
 
     function percentText(value): string {
         return Math.floor(Math.max(0, Math.min(1, value)) * 100)
@@ -154,6 +161,49 @@ ClippingRectangle {
             return 0;
         }
 
+        function landscapeColors(hour) {
+            const nightFar = root.nightFarLandscapeColor;
+            const nightNear = root.nightNearLandscapeColor;
+            const dawnFar = root.dawnFarLandscapeColor;
+            const dawnNear = root.dawnNearLandscapeColor;
+            const dayFar = root.dayFarLandscapeColor;
+            const dayNear = root.dayNearLandscapeColor;
+            const duskFar = root.duskFarLandscapeColor;
+            const duskNear = root.duskNearLandscapeColor;
+
+            if (hour >= 5 && hour < 8) {
+                const amount = (hour - 5) / 3;
+                return [
+                    transition(nightFar, dawnFar, amount),
+                    transition(nightNear, dawnNear, amount)
+                ];
+            }
+            if (hour >= 8 && hour < 10) {
+                const amount = (hour - 8) / 2;
+                return [
+                    transition(dawnFar, dayFar, amount),
+                    transition(dawnNear, dayNear, amount)
+                ];
+            }
+            if (hour >= 10 && hour < 17.5)
+                return [dayFar, dayNear];
+            if (hour >= 17.5 && hour < 20) {
+                const amount = (hour - 17.5) / 2.5;
+                return [
+                    transition(dayFar, duskFar, amount),
+                    transition(dayNear, duskNear, amount)
+                ];
+            }
+            if (hour >= 20 && hour < 22) {
+                const amount = (hour - 20) / 2;
+                return [
+                    transition(duskFar, nightFar, amount),
+                    transition(duskNear, nightNear, amount)
+                ];
+            }
+            return [nightFar, nightNear];
+        }
+
         function drawStars(context, opacity) {
             if (opacity <= 0)
                 return;
@@ -205,19 +255,44 @@ ClippingRectangle {
 
             context.fillStyle = Appearance.withAlpha(
                 sunVisible ? root.sunColor : root.moonColor,
-                sunVisible ? 0.86 : 0.72);
+                sunVisible ? 0.86 : 0.9);
             context.beginPath();
-            context.arc(x, y, radius, 0, Math.PI * 2);
+            if (sunVisible) {
+                context.arc(x, y, radius, 0, Math.PI * 2);
+            } else {
+                // Draw the crescent as one shape instead of covering a full
+                // moon with a sky-colored circle. This keeps the background
+                // gradient continuous and avoids a visible mask edge.
+                context.moveTo(x + radius * 0.32,
+                    y - radius * 0.92);
+                context.bezierCurveTo(
+                    x - radius * 0.42, y - radius * 1.02,
+                    x - radius * 0.9, y - radius * 0.48,
+                    x - radius * 0.9, y);
+                context.bezierCurveTo(
+                    x - radius * 0.9, y + radius * 0.48,
+                    x - radius * 0.42, y + radius * 1.02,
+                    x + radius * 0.32, y + radius * 0.92);
+                context.bezierCurveTo(
+                    x - radius * 0.34, y + radius * 0.48,
+                    x - radius * 0.34, y - radius * 0.48,
+                    x + radius * 0.32, y - radius * 0.92);
+                context.closePath();
+            }
             context.fill();
 
             if (!sunVisible) {
+                context.save();
+                context.clip();
                 context.fillStyle = Appearance.withAlpha(
-                    skyColors(hour)[0], 0.98);
+                    root.moonCraterColor, 0.18);
                 context.beginPath();
-                context.arc(x + radius * 0.46,
-                    y - radius * 0.18,
-                    radius * 0.92, 0, Math.PI * 2);
+                context.arc(x - radius * 0.55, y - radius * 0.2,
+                    radius * 0.18, 0, Math.PI * 2);
+                context.arc(x - radius * 0.38, y + radius * 0.42,
+                    radius * 0.12, 0, Math.PI * 2);
                 context.fill();
+                context.restore();
             }
         }
 
@@ -257,11 +332,12 @@ ClippingRectangle {
             }
         }
 
-        function drawLandscape(context) {
+        function drawLandscape(context, hour) {
             const horizon = height * 0.72;
+            const colors = landscapeColors(hour);
 
             context.fillStyle = Appearance.withAlpha(
-                root.farLandscapeColor, 0.52);
+                colors[0], 0.78);
             context.beginPath();
             context.moveTo(0, height);
             context.lineTo(0, horizon + Appearance.px(7));
@@ -278,7 +354,7 @@ ClippingRectangle {
             context.fill();
 
             context.fillStyle = Appearance.withAlpha(
-                root.nearLandscapeColor, 0.7);
+                colors[1], 0.9);
             context.beginPath();
             context.moveTo(0, height);
             context.lineTo(0, horizon + Appearance.px(17));
@@ -311,7 +387,7 @@ ClippingRectangle {
             drawStars(context, nightOpacity(hour));
             drawCelestial(context, hour);
             drawClouds(context, hour);
-            drawLandscape(context);
+            drawLandscape(context, hour);
         }
 
         onWidthChanged: requestPaint()
