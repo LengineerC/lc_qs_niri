@@ -13,21 +13,38 @@ Item {
     signal closeRequested
     property bool active: visible
     property bool contentReady: false
+    property bool revealReady: false
 
     onActiveChanged: {
-        contentDelay.stop();
+        preloadTimer.stop();
+        layoutSettleTimer.stop();
         contentReady = false;
+        revealReady = false;
         if (active)
-            contentDelay.start();
+            preloadTimer.start();
     }
 
     Timer {
-        id: contentDelay
-        interval: Appearance.spatialDuration + 40
+        id: preloadTimer
+        interval: 0
         repeat: false
         onTriggered: {
-            if (root.active)
+            if (root.active) {
                 root.contentReady = true;
+                layoutSettleTimer.start();
+            }
+        }
+    }
+
+    Timer {
+        id: layoutSettleTimer
+        // Give the ListView two frames to create, measure and polish its
+        // initial delegates before StyledPopup starts moving.
+        interval: 34
+        repeat: false
+        onTriggered: {
+            if (root.active && root.contentReady)
+                root.revealReady = true;
         }
     }
 
@@ -221,6 +238,7 @@ Item {
                     width: parent.width
                     notificationEntry: notificationDelegate.modelData
                     historical: notificationDelegate.modelData.read
+                    preloadImages: true
                     onActivated: NotificationService.activate(
                         notificationDelegate.modelData)
                     onSecondaryAction: {

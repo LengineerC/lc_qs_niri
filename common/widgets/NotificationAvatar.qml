@@ -11,6 +11,8 @@ Item {
     required property var notificationEntry
     property real implicitSize: Appearance.px(44)
     property real iconPadding: Appearance.px(5)
+    property int profileImageDelay: 180
+    property bool asynchronousProfileImage: true
     property bool profileImageReady: false
 
     readonly property bool hasProfileImage:
@@ -18,6 +20,9 @@ Item {
     readonly property bool hasAppBadge:
         hasProfileImage
             && NotificationService.hasApplicationIcon(notificationEntry)
+    readonly property bool contentReady:
+        !hasProfileImage
+            || (profileImageReady && avatarImage.status === Image.Ready)
 
     implicitWidth: implicitSize
     implicitHeight: implicitSize
@@ -25,8 +30,12 @@ Item {
     function prepareProfileImage() {
         profileImageReady = false;
         imageDelay.stop();
-        if (hasProfileImage)
-            imageDelay.start();
+        if (hasProfileImage) {
+            if (profileImageDelay > 0)
+                imageDelay.start();
+            else
+                profileImageReady = true;
+        }
     }
 
     onNotificationEntryChanged: prepareProfileImage()
@@ -37,7 +46,7 @@ Item {
         id: imageDelay
         // Screenshot tools may emit the notification just before the image
         // file has finished being written.
-        interval: 180
+        interval: Math.max(0, root.profileImageDelay)
         repeat: false
         onTriggered: root.profileImageReady = true
     }
@@ -61,6 +70,7 @@ Item {
             // the GUI thread because concurrent QIcon::fromTheme calls can
             // crash in Qt's icon loader under a notification burst.
             asynchronous: root.hasProfileImage
+                && root.asynchronousProfileImage
             cache: !root.hasProfileImage
             retainWhileLoading: false
             sourceSize {

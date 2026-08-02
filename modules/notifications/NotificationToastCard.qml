@@ -19,6 +19,7 @@ Item {
     property bool entered: false
     property bool componentReady: false
     property bool animateTransitions: false
+    property bool entrancePending: false
     property int entryGeneration: 0
     readonly property bool showing:
         entered && !notificationEntry.closing
@@ -33,6 +34,7 @@ Item {
         entryGeneration += 1;
         const generation = entryGeneration;
         const entry = notificationEntry;
+        entrancePending = false;
         animateTransitions = false;
 
         if (entry.toastPresented) {
@@ -47,8 +49,20 @@ Item {
             return;
         }
 
-        entry.toastPresented = true;
         entered = false;
+        entrancePending = true;
+        tryStartEntrance();
+    }
+
+    function tryStartEntrance() {
+        if (!entrancePending || !notificationEntry
+                || !toastAvatar.contentReady)
+            return;
+
+        entrancePending = false;
+        const generation = entryGeneration;
+        const entry = notificationEntry;
+        entry.toastPresented = true;
         Qt.callLater(() => {
             if (generation !== entryGeneration
                     || entry !== notificationEntry)
@@ -118,9 +132,12 @@ Item {
             spacing: Appearance.px(11)
 
             NotificationAvatar {
+                id: toastAvatar
+
                 Layout.alignment: Qt.AlignTop
                 implicitSize: Appearance.px(54)
                 notificationEntry: root.notificationEntry
+                onContentReadyChanged: root.tryStartEntrance()
             }
 
             ColumnLayout {

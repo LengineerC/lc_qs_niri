@@ -13,6 +13,7 @@ Rectangle {
 
     required property var notificationEntry
     property bool historical: false
+    property bool preloadImages: false
 
     signal activated
     signal secondaryAction
@@ -58,6 +59,8 @@ Rectangle {
             Layout.alignment: Qt.AlignTop
             implicitSize: Appearance.px(42)
             notificationEntry: root.notificationEntry
+            profileImageDelay: root.preloadImages ? 0 : 180
+            asynchronousProfileImage: !root.preloadImages
         }
 
         ColumnLayout {

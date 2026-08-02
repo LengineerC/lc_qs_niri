@@ -32,6 +32,7 @@ Item {
     property Item anchorItem: null
     property string page: ""
     property bool shown: false
+    property bool notificationOpenPending: false
     property real offsetScale: shown ? 0 : 1
     property var deformMatrix
     readonly property real revealProgress: {
@@ -43,6 +44,14 @@ Item {
     property string popupTitle: ""
     property var popupRows: []
     property int popupBaseWidth: 340
+
+    Timer {
+        id: notificationRevealFallback
+        interval: 300
+        repeat: false
+        onTriggered: root.revealPreparedNotification()
+    }
+
     readonly property int popupWidth: Appearance.px(popupBaseWidth)
     readonly property int popupHeight: {
         if (page === "launcher") {
@@ -101,7 +110,10 @@ Item {
     y: Appearance.barHeight
     width: popupWidth
     height: popupContent.height * revealProgress
-    visible: width > 0 && revealProgress > 0
+    // Stay logically visible while the notification page is preloading.
+    // revealProgress remains zero, so no popup pixels are shown yet.
+    visible: width > 0
+        && (revealProgress > 0 || notificationOpenPending)
     clip: true
 
     HoverHandler {
@@ -220,18 +232,41 @@ Item {
     }
 
     function showFor(target, pageName) {
-        if (shown && anchorItem === target && page === pageName) {
+        if ((shown || notificationOpenPending)
+                && anchorItem === target && page === pageName) {
             close();
             return;
         }
 
+        const wasShown = shown;
+        notificationRevealFallback.stop();
+        notificationOpenPending = false;
         configure(pageName);
         anchorItem = target;
+
+        if (pageName === "notifications" && !wasShown) {
+            // Keep revealProgress at zero while NotificationPanel creates and
+            // measures the first viewport. Its ready signal starts the popup.
+            notificationOpenPending = true;
+            notificationRevealFallback.start();
+            return;
+        }
+
         shown = true;
     }
 
     function close() {
+        notificationRevealFallback.stop();
+        notificationOpenPending = false;
         shown = false;
+    }
+
+    function revealPreparedNotification() {
+        if (!notificationOpenPending || page !== "notifications")
+            return;
+        notificationRevealFallback.stop();
+        shown = true;
+        notificationOpenPending = false;
     }
 
     Connections {
@@ -455,12 +490,20 @@ Item {
 
         NotificationPanel {
             visible: root.page === "notifications"
-            active: visible && root.shown
+            // Do not depend on the inherited visible state here: while the
+            // popup is hidden for preloading, ancestor visibility can make a
+            // child's effective visible value false and deadlock readiness.
+            active: root.page === "notifications"
+                && (root.shown || root.notificationOpenPending)
             anchors {
                 fill: innerSurface
                 margins: 1
             }
             onCloseRequested: root.close()
+            onRevealReadyChanged: {
+                if (revealReady)
+                    root.revealPreparedNotification();
+            }
         }
 
         TrayPanel {
