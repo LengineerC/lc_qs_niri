@@ -483,6 +483,7 @@ Item {
     StyledPopup {
         id: popup
         z: 10
+        outputName: root.outputName
         deformMatrix: popupBackground.deformMatrix
     }
 

@@ -22,6 +22,7 @@ ShellRoot {
         SystemService.load();
         ResourceService.load();
         OutputService.load();
+        BrightnessService.load();
         UserService.load();
         LockService.load();
         WeatherService.load();

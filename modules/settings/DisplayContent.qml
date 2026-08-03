@@ -54,8 +54,10 @@ Item {
     }
 
     onVisibleChanged: {
-        if (visible)
+        if (visible) {
             OutputService.refresh();
+            BrightnessService.refresh();
+        }
     }
 
     component PanelText: Text {
@@ -291,6 +293,44 @@ Item {
         }
     }
 
+    component BrightnessSlider: Controls.Slider {
+        id: slider
+
+        from: 1
+        to: 100
+        stepSize: 1
+        implicitHeight: Appearance.px(30)
+
+        background: Rectangle {
+            x: slider.leftPadding
+            y: slider.topPadding + slider.availableHeight / 2 - height / 2
+            width: slider.availableWidth
+            height: Appearance.px(8)
+            radius: Appearance.fullRadius
+            color: Appearance.layer1Active
+            border.width: 1
+            border.color: Appearance.outline
+
+            Rectangle {
+                width: slider.visualPosition * parent.width
+                height: parent.height
+                radius: parent.radius
+                color: Appearance.primary
+            }
+        }
+
+        handle: Rectangle {
+            x: slider.leftPadding + slider.visualPosition
+                * (slider.availableWidth - width)
+            y: slider.topPadding + slider.availableHeight / 2 - height / 2
+            implicitWidth: Appearance.px(6)
+            implicitHeight: Appearance.px(24)
+            radius: Appearance.fullRadius
+            color: slider.enabled
+                ? Appearance.primary : Appearance.subtext
+        }
+    }
+
     ColumnLayout {
         anchors {
             fill: parent
@@ -432,6 +472,8 @@ Item {
                                 modelData.vrrEnabled
                             property int draftMaxBpc:
                                 modelData.maxBpc
+                            readonly property var brightnessState:
+                                BrightnessService.stateFor(modelData.name)
                             readonly property var scaleModel:
                                 root.scaleOptions(modelData.scale)
 
@@ -545,6 +587,85 @@ Item {
                                     implicitHeight: 1
                                     color: Appearance.outline
                                     opacity: 0.55
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: Appearance.px(2)
+                                    enabled: outputCard.draftEnabled
+                                    opacity: enabled ? 1 : 0.45
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: Appearance.px(10)
+
+                                        Text {
+                                            text: "󰃠"
+                                            color: outputCard.brightnessState
+                                                    .available
+                                                ? Appearance.primary
+                                                : Appearance.subtext
+                                            font {
+                                                family:
+                                                    Appearance.iconFontFamily
+                                                pixelSize: Appearance.px(19)
+                                            }
+                                        }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 0
+
+                                            PanelText {
+                                                Layout.fillWidth: true
+                                                text: I18n.tr("brightness")
+                                                color: Appearance.layer0Text
+                                            }
+
+                                            PanelText {
+                                                Layout.fillWidth: true
+                                                visible: text.length > 0
+                                                text: outputCard.brightnessState
+                                                    .error
+                                                    || outputCard
+                                                        .brightnessState.reason
+                                                color: outputCard
+                                                        .brightnessState.error
+                                                    ? Theme.palette.m3error
+                                                    : Appearance.subtext
+                                                elide: Text.ElideRight
+                                                font.pixelSize:
+                                                    Appearance.smallFontSize
+                                            }
+                                        }
+
+                                        PanelText {
+                                            Layout.preferredWidth:
+                                                Appearance.px(48)
+                                            horizontalAlignment: Text.AlignRight
+                                            text: outputCard.brightnessState
+                                                    .available
+                                                ? Math.round(outputCard
+                                                    .brightnessState.percent)
+                                                    + "%"
+                                                : "—"
+                                            color: Appearance.subtext
+                                        }
+                                    }
+
+                                    BrightnessSlider {
+                                        Layout.fillWidth: true
+                                        enabled: outputCard.brightnessState
+                                            .available
+                                        value: outputCard.brightnessState
+                                                .available
+                                            ? outputCard.brightnessState
+                                                .percent : 1
+                                        onMoved:
+                                            BrightnessService.setBrightness(
+                                                outputCard.modelData.name,
+                                                value)
+                                    }
                                 }
 
                                 RowLayout {

@@ -12,8 +12,21 @@ Item {
     id: root
 
     property bool embedded: false
+    property bool active: visible
+    property string outputName: ""
     property string expandedSection: embedded ? "wifi" : ""
+    readonly property var brightnessState:
+        BrightnessService.stateFor(outputName)
     signal closeRequested
+
+    onActiveChanged: {
+        if (active)
+            BrightnessService.refresh();
+    }
+    onOutputNameChanged: {
+        if (active)
+            BrightnessService.refresh();
+    }
 
     implicitWidth: Appearance.px(650)
     implicitHeight: Appearance.px(680)
@@ -34,9 +47,11 @@ Item {
             x: slider.leftPadding
             y: slider.topPadding + slider.availableHeight / 2 - height / 2
             width: slider.availableWidth
-            height: Appearance.px(7)
+            height: Appearance.px(8)
             radius: Appearance.fullRadius
             color: Appearance.layer1Active
+            border.width: 1
+            border.color: Appearance.outline
             Rectangle {
                 width: slider.visualPosition * parent.width
                 height: parent.height
@@ -266,6 +281,87 @@ Item {
                     Layout.preferredWidth: Appearance.px(44)
                     text: Math.round(SystemService.microphoneVolume * 100) + "%"
                     color: Appearance.subtext
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: Appearance.px(82)
+                radius: Appearance.px(12)
+                color: Appearance.layer3
+                border.width: 1
+                border.color: Appearance.outline
+
+                ColumnLayout {
+                    anchors {
+                        fill: parent
+                        leftMargin: Appearance.px(12)
+                        rightMargin: Appearance.px(12)
+                        topMargin: Appearance.px(8)
+                        bottomMargin: Appearance.px(7)
+                    }
+                    spacing: Appearance.px(2)
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(10)
+
+                        Text {
+                            text: "󰃠"
+                            color: root.brightnessState.available
+                                ? Appearance.primary : Appearance.subtext
+                            font {
+                                family: Appearance.iconFontFamily
+                                pixelSize: Appearance.px(21)
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 0
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                text: I18n.tr("brightness") + " · "
+                                    + (root.outputName || I18n.tr("unknown"))
+                                color: Appearance.layer0Text
+                                elide: Text.ElideRight
+                            }
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                text: root.brightnessState.error
+                                    || root.brightnessState.reason
+                                visible: text.length > 0
+                                color: root.brightnessState.error
+                                    ? Theme.palette.m3error
+                                    : Appearance.subtext
+                                elide: Text.ElideRight
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        PanelText {
+                            Layout.preferredWidth: Appearance.px(44)
+                            horizontalAlignment: Text.AlignRight
+                            text: root.brightnessState.available
+                                ? Math.round(root.brightnessState.percent) + "%"
+                                : "—"
+                            color: Appearance.subtext
+                        }
+                    }
+
+                    ControlSlider {
+                        Layout.fillWidth: true
+                        from: 1
+                        to: 100
+                        stepSize: 1
+                        enabled: root.brightnessState.available
+                        value: root.brightnessState.available
+                            ? root.brightnessState.percent : 1
+                        onMoved: BrightnessService.setBrightness(
+                            root.outputName, value)
+                    }
                 }
             }
 

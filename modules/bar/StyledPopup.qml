@@ -30,6 +30,7 @@ Item {
     }
 
     property Item anchorItem: null
+    property string outputName: ""
     property string page: ""
     property bool shown: false
     property real offsetScale: shown ? 0 : 1
@@ -372,6 +373,8 @@ Item {
 
         SystemPanel {
             visible: root.page === "system"
+            active: visible && root.shown
+            outputName: root.outputName
             anchors {
                 fill: innerSurface
                 margins: 1
