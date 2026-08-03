@@ -180,6 +180,17 @@ Item {
         { value: "TileHorizontally", key: "wallpaperHorizontalTile" },
         { value: "Pad", key: "wallpaperCover" }
     ]
+    readonly property var wallpaperTransitions: [
+        { value: "none", key: "wallpaperTransitionNone" },
+        { value: "fade", key: "wallpaperTransitionFade" },
+        { value: "wipe", key: "wallpaperTransitionWipe" },
+        { value: "disc", key: "wallpaperTransitionDisc" },
+        { value: "stripes", key: "wallpaperTransitionStripes" },
+        { value: "iris", key: "wallpaperTransitionIris" },
+        { value: "pixelate", key: "wallpaperTransitionPixelate" },
+        { value: "portal", key: "wallpaperTransitionPortal" },
+        { value: "random", key: "random" }
+    ]
 
     FileDialog {
         id: wallpaperFileDialog
@@ -362,6 +373,36 @@ Item {
                             === modelData.value
                         onClicked:
                             ShellSettings.wallpaperFillMode = modelData.value
+                    }
+                }
+            }
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: Appearance.px(6)
+
+            PanelText {
+                text: I18n.tr("wallpaperTransition")
+                color: Appearance.layer0Text
+                font.weight: Font.DemiBold
+            }
+
+            Flow {
+                Layout.fillWidth: true
+                spacing: Appearance.px(6)
+
+                Repeater {
+                    model: root.wallpaperTransitions
+
+                    delegate: ModeButton {
+                        required property var modelData
+
+                        label: I18n.tr(modelData.key)
+                        selected: ShellSettings.wallpaperTransition
+                            === modelData.value
+                        onClicked: ShellSettings.wallpaperTransition
+                            = modelData.value
                     }
                 }
             }

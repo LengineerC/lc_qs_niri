@@ -24,11 +24,18 @@ Singleton {
         Theme.stateDirectory + "/wallpaper-thumbnails"
     readonly property string previewScriptPath: stripFileProtocol(
         Qt.resolvedUrl("../scripts/wallpaper_preview.py"))
+    readonly property list<string> transitionTypes: [
+        "fade", "wipe", "disc", "stripes", "iris", "pixelate", "portal"
+    ]
 
     property var wallpapers: []
     property var previewPaths: ({})
     property bool directoryReady: false
     property bool scanning: false
+    property string transitionPath: ""
+    property string activeTransition: "fade"
+    property string lastRandomTransition: ""
+    property int transitionSeed: 1
 
     signal changed(string path)
 
@@ -93,8 +100,44 @@ Singleton {
         const cleanPath = stripFileProtocol(path);
         if (!cleanPath)
             return;
+        prepareTransition(cleanPath);
         Theme.setWallpaper(cleanPath, ShellSettings.wallpaperAutoTheme);
         changed(cleanPath);
+    }
+
+    function prepareTransition(path) {
+        const cleanPath = stripFileProtocol(path);
+        if (transitionPath === cleanPath)
+            return activeTransition;
+
+        let transition = ShellSettings.wallpaperTransition;
+        if (transition === "random") {
+            let candidates = transitionTypes.filter(
+                item => item !== lastRandomTransition);
+            if (candidates.length === 0)
+                candidates = transitionTypes;
+            transition = candidates[Math.floor(Math.random()
+                * candidates.length)];
+            lastRandomTransition = transition;
+        }
+
+        transitionPath = cleanPath;
+        activeTransition = transition;
+        transitionSeed = Math.floor(Math.random() * 1000000) + 1;
+        return transition;
+    }
+
+    function transitionFor(path) {
+        return prepareTransition(path);
+    }
+
+    function seededValue(outputName, salt) {
+        let hash = transitionSeed + Math.round(Number(salt) * 7919);
+        const name = String(outputName);
+        for (let index = 0; index < name.length; ++index)
+            hash = ((hash * 31) + name.charCodeAt(index)) % 2147483647;
+        const value = Math.sin(hash * 12.9898) * 43758.5453;
+        return value - Math.floor(value);
     }
 
     function currentIndex() {
@@ -210,6 +253,8 @@ Singleton {
                 directory: root.directory,
                 count: root.wallpapers.length,
                 autoTheme: ShellSettings.wallpaperAutoTheme,
+                transition: ShellSettings.wallpaperTransition,
+                activeTransition: root.activeTransition,
                 scheme: Theme.scheme
             });
         }

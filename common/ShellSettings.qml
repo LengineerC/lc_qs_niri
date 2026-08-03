@@ -35,6 +35,7 @@ Singleton {
     property string wallpaperDirectory: ""
     property bool wallpaperAutoTheme: true
     property string wallpaperFillMode: "PreserveAspectCrop"
+    property string wallpaperTransition: "random"
     property bool showCpuUsage: true
     property bool showMemoryUsage: true
     property bool showCpuTemperature: false
@@ -109,7 +110,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 16,
+            version: 17,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             shadowEnabled: shadowEnabled,
@@ -135,6 +136,7 @@ Singleton {
             wallpaperDirectory: wallpaperDirectory,
             wallpaperAutoTheme: wallpaperAutoTheme,
             wallpaperFillMode: wallpaperFillMode,
+            wallpaperTransition: wallpaperTransition,
             showCpuUsage: showCpuUsage,
             showMemoryUsage: showMemoryUsage,
             showCpuTemperature: showCpuTemperature,
@@ -151,7 +153,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 16)
+            if (state.version !== 17)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -256,6 +258,14 @@ Singleton {
                 wallpaperFillMode = state.wallpaperFillMode;
             else
                 needsMigration = true;
+            if (typeof state.wallpaperTransition === "string"
+                    && [
+                        "none", "fade", "wipe", "disc", "stripes",
+                        "iris", "pixelate", "portal", "random"
+                    ].indexOf(state.wallpaperTransition) >= 0)
+                wallpaperTransition = state.wallpaperTransition;
+            else
+                needsMigration = true;
             if (typeof state.showCpuUsage === "boolean")
                 showCpuUsage = state.showCpuUsage;
             else
@@ -334,6 +344,7 @@ Singleton {
         wallpaperDirectory = "";
         wallpaperAutoTheme = true;
         wallpaperFillMode = "PreserveAspectCrop";
+        wallpaperTransition = "random";
         showCpuUsage = true;
         showMemoryUsage = true;
         showCpuTemperature = false;
@@ -374,6 +385,7 @@ Singleton {
     onWallpaperDirectoryChanged: scheduleSave()
     onWallpaperAutoThemeChanged: scheduleSave()
     onWallpaperFillModeChanged: scheduleSave()
+    onWallpaperTransitionChanged: scheduleSave()
     onShowCpuUsageChanged: scheduleSave()
     onShowMemoryUsageChanged: scheduleSave()
     onShowCpuTemperatureChanged: scheduleSave()
@@ -456,6 +468,14 @@ Singleton {
                 root.wallpaperFillMode = mode;
         }
 
+        function setWallpaperTransition(transition: string): void {
+            if ([
+                    "none", "fade", "wipe", "disc", "stripes",
+                    "iris", "pixelate", "portal", "random"
+                ].indexOf(transition) >= 0)
+                root.wallpaperTransition = transition;
+        }
+
         function reset(): void {
             root.resetDefaults();
         }
@@ -484,6 +504,7 @@ Singleton {
                 wallpaperDirectory: root.wallpaperDirectory,
                 wallpaperAutoTheme: root.wallpaperAutoTheme,
                 wallpaperFillMode: root.wallpaperFillMode,
+                wallpaperTransition: root.wallpaperTransition,
                 showCpuUsage: root.showCpuUsage,
                 showMemoryUsage: root.showMemoryUsage,
                 showCpuTemperature: root.showCpuTemperature,
