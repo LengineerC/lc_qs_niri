@@ -18,6 +18,9 @@ Singleton {
     property bool overviewOpen: false
     property real overviewProgress: overviewOpen ? 1 : 0
     property string lastError: ""
+    property var workspaceStates: ({})
+    property var windowStates: ({})
+    property int stateRevision: 0
 
     Behavior on overviewProgress {
         NumberAnimation {
@@ -61,6 +64,130 @@ Singleton {
         return result;
     }
 
+    function publishWorkspaceStates(states) {
+        workspaceStates = states;
+        ++stateRevision;
+    }
+
+    function publishWindowStates(states) {
+        windowStates = states;
+        ++stateRevision;
+    }
+
+    function replaceWorkspaces(items) {
+        const states = {};
+        for (const workspace of items ?? [])
+            states[String(workspace.id)] = workspace;
+        publishWorkspaceStates(states);
+    }
+
+    function replaceWindows(items) {
+        const states = {};
+        for (const window of items ?? [])
+            states[String(window.id)] = window;
+        publishWindowStates(states);
+    }
+
+    function updateWorkspace(workspaceId, updates) {
+        const key = String(workspaceId);
+        const current = workspaceStates[key];
+        if (!current)
+            return;
+        const states = Object.assign({}, workspaceStates);
+        states[key] = Object.assign({}, current, updates);
+        publishWorkspaceStates(states);
+    }
+
+    function updateWindow(window) {
+        if (!window || window.id === undefined)
+            return;
+        const states = Object.assign({}, windowStates);
+        states[String(window.id)] = window;
+        publishWindowStates(states);
+    }
+
+    function updateWindowLayouts(changes) {
+        const states = Object.assign({}, windowStates);
+        let changed = false;
+        for (const entry of changes ?? []) {
+            if (!Array.isArray(entry) || entry.length < 2)
+                continue;
+            const key = String(entry[0]);
+            if (!states[key])
+                continue;
+            states[key] = Object.assign({}, states[key], {
+                layout: entry[1]
+            });
+            changed = true;
+        }
+        if (changed)
+            publishWindowStates(states);
+    }
+
+    function removeWindow(windowId) {
+        const key = String(windowId);
+        if (!windowStates[key])
+            return;
+        const states = Object.assign({}, windowStates);
+        delete states[key];
+        publishWindowStates(states);
+    }
+
+    function activateWorkspace(workspaceId, focused) {
+        const key = String(workspaceId);
+        const target = workspaceStates[key];
+        if (!target)
+            return;
+        const states = Object.assign({}, workspaceStates);
+        for (const stateKey of Object.keys(states)) {
+            const workspace = states[stateKey];
+            const updates = {};
+            if (workspace.output === target.output)
+                updates.is_active = stateKey === key;
+            if (focused)
+                updates.is_focused = stateKey === key;
+            if (Object.keys(updates).length > 0)
+                states[stateKey] = Object.assign({}, workspace, updates);
+        }
+        publishWorkspaceStates(states);
+    }
+
+    function outputHasFullscreenWindow(outputName, outputWidth, outputHeight) {
+        // Makes this function binding-reactive even though the state is read
+        // through JavaScript maps.
+        const revision = stateRevision;
+        const width = Number(outputWidth);
+        const height = Number(outputHeight);
+        if (!outputName || width <= 0 || height <= 0)
+            return false;
+
+        let activeWorkspaceId = null;
+        for (const workspace of Object.values(workspaceStates)) {
+            if (workspace.output === outputName && workspace.is_active) {
+                activeWorkspaceId = Number(workspace.id);
+                break;
+            }
+        }
+        if (activeWorkspaceId === null)
+            return false;
+
+        // Niri deliberately distinguishes real fullscreen from windowed
+        // fullscreen in its layout: a real fullscreen tile matches the full
+        // logical output instead of the normal work area reserved by the bar.
+        const tolerance = 2.5;
+        for (const window of Object.values(windowStates)) {
+            if (Number(window.workspace_id) !== activeWorkspaceId)
+                continue;
+            const size = window.layout?.tile_size;
+            if (!Array.isArray(size) || size.length < 2)
+                continue;
+            if (Math.abs(Number(size[0]) - width) <= tolerance
+                    && Math.abs(Number(size[1]) - height) <= tolerance)
+                return true;
+        }
+        return false;
+    }
+
     Niri {
         id: backend
 
@@ -73,6 +200,9 @@ Singleton {
 
         onDisconnected: {
             root.connected = false;
+            root.workspaceStates = ({});
+            root.windowStates = ({});
+            ++root.stateRevision;
             reconnectTimer.restart();
         }
 
@@ -89,6 +219,38 @@ Singleton {
                     && typeof overviewEvent.is_open === "boolean") {
                 root.overviewOpen = overviewEvent.is_open;
             }
+
+            const workspacesChanged = event?.WorkspacesChanged;
+            if (workspacesChanged)
+                root.replaceWorkspaces(workspacesChanged.workspaces);
+
+            const workspaceActivated = event?.WorkspaceActivated;
+            if (workspaceActivated)
+                root.activateWorkspace(workspaceActivated.id,
+                    workspaceActivated.focused === true);
+
+            const activeWindowChanged = event?.WorkspaceActiveWindowChanged;
+            if (activeWindowChanged) {
+                root.updateWorkspace(activeWindowChanged.workspace_id, {
+                    active_window_id: activeWindowChanged.active_window_id
+                });
+            }
+
+            const windowsChanged = event?.WindowsChanged;
+            if (windowsChanged)
+                root.replaceWindows(windowsChanged.windows);
+
+            const windowChanged = event?.WindowOpenedOrChanged;
+            if (windowChanged)
+                root.updateWindow(windowChanged.window);
+
+            const layoutsChanged = event["WindowLayoutsChanged"];
+            if (layoutsChanged)
+                root.updateWindowLayouts(layoutsChanged.changes);
+
+            const windowClosed = event?.WindowClosed;
+            if (windowClosed)
+                root.removeWindow(windowClosed.id);
         }
     }
 

@@ -12,6 +12,7 @@ Variants {
 
         screen: modelData
         color: "transparent"
+        exclusiveZone: -1
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "quickshell:screen-corners"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
@@ -24,6 +25,7 @@ Variants {
         }
 
         ScreenCorners {
+            outputName: modelData.name
         }
 
         mask: Region {

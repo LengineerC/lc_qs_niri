@@ -8,7 +8,12 @@ import qs.services
 Item {
     id: root
 
+    required property string outputName
+    readonly property bool outputFullscreen:
+        NiriService.outputHasFullscreenWindow(outputName, width, height)
+
     anchors.fill: parent
+    visible: !outputFullscreen
 
     component ScreenCorner: Item {
         id: screenCorner
