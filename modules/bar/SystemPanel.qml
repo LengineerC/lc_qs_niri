@@ -15,9 +15,41 @@ Item {
     property bool active: visible
     property string outputName: ""
     property string expandedSection: embedded ? "wifi" : ""
+    property bool wifiPasswordVisible: false
     readonly property var brightnessState:
         BrightnessService.stateFor(outputName)
     signal closeRequested
+
+    function submitWifiPassword() {
+        const ssid = SystemService.passwordRequestedSsid;
+        if (!ssid || !wifiPassword.text || SystemService.wifiConnecting)
+            return;
+        SystemService.connectWifi(ssid, wifiPassword.text);
+    }
+
+    function wifiDetailRows(details) {
+        const rows = [
+            { label: I18n.tr("securityType"),
+                value: details.security || I18n.tr("openNetwork") },
+            { label: I18n.tr("signalStrength"),
+                value: details.strength !== undefined
+                    ? details.strength + "%" : "" },
+            { label: I18n.tr("networkBand"),
+                value: SystemService.wifiBand(details.frequency) },
+            { label: I18n.tr("networkChannel"), value: details.channel },
+            { label: I18n.tr("linkSpeed"), value: details.rate },
+            { label: I18n.tr("bssid"), value: details.bssid },
+            { label: I18n.tr("networkAdapter"), value: details.device },
+            { label: I18n.tr("ipv4Address"), value: details.ipv4Address },
+            { label: I18n.tr("ipv4Gateway"), value: details.ipv4Gateway },
+            { label: I18n.tr("dnsServers"), value: details.ipv4Dns },
+            { label: I18n.tr("ipv6Address"), value: details.ipv6Address },
+            { label: I18n.tr("macAddress"), value: details.macAddress },
+            { label: I18n.tr("mtu"), value: details.mtu }
+        ];
+        return rows.filter(row => String(row.value ?? "").length > 0
+            && row.value !== "—");
+    }
 
     onActiveChanged: {
         if (active)
@@ -26,6 +58,22 @@ Item {
     onOutputNameChanged: {
         if (active)
             BrightnessService.refresh();
+    }
+
+    Connections {
+        target: SystemService
+
+        function onPasswordRequestedSsidChanged() {
+            wifiPassword.clear();
+            root.wifiPasswordVisible = false;
+            if (SystemService.passwordRequestedSsid) {
+                Qt.callLater(() => {
+                    wifiPassword.forceActiveFocus();
+                    scroll.contentY = Math.max(0,
+                        scroll.contentHeight - scroll.height);
+                });
+            }
+        }
     }
 
     implicitWidth: Appearance.px(650)
@@ -492,7 +540,9 @@ Item {
                             radius: Appearance.px(10)
                             color: wifiMouse.containsMouse
                                 ? Appearance.layer1Hover : Appearance.layer2
-                            border.width: modelData.active ? 2 : 0
+                            border.width: modelData.active ? 2
+                                : SystemService.wifiDetailsSsid
+                                    === modelData.ssid ? 1 : 0
                             border.color: Appearance.primary
                             RowLayout {
                                 anchors {
@@ -526,10 +576,53 @@ Item {
                                         font.pixelSize: Appearance.smallFontSize
                                     }
                                 }
+
+                                Rectangle {
+                                    id: wifiDetailsButton
+
+                                    Layout.preferredWidth: Appearance.px(34)
+                                    Layout.preferredHeight: Appearance.px(34)
+                                    radius: Appearance.fullRadius
+                                    color: SystemService.wifiDetailsSsid
+                                            === modelData.ssid
+                                        ? Appearance.primaryContainer
+                                        : wifiDetailsMouse.containsMouse
+                                            ? Appearance.layer1Active
+                                            : "transparent"
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "󰋼"
+                                        color: SystemService.wifiDetailsSsid
+                                                === modelData.ssid
+                                            ? Appearance.primaryContainerText
+                                            : Appearance.subtext
+                                        font {
+                                            family: Appearance.iconFontFamily
+                                            pixelSize: Appearance.px(17)
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: wifiDetailsMouse
+
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: SystemService.toggleWifiDetails(
+                                            modelData.ssid)
+                                    }
+                                }
                             }
                             MouseArea {
                                 id: wifiMouse
-                                anchors.fill: parent
+                                anchors {
+                                    top: parent.top
+                                    bottom: parent.bottom
+                                    left: parent.left
+                                    right: parent.right
+                                    rightMargin: Appearance.px(54)
+                                }
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: SystemService.connectWifi(modelData.ssid)
@@ -537,51 +630,388 @@ Item {
                         }
                     }
 
-                    RowLayout {
+                    Rectangle {
+                        visible: SystemService.wifiDetailsSsid !== ""
+                        Layout.fillWidth: true
+                        implicitHeight: wifiDetailsColumn.implicitHeight
+                            + Appearance.px(20)
+                        radius: Appearance.px(12)
+                        color: Appearance.layer2
+                        border.width: 1
+                        border.color: Appearance.outline
+
+                        ColumnLayout {
+                            id: wifiDetailsColumn
+
+                            anchors {
+                                top: parent.top
+                                left: parent.left
+                                right: parent.right
+                                margins: Appearance.px(10)
+                            }
+                            spacing: Appearance.px(9)
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: Appearance.px(9)
+
+                                Rectangle {
+                                    Layout.preferredWidth: Appearance.px(38)
+                                    Layout.preferredHeight: Appearance.px(38)
+                                    radius: Appearance.fullRadius
+                                    color: Appearance.primaryContainer
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: SystemService.wifiIcon(
+                                            SystemService.wifiDetails.strength)
+                                        color: Appearance.primaryContainerText
+                                        font {
+                                            family: Appearance.iconFontFamily
+                                            pixelSize: Appearance.px(19)
+                                        }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 0
+
+                                    PanelText {
+                                        Layout.fillWidth: true
+                                        text: SystemService.wifiDetailsSsid
+                                        color: Appearance.layer0Text
+                                        elide: Text.ElideRight
+                                        font.weight: Font.DemiBold
+                                    }
+
+                                    PanelText {
+                                        text: SystemService.wifiDetails.active
+                                            ? I18n.tr("connected") + " · "
+                                                + I18n.tr("networkDetails")
+                                            : I18n.tr("networkDetails")
+                                        color: SystemService.wifiDetails.active
+                                            ? Appearance.primary
+                                            : Appearance.subtext
+                                        font.pixelSize:
+                                            Appearance.smallFontSize
+                                    }
+                                }
+
+                                PanelText {
+                                    visible: SystemService.wifiDetailsLoading
+                                    text: I18n.tr("loading") + "…"
+                                    color: Appearance.subtext
+                                    font.pixelSize: Appearance.smallFontSize
+                                }
+
+                                Rectangle {
+                                    Layout.preferredWidth: Appearance.px(32)
+                                    Layout.preferredHeight: Appearance.px(32)
+                                    radius: Appearance.fullRadius
+                                    color: closeWifiDetailsMouse.containsMouse
+                                        ? Appearance.layer1Active
+                                        : "transparent"
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "󰅖"
+                                        color: Appearance.subtext
+                                        font {
+                                            family: Appearance.iconFontFamily
+                                            pixelSize: Appearance.px(16)
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: closeWifiDetailsMouse
+
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: SystemService.hideWifiDetails()
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                implicitHeight: 1
+                                color: Appearance.outline
+                                opacity: 0.7
+                            }
+
+                            GridLayout {
+                                id: wifiDetailsGrid
+
+                                Layout.fillWidth: true
+                                columns: 2
+                                uniformCellWidths: true
+                                columnSpacing: Appearance.px(16)
+                                rowSpacing: Appearance.px(9)
+
+                                Repeater {
+                                    model: root.wifiDetailRows(
+                                        SystemService.wifiDetails)
+
+                                    delegate: ColumnLayout {
+                                        id: wifiDetailField
+
+                                        required property var modelData
+
+                                        Layout.fillWidth: true
+                                        spacing: Appearance.px(1)
+
+                                        PanelText {
+                                            Layout.fillWidth: true
+                                            text: wifiDetailField.modelData.label
+                                            color: Appearance.subtext
+                                            font.pixelSize:
+                                                Appearance.smallFontSize
+                                        }
+
+                                        PanelText {
+                                            Layout.fillWidth: true
+                                            text: wifiDetailField.modelData.value
+                                            color: Appearance.layer0Text
+                                            wrapMode: Text.WrapAnywhere
+                                            maximumLineCount: 2
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
                         visible: SystemService.passwordRequestedSsid !== ""
                         Layout.fillWidth: true
-                        PanelText {
-                            text: SystemService.passwordRequestedSsid
-                            color: Appearance.layer0Text
-                        }
-                        Rectangle {
-                            Layout.fillWidth: true
-                            implicitHeight: Appearance.px(34)
-                            radius: Appearance.px(9)
-                            color: Appearance.layer2
-                            TextInput {
-                                id: wifiPassword
-                                anchors {
-                                    fill: parent
-                                    margins: Appearance.px(8)
+                        implicitHeight: wifiPasswordColumn.implicitHeight
+                            + Appearance.px(20)
+                        radius: Appearance.px(12)
+                        color: Appearance.layer2
+                        border.width: 1
+                        border.color: wifiPassword.activeFocus
+                            ? Appearance.primary : Appearance.outline
+
+                        ColumnLayout {
+                            id: wifiPasswordColumn
+
+                            anchors {
+                                top: parent.top
+                                left: parent.left
+                                right: parent.right
+                                margins: Appearance.px(10)
+                            }
+                            spacing: Appearance.px(9)
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: Appearance.px(9)
+
+                                Text {
+                                    text: "󰌾"
+                                    color: Appearance.primary
+                                    font {
+                                        family: Appearance.iconFontFamily
+                                        pixelSize: Appearance.px(19)
+                                    }
                                 }
-                                color: Appearance.layer0Text
-                                echoMode: TextInput.Password
-                                verticalAlignment: TextInput.AlignVCenter
-                                font {
-                                    family: Appearance.fontFamily
-                                    pixelSize: Appearance.fontSize
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 0
+
+                                    PanelText {
+                                        Layout.fillWidth: true
+                                        text: I18n.tr("wifiPassword")
+                                        color: Appearance.layer0Text
+                                        font.weight: Font.DemiBold
+                                    }
+
+                                    PanelText {
+                                        Layout.fillWidth: true
+                                        text: SystemService.passwordRequestedSsid
+                                        color: Appearance.subtext
+                                        elide: Text.ElideRight
+                                        font.pixelSize:
+                                            Appearance.smallFontSize
+                                    }
+                                }
+
+                                Rectangle {
+                                    Layout.preferredWidth: Appearance.px(32)
+                                    Layout.preferredHeight: Appearance.px(32)
+                                    radius: Appearance.fullRadius
+                                    color: cancelWifiMouse.containsMouse
+                                        ? Appearance.layer1Active
+                                        : "transparent"
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "󰅖"
+                                        color: Appearance.subtext
+                                        font {
+                                            family: Appearance.iconFontFamily
+                                            pixelSize: Appearance.px(16)
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: cancelWifiMouse
+
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked:
+                                            SystemService.cancelWifiPassword()
+                                    }
                                 }
                             }
-                        }
-                        Rectangle {
-                            implicitWidth: Appearance.px(72)
-                            implicitHeight: Appearance.px(34)
-                            radius: Appearance.px(9)
-                            color: Appearance.primaryContainer
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: Appearance.px(8)
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    implicitHeight: Appearance.px(40)
+                                    radius: Appearance.px(10)
+                                    color: Appearance.layer1
+                                    border.width: wifiPassword.activeFocus
+                                        ? 1 : 0
+                                    border.color: Appearance.primary
+
+                                    Controls.TextField {
+                                        id: wifiPassword
+
+                                        anchors {
+                                            top: parent.top
+                                            bottom: parent.bottom
+                                            left: parent.left
+                                            right: showWifiPasswordButton.left
+                                            leftMargin: Appearance.px(10)
+                                        }
+                                        padding: 0
+                                        color: Appearance.layer0Text
+                                        placeholderText:
+                                            I18n.tr("wifiPasswordHint")
+                                        placeholderTextColor:
+                                            Appearance.subtext
+                                        selectionColor:
+                                            Appearance.primaryContainer
+                                        selectedTextColor:
+                                            Appearance.primaryContainerText
+                                        selectByMouse: true
+                                        echoMode: root.wifiPasswordVisible
+                                            ? TextInput.Normal
+                                            : TextInput.Password
+                                        inputMethodHints: Qt.ImhSensitiveData
+                                            | Qt.ImhNoPredictiveText
+                                        verticalAlignment:
+                                            TextInput.AlignVCenter
+                                        background: null
+                                        enabled: !SystemService.wifiConnecting
+                                        font {
+                                            family: Appearance.fontFamily
+                                            pixelSize: Appearance.fontSize
+                                        }
+                                        onAccepted: root.submitWifiPassword()
+                                    }
+
+                                    Rectangle {
+                                        id: showWifiPasswordButton
+
+                                        anchors {
+                                            right: parent.right
+                                            rightMargin: Appearance.px(4)
+                                            verticalCenter: parent.verticalCenter
+                                        }
+                                        width: Appearance.px(32)
+                                        height: Appearance.px(32)
+                                        radius: Appearance.fullRadius
+                                        color: showWifiPasswordMouse.containsMouse
+                                            ? Appearance.layer1Active
+                                            : "transparent"
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: root.wifiPasswordVisible
+                                                ? "󰈈" : "󰈉"
+                                            color: Appearance.subtext
+                                            font {
+                                                family:
+                                                    Appearance.iconFontFamily
+                                                pixelSize: Appearance.px(17)
+                                            }
+                                        }
+
+                                        MouseArea {
+                                            id: showWifiPasswordMouse
+
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                root.wifiPasswordVisible =
+                                                    !root.wifiPasswordVisible;
+                                                wifiPassword.forceActiveFocus();
+                                            }
+                                        }
+
+                                        Controls.ToolTip.visible:
+                                            showWifiPasswordMouse.containsMouse
+                                        Controls.ToolTip.text:
+                                            root.wifiPasswordVisible
+                                                ? I18n.tr("hidePassword")
+                                                : I18n.tr("showPassword")
+                                    }
+                                }
+
+                                Rectangle {
+                                    readonly property bool canConnect:
+                                        wifiPassword.text.length > 0
+                                            && !SystemService.wifiConnecting
+
+                                    Layout.preferredWidth: Appearance.px(88)
+                                    implicitHeight: Appearance.px(40)
+                                    radius: Appearance.px(10)
+                                    color: canConnect
+                                        ? Appearance.primaryContainer
+                                        : Appearance.layer1Active
+                                    opacity: canConnect ? 1 : 0.65
+
+                                    PanelText {
+                                        anchors.centerIn: parent
+                                        text: SystemService.wifiConnecting
+                                            ? I18n.tr("loading") + "…"
+                                            : I18n.tr("connect")
+                                        color: parent.canConnect
+                                            ? Appearance.primaryContainerText
+                                            : Appearance.subtext
+                                        font.weight: Font.DemiBold
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        enabled: parent.canConnect
+                                        hoverEnabled: enabled
+                                        cursorShape: enabled
+                                            ? Qt.PointingHandCursor
+                                            : Qt.ArrowCursor
+                                        onClicked: root.submitWifiPassword()
+                                    }
+                                }
+                            }
+
                             PanelText {
-                                anchors.centerIn: parent
-                                text: I18n.tr("connect")
-                                color: Appearance.primaryContainerText
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    SystemService.connectWifi(
-                                        SystemService.passwordRequestedSsid,
-                                        wifiPassword.text);
-                                    wifiPassword.text = "";
-                                }
+                                visible: SystemService.statusMessage !== ""
+                                Layout.fillWidth: true
+                                text: SystemService.statusMessage
+                                color: Theme.palette.m3error
+                                wrapMode: Text.WordWrap
+                                font.pixelSize: Appearance.smallFontSize
                             }
                         }
                     }
@@ -914,6 +1344,7 @@ Item {
 
             PanelText {
                 visible: SystemService.statusMessage !== ""
+                    && SystemService.passwordRequestedSsid === ""
                 Layout.fillWidth: true
                 text: SystemService.statusMessage
                 color: Theme.palette.m3error

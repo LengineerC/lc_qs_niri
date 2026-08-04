@@ -129,7 +129,7 @@ Item {
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
 
-                GridLayout {
+                Grid {
                     id: trayGrid
 
                     width: trayFlickable.width
@@ -147,13 +147,12 @@ Item {
 
                             required property SystemTrayItem modelData
 
-                            Layout.preferredWidth:
+                            width:
                                 (trayGrid.width
                                     - trayGrid.columnSpacing
                                         * (root.columnCount - 1))
                                 / root.columnCount
-                            Layout.preferredHeight:
-                                Appearance.px(56)
+                            height: Appearance.px(56)
                             radius: Appearance.smallRadius
                             color: trayMouse.containsMouse
                                 ? Appearance.layer1Hover
