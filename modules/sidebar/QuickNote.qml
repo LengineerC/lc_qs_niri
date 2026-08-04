@@ -25,8 +25,11 @@ Rectangle {
 
     property string deleteTargetFileName: ""
     property string deleteTargetPath: ""
-
-    property int editorHeight: Appearance.px(365)
+    
+    // 2560*1440 1.25x
+    // property int editorHeight: Appearance.px(365)
+    // 2560*1440 1x
+    property int editorHeight: Appearance.px(653)
     readonly property int outlineWidth: Math.max(1, Math.round(Appearance.px(1)))
 
     property string currentFileName: ""
