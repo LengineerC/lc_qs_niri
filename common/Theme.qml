@@ -21,6 +21,8 @@ Singleton {
     property bool wallpaperStateLoaded: false
     property bool startupThemeChecked: false
     property var pendingSourceArguments: null
+    property string pendingSystemMode: ""
+    property string systemColorSyncError: ""
 
     readonly property bool darkMode: mode === "dark"
     readonly property string stateDirectory: stripFileProtocol(
@@ -209,6 +211,29 @@ Singleton {
             runMatugen(["color", "hex", sourceColor]);
     }
 
+    function syncSystemColorScheme() {
+        if (!ready)
+            return;
+
+        pendingSystemMode = mode;
+        startPendingSystemColorSync();
+    }
+
+    function startPendingSystemColorSync() {
+        if (!pendingSystemMode || systemColorSchemeProcess.running)
+            return;
+
+        systemColorSchemeProcess.requestedMode = pendingSystemMode;
+        pendingSystemMode = "";
+        systemColorSyncError = "";
+        systemColorSchemeProcess.exec([
+            "gsettings", "set", "org.gnome.desktop.interface",
+            "color-scheme",
+            systemColorSchemeProcess.requestedMode === "dark"
+                ? "prefer-dark" : "prefer-light"
+        ]);
+    }
+
     function applySavedTheme(data) {
         try {
             const state = JSON.parse(data);
@@ -359,6 +384,12 @@ Singleton {
         // Forces singleton construction from shell.qml.
     }
 
+    onModeChanged: syncSystemColorScheme()
+    onReadyChanged: {
+        if (ready)
+            syncSystemColorScheme();
+    }
+
     Component.onCompleted: directoryProcess.running = true
 
     Process {
@@ -401,6 +432,29 @@ Singleton {
                 Qt.callLater(root.startPendingMatugen);
             else
                 root.generating = false;
+        }
+    }
+
+    Process {
+        id: systemColorSchemeProcess
+
+        property string requestedMode: ""
+
+        stderr: StdioCollector {
+            onStreamFinished: {
+                root.systemColorSyncError = text.trim();
+            }
+        }
+
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                console.warn("Theme: cannot update the system color scheme:",
+                    root.systemColorSyncError || "gsettings exited with "
+                        + exitCode);
+            }
+
+            if (root.pendingSystemMode)
+                Qt.callLater(root.startPendingSystemColorSync);
         }
     }
 
