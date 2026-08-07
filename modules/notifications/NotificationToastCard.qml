@@ -93,11 +93,14 @@ Item {
             shadowEnabled: true
             shadowBlur: 1
             blurMax: Math.max(1, Math.round(
-                ShellSettings.shadowBlurRadius * Appearance.scale))
+                Math.min(ShellSettings.shadowBlurRadius, 10)
+                    * Appearance.scale))
             shadowColor: Appearance.withAlpha(
-                Theme.palette.m3shadow, ShellSettings.shadowOpacity)
+                Theme.palette.m3shadow, ShellSettings.shadowOpacity * 0.7
+            )
             shadowVerticalOffset: Math.round(
-                ShellSettings.shadowOffsetY * Appearance.scale)
+                ShellSettings.shadowOffsetY * 0.5
+                    * Appearance.scale)
         }
 
         MouseArea {
