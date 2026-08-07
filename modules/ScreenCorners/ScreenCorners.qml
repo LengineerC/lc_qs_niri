@@ -19,6 +19,7 @@ Item {
         id: screenCorner
 
         property var corner: RoundCorner.CornerEnum.TopLeft
+        property bool showShadow: true
 
         implicitWidth: Appearance.cornerSize
         implicitHeight: Appearance.cornerSize
@@ -26,7 +27,8 @@ Item {
         MultiEffect {
             anchors.fill: cornerFill
             z: 0
-            visible: ShellSettings.shadowEnabled
+            visible: screenCorner.showShadow
+                && ShellSettings.shadowEnabled
             source: cornerFill
             shadowEnabled: true
             shadowBlur: 1
@@ -46,7 +48,7 @@ Item {
             anchors.fill: parent
             z: 1
             implicitSize: Appearance.cornerSize
-            color: Appearance.barBgColor
+            color: ShellSettings.screenCornerColor
             corner: screenCorner.corner
         }
     }
@@ -57,13 +59,13 @@ Item {
         anchors {
             left: parent.left
             right: parent.right
+            top: parent.top
         }
         height: Appearance.cornerSize
-        y: (-Appearance.barHeight - Appearance.cornerSize)
-            * NiriService.overviewProgress
 
         ScreenCorner {
             corner: RoundCorner.CornerEnum.TopLeft
+            showShadow: false
             anchors {
                 left: parent.left
                 top: parent.top
@@ -72,6 +74,7 @@ Item {
 
         ScreenCorner {
             corner: RoundCorner.CornerEnum.TopRight
+            showShadow: false
             anchors {
                 right: parent.right
                 top: parent.top

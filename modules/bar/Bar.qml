@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import qs.common
@@ -9,6 +10,47 @@ import qs.modules.sidebar
 import qs.services
 
 Scope {
+    component BarConnectorCorner: Item {
+        id: connectorCorner
+
+        required property var corner
+        property real effectsOpacity: 1
+
+        implicitWidth: Appearance.cornerSize
+        implicitHeight: Appearance.cornerSize
+        clip: true
+
+        MultiEffect {
+            anchors.fill: cornerFill
+            z: 0
+            visible: ShellSettings.shadowEnabled
+            source: cornerFill
+            shadowEnabled: true
+            shadowBlur: 1
+            blurMax: Math.max(1, Math.round(
+                ShellSettings.shadowBlurRadius * Appearance.scale))
+            shadowColor: Appearance.withAlpha(
+                Theme.palette.m3shadow,
+                ShellSettings.shadowOpacity
+                    * Math.max(0, Math.min(1,
+                        connectorCorner.effectsOpacity)))
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: Math.round(
+                ShellSettings.shadowOffsetY * Appearance.scale)
+            autoPaddingEnabled: true
+        }
+
+        RoundCorner {
+            id: cornerFill
+
+            anchors.fill: parent
+            z: 1
+            implicitSize: Appearance.cornerSize
+            color: Appearance.barBgColor
+            corner: connectorCorner.corner
+        }
+    }
+
     Variants {
         model: Quickshell.screens
 
@@ -137,24 +179,22 @@ Scope {
                     width: parent.width
                     height: Appearance.cornerSize
 
-                    RoundCorner {
+                    BarConnectorCorner {
                         anchors {
                             top: parent.top
                             left: parent.left
                         }
-                        implicitSize: Appearance.cornerSize
-                        color: Appearance.barBgColor
                         corner: RoundCorner.CornerEnum.TopLeft
+                        effectsOpacity: barContent.effectsOpacity
                     }
 
-                    RoundCorner {
+                    BarConnectorCorner {
                         anchors {
                             top: parent.top
                             right: parent.right
                         }
-                        implicitSize: Appearance.cornerSize
-                        color: Appearance.barBgColor
                         corner: RoundCorner.CornerEnum.TopRight
+                        effectsOpacity: barContent.effectsOpacity
                     }
                 }
             }

@@ -48,6 +48,15 @@ Item {
         }
     }
 
+    ColorDialog {
+        id: screenCornerColorDialog
+
+        title: I18n.tr("screenCornerColor")
+        onAccepted: {
+            ShellSettings.screenCornerColor = selectedColor.toString();
+        }
+    }
+
     Connections {
         target: ShellSettings
 
@@ -1336,6 +1345,92 @@ Item {
                                     onClicked: Theme.setMode(parent.modelData.mode)
                                 }
                             }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(10)
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(1)
+
+                            PanelText {
+                                text: I18n.tr("screenCornerColor")
+                                color: Appearance.layer0Text
+                            }
+
+                            PanelText {
+                                text: I18n.tr("screenCornerColorHint")
+                                color: Appearance.subtext
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        Rectangle {
+                            id: screenCornerColorButton
+
+                            implicitWidth: Appearance.px(138)
+                            implicitHeight: Appearance.px(36)
+                            radius: Appearance.px(10)
+                            color: screenCornerColorMouse.containsMouse
+                                ? Appearance.layer1Active : Appearance.layer1
+                            border.width: 1
+                            border.color: Appearance.outline
+
+                            RowLayout {
+                                anchors {
+                                    fill: parent
+                                    leftMargin: Appearance.px(8)
+                                    rightMargin: Appearance.px(10)
+                                }
+                                spacing: Appearance.px(8)
+
+                                Rectangle {
+                                    Layout.preferredWidth: Appearance.px(22)
+                                    Layout.preferredHeight: Appearance.px(22)
+                                    radius: Appearance.px(6)
+                                    color: ShellSettings.screenCornerColor
+                                    border.width: 1
+                                    border.color: Appearance.outline
+                                }
+
+                                PanelText {
+                                    Layout.fillWidth: true
+                                    text: ShellSettings.screenCornerColor
+                                        .toUpperCase()
+                                    color: Appearance.layer1Text
+                                    horizontalAlignment: Text.AlignHCenter
+                                    font.pixelSize: Appearance.smallFontSize
+                                }
+
+                                Text {
+                                    text: "󰏘"
+                                    color: Appearance.primary
+                                    font {
+                                        family: Appearance.iconFontFamily
+                                        pixelSize: Appearance.px(15)
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                id: screenCornerColorMouse
+
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    screenCornerColorDialog.selectedColor =
+                                        ShellSettings.screenCornerColor;
+                                    screenCornerColorDialog.open();
+                                }
+                            }
+
+                            Controls.ToolTip.visible:
+                                screenCornerColorMouse.containsMouse
+                            Controls.ToolTip.text: I18n.tr("chooseColor")
                         }
                     }
 
