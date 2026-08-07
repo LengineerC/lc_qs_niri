@@ -80,19 +80,31 @@ Scope {
 
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.namespace: "quickshell:bar"
-            WlrLayershell.keyboardFocus: barContent.popupShown
-                    || barContent.barContainsMouse
+            WlrLayershell.keyboardFocus:
+                    NiriService.overviewProgress <= 0
+                    && (barContent.popupShown
+                        || barContent.barContainsMouse)
                 ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             Region {
                 id: normalMask
 
                 Region {
-                    item: barContent.barMask
+                    // Keep the bar hit region in window coordinates. Using an
+                    // item below the animated barSurface can leave the
+                    // layer-shell input region at its overview offset.
+                    x: 0
+                    y: 0
+                    width: barWindow.width
+                    height: Appearance.barHeight
                 }
                 Region {
                     item: barContent.popupMask
                 }
+            }
+
+            Region {
+                id: overviewMask
             }
 
             MouseArea {
@@ -100,7 +112,11 @@ Scope {
                 onClicked: forceActiveFocus()
             }
 
-            mask: normalMask
+            // Do not disable the whole Qt Quick subtree during overview.
+            // Swap the Wayland input region instead, then restore a fresh,
+            // fixed-coordinate mask after the slide-in animation completes.
+            mask: NiriService.overviewProgress > 0
+                ? overviewMask : normalMask
 
             Timer {
                 id: focusDismissTimer
@@ -157,7 +173,6 @@ Scope {
                 // ancestor chain large enough for Qt Quick to route pointer
                 // events to content drawn below the bar.
                 height: parent.height
-                enabled: !NiriService.overviewOpen
                 y: barWindow.hiddenOffset * NiriService.overviewProgress
 
                 BarContent {
@@ -174,6 +189,10 @@ Scope {
                 }
 
                 Item {
+                    // Keep connector shadows behind BarContent so they cannot
+                    // spill over an open panel. The visible corner fill is
+                    // drawn again in the foreground strip below.
+                    z: -1
                     x: 0
                     y: Appearance.barHeight - 1
                     width: parent.width
@@ -195,6 +214,37 @@ Scope {
                         }
                         corner: RoundCorner.CornerEnum.TopRight
                         effectsOpacity: barContent.effectsOpacity
+                    }
+                }
+
+                Item {
+                    // Only the opaque corner shapes belong above BarContent.
+                    // They cover the bar's bottom-edge shadow without putting
+                    // the connector's own shadow on top of the panel.
+                    z: 1
+                    x: 0
+                    y: Appearance.barHeight - 1
+                    width: parent.width
+                    height: Appearance.cornerSize
+
+                    RoundCorner {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                        }
+                        implicitSize: Appearance.cornerSize
+                        color: Appearance.barBgColor
+                        corner: RoundCorner.CornerEnum.TopLeft
+                    }
+
+                    RoundCorner {
+                        anchors {
+                            top: parent.top
+                            right: parent.right
+                        }
+                        implicitSize: Appearance.cornerSize
+                        color: Appearance.barBgColor
+                        corner: RoundCorner.CornerEnum.TopRight
                     }
                 }
             }
@@ -321,6 +371,20 @@ Scope {
                 y: Appearance.px(5)
                 height: Math.max(0,
                     parent.height - Appearance.px(10))
+            }
+
+            // The sidebar is remapped to acquire focus and therefore sits
+            // above the Top-layer bar window. Redraw only the intersecting
+            // connector fill in this window so the sidebar cannot cover it.
+            // y = -1 keeps the curve aligned with the bar-side copy.
+            RoundCorner {
+                z: 100
+                x: 0
+                y: -1
+                visible: leftSidebar.surfaceVisible
+                implicitSize: Appearance.cornerSize
+                color: Appearance.barBgColor
+                corner: RoundCorner.CornerEnum.TopLeft
             }
         }
     }
