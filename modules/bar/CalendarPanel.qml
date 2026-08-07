@@ -96,7 +96,8 @@ Item {
         implicitHeight: Appearance.px(28)
         radius: Appearance.fullRadius
         color: buttonMouse.containsMouse
-            ? Appearance.layer1Active : "transparent"
+            ? Appearance.layer1Active
+            : Appearance.withAlpha(Appearance.layer1Active, 0)
         scale: buttonMouse.pressed ? 0.88 : 1
 
         Text {
@@ -253,7 +254,8 @@ Item {
                 implicitHeight: Appearance.px(32)
                 radius: Appearance.fullRadius
                 color: monthMouse.containsMouse
-                    ? Appearance.layer1Hover : "transparent"
+                    ? Appearance.layer1Hover
+                    : Appearance.withAlpha(Appearance.layer1Hover, 0)
 
                 PanelText {
                     anchors.centerIn: parent
@@ -353,7 +355,9 @@ Item {
                         : selected
                             ? Appearance.secondaryContainer
                             : dayMouse.containsMouse
-                                ? Appearance.layer1Hover : "transparent"
+                                ? Appearance.layer1Hover
+                                : Appearance.withAlpha(
+                                    Appearance.layer1Hover, 0)
 
                     PanelText {
                         anchors.centerIn: parent

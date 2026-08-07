@@ -281,7 +281,8 @@ Item {
                     radius: Appearance.px(12)
                     color: applicationEntry.ListView.isCurrentItem
                             || entryArea.containsMouse
-                        ? Appearance.layer1Hover : "transparent"
+                        ? Appearance.layer1Hover
+                        : Appearance.withAlpha(Appearance.layer1Hover, 0)
                     border.width:
                         applicationEntry.ListView.isCurrentItem ? 1 : 0
                     border.color: Appearance.primary

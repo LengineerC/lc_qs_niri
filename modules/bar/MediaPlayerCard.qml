@@ -269,7 +269,8 @@ ClippingRectangle {
         color: primary
             ? Appearance.primaryContainer
             : buttonMouse.containsMouse
-                ? Appearance.layer1Active : "transparent"
+                ? Appearance.layer1Active
+                : Appearance.withAlpha(Appearance.layer1Active, 0)
         scale: buttonMouse.pressed ? 0.88 : 1
         opacity: enabled ? 1 : 0.35
 

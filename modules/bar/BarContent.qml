@@ -204,7 +204,9 @@ Item {
                 color: launcherControl.containsMouse
                     || popup.shown && popup.anchorItem === launcherControl
                     || root.sidebarShown
-                    ? Appearance.secondaryContainer : "transparent"
+                    ? Appearance.secondaryContainer
+                    : Appearance.withAlpha(
+                        Appearance.secondaryContainer, 0)
                 scale: launcherControl.pressed ? 0.88 : 1
 
                 Text {
@@ -451,7 +453,8 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 radius: Appearance.fullRadius
                 color: settingsControl.containsMouse
-                    ? Appearance.layer1Hover : "transparent"
+                    ? Appearance.layer1Hover
+                    : Appearance.withAlpha(Appearance.layer1Hover, 0)
                 scale: settingsControl.pressed ? 0.88 : 1
 
                 Text {

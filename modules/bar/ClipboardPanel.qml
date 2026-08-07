@@ -74,7 +74,9 @@ Item {
                 implicitHeight: Appearance.px(28)
                 radius: Appearance.fullRadius
                 color: clearMouse.containsMouse
-                    ? Theme.palette.m3errorContainer : "transparent"
+                    ? Theme.palette.m3errorContainer
+                    : Appearance.withAlpha(
+                        Theme.palette.m3errorContainer, 0)
 
 
                 PanelText {

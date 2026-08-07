@@ -20,7 +20,8 @@ MouseArea {
         anchors.verticalCenter: parent.verticalCenter
         radius: Appearance.fullRadius
         color: root.containsMouse
-            ? Appearance.layer1Hover : "transparent"
+            ? Appearance.layer1Hover
+            : Appearance.withAlpha(Appearance.layer1Hover, 0)
         scale: root.pressed ? 0.88 : 1
 
         Text {

@@ -380,7 +380,9 @@ PopupWindow {
                             ? Appearance.px(40) : 0
                         radius: Appearance.px(10)
                         color: backMouse.containsMouse
-                            ? Appearance.layer1Hover : "transparent"
+                            ? Appearance.layer1Hover
+                            : Appearance.withAlpha(
+                                Appearance.layer1Hover, 0)
 
                         RowLayout {
                             anchors {

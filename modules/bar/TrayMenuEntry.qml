@@ -34,7 +34,8 @@ Rectangle {
     radius: Appearance.px(10)
     color: separator ? Appearance.outline
         : entryMouse.containsMouse && root.enabled
-            ? Appearance.primaryContainer : "transparent"
+            ? Appearance.primaryContainer
+            : Appearance.withAlpha(Appearance.primaryContainer, 0)
     opacity: separator || root.enabled ? 1 : 0.42
     enabled: !separator && menuEntry.enabled
     scale: entryMouse.pressed ? 0.98 : 1

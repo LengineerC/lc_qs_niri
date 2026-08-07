@@ -20,7 +20,8 @@ MouseArea {
         anchors.verticalCenter: parent.verticalCenter
         radius: Appearance.fullRadius
         color: root.containsMouse
-            ? Appearance.primaryContainer : "transparent"
+            ? Appearance.primaryContainer
+            : Appearance.withAlpha(Appearance.primaryContainer, 0)
         scale: root.pressed ? 0.88 : 1
 
         Text {

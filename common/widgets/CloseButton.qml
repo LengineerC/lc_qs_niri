@@ -16,7 +16,7 @@ Rectangle {
     implicitHeight: Appearance.px(28)
     radius: Appearance.fullRadius
     color: closeMouse.containsMouse && root.enabled
-        ? root.hoverColor : "transparent"
+        ? root.hoverColor : Appearance.withAlpha(root.hoverColor, 0)
     scale: closeMouse.pressed ? 0.88 : 1
     opacity: root.enabled ? 1 : 0.4
 
