@@ -152,7 +152,8 @@ Singleton {
         publishWorkspaceStates(states);
     }
 
-    function outputHasFullscreenWindow(outputName, outputWidth, outputHeight) {
+    function outputActiveWindowIsFullscreen(outputName, outputWidth,
+            outputHeight) {
         // Makes this function binding-reactive even though the state is read
         // through JavaScript maps.
         const revision = stateRevision;
@@ -161,31 +162,35 @@ Singleton {
         if (!outputName || width <= 0 || height <= 0)
             return false;
 
-        let activeWorkspaceId = null;
+        let activeWorkspace = null;
         for (const workspace of Object.values(workspaceStates)) {
             if (workspace.output === outputName && workspace.is_active) {
-                activeWorkspaceId = Number(workspace.id);
+                activeWorkspace = workspace;
                 break;
             }
         }
-        if (activeWorkspaceId === null)
+        if (!activeWorkspace)
             return false;
+
+        const activeWindowId = activeWorkspace.active_window_id;
+        if (activeWindowId === null || activeWindowId === undefined)
+            return false;
+
+        const window = windowStates[String(activeWindowId)];
+        if (!window
+                || Number(window.workspace_id)
+                    !== Number(activeWorkspace.id)) {
+            return false;
+        }
 
         // Niri deliberately distinguishes real fullscreen from windowed
         // fullscreen in its layout: a real fullscreen tile matches the full
         // logical output instead of the normal work area reserved by the bar.
         const tolerance = 2.5;
-        for (const window of Object.values(windowStates)) {
-            if (Number(window.workspace_id) !== activeWorkspaceId)
-                continue;
-            const size = window.layout?.tile_size;
-            if (!Array.isArray(size) || size.length < 2)
-                continue;
-            if (Math.abs(Number(size[0]) - width) <= tolerance
-                    && Math.abs(Number(size[1]) - height) <= tolerance)
-                return true;
-        }
-        return false;
+        const size = window.layout?.tile_size;
+        return Array.isArray(size) && size.length >= 2
+            && Math.abs(Number(size[0]) - width) <= tolerance
+            && Math.abs(Number(size[1]) - height) <= tolerance;
     }
 
     Niri {

@@ -10,7 +10,8 @@ Item {
 
     required property string outputName
     readonly property bool outputFullscreen:
-        NiriService.outputHasFullscreenWindow(outputName, width, height)
+        NiriService.outputActiveWindowIsFullscreen(
+            outputName, width, height)
 
     anchors.fill: parent
     visible: !outputFullscreen
