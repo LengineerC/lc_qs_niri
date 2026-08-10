@@ -303,14 +303,29 @@ Item {
 
     Row {
         id: middleSection
+
+        readonly property real clockCenterInRow:
+            workspaceSwitcher.width + spacing
+                + weatherModule.width + spacing
+                + timeModule.width / 2
+
+        x: {
+            const barCenter = parent.width / 2;
+            if (ShellSettings.barCenterAlignment === "clock") {
+                return Math.round(barCenter - clockCenterInRow);
+            }
+            return Math.round(barCenter - implicitWidth / 2);
+        }
+        width: implicitWidth
         anchors {
             top: parent.top
-            horizontalCenter: parent.horizontalCenter
         }
         height: Appearance.barHeight
         spacing: Appearance.px(4)
 
         WorkspaceSwitcher {
+            id: workspaceSwitcher
+
             anchors.verticalCenter: parent.verticalCenter
             outputName: root.outputName
         }

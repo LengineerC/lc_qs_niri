@@ -35,7 +35,6 @@ Item {
         { value: 0, label: I18n.tr("sunday") },
         { value: 6, label: I18n.tr("saturday") }
     ]
-
     FileDialog {
         id: avatarFileDialog
 
@@ -1619,6 +1618,63 @@ Item {
                 }
 
                 SettingCard {
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(10)
+
+                        ColumnLayout {
+                            readonly property int targetWidth: Appearance.px(
+                                I18n.language === "en_US" ? 260 : 230)
+
+                            Layout.preferredWidth: targetWidth
+                            Layout.minimumWidth: Appearance.px(180)
+                            Layout.maximumWidth: targetWidth
+                            spacing: Appearance.px(1)
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                text: I18n.tr("barCenterAlignment")
+                                color: Appearance.layer0Text
+                            }
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                Layout.maximumWidth: parent.width
+                                text: I18n.tr("barCenterAlignmentHint")
+                                color: Appearance.subtext
+                                wrapMode: Text.WordWrap
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(6)
+
+                            Repeater {
+                                model: ["group", "clock"]
+
+                                delegate: ChoiceChip {
+                                    required property string modelData
+
+                                    // Keep translation lookup in the delegate
+                                    // binding so live language changes always
+                                    // update both choices.
+                                    label: modelData === "group"
+                                        ? I18n.tr("centerWholeGroup")
+                                        : I18n.tr("centerOnClock")
+                                    selected:
+                                        ShellSettings.barCenterAlignment
+                                            === modelData
+                                    onChosen: {
+                                        ShellSettings.barCenterAlignment =
+                                            modelData;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     FormatRow {
                         label: I18n.tr("timeFormat")
                         currentValue: ShellSettings.timeFormat

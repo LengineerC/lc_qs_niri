@@ -23,6 +23,8 @@ ClippingRectangle {
     border.color: MediaService.activePlayer === player
         ? Appearance.primary : Appearance.outline
 
+    scale: 0.99
+
     Image {
         id: backgroundArt
 
