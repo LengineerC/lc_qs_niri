@@ -18,9 +18,8 @@ Item {
     readonly property var moveCurve: ShellSettings.popupBezierCurve
     readonly property real targetX: {
         const screenWidth = parent?.width ?? popupWidth;
-        const center = anchorItem
-            ? anchorItem.mapToItem(parent, anchorItem.width / 2, 0).x
-            : screenWidth / 2;
+        const center = Number.isFinite(anchorCenterX)
+            ? anchorCenterX : screenWidth / 2;
         const rawX = center - popupWidth / 2;
         const remaining = screenWidth - Math.floor(rawX + popupWidth);
 
@@ -30,6 +29,10 @@ Item {
     }
 
     property Item anchorItem: null
+    // Freeze the trigger's center while the popup is open. Dynamic bar
+    // modules (especially media metadata) may resize or move without dragging
+    // an already visible panel along with them.
+    property real anchorCenterX: NaN
     property string outputName: ""
     property string page: ""
     property bool shown: false
@@ -228,6 +231,14 @@ Item {
 
         configure(pageName);
         anchorItem = target;
+        if (target && parent) {
+            const mappedCenter = target.mapToItem(
+                parent, target.width / 2, 0).x;
+            anchorCenterX = Number.isFinite(mappedCenter)
+                ? mappedCenter : parent.width / 2;
+        } else {
+            anchorCenterX = (parent?.width ?? popupWidth) / 2;
+        }
         shown = true;
     }
 
