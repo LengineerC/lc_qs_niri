@@ -23,6 +23,7 @@ Singleton {
     property var pendingSourceArguments: null
     property string pendingSystemMode: ""
     property string systemColorSyncError: ""
+    property string systemGtkThemeOutput: ""
 
     readonly property bool darkMode: mode === "dark"
     readonly property string stateDirectory: stripFileProtocol(
@@ -219,9 +220,44 @@ Singleton {
         startPendingSystemColorSync();
     }
 
+    function gtkThemeNameFromOutput(output) {
+        const value = String(output ?? "").trim();
+        if (value.length >= 2
+                && ((value.startsWith("'") && value.endsWith("'"))
+                    || (value.startsWith('"') && value.endsWith('"')))) {
+            return value.slice(1, -1);
+        }
+        return value;
+    }
+
+    function matchingGtkTheme(currentTheme, requestedMode) {
+        // Only switch theme families with a known light/dark pair. This keeps
+        // a custom GTK theme selected by the user from being overwritten.
+        if (currentTheme === "adw-gtk3"
+                || currentTheme === "adw-gtk3-dark") {
+            return requestedMode === "dark"
+                ? "adw-gtk3-dark" : "adw-gtk3";
+        }
+        if (currentTheme === "Adwaita"
+                || currentTheme === "Adwaita-dark") {
+            return requestedMode === "dark"
+                ? "Adwaita-dark" : "Adwaita";
+        }
+        return "";
+    }
+
+    function finishSystemColorSync() {
+        if (pendingSystemMode)
+            Qt.callLater(startPendingSystemColorSync);
+    }
+
     function startPendingSystemColorSync() {
-        if (!pendingSystemMode || systemColorSchemeProcess.running)
+        if (!pendingSystemMode
+                || systemColorSchemeProcess.running
+                || systemGtkThemeReadProcess.running
+                || systemGtkThemeSetProcess.running) {
             return;
+        }
 
         systemColorSchemeProcess.requestedMode = pendingSystemMode;
         pendingSystemMode = "";
@@ -453,8 +489,76 @@ Singleton {
                         + exitCode);
             }
 
-            if (root.pendingSystemMode)
-                Qt.callLater(root.startPendingSystemColorSync);
+            root.systemGtkThemeOutput = "";
+            systemGtkThemeReadProcess.requestedMode = requestedMode;
+            systemGtkThemeReadProcess.errorOutput = "";
+            systemGtkThemeReadProcess.exec([
+                "gsettings", "get", "org.gnome.desktop.interface",
+                "gtk-theme"
+            ]);
+        }
+    }
+
+    Process {
+        id: systemGtkThemeReadProcess
+
+        property string requestedMode: ""
+        property string errorOutput: ""
+
+        stdout: StdioCollector {
+            onStreamFinished: root.systemGtkThemeOutput = text
+        }
+
+        stderr: StdioCollector {
+            onStreamFinished: systemGtkThemeReadProcess.errorOutput =
+                text.trim()
+        }
+
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                console.warn("Theme: cannot read the system GTK theme:",
+                    errorOutput || "gsettings exited with " + exitCode);
+                root.finishSystemColorSync();
+                return;
+            }
+
+            const currentTheme = root.gtkThemeNameFromOutput(
+                root.systemGtkThemeOutput);
+            const targetTheme = root.matchingGtkTheme(
+                currentTheme, requestedMode);
+            if (!targetTheme || targetTheme === currentTheme) {
+                root.finishSystemColorSync();
+                return;
+            }
+
+            systemGtkThemeSetProcess.requestedMode = requestedMode;
+            systemGtkThemeSetProcess.targetTheme = targetTheme;
+            systemGtkThemeSetProcess.errorOutput = "";
+            systemGtkThemeSetProcess.exec([
+                "gsettings", "set", "org.gnome.desktop.interface",
+                "gtk-theme", targetTheme
+            ]);
+        }
+    }
+
+    Process {
+        id: systemGtkThemeSetProcess
+
+        property string requestedMode: ""
+        property string targetTheme: ""
+        property string errorOutput: ""
+
+        stderr: StdioCollector {
+            onStreamFinished: systemGtkThemeSetProcess.errorOutput =
+                text.trim()
+        }
+
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                console.warn("Theme: cannot update the system GTK theme:",
+                    errorOutput || "gsettings exited with " + exitCode);
+            }
+            root.finishSystemColorSync();
         }
     }
 
