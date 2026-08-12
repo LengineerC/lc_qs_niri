@@ -180,7 +180,7 @@ Rectangle {
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
-                spacing: root.rowSpacing
+                spacing: root.rowSpacing + 5
 
                 Text {
                     Layout.fillWidth: true
