@@ -36,6 +36,9 @@ Rectangle {
     property string currentPath: ""
     property string operationError: ""
 
+    readonly property bool hasCurrentNote:
+        initialized && currentPath.length > 0
+
     property string pendingAction: ""
     property var pendingActionData: ({})
 
@@ -82,6 +85,9 @@ Rectangle {
 
         if (!initialized)
             return I18n.tr("loading");
+
+        if (!hasCurrentNote)
+            return I18n.tr("noNotes");
 
         if (saving)
             return I18n.tr("saving");
@@ -631,7 +637,7 @@ Rectangle {
     }
 
     function togglePreviewMode(): void {
-        if (!root.initialized)
+        if (!root.hasCurrentNote)
             return;
 
         root.previewMode = !root.previewMode;
@@ -720,8 +726,43 @@ Rectangle {
     }
 
     /*
+     * 进入无笔记状态。此时组件本身已经初始化完成，
+     * 但没有活动文件，编辑和预览操作都应保持禁用。
+     */
+    function enterEmptyState(): void {
+        saveTimer.stop();
+
+        confirmingDelete = false;
+        renaming = false;
+        previewMode = false;
+        dirty = false;
+        saving = false;
+
+        pendingAction = "";
+        pendingActionData = ({});
+
+        savingPath = "";
+        savingText = "";
+        editRevision = 0;
+        savingRevision = 0;
+
+        currentFileName = "";
+        currentPath = "";
+
+        /*
+         * 赋值时先保持 initialized=false，避免清空文本
+         * 被 onTextChanged 当成一次用户编辑。
+         */
+        initialized = false;
+        editor.deselect();
+        editor.text = "";
+        renameEditor.text = "";
+        initialized = true;
+    }
+
+    /*
      * 第一次加载目录时，打开最近修改的文件。
-     * 如果目录为空，则自动创建第一份笔记。
+     * 目录为空时保留无笔记状态，等待用户主动新建。
      */
     function selectInitialNote(): void {
         if (initialSelectionDone
@@ -741,7 +782,7 @@ Rectangle {
                     0, "filePath")
             });
         } else {
-            requestNewNote();
+            enterEmptyState();
         }
     }
 
@@ -854,8 +895,11 @@ Rectangle {
 
                 root.refreshFolderModel();
             } else {
-                root.initialized =
-                    root.currentPath.length > 0;
+                /*
+                 * 新建失败不代表组件仍在加载；若原本没有
+                 * 笔记，应继续停留在可再次新建的空状态。
+                 */
+                root.initialized = true;
 
                 root.operationError =
                     I18n.tr("noteCreateError");
@@ -953,7 +997,7 @@ Rectangle {
                 * 允许 selectInitialNote() 再运行一次：
                 *
                 * - 尚有文件：打开最新的一份
-                * - 没有文件：自动新建一份
+                * - 没有文件：进入无笔记状态
                 */
                 root.initialSelectionDone = false;
                 root.refreshFolderModel();
@@ -1646,8 +1690,7 @@ Rectangle {
                                 - Appearance.px(30)
                         )
 
-                        enabled: root.initialized
-                            && root.currentPath.length > 0
+                        enabled: root.hasCurrentNote
 
                         textFormat: TextEdit.PlainText
                         wrapMode: TextEdit.Wrap
@@ -1702,9 +1745,9 @@ Rectangle {
                             && editor.text.length === 0
                             && !editor.preeditText
 
-                        text: I18n.tr(
-                            "markdownNotePlaceholder"
-                        )
+                        text: root.hasCurrentNote
+                            ? I18n.tr("markdownNotePlaceholder")
+                            : I18n.tr("noNotes")
 
                         color: Appearance.subtext
 
@@ -1798,7 +1841,7 @@ Rectangle {
                     /*
                     * 平时保持低透明度，悬停时变清晰。
                     */
-                    opacity: !root.initialized
+                    opacity: !root.hasCurrentNote
                         ? 0.25
                         : modeButtonMouse.containsMouse
                             ? 1
@@ -1829,7 +1872,7 @@ Rectangle {
                         id: modeButtonMouse
 
                         anchors.fill: parent
-                        enabled: root.initialized
+                        enabled: root.hasCurrentNote
                         hoverEnabled: true
 
                         cursorShape: enabled
