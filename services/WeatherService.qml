@@ -12,12 +12,13 @@ Singleton {
     readonly property int refreshInterval: 30 * 60 * 1000
 
     property bool ready: false
-    property bool loading: false
+    property bool loading: true
     property string error: ""
     property var current: ({})
     property var hourlyForecast: []
     property var dailyForecast: []
     property date lastUpdated: new Date(0)
+    property string dataLocationKey: ""
 
     property string locationSearchStatus: ""
     property string locationSearchError: ""
@@ -152,7 +153,42 @@ Singleton {
         return I18n.locale.toString(date, "MM/dd");
     }
 
-    function parseForecast(text) {
+    function coordinateKey(latitude, longitude) {
+        const lat = Number(latitude);
+        const lon = Number(longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon))
+            return "";
+        return lat.toFixed(5) + "," + lon.toFixed(5);
+    }
+
+    function configuredLocationKey() {
+        return coordinateKey(
+            ShellSettings.weatherLatitude,
+            ShellSettings.weatherLongitude
+        );
+    }
+
+    function invalidateForecast() {
+        ready = false;
+        loading = true;
+        current = ({});
+        hourlyForecast = [];
+        dailyForecast = [];
+        dataLocationKey = "";
+        lastUpdated = new Date(0);
+        error = "";
+    }
+
+    function parseForecast(text, requestLocationKey) {
+        /*
+         * 设置加载或用户切换地点后，旧 curl 进程仍可能晚一步返回。
+         * 只有响应坐标仍与当前设置一致时才允许写入界面。
+         */
+        if (!requestLocationKey
+                || requestLocationKey !== configuredLocationKey()) {
+            return;
+        }
+
         try {
             const data = JSON.parse(String(text));
             if (!data.current || !data.hourly || !data.daily)
@@ -233,6 +269,7 @@ Singleton {
 
             hourlyForecast = nextHours;
             dailyForecast = nextDays;
+            dataLocationKey = requestLocationKey;
             ready = true;
             error = "";
             lastUpdated = new Date();
@@ -243,9 +280,7 @@ Singleton {
         }
     }
 
-    function forecastUrl() {
-        const latitude = Number(ShellSettings.weatherLatitude);
-        const longitude = Number(ShellSettings.weatherLongitude);
+    function forecastUrl(latitude, longitude) {
         const currentFields = [
             "temperature_2m", "relative_humidity_2m",
             "apparent_temperature", "is_day", "precipitation",
@@ -272,14 +307,32 @@ Singleton {
     }
 
     function refresh() {
+        /*
+         * ShellSettings 使用 FileView 异步恢复。它就绪前的坐标只是
+         * 默认值，不能据此发起启动请求。
+         */
+        if (!ShellSettings.ready) {
+            refreshAgain = true;
+            return;
+        }
+
         if (forecastProcess.running) {
             refreshAgain = true;
             return;
         }
+
+        const latitude = Number(ShellSettings.weatherLatitude);
+        const longitude = Number(ShellSettings.weatherLongitude);
+        const requestLocationKey = coordinateKey(latitude, longitude);
+        if (!requestLocationKey)
+            return;
+
         loading = true;
         error = "";
+        forecastProcess.locationKey = requestLocationKey;
         forecastProcess.command = [
-            "curl", "-fsSL", "--max-time", "20", forecastUrl()
+            "curl", "-fsSL", "--max-time", "20",
+            forecastUrl(latitude, longitude)
         ];
         forecastProcess.running = true;
     }
@@ -343,16 +396,32 @@ Singleton {
         }
     }
 
-    Component.onCompleted: refresh()
+    Component.onCompleted: {
+        if (ShellSettings.ready)
+            refresh();
+    }
 
     Connections {
         target: ShellSettings
 
+        function onReadyChanged() {
+            if (!ShellSettings.ready)
+                return;
+
+            locationRefreshDelay.stop();
+            root.refreshAgain = false;
+            root.refresh();
+        }
+
         function onWeatherLatitudeChanged() {
-            locationRefreshDelay.restart();
+            root.invalidateForecast();
+            if (ShellSettings.ready)
+                locationRefreshDelay.restart();
         }
         function onWeatherLongitudeChanged() {
-            locationRefreshDelay.restart();
+            root.invalidateForecast();
+            if (ShellSettings.ready)
+                locationRefreshDelay.restart();
         }
     }
 
@@ -372,19 +441,35 @@ Singleton {
     Process {
         id: forecastProcess
 
+        property string locationKey: ""
+
         stdout: StdioCollector {
-            onStreamFinished: root.parseForecast(text)
+            onStreamFinished:
+                root.parseForecast(text, forecastProcess.locationKey)
         }
         stderr: StdioCollector {
             onStreamFinished: {
-                if (text.trim())
+                if (text.trim()
+                        && forecastProcess.locationKey
+                            === root.configuredLocationKey()) {
                     root.error = text.trim();
+                }
             }
         }
         onExited: exitCode => {
-            root.loading = false;
-            if (exitCode !== 0 && !root.error)
+            const responseMatchesLocation =
+                forecastProcess.locationKey
+                    === root.configuredLocationKey();
+
+            /*
+             * 旧地点响应退出或已有下一次刷新排队时维持加载态，
+             * 避免两次请求之间闪出“天气不可用”。
+             */
+            root.loading = !responseMatchesLocation || root.refreshAgain;
+            if (exitCode !== 0 && !root.error
+                    && responseMatchesLocation) {
                 root.error = "Open-Meteo request failed";
+            }
             if (root.refreshAgain) {
                 root.refreshAgain = false;
                 Qt.callLater(() => root.refresh());
