@@ -13,8 +13,10 @@ Singleton {
     property color layer0Border: mix(Theme.palette.m3outlineVariant,
         Theme.palette.m3background, 0.4)
     property color layer1: Theme.palette.m3surfaceContainerLow
-    property color layer1Hover: mix(layer1, Theme.palette.m3onSurfaceVariant, 0.08)
-    property color layer1Active: mix(layer1, Theme.palette.m3onSurfaceVariant, 0.15)
+    property color layer1Hover: mix(Theme.palette.m3surfaceContainerLow,
+        Theme.palette.m3onSurfaceVariant, 0.08)
+    property color layer1Active: mix(Theme.palette.m3surfaceContainerLow,
+        Theme.palette.m3onSurfaceVariant, 0.15)
     property color layer2: Theme.palette.m3surfaceContainer
     property color layer3: Theme.palette.m3surfaceContainerHigh
     property color layer0Text: Theme.palette.m3onBackground
@@ -70,23 +72,23 @@ Singleton {
     readonly property var spatialCurve: [0.42, 1.67, 0.21, 0.90, 1, 1]
     readonly property var exitCurve: [0.3, 0, 0.8, 0.15, 1, 1]
 
-    Behavior on barBgColor { ColorAnimation { duration: 500 } }
-    Behavior on layer0 { ColorAnimation { duration: 500 } }
-    Behavior on layer0Border { ColorAnimation { duration: 500 } }
-    Behavior on layer1 { ColorAnimation { duration: 500 } }
-    Behavior on layer1Hover { ColorAnimation { duration: 500 } }
-    Behavior on layer1Active { ColorAnimation { duration: 500 } }
-    Behavior on layer2 { ColorAnimation { duration: 500 } }
-    Behavior on layer3 { ColorAnimation { duration: 500 } }
-    Behavior on layer0Text { ColorAnimation { duration: 500 } }
-    Behavior on layer1Text { ColorAnimation { duration: 500 } }
-    Behavior on subtext { ColorAnimation { duration: 500 } }
-    Behavior on outline { ColorAnimation { duration: 500 } }
-    Behavior on primary { ColorAnimation { duration: 500 } }
-    Behavior on primaryContainer { ColorAnimation { duration: 500 } }
-    Behavior on primaryContainerText { ColorAnimation { duration: 500 } }
-    Behavior on secondaryContainer { ColorAnimation { duration: 500 } }
-    Behavior on secondaryContainerText { ColorAnimation { duration: 500 } }
-    Behavior on tertiary { ColorAnimation { duration: 500 } }
-    Behavior on shadow { ColorAnimation { duration: 500 } }
+    Behavior on barBgColor { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on layer0 { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on layer0Border { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on layer1 { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on layer1Hover { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on layer1Active { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on layer2 { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on layer3 { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on layer0Text { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on layer1Text { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on subtext { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on outline { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on primary { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on primaryContainer { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on primaryContainerText { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on secondaryContainer { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on secondaryContainerText { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on tertiary { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on shadow { ColorAnimation { duration: root.spatialDuration } }
 }

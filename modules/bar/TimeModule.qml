@@ -59,6 +59,7 @@ MouseArea {
         scale: root.pressed ? 0.94 : 1
 
         Behavior on color {
+            enabled: !Theme.paletteTransitionRunning
             ColorAnimation {
                 duration: Appearance.fastDuration
             }

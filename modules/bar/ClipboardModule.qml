@@ -35,6 +35,7 @@ MouseArea {
         }
 
         Behavior on color {
+            enabled: !Theme.paletteTransitionRunning
             ColorAnimation { duration: Appearance.fastDuration }
         }
 

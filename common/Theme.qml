@@ -31,6 +31,7 @@ Singleton {
     property bool applicationMatugenConfigChecked: false
     property bool applicationMatugenConfigAvailable: false
     property bool syncingApplications: false
+    property bool paletteTransitionRunning: false
 
     readonly property bool darkMode: mode === "dark"
     readonly property string stateDirectory: stripFileProtocol(
@@ -165,6 +166,9 @@ Singleton {
     }
 
     function applyColorMap(colors) {
+        paletteTransitionRunning = true;
+        paletteTransitionTimer.restart();
+
         for (const key of colorKeys) {
             if (!colors[key])
                 continue;
@@ -554,6 +558,14 @@ Singleton {
             else
                 root.syncingApplications = false;
         }
+    }
+
+    Timer {
+        id: paletteTransitionTimer
+
+        interval: Math.max(40, ShellSettings.animationDuration)
+        repeat: false
+        onTriggered: root.paletteTransitionRunning = false
     }
 
     Process {
