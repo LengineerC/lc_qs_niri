@@ -23,6 +23,7 @@ Item {
             return String(searchable).toLocaleLowerCase().includes(query);
         });
     }
+    property string selectedEntryId: ""
 
     implicitWidth: Appearance.px(520)
     implicitHeight: Appearance.px(560)
@@ -40,6 +41,63 @@ Item {
         closeRequested();
     }
 
+    function setSelectedIndex(index, position = true) {
+        const count = filteredEntries.length;
+        if (count === 0) {
+            historyList.currentIndex = -1;
+            selectedEntryId = "";
+            return;
+        }
+
+        const nextIndex = Math.max(0, Math.min(count - 1, index));
+        historyList.currentIndex = nextIndex;
+        selectedEntryId = String(filteredEntries[nextIndex].id);
+
+        if (position) {
+            Qt.callLater(() => historyList.positionViewAtIndex(
+                nextIndex, ListView.Contain));
+        }
+    }
+
+    function reconcileSelection() {
+        if (!visible || filteredEntries.length === 0) {
+            historyList.currentIndex = -1;
+            selectedEntryId = "";
+            return;
+        }
+
+        if (selectedEntryId) {
+            const selectedIndex = filteredEntries.findIndex(
+                entry => String(entry.id) === selectedEntryId);
+            if (selectedIndex >= 0) {
+                setSelectedIndex(selectedIndex);
+                return;
+            }
+        }
+
+        setSelectedIndex(0);
+    }
+
+    function moveSelection(offset) {
+        if (filteredEntries.length === 0)
+            return;
+
+        if (historyList.currentIndex < 0) {
+            setSelectedIndex(offset < 0
+                ? filteredEntries.length - 1 : 0);
+            return;
+        }
+
+        setSelectedIndex(historyList.currentIndex + offset);
+    }
+
+    function activateSelection() {
+        const index = historyList.currentIndex;
+        if (index < 0 || index >= filteredEntries.length)
+            return;
+        copyAndClose(filteredEntries[index].id);
+    }
+
     component PanelText: Text {
         color: Appearance.layer1Text
         font {
@@ -51,11 +109,18 @@ Item {
     onVisibleChanged: {
         if (visible) {
             ClipboardService.refresh();
-            Qt.callLater(() => searchInput.forceActiveFocus());
+            Qt.callLater(() => {
+                searchInput.forceActiveFocus();
+                root.reconcileSelection();
+            });
         } else {
             searchInput.text = "";
+            selectedEntryId = "";
+            historyList.currentIndex = -1;
         }
     }
+
+    onFilteredEntriesChanged: Qt.callLater(root.reconcileSelection)
 
     ColumnLayout {
         anchors {
@@ -148,6 +213,20 @@ Item {
                         family: Appearance.fontFamily
                         pixelSize: Appearance.fontSize
                     }
+
+                    Keys.onPressed: event => {
+                        if (event.key === Qt.Key_Up) {
+                            root.moveSelection(-1);
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_Down) {
+                            root.moveSelection(1);
+                            event.accepted = true;
+                        } else if (event.key === Qt.Key_Return
+                                || event.key === Qt.Key_Enter) {
+                            root.activateSelection();
+                            event.accepted = true;
+                        }
+                    }
                 }
 
                 Rectangle {
@@ -191,6 +270,7 @@ Item {
                 clip: true
                 spacing: Appearance.px(8)
                 model: root.filteredEntries
+                currentIndex: -1
                 boundsBehavior: Flickable.StopAtBounds
 
                 Controls.ScrollBar.vertical: Controls.ScrollBar {
@@ -201,15 +281,22 @@ Item {
                     id: historyEntry
 
                     required property var modelData
+                    required property int index
+
+                    readonly property bool selected:
+                        historyEntry.index === historyList.currentIndex
 
                     width: ListView.view.width
                     height: modelData.kind === "image"
                         ? Appearance.px(182) : Appearance.px(104)
                     radius: Appearance.smallRadius
-                    color: entryMouse.containsMouse
-                        ? Appearance.layer1Hover : Appearance.layer1
-                    border.width: 1
-                    border.color: Appearance.outline
+                    color: historyEntry.selected
+                        ? Appearance.primaryContainer
+                        : entryMouse.containsMouse
+                            ? Appearance.layer1Hover : Appearance.layer1
+                    border.width: historyEntry.selected ? 2 : 1
+                    border.color: historyEntry.selected
+                        ? Appearance.primary : Appearance.outline
                     clip: true
 
                     MouseArea {
@@ -251,7 +338,9 @@ Item {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             text: historyEntry.modelData.preview
-                            color: Appearance.layer0Text
+                            color: historyEntry.selected
+                                ? Appearance.primaryContainerText
+                                : Appearance.layer0Text
                             wrapMode: Text.WrapAnywhere
                             elide: Text.ElideRight
                             maximumLineCount: 4
@@ -261,7 +350,9 @@ Item {
                         PanelText {
                             text: root.formatSize(
                                 historyEntry.modelData.size)
-                            color: Appearance.subtext
+                            color: historyEntry.selected
+                                ? Appearance.primaryContainerText
+                                : Appearance.subtext
                             font.pixelSize: Appearance.smallFontSize
                         }
                     }
