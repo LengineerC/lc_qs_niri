@@ -21,8 +21,16 @@ Singleton {
     property bool wallpaperStateLoaded: false
     property bool startupThemeChecked: false
     property var pendingSourceArguments: null
+    property var pendingApplicationSourceArguments: null
+    property string pendingApplicationMode: ""
+    property string pendingApplicationScheme: ""
     property string pendingSystemMode: ""
     property string systemColorSyncError: ""
+    property string applicationMatugenError: ""
+    property string applicationMatugenDiagnostics: ""
+    property bool applicationMatugenConfigChecked: false
+    property bool applicationMatugenConfigAvailable: false
+    property bool syncingApplications: false
 
     readonly property bool darkMode: mode === "dark"
     readonly property string stateDirectory: stripFileProtocol(
@@ -32,6 +40,9 @@ Singleton {
     readonly property string wallpaperFilePath: stateDirectory + "/wallpaper.path"
     readonly property string matugenConfigPath: stripFileProtocol(
         Quickshell.shellPath("theme/matugen.toml"))
+    readonly property string applicationMatugenConfigPath:
+        stripFileProtocol(StandardPaths.standardLocations(
+            StandardPaths.ConfigLocation)[0]) + "/matugen/config.toml"
 
     readonly property list<string> colorKeys: [
         "background",
@@ -297,6 +308,8 @@ Singleton {
         generatedOutput = "";
         generating = true;
         matugenProcess.requestedMode = mode;
+        matugenProcess.requestedScheme = scheme;
+        matugenProcess.sourceArguments = sourceArguments.slice();
 
         matugenProcess.exec([
             "matugen",
@@ -304,7 +317,7 @@ Singleton {
             "--json", "hex",
             "--quiet",
             "--mode", matugenProcess.requestedMode,
-            "--type", scheme,
+            "--type", matugenProcess.requestedScheme,
             "--source-color-index", "0"
         ].concat(sourceArguments));
     }
@@ -316,6 +329,66 @@ Singleton {
             matugenProcess.running = false;
         else
             startPendingMatugen();
+    }
+
+    /*
+     * Shell 调色与应用模板分成两个 Matugen 进程：
+     *
+     * - 内置的空模板配置只负责提供稳定的 JSON 输出；
+     * - 用户的 ~/.config/matugen/config.toml 负责生成第三方应用主题
+     *   和执行其 post_hook。
+     *
+     * 这样某个应用模板失败或向 stdout 输出内容时，不会阻止 Shell
+     * 自身更新颜色。快速连续切换时只保留最后一次应用同步请求。
+     */
+    function startPendingApplicationMatugen() {
+        if (pendingApplicationSourceArguments === null
+                || applicationMatugenProcess.running
+                || !applicationMatugenConfigChecked) {
+            return;
+        }
+
+        if (!applicationMatugenConfigAvailable) {
+            pendingApplicationSourceArguments = null;
+            pendingApplicationMode = "";
+            pendingApplicationScheme = "";
+            syncingApplications = false;
+            return;
+        }
+
+        const sourceArguments = pendingApplicationSourceArguments;
+        applicationMatugenProcess.requestedMode = pendingApplicationMode;
+        applicationMatugenProcess.requestedScheme = pendingApplicationScheme;
+
+        pendingApplicationSourceArguments = null;
+        pendingApplicationMode = "";
+        pendingApplicationScheme = "";
+        applicationMatugenError = "";
+        applicationMatugenDiagnostics = "";
+        syncingApplications = true;
+
+        applicationMatugenProcess.exec([
+            "matugen",
+            "--config", applicationMatugenConfigPath,
+            "--quiet",
+            "--continue-on-error",
+            "--mode", applicationMatugenProcess.requestedMode,
+            "--type", applicationMatugenProcess.requestedScheme,
+            "--source-color-index", "0"
+        ].concat(sourceArguments));
+    }
+
+    function syncApplicationThemes(sourceArguments, requestedMode,
+            requestedScheme) {
+        pendingApplicationSourceArguments = sourceArguments.slice();
+        pendingApplicationMode = requestedMode;
+        pendingApplicationScheme = requestedScheme;
+        syncingApplications = true;
+
+        if (applicationMatugenProcess.running)
+            applicationMatugenProcess.running = false;
+        else
+            startPendingApplicationMatugen();
     }
 
     function setWallpaper(path, generateTheme = true) {
@@ -405,6 +478,8 @@ Singleton {
 
         property int exitCode: 0
         property string requestedMode: ""
+        property string requestedScheme: ""
+        property var sourceArguments: []
 
         stdout: StdioCollector {
             onStreamFinished: {
@@ -422,9 +497,15 @@ Singleton {
         onExited: (exitCode, exitStatus) => {
             matugenProcess.exitCode = exitCode;
             if (exitCode === 0 && root.generatedOutput
-                    && matugenProcess.requestedMode === root.mode)
+                    && matugenProcess.requestedMode === root.mode
+                    && matugenProcess.requestedScheme === root.scheme) {
                 root.applyMatugen(root.generatedOutput);
-            else if (exitCode !== 0
+                root.syncApplicationThemes(
+                    matugenProcess.sourceArguments,
+                    matugenProcess.requestedMode,
+                    matugenProcess.requestedScheme
+                );
+            } else if (exitCode !== 0
                     && root.pendingSourceArguments === null)
                 console.warn("Theme: matugen exited with", exitCode);
 
@@ -432,6 +513,46 @@ Singleton {
                 Qt.callLater(root.startPendingMatugen);
             else
                 root.generating = false;
+        }
+    }
+
+    Process {
+        id: applicationMatugenProcess
+
+        property string requestedMode: ""
+        property string requestedScheme: ""
+
+        stdout: StdioCollector {}
+
+        stderr: StdioCollector {
+            onStreamFinished: {
+                root.applicationMatugenDiagnostics = text.trim();
+            }
+        }
+
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                root.applicationMatugenError =
+                    root.applicationMatugenDiagnostics
+                        || "matugen exited with " + exitCode;
+            } else {
+                /*
+                 * 某些 post-hook（例如 fcitx5 -r）会把普通运行信息
+                 * 写入 stderr，成功退出时不能把它误判为同步失败。
+                 */
+                root.applicationMatugenError = "";
+            }
+
+            if (exitCode !== 0
+                    && root.pendingApplicationSourceArguments === null) {
+                console.warn("Theme: cannot update application themes:",
+                    root.applicationMatugenError);
+            }
+
+            if (root.pendingApplicationSourceArguments !== null)
+                Qt.callLater(root.startPendingApplicationMatugen);
+            else
+                root.syncingApplications = false;
         }
     }
 
@@ -514,6 +635,30 @@ Singleton {
         }
     }
 
+    FileView {
+        id: applicationMatugenConfigFile
+
+        path: root.applicationMatugenConfigPath
+        watchChanges: true
+        printErrors: false
+
+        onFileChanged: reload()
+        onLoaded: {
+            root.applicationMatugenConfigChecked = true;
+            root.applicationMatugenConfigAvailable = true;
+            root.applicationMatugenError = "";
+            Qt.callLater(root.startPendingApplicationMatugen);
+        }
+        onLoadFailed: {
+            root.applicationMatugenConfigChecked = true;
+            root.applicationMatugenConfigAvailable = false;
+            root.pendingApplicationSourceArguments = null;
+            root.pendingApplicationMode = "";
+            root.pendingApplicationScheme = "";
+            root.syncingApplications = false;
+        }
+    }
+
     IpcHandler {
         target: "theme"
 
@@ -543,7 +688,14 @@ Singleton {
                 scheme: root.scheme,
                 wallpaperPath: root.wallpaperPath,
                 sourceColor: root.sourceColor,
-                generating: root.generating
+                generating: root.generating,
+                syncingApplications: root.syncingApplications,
+                applicationMatugenConfig:
+                    root.applicationMatugenConfigPath,
+                applicationMatugenConfigAvailable:
+                    root.applicationMatugenConfigAvailable,
+                applicationMatugenError:
+                    root.applicationMatugenError
             });
         }
     }
