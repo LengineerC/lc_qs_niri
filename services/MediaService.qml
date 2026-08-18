@@ -18,7 +18,7 @@ Singleton {
     readonly property list<MprisPlayer> realPlayers:
         Mpris.players.values.filter(player => root.isRealPlayer(player))
     readonly property list<MprisPlayer> players:
-        filterDuplicatePlayers(realPlayers)
+        sortPlayers(filterDuplicatePlayers(realPlayers))
 
     property MprisPlayer activePlayer: null
 
@@ -79,6 +79,37 @@ Singleton {
         return true;
     }
 
+    function playerSortRank(player) {
+        if (!player)
+            return 4;
+        if (player.playbackState === MprisPlaybackState.Playing)
+            return 0;
+        if (player.playbackState === MprisPlaybackState.Paused
+                && hasMediaMetadata(player))
+            return 1;
+        if (hasMediaMetadata(player))
+            return 2;
+        if (hasPlaybackCapability(player))
+            return 3;
+        return 4;
+    }
+
+    function sortPlayers(sourcePlayers) {
+        // Keep the original MPRIS order for players with the same state. This
+        // keeps multiple simultaneously-playing cards stable while still
+        // moving every playing player ahead of paused or stopped players.
+        return sourcePlayers.map((player, index) => ({
+            "player": player,
+            "sourceIndex": index,
+            "rank": playerSortRank(player)
+        })).sort((left, right) => {
+            const rankDifference = left.rank - right.rank;
+            return rankDifference !== 0
+                ? rankDifference
+                : left.sourceIndex - right.sourceIndex;
+        }).map(entry => entry.player);
+    }
+
     function filterDuplicatePlayers(sourcePlayers) {
         const filtered = [];
         const used = new Set();
@@ -106,12 +137,25 @@ Singleton {
                     group.push(candidateIndex);
             }
 
-            let selectedIndex = group.find(candidateIndex => {
-                const player = sourcePlayers[candidateIndex];
-                return String(player.trackArtUrl || "").length > 0;
-            });
-            if (selectedIndex === undefined)
-                selectedIndex = group[0];
+            // Duplicate MPRIS endpoints can briefly disagree about playback
+            // state. Prefer the endpoint that is actually playing, then use
+            // artwork as the tie-breaker so an inactive proxy cannot hide it.
+            let selectedIndex = group[0];
+            for (const candidateIndex of group.slice(1)) {
+                const selected = sourcePlayers[selectedIndex];
+                const candidate = sourcePlayers[candidateIndex];
+                const selectedRank = playerSortRank(selected);
+                const candidateRank = playerSortRank(candidate);
+                const selectedHasArt = String(
+                    selected.trackArtUrl || "").length > 0;
+                const candidateHasArt = String(
+                    candidate.trackArtUrl || "").length > 0;
+
+                if (candidateRank < selectedRank
+                        || (candidateRank === selectedRank
+                            && candidateHasArt && !selectedHasArt))
+                    selectedIndex = candidateIndex;
+            }
 
             filtered.push(sourcePlayers[selectedIndex]);
             for (const usedIndex of group)
