@@ -10,6 +10,11 @@ MouseArea {
 
     signal activated
 
+    readonly property int percentageTextWidth:
+        Math.ceil(percentageWidthMeasure.implicitWidth)
+    readonly property int temperatureTextWidth:
+        Math.ceil(temperatureWidthMeasure.implicitWidth)
+
     readonly property var shownResources: {
         const resources = [];
         if (ShellSettings.showCpuUsage) {
@@ -52,6 +57,33 @@ MouseArea {
     implicitWidth: performanceRow.implicitWidth + Appearance.px(18)
     implicitHeight: Appearance.barHeight
     onClicked: activated()
+
+    function textWidthFor(resourceKey) {
+        return resourceKey === "temperature"
+            ? temperatureTextWidth : percentageTextWidth;
+    }
+
+    Text {
+        id: percentageWidthMeasure
+
+        visible: false
+        text: "888%"
+        font {
+            family: Appearance.fontFamily
+            pixelSize: Appearance.smallFontSize
+        }
+    }
+
+    Text {
+        id: temperatureWidthMeasure
+
+        visible: false
+        text: "888°C"
+        font {
+            family: Appearance.fontFamily
+            pixelSize: Appearance.smallFontSize
+        }
+    }
 
     Rectangle {
         anchors {
@@ -101,9 +133,16 @@ MouseArea {
                 }
 
                 Text {
+                    readonly property int reservedWidth:
+                        root.textWidthFor(parent.modelData.key)
+
+                    Layout.minimumWidth: reservedWidth
+                    Layout.preferredWidth: reservedWidth
+                    Layout.maximumWidth: reservedWidth
                     text: parent.modelData.text
                     color: parent.modelData.warning
                         ? Theme.palette.m3error : Appearance.layer0Text
+                    horizontalAlignment: Text.AlignLeft
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Appearance.smallFontSize
