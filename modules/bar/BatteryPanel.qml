@@ -109,14 +109,20 @@ Item {
             border.width: 1
             border.color: Appearance.outline
 
-            RowLayout {
+            Item {
                 anchors {
                     fill: parent
-                    margins: Appearance.px(14)
+                    leftMargin: Appearance.px(33)
+                    rightMargin: Appearance.px(33)
                 }
-                spacing: Appearance.px(14)
 
                 Text {
+                    id: mainBatteryIcon
+
+                    anchors {
+                        left: parent.left
+                        verticalCenter: parent.verticalCenter
+                    }
                     text: BatteryService.powerIcon()
                     color: BatteryService.low
                         ? Theme.palette.m3error : Appearance.primary
@@ -126,11 +132,30 @@ Item {
                     }
                 }
 
-                ColumnLayout {
-                    Layout.fillWidth: true
+                PanelText {
+                    id: profileLabel
+
+                    anchors {
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+                    }
+                    text: BatteryService.profileName
+                    color: Appearance.primary
+                    font.weight: Font.DemiBold
+                }
+
+                Column {
+                    anchors {
+                        left: mainBatteryIcon.right
+                        right: profileLabel.left
+                        leftMargin: Appearance.px(18)
+                        rightMargin: Appearance.px(18)
+                        verticalCenter: parent.verticalCenter
+                    }
                     spacing: 0
 
                     PanelText {
+                        width: parent.width
                         text: BatteryService.hasBattery
                             ? BatteryService.percent + "%"
                             : I18n.tr("externalPower")
@@ -140,9 +165,11 @@ Item {
                             pixelSize: Appearance.px(26)
                             weight: Font.Bold
                         }
+                        elide: Text.ElideRight
                     }
 
                     PanelText {
+                        width: parent.width
                         text: {
                             const remaining = BatteryService.formatTime();
                             if (!remaining)
@@ -152,20 +179,17 @@ Item {
                         }
                         color: Appearance.subtext
                         font.pixelSize: Appearance.smallFontSize
+                        elide: Text.ElideRight
                     }
 
                     PanelText {
                         visible: !BatteryService.hasBattery
+                        width: parent.width
                         text: I18n.tr("noBatteryDetected")
                         color: Appearance.subtext
                         font.pixelSize: Appearance.smallFontSize
+                        elide: Text.ElideRight
                     }
-                }
-
-                PanelText {
-                    text: BatteryService.profileName
-                    color: Appearance.primary
-                    font.weight: Font.DemiBold
                 }
             }
         }
