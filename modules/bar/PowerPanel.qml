@@ -52,6 +52,9 @@ Item {
         required property string icon
         required property string label
         property bool destructive: false
+        property real holdProgress: 0
+        property bool holdTriggered: false
+        readonly property int holdDuration: 300
         readonly property bool hovered: actionHover.hovered
 
         Layout.fillWidth: true
@@ -60,16 +63,54 @@ Item {
         // Keep the animated surface opaque. Animating from layer1 to an
         // alpha-only error color exposed the popup background mid-transition
         // and looked like a one-frame hover flash.
-        color: hovered
-            ? destructive
-                ? Appearance.mix(Appearance.layer1,
-                    Theme.palette.m3error, 0.14)
-                : Appearance.layer1Hover
-            : Appearance.layer1
+        color: hovered ? destructive ? Appearance.mix(Appearance.layer1, Theme.palette.m3error, 0.14) : Appearance.layer1Hover : Appearance.layer1
         border.width: 1
-        border.color: hovered && destructive
-            ? Theme.palette.m3error : Appearance.outline
-        scale: actionTap.pressed ? 0.985 : 1
+        border.color: hovered && destructive ? Theme.palette.m3error : Appearance.outline
+        scale: actionPressArea.pressed ? 0.985 : 1
+
+        function beginHold() {
+            holdReset.stop();
+            holdAnimation.stop();
+            holdProgress = 0;
+            holdTriggered = false;
+            holdAnimation.restart();
+        }
+
+        function resetHold() {
+            holdAnimation.stop();
+            holdReset.stop();
+            holdProgress = 0;
+            holdTriggered = false;
+        }
+
+        function cancelHold() {
+            if (holdTriggered)
+                return;
+            holdAnimation.stop();
+            if (holdProgress > 0)
+                holdReset.restart();
+        }
+
+        Item {
+            anchors {
+                fill: parent
+                margins: 1
+            }
+            clip: true
+
+            Item {
+                width: parent.width * actionButton.holdProgress
+                height: parent.height
+                clip: true
+
+                Rectangle {
+                    width: actionButton.width - 2
+                    height: parent.height
+                    radius: Math.max(0, actionButton.radius - 1)
+                    color: actionButton.destructive ? Appearance.mix(Appearance.layer1, Theme.palette.m3error, 0.32) : Appearance.primaryContainer
+                }
+            }
+        }
 
         RowLayout {
             anchors {
@@ -83,17 +124,12 @@ Item {
                 implicitWidth: Appearance.px(34)
                 implicitHeight: Appearance.px(34)
                 radius: Appearance.px(10)
-                color: actionButton.destructive
-                    ? Appearance.withAlpha(
-                        Theme.palette.m3error, 0.14)
-                    : Appearance.primaryContainer
+                color: actionButton.destructive ? Appearance.withAlpha(Theme.palette.m3error, 0.14) : Appearance.primaryContainer
 
                 Text {
                     anchors.centerIn: parent
                     text: actionButton.icon
-                    color: actionButton.destructive
-                        ? Theme.palette.m3error
-                        : Appearance.primaryContainerText
+                    color: actionButton.destructive ? Theme.palette.m3error : Appearance.primaryContainerText
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(17)
@@ -104,8 +140,7 @@ Item {
             PanelText {
                 Layout.fillWidth: true
                 text: actionButton.label
-                color: actionButton.destructive
-                    ? Theme.palette.m3error : Appearance.layer0Text
+                color: actionButton.destructive ? Theme.palette.m3error : Appearance.layer0Text
                 font.weight: Font.DemiBold
             }
 
@@ -119,7 +154,7 @@ Item {
             }
         }
 
-        // Keep hover and click tracking independent. MouseArea.containsMouse
+        // Keep hover and press tracking independent. MouseArea.containsMouse
         // can briefly flip while an animated delegate is being re-evaluated,
         // which was visible as a flash on the destructive power-off action.
         HoverHandler {
@@ -127,13 +162,58 @@ Item {
             cursorShape: Qt.PointingHandCursor
         }
 
-        TapHandler {
-            id: actionTap
-            onTapped: root.perform(actionButton.action)
+        MouseArea {
+            id: actionPressArea
+
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton
+            preventStealing: true
+            cursorShape: Qt.PointingHandCursor
+
+            onPressed: actionButton.beginHold()
+            onReleased: actionButton.cancelHold()
+            onCanceled: actionButton.cancelHold()
+            onPositionChanged: mouse => {
+                if (pressed && (mouse.x < 0 || mouse.x > width || mouse.y < 0 || mouse.y > height))
+                    actionButton.cancelHold();
+            }
+        }
+
+        NumberAnimation {
+            id: holdAnimation
+
+            target: actionButton
+            property: "holdProgress"
+            from: 0
+            to: 1
+            duration: actionButton.holdDuration
+            easing.type: Easing.Linear
+            onFinished: {
+                actionButton.holdTriggered = true;
+                root.perform(actionButton.action);
+                actionButton.resetHold();
+            }
+        }
+
+        NumberAnimation {
+            id: holdReset
+
+            target: actionButton
+            property: "holdProgress"
+            to: 0
+            duration: Appearance.fastDuration
+            easing.type: Easing.OutCubic
+        }
+
+        onVisibleChanged: {
+            if (!visible)
+                resetHold();
         }
 
         Behavior on color {
-            ColorAnimation { duration: Appearance.fastDuration }
+            ColorAnimation {
+                duration: Appearance.fastDuration
+            }
         }
         Behavior on scale {
             NumberAnimation {
@@ -194,9 +274,7 @@ Item {
                     }
 
                     PanelText {
-                        visible: UserService.loginName
-                            && UserService.loginName
-                                !== UserService.displayName
+                        visible: UserService.loginName && UserService.loginName !== UserService.displayName
                         text: "@" + UserService.loginName
                         color: Appearance.subtext
                         font.pixelSize: Appearance.smallFontSize
@@ -215,8 +293,7 @@ Item {
                         }
 
                         PanelText {
-                            text: I18n.tr("systemUptime") + " · "
-                                + UserService.formatUptime()
+                            text: I18n.tr("systemUptime") + " · " + UserService.formatUptime()
                             color: Appearance.subtext
                             font.pixelSize: Appearance.smallFontSize
                         }
