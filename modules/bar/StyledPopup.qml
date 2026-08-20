@@ -13,7 +13,8 @@ Item {
 
     readonly property Item popupMaskItem: root
     readonly property bool pointerInside: popupHover.hovered
-        || page === "tray" && trayPanel.menuContainsMouse
+        || page === "tray"
+            && (dedicatedPanelLoader.item?.menuContainsMouse ?? false)
     readonly property int moveDuration: ShellSettings.animationDuration
     readonly property var moveCurve: ShellSettings.popupBezierCurve
     readonly property real targetX: {
@@ -47,6 +48,22 @@ Item {
     property string popupTitle: ""
     property var popupRows: []
     property int popupBaseWidth: 340
+    readonly property Component currentPanelComponent: {
+        switch (page) {
+        case "system": return systemPanelComponent;
+        case "launcher": return launcherPanelComponent;
+        case "resources": return resourcePanelComponent;
+        case "battery": return batteryPanelComponent;
+        case "power": return powerPanelComponent;
+        case "weather": return weatherPanelComponent;
+        case "calendar": return calendarPanelComponent;
+        case "clipboard": return clipboardPanelComponent;
+        case "notifications": return notificationPanelComponent;
+        case "tray": return trayPanelComponent;
+        case "media": return mediaPanelComponent;
+        default: return null;
+        }
+    }
     readonly property int popupWidth: Appearance.px(popupBaseWidth)
     readonly property int popupHeight: {
         if (page === "launcher") {
@@ -69,13 +86,13 @@ Item {
                         - Appearance.barHeight - Appearance.px(8)));
         }
         if (page === "battery")
-            return batteryPanel.implicitHeight + 16;
+            return loadedPanelHeight(390) + 16;
         if (page === "power")
-            return powerPanel.implicitHeight + 16;
+            return loadedPanelHeight(480) + 16;
         if (page === "weather")
-            return weatherPanel.implicitHeight + 16;
+            return loadedPanelHeight(430) + 16;
         if (page === "calendar")
-            return calendarPanel.implicitHeight + 16;
+            return loadedPanelHeight(440) + 16;
         if (page === "clipboard") {
             return Math.min(Appearance.px(620),
                 Math.max(Appearance.px(390),
@@ -89,14 +106,14 @@ Item {
                         - Appearance.barHeight - Appearance.px(8)));
         }
         if (page === "tray")
-            return trayPanel.implicitHeight + 16;
+            return loadedPanelHeight(160) + 16;
         if (page === "media") {
             const availableHeight =
                 (parent?.height ?? Appearance.px(760))
                     - Appearance.barHeight - Appearance.px(8);
             return Math.min(availableHeight,
                 Math.max(Appearance.px(260),
-                    mediaPanel.implicitHeight + Appearance.px(16)));
+                    loadedPanelHeight(150) + Appearance.px(16)));
         }
         return popupLayout.implicitHeight + Appearance.px(36);
     }
@@ -223,6 +240,107 @@ Item {
         }
     }
 
+    function loadedPanelHeight(fallbackHeight) {
+        return dedicatedPanelLoader.item?.implicitHeight
+            ?? Appearance.px(fallbackHeight);
+    }
+
+    Component {
+        id: systemPanelComponent
+
+        SystemPanel {
+            active: root.shown
+            outputName: root.outputName
+            onCloseRequested: root.close()
+        }
+    }
+
+    Component {
+        id: launcherPanelComponent
+
+        LauncherPanel {
+            active: root.shown
+            onCloseRequested: root.close()
+        }
+    }
+
+    Component {
+        id: resourcePanelComponent
+
+        ResourcePanel {
+            active: root.shown
+            onCloseRequested: root.close()
+        }
+    }
+
+    Component {
+        id: batteryPanelComponent
+
+        BatteryPanel {
+            onCloseRequested: root.close()
+        }
+    }
+
+    Component {
+        id: powerPanelComponent
+
+        PowerPanel {
+            onCloseRequested: root.close()
+        }
+    }
+
+    Component {
+        id: weatherPanelComponent
+
+        WeatherPanel {
+            active: root.shown
+            onCloseRequested: root.close()
+        }
+    }
+
+    Component {
+        id: calendarPanelComponent
+
+        CalendarPanel {
+            onCloseRequested: root.close()
+        }
+    }
+
+    Component {
+        id: clipboardPanelComponent
+
+        ClipboardPanel {
+            onCloseRequested: root.close()
+        }
+    }
+
+    Component {
+        id: notificationPanelComponent
+
+        NotificationPanel {
+            active: root.shown
+            onCloseRequested: root.close()
+        }
+    }
+
+    Component {
+        id: trayPanelComponent
+
+        TrayPanel {
+            active: root.shown
+            onCloseRequested: root.close()
+        }
+    }
+
+    Component {
+        id: mediaPanelComponent
+
+        MediaPanel {
+            visualizerActive: root.revealProgress > 0
+            onCloseRequested: root.close()
+        }
+    }
+
     function showFor(target, pageName) {
         if (shown && anchorItem === target && page === pageName) {
             close();
@@ -317,14 +435,7 @@ Item {
         ColumnLayout {
             id: popupLayout
 
-            visible: root.page !== "system" && root.page !== "battery"
-                && root.page !== "power"
-                && root.page !== "weather"
-                && root.page !== "calendar" && root.page !== "clipboard"
-                && root.page !== "notifications"
-                && root.page !== "tray"
-                && root.page !== "media" && root.page !== "launcher"
-                && root.page !== "resources"
+            visible: root.currentPanelComponent === null
             x: Appearance.px(21)
             y: Appearance.px(18)
             width: parent.width - Appearance.px(42)
@@ -382,124 +493,17 @@ Item {
 
         }
 
-        SystemPanel {
-            visible: root.page === "system"
-            active: visible && root.shown
-            outputName: root.outputName
+        Loader {
+            id: dedicatedPanelLoader
+
+            active: root.currentPanelComponent !== null
+                && (root.shown || root.revealProgress > 0)
+            asynchronous: false
+            sourceComponent: root.currentPanelComponent
             anchors {
                 fill: innerSurface
                 margins: 1
             }
-            onCloseRequested: root.close()
-        }
-
-        LauncherPanel {
-            visible: root.page === "launcher"
-            active: visible && root.shown
-            anchors {
-                fill: innerSurface
-                margins: 1
-            }
-            onCloseRequested: root.close()
-        }
-
-        ResourcePanel {
-            visible: root.page === "resources"
-            active: visible && root.shown
-            anchors {
-                fill: innerSurface
-                margins: 1
-            }
-            onCloseRequested: root.close()
-        }
-
-        BatteryPanel {
-            id: batteryPanel
-
-            visible: root.page === "battery"
-            anchors {
-                fill: innerSurface
-                margins: 1
-            }
-            onCloseRequested: root.close()
-        }
-
-        PowerPanel {
-            id: powerPanel
-
-            visible: root.page === "power"
-            anchors {
-                fill: innerSurface
-                margins: 1
-            }
-            onCloseRequested: root.close()
-        }
-
-        WeatherPanel {
-            id: weatherPanel
-
-            visible: root.page === "weather"
-            active: visible && root.shown
-            anchors {
-                fill: innerSurface
-                margins: 1
-            }
-            onCloseRequested: root.close()
-        }
-
-        CalendarPanel {
-            id: calendarPanel
-
-            visible: root.page === "calendar"
-            anchors {
-                fill: innerSurface
-                margins: 1
-            }
-            onCloseRequested: root.close()
-        }
-
-        ClipboardPanel {
-            visible: root.page === "clipboard"
-            anchors {
-                fill: innerSurface
-                margins: 1
-            }
-            onCloseRequested: root.close()
-        }
-
-        NotificationPanel {
-            visible: root.page === "notifications"
-            active: visible && root.shown
-            anchors {
-                fill: innerSurface
-                margins: 1
-            }
-            onCloseRequested: root.close()
-        }
-
-        TrayPanel {
-            id: trayPanel
-
-            visible: root.page === "tray"
-            active: root.shown && root.page === "tray"
-            anchors {
-                fill: innerSurface
-                margins: 1
-            }
-            onCloseRequested: root.close()
-        }
-
-        MediaPanel {
-            id: mediaPanel
-
-            visible: root.page === "media"
-            visualizerActive: root.page === "media"
-                && root.revealProgress > 0
-            anchors {
-                fill: innerSurface
-                margins: 1
-            }
-            onCloseRequested: root.close()
         }
 
     }

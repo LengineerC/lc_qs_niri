@@ -22,6 +22,15 @@ ApplicationWindow {
     minimumWidth: Appearance.px(760)
     minimumHeight: Appearance.px(620)
 
+    readonly property Component currentPageComponent: {
+        switch (currentPage) {
+        case 1: return systemPageComponent;
+        case 2: return stylePageComponent;
+        case 3: return displayPageComponent;
+        default: return settingsPageComponent;
+        }
+    }
+
     function openWindow() {
         show();
         raise();
@@ -42,6 +51,46 @@ ApplicationWindow {
     onClosing: event => {
         event.accepted = false;
         closeWindow();
+    }
+
+    Component {
+        id: settingsPageComponent
+
+        SettingsContent {
+            anchors.fill: parent
+            onCloseRequested: root.closeWindow()
+        }
+    }
+
+    Component {
+        id: systemPageComponent
+
+        SystemPanel {
+            embedded: true
+            anchors {
+                fill: parent
+                margins: Appearance.px(8)
+            }
+            onCloseRequested: root.closeWindow()
+        }
+    }
+
+    Component {
+        id: stylePageComponent
+
+        StyleContent {
+            anchors.fill: parent
+            onCloseRequested: root.closeWindow()
+        }
+    }
+
+    Component {
+        id: displayPageComponent
+
+        DisplayContent {
+            anchors.fill: parent
+            onCloseRequested: root.closeWindow()
+        }
     }
 
     Connections {
@@ -407,32 +456,11 @@ ApplicationWindow {
                 border.color: Appearance.layer0Border
                 clip: true
 
-                SettingsContent {
-                    visible: root.currentPage === 0
+                Loader {
                     anchors.fill: parent
-                    onCloseRequested: root.closeWindow()
-                }
-
-                SystemPanel {
-                    visible: root.currentPage === 1
-                    embedded: true
-                    anchors {
-                        fill: parent
-                        margins: Appearance.px(8)
-                    }
-                    onCloseRequested: root.closeWindow()
-                }
-
-                StyleContent {
-                    visible: root.currentPage === 2
-                    anchors.fill: parent
-                    onCloseRequested: root.closeWindow()
-                }
-
-                DisplayContent {
-                    visible: root.currentPage === 3
-                    anchors.fill: parent
-                    onCloseRequested: root.closeWindow()
+                    active: root.visible
+                    asynchronous: false
+                    sourceComponent: root.currentPageComponent
                 }
             }
         }

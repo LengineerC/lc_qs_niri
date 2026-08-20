@@ -86,11 +86,10 @@ Scope {
                 finishTransition();
                 return;
             }
+            if (effectActive)
+                return;
 
             effectActive = true;
-            currentTexture.scheduleUpdate();
-            nextTexture.scheduleUpdate();
-            transitionDelay.restart();
         }
 
         function changeWallpaper(path) {
@@ -170,39 +169,67 @@ Scope {
                 }
             }
 
-            ShaderEffectSource {
-                id: currentTexture
-                sourceItem: currentWallpaper
-                hideSource: wallpaperWindow.effectActive
-                live: false
-                recursive: false
-            }
+            Loader {
+                id: transitionLayerLoader
 
-            ShaderEffectSource {
-                id: nextTexture
-                sourceItem: nextWallpaper
-                hideSource: true
-                live: false
-                recursive: false
-            }
-
-            ShaderEffect {
                 anchors.fill: parent
-                visible: wallpaperWindow.effectActive
+                active: wallpaperWindow.effectActive
 
-                // Both textures are loaded before the compiled effect is shown.
-                property variant source1: currentTexture
-                property variant source2: nextTexture
-                property real progress: wallpaperWindow.transitionProgress
-                property real transitionKind: wallpaperWindow.transitionKind
-                property real aspectRatio: width / Math.max(1, height)
-                property real direction: wallpaperWindow.wipeDirection
-                property real stripeCount: wallpaperWindow.stripeCount
-                property real stripeAngle: wallpaperWindow.stripeAngle
-                property vector2d centerPoint: wallpaperWindow.effectCenter
+                sourceComponent: Component {
+                    Item {
+                        function captureSources() {
+                            currentTexture.scheduleUpdate();
+                            nextTexture.scheduleUpdate();
+                        }
 
-                fragmentShader: Qt.resolvedUrl(
-                    "../../shaders/wallpaper_transition.frag.qsb")
+                        ShaderEffectSource {
+                            id: currentTexture
+                            sourceItem: currentWallpaper
+                            hideSource: true
+                            live: false
+                            recursive: false
+                        }
+
+                        ShaderEffectSource {
+                            id: nextTexture
+                            sourceItem: nextWallpaper
+                            hideSource: true
+                            live: false
+                            recursive: false
+                        }
+
+                        ShaderEffect {
+                            anchors.fill: parent
+
+                            // Both textures are loaded before the compiled
+                            // transition effect is shown.
+                            property variant source1: currentTexture
+                            property variant source2: nextTexture
+                            property real progress:
+                                wallpaperWindow.transitionProgress
+                            property real transitionKind:
+                                wallpaperWindow.transitionKind
+                            property real aspectRatio:
+                                width / Math.max(1, height)
+                            property real direction:
+                                wallpaperWindow.wipeDirection
+                            property real stripeCount:
+                                wallpaperWindow.stripeCount
+                            property real stripeAngle:
+                                wallpaperWindow.stripeAngle
+                            property vector2d centerPoint:
+                                wallpaperWindow.effectCenter
+
+                            fragmentShader: Qt.resolvedUrl(
+                                "../../shaders/wallpaper_transition.frag.qsb")
+                        }
+                    }
+                }
+
+                onLoaded: {
+                    item.captureSources();
+                    transitionDelay.restart();
+                }
             }
         }
 
