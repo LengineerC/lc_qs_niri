@@ -606,20 +606,25 @@ Singleton {
 
         const notification = entry.notification;
         const liveActions = notification?.actions ?? [];
+        const primaryAction = liveActions.find(action =>
+            action.identifier === "default")
+            ?? liveActions[0]
+            ?? null;
+        let activated = false;
 
-        const defaultAction = liveActions.find(action =>
-            action.identifier === "default");
-
-        if (defaultAction) {
+        if (primaryAction) {
             try {
-                defaultAction.invoke();
+                primaryAction.invoke();
+                activated = true;
             } catch (error) {
                 console.warn(
                     "NotificationService: action invocation failed:",
                     error
                 );
             }
-        } else {
+        }
+
+        if (!activated) {
             console.debug(
                 "NotificationService: notification is no longer actionable:",
                 entry.notificationId
