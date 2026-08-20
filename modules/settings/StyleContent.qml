@@ -32,10 +32,7 @@ Item {
         implicitWidth: buttonRow.implicitWidth + Appearance.px(20)
         implicitHeight: Appearance.px(34)
         radius: Appearance.px(10)
-        color: selected
-            ? Appearance.primaryContainer
-            : buttonArea.containsMouse
-                ? Appearance.layer1Active : Appearance.layer1
+        color: selected ? Appearance.primaryContainer : buttonArea.containsMouse ? Appearance.layer1Active : Appearance.layer1
         border.width: selected ? 1 : 0
         border.color: Appearance.primary
 
@@ -46,8 +43,7 @@ Item {
 
             Text {
                 text: button.icon
-                color: button.selected
-                    ? Appearance.primaryContainerText : Appearance.primary
+                color: button.selected ? Appearance.primaryContainerText : Appearance.primary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(15)
@@ -56,9 +52,7 @@ Item {
 
             PanelText {
                 text: button.label
-                color: button.selected
-                    ? Appearance.primaryContainerText
-                    : Appearance.layer1Text
+                color: button.selected ? Appearance.primaryContainerText : Appearance.layer1Text
                 font.pixelSize: Appearance.smallFontSize
             }
         }
@@ -82,19 +76,14 @@ Item {
         implicitWidth: modeLabel.implicitWidth + Appearance.px(20)
         implicitHeight: Appearance.px(34)
         radius: Appearance.px(9)
-        color: selected
-            ? Appearance.primaryContainer
-            : modeButtonArea.containsMouse
-                ? Appearance.layer1Active : Appearance.layer1
+        color: selected ? Appearance.primaryContainer : modeButtonArea.containsMouse ? Appearance.layer1Active : Appearance.layer1
 
         PanelText {
             id: modeLabel
 
             anchors.centerIn: parent
             text: button.label
-            color: button.selected
-                ? Appearance.primaryContainerText
-                : Appearance.layer1Text
+            color: button.selected ? Appearance.primaryContainerText : Appearance.layer1Text
             font {
                 pixelSize: Appearance.smallFontSize
                 weight: button.selected ? Font.DemiBold : Font.Normal
@@ -111,7 +100,9 @@ Item {
         }
 
         Behavior on color {
-            ColorAnimation { duration: Appearance.fastDuration }
+            ColorAnimation {
+                duration: Appearance.fastDuration
+            }
         }
     }
 
@@ -127,22 +118,17 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: Appearance.fullRadius
-            color: control.checked
-                ? Appearance.primary : Appearance.layer1Active
+            color: control.checked ? Appearance.primary : Appearance.layer1Active
             border.width: control.checked ? 0 : 1
             border.color: Appearance.subtext
 
             Rectangle {
-                width: control.checked
-                    ? Appearance.px(19) : Appearance.px(15)
+                width: control.checked ? Appearance.px(19) : Appearance.px(15)
                 height: width
                 radius: Appearance.fullRadius
                 anchors.verticalCenter: parent.verticalCenter
-                x: control.checked
-                    ? parent.width - width - Appearance.px(3)
-                    : Appearance.px(5)
-                color: control.checked
-                    ? Theme.palette.m3onPrimary : Appearance.subtext
+                x: control.checked ? parent.width - width - Appearance.px(3) : Appearance.px(5)
+                color: control.checked ? Theme.palette.m3onPrimary : Appearance.subtext
 
                 Behavior on x {
                     NumberAnimation {
@@ -161,56 +147,126 @@ Item {
     }
 
     readonly property var schemes: [
-        { value: "scheme-content", key: "schemeContent" },
-        { value: "scheme-expressive", key: "schemeExpressive" },
-        { value: "scheme-fidelity", key: "schemeFidelity" },
-        { value: "scheme-fruit-salad", key: "schemeFruitSalad" },
-        { value: "scheme-monochrome", key: "schemeMonochrome" },
-        { value: "scheme-neutral", key: "schemeNeutral" },
-        { value: "scheme-rainbow", key: "schemeRainbow" },
-        { value: "scheme-tonal-spot", key: "schemeTonalSpot" },
-        { value: "scheme-vibrant", key: "schemeVibrant" }
+        {
+            value: "scheme-content",
+            key: "schemeContent"
+        },
+        {
+            value: "scheme-expressive",
+            key: "schemeExpressive"
+        },
+        {
+            value: "scheme-fidelity",
+            key: "schemeFidelity"
+        },
+        {
+            value: "scheme-fruit-salad",
+            key: "schemeFruitSalad"
+        },
+        {
+            value: "scheme-monochrome",
+            key: "schemeMonochrome"
+        },
+        {
+            value: "scheme-neutral",
+            key: "schemeNeutral"
+        },
+        {
+            value: "scheme-rainbow",
+            key: "schemeRainbow"
+        },
+        {
+            value: "scheme-tonal-spot",
+            key: "schemeTonalSpot"
+        },
+        {
+            value: "scheme-vibrant",
+            key: "schemeVibrant"
+        }
     ]
     readonly property var wallpaperModes: [
-        { value: "Stretch", key: "wallpaperStretch" },
-        { value: "PreserveAspectFit", key: "wallpaperFit" },
-        { value: "PreserveAspectCrop", key: "wallpaperFill" },
-        { value: "Tile", key: "wallpaperTile" },
-        { value: "TileVertically", key: "wallpaperVerticalTile" },
-        { value: "TileHorizontally", key: "wallpaperHorizontalTile" },
-        { value: "Pad", key: "wallpaperCover" }
+        {
+            value: "Stretch",
+            key: "wallpaperStretch"
+        },
+        {
+            value: "PreserveAspectFit",
+            key: "wallpaperFit"
+        },
+        {
+            value: "PreserveAspectCrop",
+            key: "wallpaperFill"
+        },
+        {
+            value: "Tile",
+            key: "wallpaperTile"
+        },
+        {
+            value: "TileVertically",
+            key: "wallpaperVerticalTile"
+        },
+        {
+            value: "TileHorizontally",
+            key: "wallpaperHorizontalTile"
+        },
+        {
+            value: "Pad",
+            key: "wallpaperCover"
+        }
     ]
     readonly property var wallpaperTransitions: [
-        { value: "none", key: "wallpaperTransitionNone" },
-        { value: "fade", key: "wallpaperTransitionFade" },
-        { value: "wipe", key: "wallpaperTransitionWipe" },
-        { value: "disc", key: "wallpaperTransitionDisc" },
-        { value: "stripes", key: "wallpaperTransitionStripes" },
-        { value: "iris", key: "wallpaperTransitionIris" },
-        { value: "pixelate", key: "wallpaperTransitionPixelate" },
-        { value: "portal", key: "wallpaperTransitionPortal" },
-        { value: "random", key: "random" }
+        {
+            value: "none",
+            key: "wallpaperTransitionNone"
+        },
+        {
+            value: "fade",
+            key: "wallpaperTransitionFade"
+        },
+        {
+            value: "wipe",
+            key: "wallpaperTransitionWipe"
+        },
+        {
+            value: "disc",
+            key: "wallpaperTransitionDisc"
+        },
+        {
+            value: "stripes",
+            key: "wallpaperTransitionStripes"
+        },
+        {
+            value: "iris",
+            key: "wallpaperTransitionIris"
+        },
+        {
+            value: "pixelate",
+            key: "wallpaperTransitionPixelate"
+        },
+        {
+            value: "portal",
+            key: "wallpaperTransitionPortal"
+        },
+        {
+            value: "random",
+            key: "random"
+        }
     ]
 
     FileDialog {
         id: wallpaperFileDialog
         title: I18n.tr("chooseWallpaper")
-        currentFolder: WallpaperService.fileUrl(
-            WallpaperService.directory)
+        currentFolder: WallpaperService.fileUrl(WallpaperService.directory)
         fileMode: FileDialog.OpenFile
-        nameFilters: [
-            "Images (*.jpg *.jpeg *.png *.webp)"
-        ]
+        nameFilters: ["Images (*.jpg *.jpeg *.png *.webp)"]
         onAccepted: WallpaperService.apply(selectedFile)
     }
 
     FolderDialog {
         id: wallpaperFolderDialog
         title: I18n.tr("chooseWallpaperDirectory")
-        currentFolder: WallpaperService.fileUrl(
-            WallpaperService.directory)
-        onAccepted:
-            WallpaperService.setDirectory(selectedFolder)
+        currentFolder: WallpaperService.fileUrl(WallpaperService.directory)
+        onAccepted: WallpaperService.setDirectory(selectedFolder)
     }
 
     ColumnLayout {
@@ -266,8 +322,8 @@ Item {
 
             Image {
                 anchors.fill: parent
-                source: WallpaperService.fileUrl(
-                    WallpaperService.currentPath)
+                source: WallpaperService.fileUrl(WallpaperService.currentPath)
+                sourceSize.width: Math.max(1, Math.ceil(width * (Window.window?.devicePixelRatio ?? 1)))
                 fillMode: WallpaperService.imageFillMode
                 asynchronous: true
                 cache: false
@@ -282,8 +338,7 @@ Item {
                     bottom: parent.bottom
                 }
                 height: Appearance.px(48)
-                color: Appearance.withAlpha(
-                    Theme.palette.m3scrim, 0.62)
+                color: Appearance.withAlpha(Theme.palette.m3scrim, 0.62)
 
                 RowLayout {
                     anchors {
@@ -295,8 +350,7 @@ Item {
 
                     PanelText {
                         Layout.fillWidth: true
-                        text: WallpaperService.currentPath
-                            || I18n.tr("noWallpaperSelected")
+                        text: WallpaperService.currentPath || I18n.tr("noWallpaperSelected")
                         color: "white"
                         elide: Text.ElideMiddle
                         font.pixelSize: Appearance.smallFontSize
@@ -339,7 +393,9 @@ Item {
                 onClicked: WallpaperService.next()
             }
 
-            Item { Layout.fillWidth: true }
+            Item {
+                Layout.fillWidth: true
+            }
 
             ActionButton {
                 icon: "󰉋"
@@ -369,10 +425,8 @@ Item {
                         required property var modelData
 
                         label: I18n.tr(modelData.key)
-                        selected: ShellSettings.wallpaperFillMode
-                            === modelData.value
-                        onClicked:
-                            ShellSettings.wallpaperFillMode = modelData.value
+                        selected: ShellSettings.wallpaperFillMode === modelData.value
+                        onClicked: ShellSettings.wallpaperFillMode = modelData.value
                     }
                 }
             }
@@ -399,10 +453,8 @@ Item {
                         required property var modelData
 
                         label: I18n.tr(modelData.key)
-                        selected: ShellSettings.wallpaperTransition
-                            === modelData.value
-                        onClicked: ShellSettings.wallpaperTransition
-                            = modelData.value
+                        selected: ShellSettings.wallpaperTransition === modelData.value
+                        onClicked: ShellSettings.wallpaperTransition = modelData.value
                     }
                 }
             }
@@ -410,8 +462,7 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: themeOptions.implicitHeight
-                + Appearance.px(20)
+            implicitHeight: themeOptions.implicitHeight + Appearance.px(20)
             radius: Appearance.smallRadius
             color: Appearance.layer3
             border.width: 1
@@ -448,8 +499,7 @@ Item {
 
                     SettingSwitch {
                         checked: ShellSettings.wallpaperAutoTheme
-                        onToggled: checked =>
-                            ShellSettings.wallpaperAutoTheme = checked
+                        onToggled: checked => ShellSettings.wallpaperAutoTheme = checked
                     }
                 }
 
@@ -511,8 +561,7 @@ Item {
 
             PanelText {
                 Layout.fillWidth: true
-                text: I18n.tr("wallpapers")
-                    + "  " + WallpaperService.wallpapers.length
+                text: I18n.tr("wallpapers") + "  " + WallpaperService.wallpapers.length
                 color: Appearance.layer0Text
                 font.weight: Font.DemiBold
             }
@@ -547,11 +596,8 @@ Item {
                     }
                     radius: Appearance.smallRadius
                     color: Appearance.layer1
-                    border.width: modelData
-                            === WallpaperService.currentPath ? 3 : 1
-                    border.color: modelData
-                            === WallpaperService.currentPath
-                        ? Appearance.primary : Appearance.outline
+                    border.width: modelData === WallpaperService.currentPath ? 3 : 1
+                    border.color: modelData === WallpaperService.currentPath ? Appearance.primary : Appearance.outline
                     clip: true
 
                     Image {
