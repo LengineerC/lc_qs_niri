@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import fcntl
 import hashlib
 import json
 import os
+from contextlib import contextmanager
 from pathlib import Path
 import subprocess
 import sys
@@ -10,6 +12,14 @@ import time
 
 
 PREVIEW_BYTES = 32768
+
+
+@contextmanager
+def history_lock(directory):
+    directory.mkdir(parents=True, exist_ok=True)
+    with (directory / ".lock").open("a+b") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        yield
 
 
 def history_files(directory):
@@ -104,33 +114,33 @@ def capture(directory, max_bytes, max_entries):
         return
 
     digest = hashlib.sha256(data).hexdigest()
-    directory.mkdir(parents=True, exist_ok=True)
+    with history_lock(directory):
+        # Re-copying an older item promotes it instead of creating duplicates. The lock is needed
+        # because wl-paste may launch overlapping capture callbacks for one selection change.
+        for metadata_path in history_files(directory):
+            metadata = load_meta(metadata_path)
+            if metadata and metadata.get("sha256") == digest:
+                remove_entry(directory, metadata_path.stem)
 
-    # Re-copying an older item promotes it instead of creating duplicates.
-    for metadata_path in history_files(directory):
-        metadata = load_meta(metadata_path)
-        if metadata and metadata.get("sha256") == digest:
-            remove_entry(directory, metadata_path.stem)
-
-    entry_id = str(time.time_ns())
-    data_path = directory / f"{entry_id}.data"
-    metadata_path = directory / f"{entry_id}.json"
-    data_path.write_bytes(data)
-    metadata_path.write_text(
-        json.dumps(
-            {
-                "id": entry_id,
-                "kind": kind,
-                "mime": mime,
-                "size": len(data),
-                "sha256": digest,
-                "timestamp": int(time.time()),
-            },
-            ensure_ascii=False,
-        ),
-        encoding="utf-8",
-    )
-    prune(directory, max_entries, max_bytes)
+        entry_id = str(time.time_ns())
+        data_path = directory / f"{entry_id}.data"
+        metadata_path = directory / f"{entry_id}.json"
+        data_path.write_bytes(data)
+        metadata_path.write_text(
+            json.dumps(
+                {
+                    "id": entry_id,
+                    "kind": kind,
+                    "mime": mime,
+                    "size": len(data),
+                    "sha256": digest,
+                    "timestamp": int(time.time()),
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        prune(directory, max_entries, max_bytes)
     print("changed", flush=True)
 
 
