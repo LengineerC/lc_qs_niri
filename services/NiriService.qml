@@ -38,6 +38,15 @@ Singleton {
         return result;
     }
 
+    function toggleOverview() {
+        const result = backend.toggleOverview();
+        if (!result.ok) {
+            lastError = result.error ?? "Unknown Niri IPC error";
+            console.warn("Failed to toggle Niri overview:", lastError);
+        }
+        return result;
+    }
+
     function moveWorkspaceToIndex(workspaceId, targetIndex) {
         const index = Math.max(1, Math.round(Number(targetIndex)));
         const result = backend.sendRawAction({

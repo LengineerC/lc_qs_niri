@@ -213,6 +213,12 @@ Item {
         }
     }
 
+    TapHandler {
+        acceptedButtons: Qt.RightButton
+        gesturePolicy: TapHandler.ReleaseWithinBounds
+        onTapped: NiriService.toggleOverview()
+    }
+
     Rectangle {
         anchors {
             fill: parent
