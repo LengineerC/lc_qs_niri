@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Pam
 import Quickshell.Wayland
+import qs.common
 import qs.services
 
 Scope {
@@ -11,6 +12,21 @@ Scope {
 
     readonly property string pamDirectory:
         String(Qt.resolvedUrl("pam")).replace(/^file:\/\//, "")
+
+    PersistentProperties {
+        id: runtimeState
+        reloadableId: "lock-startup-runtime"
+        property bool startupLockChecked: false
+    }
+
+    function checkStartupLock() {
+        if (runtimeState.startupLockChecked || !ShellSettings.ready)
+            return;
+
+        runtimeState.startupLockChecked = true;
+        if (ShellSettings.lockOnStartup)
+            Qt.callLater(root.open);
+    }
 
     function open() {
         if (sessionLock.locked)
@@ -30,6 +46,16 @@ Scope {
             root.open();
         }
     }
+
+    Connections {
+        target: ShellSettings
+
+        function onReadyChanged() {
+            root.checkStartupLock();
+        }
+    }
+
+    Component.onCompleted: checkStartupLock()
 
     Scope {
         id: authContext

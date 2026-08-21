@@ -36,6 +36,7 @@ Singleton {
     property int clipboardMaxEntryMb: 10
     property int clipboardMaxEntries: 100
     property bool doNotDisturb: false
+    property bool lockOnStartup: false
     property string wallpaperDirectory: ""
     property bool wallpaperAutoTheme: true
     property string wallpaperFillMode: "PreserveAspectCrop"
@@ -114,7 +115,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 19,
+            version: 20,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             shadowEnabled: shadowEnabled,
@@ -139,6 +140,7 @@ Singleton {
             clipboardMaxEntryMb: clipboardMaxEntryMb,
             clipboardMaxEntries: clipboardMaxEntries,
             doNotDisturb: doNotDisturb,
+            lockOnStartup: lockOnStartup,
             wallpaperDirectory: wallpaperDirectory,
             wallpaperAutoTheme: wallpaperAutoTheme,
             wallpaperFillMode: wallpaperFillMode,
@@ -159,7 +161,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 19)
+            if (state.version !== 20)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -254,6 +256,10 @@ Singleton {
                 needsMigration = true;
             if (typeof state.doNotDisturb === "boolean")
                 doNotDisturb = state.doNotDisturb;
+            else
+                needsMigration = true;
+            if (typeof state.lockOnStartup === "boolean")
+                lockOnStartup = state.lockOnStartup;
             else
                 needsMigration = true;
             if (typeof state.wallpaperDirectory === "string")
@@ -362,6 +368,7 @@ Singleton {
         clipboardMaxEntryMb = 10;
         clipboardMaxEntries = 100;
         doNotDisturb = false;
+        lockOnStartup = false;
         wallpaperDirectory = "";
         wallpaperAutoTheme = true;
         wallpaperFillMode = "PreserveAspectCrop";
@@ -405,6 +412,7 @@ Singleton {
     onClipboardMaxEntryMbChanged: scheduleSave()
     onClipboardMaxEntriesChanged: scheduleSave()
     onDoNotDisturbChanged: scheduleSave()
+    onLockOnStartupChanged: scheduleSave()
     onWallpaperDirectoryChanged: scheduleSave()
     onWallpaperAutoThemeChanged: scheduleSave()
     onWallpaperFillModeChanged: scheduleSave()
@@ -483,6 +491,10 @@ Singleton {
                 root.calendarWeekStart = day;
         }
 
+        function setLockOnStartup(enabled: bool): void {
+            root.lockOnStartup = enabled;
+        }
+
         function setWallpaperFillMode(mode: string): void {
             if ([
                     "Stretch",
@@ -536,6 +548,7 @@ Singleton {
                 clipboardMaxEntryMb: root.clipboardMaxEntryMb,
                 clipboardMaxEntries: root.clipboardMaxEntries,
                 doNotDisturb: root.doNotDisturb,
+                lockOnStartup: root.lockOnStartup,
                 wallpaperDirectory: root.wallpaperDirectory,
                 wallpaperAutoTheme: root.wallpaperAutoTheme,
                 wallpaperFillMode: root.wallpaperFillMode,

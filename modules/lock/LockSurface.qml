@@ -127,7 +127,7 @@ WlSessionLockSurface {
 
             anchors.centerIn: parent
             text: "󰌾"
-            rotation: 180
+            rotation: 0
             opacity: 1
             color: Appearance.layer0Text
             font {
@@ -154,7 +154,14 @@ WlSessionLockSurface {
         id: startupAnimation
 
         running: false
-        onFinished: root.focusAuth()
+        onFinished: {
+            // 360 degrees is visually identical to zero, but normalising both
+            // properties prevents the lock icon from inheriting an inverted
+            // angle when it is shown again during the exit animation.
+            root.containerRotation = 0;
+            lockIcon.rotation = 0;
+            root.focusAuth();
+        }
 
         ParallelAnimation {
             NumberAnimation {
@@ -182,6 +189,15 @@ WlSessionLockSurface {
                     Appearance.spatialDuration)
                 easing.type: Easing.OutCubic
             }
+            NumberAnimation {
+                target: lockIcon
+                property: "rotation"
+                from: 180
+                to: 0
+                duration: Math.max(260,
+                    Appearance.spatialDuration)
+                easing.type: Easing.OutCubic
+            }
         }
 
         ParallelAnimation {
@@ -197,6 +213,7 @@ WlSessionLockSurface {
             NumberAnimation {
                 target: lockIcon
                 property: "rotation"
+                from: 0
                 to: 360
                 duration: Appearance.spatialDuration
                 easing.type: Easing.OutCubic

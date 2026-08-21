@@ -296,6 +296,10 @@ Singleton {
         suspend: ["挂起", "Suspend"],
         lock: ["锁定", "Lock"],
         lockScreen: ["锁定屏幕", "Lock screen"],
+        lockOnStartup: ["启动时自动锁定", "Lock on startup"],
+        lockOnStartupHint: [
+            "QuickShell 启动并加载设置后自动锁定会话",
+            "Lock the session after QuickShell starts and loads its settings"],
         enterPassword: ["输入密码", "Enter password"],
         authenticating: ["正在验证…", "Authenticating…"],
         incorrectPassword: ["密码错误，请重试",
