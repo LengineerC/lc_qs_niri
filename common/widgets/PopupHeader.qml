@@ -32,6 +32,7 @@ ColumnLayout {
     property int titleFontSize: Appearance.largeFontSize
     property int titleFontWeight: Font.DemiBold
     property int subtitleFontSize: Appearance.smallFontSize
+    property real headerRowHeight: -1
 
     property real contentSpacing: Appearance.px(8)
     property real actionSpacing: Appearance.px(7)
@@ -48,6 +49,7 @@ ColumnLayout {
     RowLayout {
         Layout.fillWidth: true
         Layout.minimumWidth: 0
+        Layout.preferredHeight: root.headerRowHeight
         Layout.leftMargin: root.contentLeftMargin
         Layout.rightMargin: root.contentRightMargin
         spacing: root.contentSpacing

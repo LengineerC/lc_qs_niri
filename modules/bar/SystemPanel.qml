@@ -267,12 +267,20 @@ Item {
 
         ColumnLayout {
             id: panelColumn
-            x: Appearance.px(16)
-            y: Appearance.px(12)
-            width: scroll.width - Appearance.px(32)
+            x: Appearance.px(root.embedded ? 18 : 16)
+            y: Appearance.px(root.embedded ? 18 : 12)
+            width: scroll.width - Appearance.px(root.embedded ? 36 : 32)
             spacing: Appearance.px(10)
 
+            SettingsPageHeader {
+                visible: root.embedded
+                icon: "󰒓"
+                title: I18n.tr("networkDevices")
+                onCloseClicked: root.closeRequested()
+            }
+
             PopupHeader {
+                visible: !root.embedded
                 icon: "󰒓"
                 title: I18n.tr("networkDevices")
             }

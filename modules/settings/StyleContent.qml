@@ -276,38 +276,16 @@ Item {
         }
         spacing: Appearance.px(10)
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.px(9)
-
-            Text {
-                text: "󰏘"
-                color: Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    pixelSize: Appearance.px(20)
-                }
-            }
-
-            PanelText {
-                Layout.fillWidth: true
-                text: I18n.tr("style")
-                color: Appearance.layer0Text
-                font {
-                    pixelSize: Appearance.largeFontSize
-                    weight: Font.DemiBold
-                }
-            }
+        SettingsPageHeader {
+            icon: "󰏘"
+            title: I18n.tr("style")
+            onCloseClicked: root.closeRequested()
 
             PanelText {
                 visible: Theme.generating
                 text: I18n.tr("generating")
                 color: Appearance.primary
                 font.pixelSize: Appearance.smallFontSize
-            }
-
-            CloseButton {
-                onClicked: root.closeRequested()
             }
         }
 

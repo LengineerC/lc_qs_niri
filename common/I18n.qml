@@ -231,6 +231,7 @@ Singleton {
         colorDepth: ["色深", "Color depth"],
         bitsPerChannel: ["位/通道", "bits/channel"],
         apply: ["应用", "Apply"],
+        confirm: ["确定", "Confirm"],
         applying: ["正在应用…", "Applying…"],
         noOutputs: ["没有检测到显示器", "No displays detected"],
         displayReadFailed: ["读取显示器信息失败",

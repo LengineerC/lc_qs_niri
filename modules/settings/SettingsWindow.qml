@@ -67,10 +67,7 @@ ApplicationWindow {
 
         SystemPanel {
             embedded: true
-            anchors {
-                fill: parent
-                margins: Appearance.px(8)
-            }
+            anchors.fill: parent
             onCloseRequested: root.closeWindow()
         }
     }

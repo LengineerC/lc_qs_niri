@@ -338,28 +338,10 @@ Item {
         }
         spacing: Appearance.px(10)
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Appearance.px(9)
-
-            Text {
-                text: "󰍹"
-                color: Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    pixelSize: Appearance.px(20)
-                }
-            }
-
-            PanelText {
-                Layout.fillWidth: true
-                text: I18n.tr("displaySettings")
-                color: Appearance.layer0Text
-                font {
-                    pixelSize: Appearance.largeFontSize
-                    weight: Font.DemiBold
-                }
-            }
+        SettingsPageHeader {
+            icon: "󰍹"
+            title: I18n.tr("displaySettings")
+            onCloseClicked: root.closeRequested()
 
             ActionButton {
                 icon: "󰑐"
@@ -367,10 +349,6 @@ Item {
                 enabled: !OutputService.refreshing
                     && !OutputService.applying
                 onClicked: OutputService.refresh()
-            }
-
-            CloseButton {
-                onClicked: root.closeRequested()
             }
         }
 

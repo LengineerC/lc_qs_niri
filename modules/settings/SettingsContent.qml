@@ -19,6 +19,20 @@ Item {
         Number(ShellSettings.weatherLatitude).toFixed(5)
     property string weatherLongitudeDraft:
         Number(ShellSettings.weatherLongitude).toFixed(5)
+    property string barFontFamilyDraft: ShellSettings.barFontFamily
+    property string monospaceFontFamilyDraft:
+        ShellSettings.monospaceFontFamily
+    property int barFontSizeDraft: ShellSettings.barFontSize
+    property real scaleDraft: ShellSettings.scale
+    readonly property bool barAppearanceValid:
+        barFontFamilyDraft.trim().length > 0
+            && monospaceFontFamilyDraft.trim().length > 0
+    readonly property bool barAppearanceDirty:
+        barFontFamilyDraft.trim() !== ShellSettings.barFontFamily
+            || monospaceFontFamilyDraft.trim()
+                !== ShellSettings.monospaceFontFamily
+            || barFontSizeDraft !== ShellSettings.barFontSize
+            || Math.abs(scaleDraft - ShellSettings.scale) > 0.001
     readonly property bool weatherCoordinatesValid: {
         const latitude = Number(weatherLatitudeDraft);
         const longitude = Number(weatherLongitudeDraft);
@@ -35,6 +49,36 @@ Item {
         { value: 0, label: I18n.tr("sunday") },
         { value: 6, label: I18n.tr("saturday") }
     ]
+
+    function filteredFontFamilies(families, query, showAll) {
+        const needle = showAll ? "" : String(query).trim().toLowerCase();
+        const prefixMatches = [];
+        const containsMatches = [];
+        for (let index = 0; index < families.length; ++index) {
+            const family = String(families[index]);
+            const lowerFamily = family.toLowerCase();
+            if (needle && !lowerFamily.includes(needle))
+                continue;
+            if (!needle || lowerFamily.startsWith(needle))
+                prefixMatches.push(family);
+            else
+                containsMatches.push(family);
+        }
+        return prefixMatches.concat(containsMatches).slice(0, 100);
+    }
+
+    function applyBarAppearance() {
+        if (!barAppearanceValid)
+            return;
+
+        ShellSettings.barFontFamily = barFontFamilyDraft.trim();
+        ShellSettings.monospaceFontFamily =
+            monospaceFontFamilyDraft.trim();
+        ShellSettings.barFontSize = Math.round(barFontSizeDraft);
+        // Apply scale last so the settings layout only moves once, after all
+        // other draft values have already been committed.
+        ShellSettings.scale = scaleDraft;
+    }
     FileDialog {
         id: avatarFileDialog
 
@@ -197,6 +241,229 @@ Item {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: control.toggled(!control.checked)
+        }
+    }
+
+    component FontSelector: Item {
+        id: selector
+
+        required property string currentValue
+        property string draftText: currentValue
+        property bool browseAll: false
+        readonly property var fontFamilies: Qt.fontFamilies()
+        readonly property var filteredFamilies:
+            root.filteredFontFamilies(fontFamilies, draftText, browseAll)
+        signal valueEdited(string value)
+
+        implicitHeight: Appearance.px(36)
+
+        function openSuggestions(showAll) {
+            const wasOpened = fontPopup.opened;
+            browseAll = showAll;
+            fontPopup.updatePlacement();
+            if (!wasOpened) {
+                fontList.currentIndex = filteredFamilies.length > 0 ? 0 : -1;
+                fontPopup.open();
+            } else if (fontList.currentIndex >= filteredFamilies.length) {
+                fontList.currentIndex = filteredFamilies.length - 1;
+            }
+        }
+
+        function choose(value) {
+            draftText = value;
+            valueEdited(value);
+            fontPopup.close();
+        }
+
+        onCurrentValueChanged: {
+            if (!fontInput.activeFocus)
+                draftText = currentValue;
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            radius: Appearance.px(9)
+            color: Appearance.layer1
+            border.width: fontInput.activeFocus || fontPopup.opened ? 1 : 0
+            border.color: Appearance.primary
+
+            Controls.TextField {
+                id: fontInput
+
+                anchors {
+                    fill: parent
+                    leftMargin: Appearance.px(10)
+                    rightMargin: Appearance.px(34)
+                }
+                padding: 0
+                verticalAlignment: TextInput.AlignVCenter
+                color: Appearance.layer0Text
+                selectionColor: Appearance.primaryContainer
+                selectedTextColor: Appearance.primaryContainerText
+                selectByMouse: true
+                text: selector.draftText
+                background: null
+                font {
+                    family: selector.draftText.trim()
+                        || Appearance.fontFamily
+                    pixelSize: Appearance.fontSize
+                }
+
+                onTextEdited: {
+                    selector.browseAll = false;
+                    selector.draftText = text;
+                    selector.valueEdited(text);
+                    selector.openSuggestions(false);
+                }
+                onActiveFocusChanged: {
+                    if (activeFocus)
+                        selector.openSuggestions(false);
+                }
+                onAccepted: {
+                    if (fontPopup.opened && fontList.currentIndex >= 0) {
+                        selector.choose(selector.filteredFamilies[
+                            fontList.currentIndex]);
+                    } else {
+                        selector.valueEdited(text.trim());
+                        fontPopup.close();
+                    }
+                }
+                Keys.onDownPressed: event => {
+                    const wasOpened = fontPopup.opened;
+                    selector.openSuggestions(false);
+                    if (wasOpened) {
+                        fontList.currentIndex = Math.min(
+                            selector.filteredFamilies.length - 1,
+                            Math.max(0, fontList.currentIndex + 1));
+                    }
+                    event.accepted = true;
+                }
+                Keys.onUpPressed: event => {
+                    const wasOpened = fontPopup.opened;
+                    selector.openSuggestions(false);
+                    if (wasOpened) {
+                        fontList.currentIndex = Math.max(0,
+                            fontList.currentIndex - 1);
+                    } else if (selector.filteredFamilies.length > 0) {
+                        fontList.currentIndex =
+                            selector.filteredFamilies.length - 1;
+                    }
+                    event.accepted = true;
+                }
+            }
+
+            Text {
+                anchors {
+                    right: parent.right
+                    rightMargin: Appearance.px(10)
+                    verticalCenter: parent.verticalCenter
+                }
+                text: fontPopup.opened ? "󰅃" : "󰅀"
+                color: Appearance.subtext
+                font {
+                    family: Appearance.iconFontFamily
+                    pixelSize: Appearance.px(14)
+                }
+            }
+
+            MouseArea {
+                anchors {
+                    top: parent.top
+                    right: parent.right
+                    bottom: parent.bottom
+                }
+                width: Appearance.px(34)
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    const wasOpened = fontPopup.opened;
+                    fontInput.forceActiveFocus();
+                    if (wasOpened)
+                        fontPopup.close();
+                    else
+                        selector.openSuggestions(true);
+                }
+            }
+        }
+
+        Controls.Popup {
+            id: fontPopup
+
+            parent: selector
+            x: 0
+            width: selector.width
+            height: Math.min(Appearance.px(260), Math.max(
+                Appearance.px(42),
+                selector.filteredFamilies.length * Appearance.px(34)
+                    + topPadding + bottomPadding))
+            padding: Appearance.px(4)
+            closePolicy: Controls.Popup.CloseOnEscape
+                | Controls.Popup.CloseOnPressOutsideParent
+            onClosed: selector.browseAll = false
+
+            function updatePlacement() {
+                const window = Window.window;
+                if (!window) {
+                    y = selector.height + Appearance.px(4);
+                    return;
+                }
+
+                const scenePosition = selector.mapToItem(null, 0, 0);
+                const spaceAbove = scenePosition.y;
+                const spaceBelow = window.height - scenePosition.y
+                    - selector.height;
+                const requiredSpace = height + Appearance.px(8);
+                y = spaceBelow < requiredSpace
+                        && spaceAbove >= requiredSpace
+                    ? -height - Appearance.px(4)
+                    : selector.height + Appearance.px(4);
+            }
+
+            contentItem: ListView {
+                id: fontList
+
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                model: selector.filteredFamilies
+                currentIndex: -1
+
+                delegate: Controls.ItemDelegate {
+                    id: fontDelegate
+
+                    required property string modelData
+                    required property int index
+                    width: fontList.width
+                    implicitHeight: Appearance.px(34)
+                    highlighted: fontList.currentIndex === index
+
+                    contentItem: Text {
+                        text: fontDelegate.modelData
+                        color: Appearance.layer0Text
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                        font {
+                            family: fontDelegate.modelData
+                            pixelSize: Appearance.smallFontSize
+                        }
+                    }
+                    background: Rectangle {
+                        radius: Appearance.px(7)
+                        color: fontDelegate.highlighted
+                            ? Appearance.layer1Active : "transparent"
+                    }
+                    onClicked: selector.choose(modelData)
+                }
+
+                Controls.ScrollIndicator.vertical:
+                    Controls.ScrollIndicator {}
+            }
+
+            background: Rectangle {
+                radius: Appearance.px(10)
+                color: Appearance.layer2
+                border.width: 1
+                border.color: Appearance.outline
+            }
         }
     }
 
@@ -556,62 +823,28 @@ Item {
             onClicked: forceActiveFocus()
         }
 
-        RowLayout {
-            id: titleRow
+        SettingsPageHeader {
+            id: pageHeader
+            height: implicitHeight
             anchors {
                 top: parent.top
                 left: parent.left
                 right: parent.right
                 margins: Appearance.px(18)
             }
-            height: Appearance.px(34)
-            spacing: Appearance.px(9)
-
-            Text {
-                text: "󰒓"
-                color: Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    pixelSize: Appearance.px(20)
-                }
-            }
-
-            PanelText {
-                Layout.fillWidth: true
-                text: I18n.tr("quickSettings")
-                color: Appearance.layer0Text
-                font {
-                    pixelSize: Appearance.largeFontSize
-                    weight: Font.DemiBold
-                }
-            }
-
-            CloseButton {
-                onClicked: root.closeRequested()
-            }
-        }
-
-        Rectangle {
-            anchors {
-                top: titleRow.bottom
-                left: parent.left
-                right: parent.right
-                leftMargin: Appearance.px(18)
-                rightMargin: Appearance.px(18)
-                topMargin: Appearance.px(4)
-            }
-            height: 1
-            color: Appearance.outline
+            icon: "󰒓"
+            title: I18n.tr("quickSettings")
+            onCloseClicked: root.closeRequested()
         }
 
         Flickable {
             id: flickable
             anchors {
-                top: titleRow.bottom
+                top: pageHeader.bottom
                 left: parent.left
                 right: parent.right
                 bottom: parent.bottom
-                topMargin: Appearance.px(10)
+                topMargin: Appearance.px(5)
                 leftMargin: Appearance.px(18)
                 rightMargin: Appearance.px(10)
                 bottomMargin: Appearance.px(14)
@@ -1525,6 +1758,123 @@ Item {
                 }
 
                 SectionTitle {
+                    icon: "󰛖"
+                    title: I18n.tr("barFontSize")
+                }
+
+                SettingCard {
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(10)
+
+                        PanelText {
+                            Layout.preferredWidth: Appearance.px(
+                                I18n.language === "en_US" ? 150 : 118)
+                            text: I18n.tr("font")
+                        }
+
+                        FontSelector {
+                            Layout.fillWidth: true
+                            currentValue: root.barFontFamilyDraft
+                            onValueEdited: value => {
+                                root.barFontFamilyDraft = value;
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(10)
+
+                        PanelText {
+                            Layout.preferredWidth: Appearance.px(
+                                I18n.language === "en_US" ? 150 : 118)
+                            text: I18n.tr("monospaceFont")
+                        }
+
+                        FontSelector {
+                            Layout.fillWidth: true
+                            currentValue: root.monospaceFontFamilyDraft
+                            onValueEdited: value => {
+                                root.monospaceFontFamilyDraft = value;
+                            }
+                        }
+                    }
+
+                    SliderRow {
+                        label: I18n.tr("fontSize")
+                        currentValue: root.barFontSizeDraft
+                        from: 9
+                        to: 24
+                        stepSize: 1
+                        decimals: 0
+                        suffix: " px"
+                        onMoved: value => {
+                            root.barFontSizeDraft = Math.round(value);
+                        }
+                    }
+
+                    SliderRow {
+                        label: I18n.tr("overallScale")
+                        currentValue: root.scaleDraft
+                        from: 0.75
+                        to: 1.5
+                        stepSize: 0.05
+                        decimals: 2
+                        suffix: "×"
+                        onMoved: value => root.scaleDraft = value
+                    }
+
+                    Rectangle {
+                        id: confirmBarAppearanceButton
+
+                        Layout.alignment: Qt.AlignRight
+                        implicitWidth: confirmBarAppearanceRow.implicitWidth
+                            + Appearance.px(22)
+                        implicitHeight: Appearance.px(34)
+                        radius: Appearance.px(10)
+                        enabled: root.barAppearanceValid
+                            && root.barAppearanceDirty
+                        opacity: enabled ? 1 : 0.45
+                        color: confirmBarAppearanceArea.containsMouse
+                                && enabled
+                            ? Appearance.primary
+                            : Appearance.primaryContainer
+
+                        RowLayout {
+                            id: confirmBarAppearanceRow
+                            anchors.centerIn: parent
+                            spacing: Appearance.px(6)
+
+                            Text {
+                                text: "󰄬"
+                                color: Appearance.primaryContainerText
+                                font {
+                                    family: Appearance.iconFontFamily
+                                    pixelSize: Appearance.px(14)
+                                }
+                            }
+
+                            PanelText {
+                                text: I18n.tr("confirm")
+                                color: Appearance.primaryContainerText
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        MouseArea {
+                            id: confirmBarAppearanceArea
+                            anchors.fill: parent
+                            enabled: parent.enabled
+                            hoverEnabled: true
+                            cursorShape: enabled
+                                ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            onClicked: root.applyBarAppearance()
+                        }
+                    }
+                }
+
+                SectionTitle {
                     icon: "󰅹"
                     title: I18n.tr("shadow")
                 }
@@ -1854,131 +2204,6 @@ Item {
                     }
                 }
 
-                SectionTitle {
-                    icon: "󰛖"
-                    title: I18n.tr("barFontSize")
-                }
-
-                SettingCard {
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Appearance.px(10)
-
-                        PanelText {
-                            Layout.preferredWidth: Appearance.px(
-                                I18n.language === "en_US" ? 150 : 118)
-                            text: I18n.tr("font")
-                        }
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            implicitHeight: Appearance.px(34)
-                            radius: Appearance.px(9)
-                            color: Appearance.layer1
-                            border.width: fontInput.activeFocus ? 1 : 0
-                            border.color: Appearance.primary
-
-                            TextInput {
-                                id: fontInput
-                                anchors {
-                                    fill: parent
-                                    leftMargin: Appearance.px(10)
-                                    rightMargin: Appearance.px(10)
-                                }
-                                verticalAlignment: TextInput.AlignVCenter
-                                color: Appearance.layer0Text
-                                selectionColor: Appearance.primaryContainer
-                                selectedTextColor: Appearance.primaryContainerText
-                                text: ShellSettings.barFontFamily
-                                font {
-                                    family: Appearance.fontFamily
-                                    pixelSize: Appearance.fontSize
-                                }
-                                onEditingFinished: {
-                                    if (text.trim())
-                                        ShellSettings.barFontFamily = text.trim();
-                                    else
-                                        text = ShellSettings.barFontFamily;
-                                }
-                            }
-                        }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Appearance.px(10)
-
-                        PanelText {
-                            Layout.preferredWidth: Appearance.px(
-                                I18n.language === "en_US" ? 150 : 118)
-                            text: I18n.tr("monospaceFont")
-                        }
-
-                        Rectangle {
-                            Layout.fillWidth: true
-                            implicitHeight: Appearance.px(34)
-                            radius: Appearance.px(9)
-                            color: Appearance.layer1
-                            border.width: monospaceFontInput.activeFocus
-                                ? 1 : 0
-                            border.color: Appearance.primary
-
-                            TextInput {
-                                id: monospaceFontInput
-                                anchors {
-                                    fill: parent
-                                    leftMargin: Appearance.px(10)
-                                    rightMargin: Appearance.px(10)
-                                }
-                                verticalAlignment: TextInput.AlignVCenter
-                                color: Appearance.layer0Text
-                                selectionColor: Appearance.primaryContainer
-                                selectedTextColor:
-                                    Appearance.primaryContainerText
-                                text: ShellSettings.monospaceFontFamily
-                                font {
-                                    family:
-                                        ShellSettings.monospaceFontFamily
-                                    pixelSize: Appearance.fontSize
-                                }
-                                onEditingFinished: {
-                                    if (text.trim()) {
-                                        ShellSettings.monospaceFontFamily =
-                                            text.trim();
-                                    } else {
-                                        text = ShellSettings
-                                            .monospaceFontFamily;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    SliderRow {
-                        label: I18n.tr("fontSize")
-                        currentValue: ShellSettings.barFontSize
-                        from: 9
-                        to: 24
-                        stepSize: 1
-                        decimals: 0
-                        suffix: " px"
-                        onMoved: value => {
-                            ShellSettings.barFontSize = Math.round(value);
-                        }
-                    }
-
-                    SliderRow {
-                        label: I18n.tr("overallScale")
-                        currentValue: ShellSettings.scale
-                        from: 0.75
-                        to: 1.5
-                        stepSize: 0.05
-                        decimals: 2
-                        suffix: "×"
-                        onMoved: value => ShellSettings.scale = value
-                    }
-                }
-
                 Rectangle {
                     Layout.alignment: Qt.AlignRight
                     Layout.topMargin: Appearance.px(4)
@@ -2003,7 +2228,15 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: ShellSettings.resetDefaults()
+                        onClicked: {
+                            ShellSettings.resetDefaults();
+                            root.barFontFamilyDraft =
+                                ShellSettings.barFontFamily;
+                            root.monospaceFontFamilyDraft =
+                                ShellSettings.monospaceFontFamily;
+                            root.barFontSizeDraft = ShellSettings.barFontSize;
+                            root.scaleDraft = ShellSettings.scale;
+                        }
                     }
                 }
             }
