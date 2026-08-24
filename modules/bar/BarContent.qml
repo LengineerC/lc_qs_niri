@@ -19,6 +19,8 @@ Item {
         && barHover.point.position.y < Appearance.barHeight
     readonly property bool popupShown: popup.shown
     readonly property bool popupContainsMouse: popup.pointerInside
+    readonly property bool notificationPanelShown:
+        popup.shown && popup.page === "notifications"
     readonly property bool sidebarShown:
         LeftSidebarService.shown
         && LeftSidebarService.targetOutputName === root.outputName
@@ -46,6 +48,27 @@ Item {
     function showPopup(target, pageName) {
         LeftSidebarService.close();
         popup.showFor(target, pageName);
+    }
+
+    function handleNotificationPanelAction(action, targetOutputName) {
+        const targetsThisBar = targetOutputName === root.outputName;
+
+        if (action === "close" || !targetsThisBar) {
+            if (root.notificationPanelShown)
+                popup.close();
+            return;
+        }
+
+        if (action === "toggle" && root.notificationPanelShown) {
+            popup.close();
+        } else if (!root.notificationPanelShown) {
+            root.showPopup(notificationModule, "notifications");
+        }
+    }
+
+    function syncNotificationPanelVisibility() {
+        NotificationService.updatePanelVisibility(
+            root.outputName, root.notificationPanelShown);
     }
 
     function requestHostWindowFocus() {
@@ -434,6 +457,14 @@ Item {
                 root.showPopup(notificationModule, "notifications")
         }
 
+        Connections {
+            target: NotificationService
+
+            function onPanelActionRequested(action, outputName) {
+                root.handleNotificationPanelAction(action, outputName);
+            }
+        }
+
         TrayModule {
             id: trayModule
 
@@ -505,6 +536,18 @@ Item {
         z: 10
         outputName: root.outputName
         deformMatrix: popupBackground.deformMatrix
+    }
+
+    Connections {
+        target: popup
+
+        function onShownChanged() {
+            root.syncNotificationPanelVisibility();
+        }
+
+        function onPageChanged() {
+            root.syncNotificationPanelVisibility();
+        }
     }
 
 }

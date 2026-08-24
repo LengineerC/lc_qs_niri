@@ -65,8 +65,13 @@ Singleton {
     property bool historyReady: false
     property bool directoryReady: false
     property int sequence: 0
+    property string panelOutputName: ""
+    property string pendingPanelAction: ""
+    property int panelRequestRevision: 0
+    property int activePanelRequestRevision: -1
 
     readonly property int unreadCount: unreadEntries.length
+    readonly property bool panelVisible: panelOutputName.length > 0
     readonly property int maxVisiblePopups: 5
     readonly property int toastExitDuration: Math.max(160,
         Math.min(320, Math.round(ShellSettings.animationDuration * 0.55)))
@@ -78,6 +83,7 @@ Singleton {
     readonly property int maxHistoryEntries: 200
 
     signal received(var entry)
+    signal panelActionRequested(string action, string outputName)
 
     Component {
         id: entryComponent
@@ -96,6 +102,80 @@ Singleton {
 
     function load() {
         // Forces singleton construction from shell.qml.
+    }
+
+    function updatePanelVisibility(outputName, visible) {
+        const name = String(outputName ?? "");
+        if (visible) {
+            panelOutputName = name;
+        } else if (panelOutputName === name) {
+            panelOutputName = "";
+        }
+    }
+
+    function cancelPanelOutputRequest() {
+        ++panelRequestRevision;
+        pendingPanelAction = "";
+    }
+
+    function requestPanelAction(action) {
+        ++panelRequestRevision;
+        pendingPanelAction = action;
+
+        if (!panelOutputProcess.running)
+            startPanelOutputRequest();
+    }
+
+    function startPanelOutputRequest() {
+        if (pendingPanelAction.length === 0
+                || panelOutputProcess.running) {
+            return;
+        }
+
+        activePanelRequestRevision = panelRequestRevision;
+        panelOutputProcess.output = "";
+        panelOutputProcess.exec([
+            "niri", "msg", "--json", "focused-output"
+        ]);
+    }
+
+    function openPanel() {
+        requestPanelAction("open");
+    }
+
+    function closePanel() {
+        cancelPanelOutputRequest();
+        panelOutputName = "";
+        panelActionRequested("close", "");
+    }
+
+    function togglePanel() {
+        requestPanelAction("toggle");
+    }
+
+    function handlePanelOutputResult(outputText, completedRevision) {
+        if (completedRevision !== panelRequestRevision
+                || completedRevision !== activePanelRequestRevision) {
+            return;
+        }
+
+        const action = pendingPanelAction;
+        pendingPanelAction = "";
+        if (action.length === 0)
+            return;
+
+        try {
+            const output = JSON.parse(String(outputText ?? "").trim());
+            const outputName = String(output?.name ?? "");
+            if (outputName.length === 0) {
+                console.warn("Niri focused output has no name:", outputText);
+                return;
+            }
+            panelActionRequested(action, outputName);
+        } catch (error) {
+            console.warn("Failed to parse niri focused output:",
+                outputText, error);
+        }
     }
 
     function nextId(sourceId) {
@@ -692,6 +772,38 @@ Singleton {
         }
     }
 
+    Process {
+        id: panelOutputProcess
+
+        property string output: ""
+
+        stdout: StdioCollector {
+            onStreamFinished: panelOutputProcess.output = this.text
+        }
+
+        stderr: StdioCollector {
+            id: panelOutputError
+        }
+
+        onExited: (exitCode, exitStatus) => {
+            const completedRevision = root.activePanelRequestRevision;
+
+            if (exitCode === 0) {
+                root.handlePanelOutputResult(
+                    panelOutputProcess.output, completedRevision);
+            } else {
+                if (completedRevision === root.panelRequestRevision)
+                    root.pendingPanelAction = "";
+                console.warn("Failed to query niri focused output:",
+                    exitCode, exitStatus, panelOutputError.text);
+            }
+
+            root.activePanelRequestRevision = -1;
+            if (root.pendingPanelAction.length > 0)
+                Qt.callLater(() => root.startPanelOutputRequest());
+        }
+    }
+
     IpcHandler {
         target: "notifications"
 
@@ -704,8 +816,26 @@ Singleton {
                 pending: root.entries.filter(entry =>
                     entry && entry.pendingPopup).length,
                 history: root.historyEntries.length,
-                doNotDisturb: root.doNotDisturb
+                doNotDisturb: root.doNotDisturb,
+                panelVisible: root.panelVisible,
+                panelOutput: root.panelOutputName
             });
+        }
+
+        function open(): void {
+            root.openPanel();
+        }
+
+        function close(): void {
+            root.closePanel();
+        }
+
+        function toggle(): void {
+            root.togglePanel();
+        }
+
+        function visible(): bool {
+            return root.panelVisible;
         }
 
         function markAllRead(): void {

@@ -164,6 +164,10 @@ Launcher、剪切板和系统监视器是由 Niri 管理的普通独立窗口。
 
 | 命令 | 说明 |
 | --- | --- |
+| `qs ipc call notifications open` | 在当前聚焦的显示器上打开通知面板 |
+| `qs ipc call notifications close` | 关闭通知面板 |
+| `qs ipc call notifications toggle` | 在当前聚焦的显示器上切换通知面板 |
+| `qs ipc call notifications visible` | 返回通知面板是否显示 |
 | `qs ipc call notifications status` | 返回未读数、弹出数、历史数和勿扰状态 JSON |
 | `qs ipc call notifications markAllRead` | 将所有通知标记为已读 |
 | `qs ipc call notifications clearHistory` | 清空通知历史 |
