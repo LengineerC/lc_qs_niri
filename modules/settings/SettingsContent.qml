@@ -1698,9 +1698,11 @@ Item {
                                 }
                             }
 
-                            Controls.ToolTip.visible:
-                                screenCornerColorMouse.containsMouse
-                            Controls.ToolTip.text: I18n.tr("chooseColor")
+                            StyledToolTip {
+                                visible:
+                                    screenCornerColorMouse.containsMouse
+                                text: I18n.tr("chooseColor")
+                            }
                         }
                     }
 

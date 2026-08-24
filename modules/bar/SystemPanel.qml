@@ -968,12 +968,14 @@ Item {
                                             }
                                         }
 
-                                        Controls.ToolTip.visible:
-                                            showWifiPasswordMouse.containsMouse
-                                        Controls.ToolTip.text:
-                                            root.wifiPasswordVisible
+                                        StyledToolTip {
+                                            visible:
+                                                showWifiPasswordMouse
+                                                    .containsMouse
+                                            text: root.wifiPasswordVisible
                                                 ? I18n.tr("hidePassword")
                                                 : I18n.tr("showPassword")
+                                        }
                                     }
                                 }
 

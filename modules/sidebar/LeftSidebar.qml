@@ -587,11 +587,13 @@ Item {
                     root.forceActiveFocus();
                 }
 
-                Controls.ToolTip.visible: containsMouse
-                Controls.ToolTip.text: root.editMode
-                    ? I18n.tr("finishEditing")
-                    : I18n.tr("editWidgets")
-                Controls.ToolTip.delay: 450
+                StyledToolTip {
+                    visible: editMouse.containsMouse
+                    text: root.editMode
+                        ? I18n.tr("finishEditing")
+                        : I18n.tr("editWidgets")
+                    delay: 450
+                }
             }
         }
     }

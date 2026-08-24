@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls as Controls
 import QtQuick.Layouts
 import qs.common
+import qs.common.widgets
 import qs.services
 
 Rectangle {
@@ -248,9 +249,11 @@ Rectangle {
                         }
                     }
 
-                    Controls.ToolTip.visible: containsMouse
-                    Controls.ToolTip.text: I18n.tr("delete")
-                    Controls.ToolTip.delay: 500
+                    StyledToolTip {
+                        visible: deleteButton.containsMouse
+                        text: I18n.tr("delete")
+                        delay: 500
+                    }
                 }
             }
 

@@ -125,7 +125,10 @@ Scope {
                 onTriggered: {
                     if (barContent.popupShown
                             && !barContent.hostWindowActive
-                            && !barContent.popupContainsMouse) {
+                            && !barContent.popupContainsMouse
+                            && NotificationService
+                                .panelFocusProxyOutputName
+                                !== barWindow.modelData.name) {
                         barContent.closePopup();
                     }
                 }
@@ -135,13 +138,19 @@ Scope {
                 target: barContent
 
                 function onPopupShownChanged() {
-                    if (!barContent.popupShown)
+                    if (!barContent.popupShown) {
+                        focusDismissTimer.stop();
                         return;
+                    }
 
                     // The hover binding above lets Niri focus this surface
                     // on the opening click. Also request activation after
                     // bindings have settled for keyboard/touch activation.
                     focusDismissTimer.stop();
+                    if (NotificationService.panelFocusProxyOutputName
+                            === barWindow.modelData.name) {
+                        return;
+                    }
                     barContent.requestHostWindowFocus();
                     Qt.callLater(
                         () => barContent.requestHostWindowFocus());
@@ -150,7 +159,10 @@ Scope {
                 function onHostWindowActiveChanged() {
                     if (barContent.hostWindowActive) {
                         focusDismissTimer.stop();
-                    } else if (barContent.popupShown) {
+                    } else if (barContent.popupShown
+                            && NotificationService
+                                .panelFocusProxyOutputName
+                                !== barWindow.modelData.name) {
                         focusDismissTimer.restart();
                     }
                 }
@@ -159,7 +171,10 @@ Scope {
                     if (barContent.popupContainsMouse) {
                         focusDismissTimer.stop();
                     } else if (barContent.popupShown
-                            && !barContent.hostWindowActive) {
+                            && !barContent.hostWindowActive
+                            && NotificationService
+                                .panelFocusProxyOutputName
+                                !== barWindow.modelData.name) {
                         focusDismissTimer.restart();
                     }
                 }
@@ -255,6 +270,88 @@ Scope {
                 function onOverviewOpenChanged() {
                     if (NiriService.overviewOpen)
                         barContent.closeOverlays();
+                }
+            }
+        }
+    }
+
+    // A permanently mapped bar cannot acquire Niri's OnDemand focus from an
+    // IPC request. Map only this tiny, non-interactive surface so the bar and
+    // its popup keep their existing geometry and animation state.
+    Variants {
+        model: Quickshell.screens
+
+        PanelWindow {
+            id: notificationFocusWindow
+
+            required property ShellScreen modelData
+            property bool acquiredFocus: false
+
+            screen: modelData
+            visible: NotificationService.panelVisible
+                && NotificationService.panelFocusProxyOutputName
+                    === modelData.name
+            implicitWidth: 2
+            implicitHeight: 2
+
+            anchors {
+                top: true
+                left: true
+            }
+
+            exclusionMode: ExclusionMode.Ignore
+            color: Appearance.barBgColor
+
+            WlrLayershell.layer: WlrLayer.Top
+            WlrLayershell.namespace:
+                "quickshell:notification-ipc-focus"
+            WlrLayershell.keyboardFocus: visible
+                ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
+            Region {
+                id: notificationFocusMask
+            }
+
+            mask: notificationFocusMask
+
+            onVisibleChanged: {
+                if (!visible) {
+                    focusWindowDismissTimer.stop();
+                    acquiredFocus = false;
+                }
+            }
+
+            Item {
+                readonly property bool hostWindowActive: Window.active
+
+                onHostWindowActiveChanged: {
+                    if (hostWindowActive) {
+                        notificationFocusWindow.acquiredFocus = true;
+                        focusWindowDismissTimer.stop();
+                    } else if (notificationFocusWindow.visible
+                            && notificationFocusWindow.acquiredFocus) {
+                        focusWindowDismissTimer.restart();
+                    }
+                }
+            }
+
+            Timer {
+                id: focusWindowDismissTimer
+
+                interval: 120
+                onTriggered: {
+                    if (!notificationFocusWindow.visible
+                            || !notificationFocusWindow.acquiredFocus) {
+                        return;
+                    }
+
+                    if (NotificationService.panelHostFocusOutputName
+                            === notificationFocusWindow.modelData.name) {
+                        NotificationService.releasePanelFocusProxy(
+                            notificationFocusWindow.modelData.name);
+                    } else {
+                        NotificationService.closePanel();
+                    }
                 }
             }
         }

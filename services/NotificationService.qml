@@ -66,6 +66,8 @@ Singleton {
     property bool directoryReady: false
     property int sequence: 0
     property string panelOutputName: ""
+    property string panelFocusProxyOutputName: ""
+    property string panelHostFocusOutputName: ""
     property string pendingPanelAction: ""
     property int panelRequestRevision: 0
     property int activePanelRequestRevision: -1
@@ -110,6 +112,29 @@ Singleton {
             panelOutputName = name;
         } else if (panelOutputName === name) {
             panelOutputName = "";
+            releasePanelFocusProxy(name);
+            updatePanelHostFocus(name, false);
+        }
+    }
+
+    function requestPanelFocusProxy(outputName, hostFocused) {
+        const name = String(outputName ?? "");
+        panelFocusProxyOutputName = name;
+        updatePanelHostFocus(name, hostFocused === true);
+    }
+
+    function releasePanelFocusProxy(outputName) {
+        if (panelFocusProxyOutputName === String(outputName ?? ""))
+            panelFocusProxyOutputName = "";
+    }
+
+    function updatePanelHostFocus(outputName, focused) {
+        const name = String(outputName ?? "");
+        if (focused) {
+            panelHostFocusOutputName = name;
+            releasePanelFocusProxy(name);
+        } else if (panelHostFocusOutputName === name) {
+            panelHostFocusOutputName = "";
         }
     }
 
@@ -146,6 +171,8 @@ Singleton {
     function closePanel() {
         cancelPanelOutputRequest();
         panelOutputName = "";
+        panelFocusProxyOutputName = "";
+        panelHostFocusOutputName = "";
         panelActionRequested("close", "");
     }
 

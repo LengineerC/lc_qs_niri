@@ -61,8 +61,11 @@ Item {
 
         if (action === "toggle" && root.notificationPanelShown) {
             popup.close();
-        } else if (!root.notificationPanelShown) {
-            root.showPopup(notificationModule, "notifications");
+        } else {
+            NotificationService.requestPanelFocusProxy(
+                root.outputName, root.hostWindowActive);
+            if (!root.notificationPanelShown)
+                root.showPopup(notificationModule, "notifications");
         }
     }
 
@@ -75,6 +78,16 @@ Item {
         root.forceActiveFocus(Qt.MouseFocusReason);
         Window.window?.requestActivate();
     }
+
+    onHostWindowActiveChanged:
+        NotificationService.updatePanelHostFocus(
+            root.outputName,
+            root.notificationPanelShown && root.hostWindowActive)
+
+    onNotificationPanelShownChanged:
+        NotificationService.updatePanelHostFocus(
+            root.outputName,
+            root.notificationPanelShown && root.hostWindowActive)
 
     component BarText: Text {
         color: Appearance.layer1Text

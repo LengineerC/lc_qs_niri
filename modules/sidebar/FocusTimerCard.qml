@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import QtQuick.Shapes
 import Quickshell.Widgets
 import qs.common
+import qs.common.widgets
 import qs.services
 
 ClippingRectangle {
@@ -262,9 +263,11 @@ ClippingRectangle {
                     }
                 }
 
-                Controls.ToolTip.visible: containsMouse
-                Controls.ToolTip.text: I18n.tr("reset")
-                Controls.ToolTip.delay: 500
+                StyledToolTip {
+                    visible: resetButton.containsMouse
+                    text: I18n.tr("reset")
+                    delay: 500
+                }
             }
 
             Rectangle {
@@ -375,10 +378,12 @@ ClippingRectangle {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: FocusTimerService.toggle()
 
-                    Controls.ToolTip.visible: containsMouse
-                    Controls.ToolTip.text: FocusTimerService.running
-                        ? I18n.tr("pause") : I18n.tr("start")
-                    Controls.ToolTip.delay: 500
+                    StyledToolTip {
+                        visible: parent.containsMouse
+                        text: FocusTimerService.running
+                            ? I18n.tr("pause") : I18n.tr("start")
+                        delay: 500
+                    }
                 }
             }
         }
@@ -525,9 +530,11 @@ ClippingRectangle {
                     }
                 }
 
-                Controls.ToolTip.visible: containsMouse
-                Controls.ToolTip.text: I18n.tr("apply")
-                Controls.ToolTip.delay: 500
+                StyledToolTip {
+                    visible: applyButton.containsMouse
+                    text: I18n.tr("apply")
+                    delay: 500
+                }
             }
         }
 

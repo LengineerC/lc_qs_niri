@@ -229,12 +229,12 @@ Item {
                                 }
                             }
 
-                            Controls.ToolTip.visible:
-                                trayMouse.containsMouse
+                            StyledToolTip {
+                                visible: trayMouse.containsMouse
                                     && !root.menuOpen
-                            Controls.ToolTip.text:
-                                root.itemTitle(modelData)
-                            Controls.ToolTip.delay: 500
+                                text: root.itemTitle(modelData)
+                                delay: 500
+                            }
 
                             Behavior on color {
                                 ColorAnimation {
