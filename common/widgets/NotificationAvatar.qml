@@ -50,6 +50,19 @@ Item {
         color: Appearance.primaryContainer
         clip: true
 
+        Text {
+            anchors.centerIn: parent
+            visible: avatarImage.status === Image.Error
+                || !root.hasProfileImage
+                    && avatarImage.status !== Image.Ready
+            text: "󰂚"
+            color: Appearance.primary
+            font {
+                family: Appearance.iconFontFamily
+                pixelSize: Math.round(root.implicitSize * 0.48)
+            }
+        }
+
         Image {
             id: avatarImage
 
@@ -70,6 +83,7 @@ Item {
             source: root.hasProfileImage && !root.profileImageReady
                 ? "" : NotificationService.avatarSource(
                     root.notificationEntry)
+            visible: status === Image.Ready
             fillMode: root.hasProfileImage
                 ? Image.PreserveAspectCrop : Image.PreserveAspectFit
 

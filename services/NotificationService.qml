@@ -232,8 +232,23 @@ Singleton {
 
     function normaliseImageSource(source) {
         const value = String(source ?? "").trim();
-        if (!value)
+        if (!value || /^(null|undefined|\(null\))$/i.test(value)
+                || /^image:\/\/icon\/(null|undefined|\(null\))$/i
+                    .test(value)) {
             return "";
+        }
+
+        // Quickshell represents a freedesktop image-path hint through its
+        // icon provider. Absolute image files are thumbnails rather than
+        // theme icons, so feed them to Image as files directly.
+        const iconProviderPrefix = "image://icon/";
+        if (value.startsWith(iconProviderPrefix)) {
+            const iconValue = value.slice(iconProviderPrefix.length);
+            if (iconValue.startsWith("/"))
+                return "file://" + iconValue;
+            if (iconValue.startsWith("file://"))
+                return iconValue;
+        }
         if (value.startsWith("/"))
             return "file://" + value;
         return value;
@@ -266,15 +281,15 @@ Singleton {
     }
 
     function serialiseEntry(entry) {
+        const image = normaliseImageSource(entry.image);
         return {
             notificationId: entry.notificationId,
             appName: entry.appName,
-            appIcon: entry.appIcon,
+            appIcon: normaliseImageSource(entry.appIcon),
             desktopEntry: entry.desktopEntry,
             summary: entry.summary,
             body: entry.body,
-            image: String(entry.image).startsWith("image://qsimage/")
-                ? "" : entry.image,
+            image: image.startsWith("image://qsimage/") ? "" : image,
             urgency: entry.urgency,
             timestamp: entry.timestamp,
             read: entry.read
@@ -381,11 +396,11 @@ Singleton {
                     notificationId: String(data.notificationId
                         ?? root.nextId("history")),
                     appName: String(data.appName ?? ""),
-                    appIcon: String(data.appIcon ?? ""),
+                    appIcon: normaliseImageSource(data.appIcon),
                     desktopEntry: String(data.desktopEntry ?? ""),
                     summary: String(data.summary ?? ""),
                     body: String(data.body ?? ""),
-                    image: String(data.image ?? ""),
+                    image: normaliseImageSource(data.image),
                     urgency: Number(data.urgency
                         ?? NotificationUrgency.Normal),
                     timestamp: Number(data.timestamp ?? Date.now()),
@@ -458,7 +473,7 @@ Singleton {
             notificationId: nextId(notification.id),
             notification: notification,
             appName: resolveAppName(notification),
-            appIcon: notification.appIcon ?? "",
+            appIcon: normaliseImageSource(notification.appIcon),
             desktopEntry: notification.desktopEntry ?? "",
             summary: plainText(notification.summary),
             body: plainText(notification.body),
@@ -681,8 +696,9 @@ Singleton {
     function iconSource(entry) {
         if (!entry)
             return Quickshell.iconPath("dialog-information");
-        if (entry.appIcon)
-            return Quickshell.iconPath(entry.appIcon,
+        const appIcon = normaliseImageSource(entry.appIcon);
+        if (appIcon)
+            return Quickshell.iconPath(appIcon,
                 "dialog-information");
         const desktop = desktopEntryFor(entry);
         return desktop?.icon
@@ -693,7 +709,7 @@ Singleton {
     function hasApplicationIcon(entry) {
         if (!entry)
             return false;
-        if (entry.appIcon)
+        if (normaliseImageSource(entry.appIcon))
             return true;
         return Boolean(desktopEntryFor(entry)?.icon);
     }
