@@ -343,7 +343,9 @@ Singleton {
      *   和执行其 post_hook。
      *
      * 这样某个应用模板失败或向 stdout 输出内容时，不会阻止 Shell
-     * 自身更新颜色。快速连续切换时只保留最后一次应用同步请求。
+     * 自身更新颜色。应用模板必须串行生成：Matugen 会逐个写入模板，
+     * 中途终止进程会留下只更新了一部分文件的状态。快速连续切换时
+     * 让当前批次完整结束，并把等待队列合并为最后一次同步请求。
      */
     function startPendingApplicationMatugen() {
         if (pendingApplicationSourceArguments === null
@@ -389,9 +391,7 @@ Singleton {
         pendingApplicationScheme = requestedScheme;
         syncingApplications = true;
 
-        if (applicationMatugenProcess.running)
-            applicationMatugenProcess.running = false;
-        else
+        if (!applicationMatugenProcess.running)
             startPendingApplicationMatugen();
     }
 
