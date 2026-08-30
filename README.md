@@ -90,17 +90,19 @@ cmake、ninja、C++20 编译器、Qt 6 Core/Qml/Quick/ShaderTools
 然后依据 `native/caelestia-blobs/CMakeLists.txt` 重新编译。该构建文件还会
 读取工作区中的 `caelestiashell/plugin/src/Caelestia/Blobs` 源码。
 
-## 2. 独立窗口
+## 2. 独立界面
 
-Launcher、剪切板和系统监视器是由 Niri 管理的普通独立窗口。
+Launcher IPC 会在当前显示器打开全屏 layer-shell 启动台，支持模糊壁纸、
+应用网格、搜索和键盘选择；Bar 左侧系统图标仍打开原来的小型面板。
+剪切板和系统监视器仍是由 Niri 管理的普通独立窗口。
 
 ### `launcher`
 
 | 命令 | 说明 |
 | --- | --- |
-| `qs ipc call launcher open` | 打开应用启动器 |
-| `qs ipc call launcher close` | 关闭应用启动器 |
-| `qs ipc call launcher toggle` | 切换应用启动器显示状态 |
+| `qs ipc call launcher open` | 在当前显示器打开全屏启动台 |
+| `qs ipc call launcher close` | 关闭全屏启动台 |
+| `qs ipc call launcher toggle` | 切换全屏启动台显示状态 |
 | `qs ipc call launcher visible` | 返回当前是否显示 |
 
 ### `clipboard`

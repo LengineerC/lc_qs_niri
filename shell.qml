@@ -9,6 +9,7 @@ import qs.modules.notifications
 import qs.modules.settings
 import qs.modules.wallpaper
 import qs.modules.lock
+import "modules/launcher" as LauncherModule
 import qs.services
 
 ShellRoot {
@@ -34,6 +35,9 @@ ShellRoot {
     }
 
     WallpaperBackground {
+    }
+
+    LauncherModule.Launchpad {
     }
 
     SettingsWindow {

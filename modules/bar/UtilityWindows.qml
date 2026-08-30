@@ -38,50 +38,6 @@ Scope {
     }
 
     ManagedWindow {
-        id: launcherWindow
-
-        title: "QuickShell " + I18n.tr("launcher")
-        width: Math.min(screen?.width * 0.72 ?? Appearance.px(540),
-            Appearance.px(540))
-        height: Math.min(screen?.height * 0.82 ?? Appearance.px(620),
-            Appearance.px(620))
-        minimumWidth: Appearance.px(420)
-        minimumHeight: Appearance.px(390)
-
-        LauncherPanel {
-            anchors.fill: parent
-            active: launcherWindow.visible
-            onCloseRequested: launcherWindow.closeWindow()
-        }
-
-        Shortcut {
-            sequence: "Escape"
-            enabled: launcherWindow.visible
-            onActivated: launcherWindow.closeWindow()
-        }
-
-        IpcHandler {
-            target: "launcher"
-
-            function open(): void {
-                launcherWindow.openWindow();
-            }
-
-            function close(): void {
-                launcherWindow.closeWindow();
-            }
-
-            function toggle(): void {
-                launcherWindow.toggleWindow();
-            }
-
-            function visible(): bool {
-                return launcherWindow.visible;
-            }
-        }
-    }
-
-    ManagedWindow {
         id: clipboardWindow
 
         title: "QuickShell " + I18n.tr("clipboard")
