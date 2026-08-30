@@ -14,7 +14,9 @@ Item {
             outputName, width, height)
 
     anchors.fill: parent
-    visible: !outputFullscreen
+    // A fullscreen client hides the decorative corners, but Launchpad is a
+    // shell surface rather than that client and should keep the screen frame.
+    visible: !outputFullscreen || NiriService.launchpadProgress > 0
 
     component ScreenCorner: Item {
         id: screenCorner

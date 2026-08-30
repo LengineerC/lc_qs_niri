@@ -81,7 +81,7 @@ Scope {
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.namespace: "quickshell:bar"
             WlrLayershell.keyboardFocus:
-                    NiriService.overviewProgress <= 0
+                    NiriService.barRetractionProgress <= 0
                     && (barContent.popupShown
                         || barContent.barContainsMouse)
                 ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
@@ -115,7 +115,7 @@ Scope {
             // Do not disable the whole Qt Quick subtree during overview.
             // Swap the Wayland input region instead, then restore a fresh,
             // fixed-coordinate mask after the slide-in animation completes.
-            mask: NiriService.overviewProgress > 0
+            mask: NiriService.barRetractionProgress > 0
                 ? overviewMask : normalMask
 
             Timer {
@@ -188,13 +188,15 @@ Scope {
                 // ancestor chain large enough for Qt Quick to route pointer
                 // events to content drawn below the bar.
                 height: parent.height
-                y: barWindow.hiddenOffset * NiriService.overviewProgress
+                y: barWindow.hiddenOffset
+                    * NiriService.barRetractionProgress
 
                 BarContent {
                     id: barContent
 
                     outputName: modelData.name
-                    effectsOpacity: 1 - NiriService.overviewProgress
+                    effectsOpacity:
+                        1 - NiriService.barRetractionProgress
                     anchors {
                         top: parent.top
                         bottom: parent.bottom

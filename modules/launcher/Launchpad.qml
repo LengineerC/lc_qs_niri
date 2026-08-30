@@ -17,6 +17,13 @@ Scope {
     property int requestRevision: 0
     property int activeRequestRevision: -1
 
+    Component.onDestruction: NiriService.launchpadProgress = 0
+
+    onTargetOutputNameChanged: {
+        // A launchpad moved to another output starts a fresh reveal there.
+        NiriService.launchpadProgress = 0;
+    }
+
     function cancelFocusedOutputRequest() {
         ++requestRevision;
         pendingAction = "";
@@ -176,7 +183,7 @@ Scope {
                 right: true
             }
 
-            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.namespace: "quickshell:launchpad"
             WlrLayershell.keyboardFocus: targetShown
                 ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
@@ -193,6 +200,11 @@ Scope {
                 revealAnimation.start();
             }
 
+            onRevealProgressChanged: {
+                if (root.targetOutputName === modelData.name)
+                    NiriService.launchpadProgress = revealProgress;
+            }
+
             NumberAnimation {
                 id: revealAnimation
 
@@ -203,10 +215,10 @@ Scope {
             Item {
                 id: blurredBackdrop
 
-                anchors {
-                    fill: parent
-                    margins: -Appearance.px(48)
-                }
+                // Keep exactly the same geometry as the desktop wallpaper.
+                // Expanding this item to hide blur edges also zoomed the image
+                // slightly whenever the launchpad appeared.
+                anchors.fill: parent
                 opacity: launchpadWindow.revealProgress
                 layer.enabled: launchpadWindow.visible
                 layer.effect: MultiEffect {

@@ -17,6 +17,11 @@ Singleton {
     property bool connected: false
     property bool overviewOpen: false
     property real overviewProgress: overviewOpen ? 1 : 0
+    // Full-screen shell surfaces can reuse the Overview bar retraction
+    // without pretending that Niri's Overview itself is open.
+    property real launchpadProgress: 0
+    readonly property real barRetractionProgress: Math.max(
+        overviewProgress, Math.max(0, Math.min(1, launchpadProgress)))
     property string lastError: ""
     property var workspaceStates: ({})
     property var windowStates: ({})
