@@ -96,6 +96,19 @@ Singleton {
             + (mode.is_preferred ? "  ★" : "");
     }
 
+    function persistentRecordFor(output) {
+        const name = String(output?.name || "");
+        if (name && persistentOutputs[name])
+            return persistentOutputs[name];
+
+        const matchName = stableOutputName(output);
+        if (!matchName)
+            return null;
+        const key = Object.keys(persistentOutputs).find(candidate =>
+            persistentOutputs[candidate]?.matchName === matchName);
+        return key === undefined ? null : persistentOutputs[key];
+    }
+
     function normalizeOutput(output) {
         const modes = (output.modes || []).map(mode => ({
             width: Number(mode.width),
@@ -116,6 +129,10 @@ Singleton {
                 label: "Auto"
             };
         const logical = output.logical;
+        const enabled = logical !== null && logical !== undefined;
+        const persistent = persistentRecordFor(output);
+        const restoredMode = !enabled && persistent?.mode
+            ? String(persistent.mode) : currentMode.value;
 
         return {
             name: String(output.name || ""),
@@ -125,17 +142,32 @@ Singleton {
             physicalWidth: Number(output.physical_size?.[0] || 0),
             physicalHeight: Number(output.physical_size?.[1] || 0),
             modes: modes,
-            currentMode: currentMode.value,
-            enabled: logical !== null && logical !== undefined,
-            x: Math.round(Number(logical?.x || 0)),
-            y: Math.round(Number(logical?.y || 0)),
+            currentMode: restoredMode,
+            enabled: enabled,
+            automaticPosition: persistent
+                ? Boolean(persistent.automaticPosition) : !enabled,
+            x: enabled
+                ? Math.round(Number(logical?.x || 0))
+                : Math.round(Number(persistent?.x || 0)),
+            y: enabled
+                ? Math.round(Number(logical?.y || 0))
+                : Math.round(Number(persistent?.y || 0)),
             logicalWidth: Math.round(Number(logical?.width || 0)),
             logicalHeight: Math.round(Number(logical?.height || 0)),
-            scale: Number(logical?.scale || 1),
-            transform: normalizeTransform(logical?.transform),
+            scale: enabled
+                ? Number(logical?.scale || 1)
+                : clampedScale(persistent?.scale),
+            transform: enabled
+                ? normalizeTransform(logical?.transform)
+                : normalizeTransform(persistent?.transform),
             vrrSupported: Boolean(output.vrr_supported),
-            vrrEnabled: Boolean(output.vrr_enabled),
-            maxBpc: Number(output.max_bpc || 8)
+            vrrEnabled: enabled
+                ? Boolean(output.vrr_enabled)
+                : Boolean(persistent?.vrrEnabled),
+            maxBpc: enabled
+                ? Number(output.max_bpc || 8)
+                : allowedMaxBpc(persistent?.maxBpc
+                    ?? output.max_bpc)
         };
     }
 
@@ -196,7 +228,10 @@ Singleton {
             transform: normalizeTransform(transform === undefined
                 ? output.transform : transform),
             automaticPosition: automaticPosition === undefined
-                ? !output.enabled : Boolean(automaticPosition),
+                ? (output.automaticPosition === undefined
+                    ? !output.enabled
+                    : Boolean(output.automaticPosition))
+                : Boolean(automaticPosition),
             x: Math.round(Number(x === undefined ? output.x : x) || 0),
             y: Math.round(Number(y === undefined ? output.y : y) || 0),
             vrrEnabled: vrrEnabled === undefined
@@ -348,6 +383,7 @@ Singleton {
         persistenceStateReady = true;
         if (persistenceWritePending)
             writePersistentFiles();
+        refresh();
     }
 
     function applyOutput(name, enabled, mode, scale,

@@ -443,7 +443,7 @@ Item {
                             property string draftTransform:
                                 modelData.transform
                             property bool automaticPosition:
-                                !modelData.enabled
+                                modelData.automaticPosition
                             property int draftX: modelData.x
                             property int draftY: modelData.y
                             property bool draftVrr:
