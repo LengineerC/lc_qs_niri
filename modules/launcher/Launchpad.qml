@@ -184,7 +184,10 @@ Scope {
             }
 
             WlrLayershell.layer: WlrLayer.Top
-            WlrLayershell.namespace: "quickshell:launchpad"
+            WlrLayershell.namespace:
+                ShellSettings.launchpadBackgroundMode === "window"
+                    ? "quickshell:launchpad-window-blur"
+                    : "quickshell:launchpad-wallpaper"
             WlrLayershell.keyboardFocus: targetShown
                 ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
@@ -212,38 +215,37 @@ Scope {
                 property: "revealProgress"
             }
 
-            Item {
-                id: blurredBackdrop
-
-                // Keep exactly the same geometry as the desktop wallpaper.
-                // Expanding this item to hide blur edges also zoomed the image
-                // slightly whenever the launchpad appeared.
+            Loader {
                 anchors.fill: parent
-                opacity: launchpadWindow.revealProgress
-                layer.enabled: launchpadWindow.visible
-                layer.effect: MultiEffect {
-                    autoPaddingEnabled: false
-                    blurEnabled: true
-                    blur: 1
-                    blurMax: Appearance.px(48)
-                    blurMultiplier: 1
-                }
+                active: launchpadWindow.visible
+                    && ShellSettings.launchpadBackgroundMode === "wallpaper"
 
-                Image {
-                    anchors.fill: parent
-                    source: launchpadWindow.visible
-                        ? WallpaperService.fileUrl(
-                            WallpaperService.currentPath) : ""
-                    sourceSize {
-                        width: launchpadWindow.width
-                        height: launchpadWindow.height
+                sourceComponent: Component {
+                    Item {
+                        opacity: launchpadWindow.revealProgress
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            autoPaddingEnabled: false
+                            blurEnabled: true
+                            blur: 1
+                            blurMax: Appearance.px(48)
+                            blurMultiplier: 1
+                        }
+
+                        Image {
+                            anchors.fill: parent
+                            source: WallpaperService.fileUrl(
+                                WallpaperService.currentPath)
+                            sourceSize {
+                                width: launchpadWindow.width
+                                height: launchpadWindow.height
+                            }
+                            fillMode: WallpaperService.imageFillMode
+                            asynchronous: true
+                            cache: false
+                            smooth: true
+                        }
                     }
-                    fillMode: WallpaperService.imageFillMode
-                    asynchronous: true
-                    // This is a screen-sized decode. Release it with the
-                    // launchpad instead of retaining a second wallpaper copy.
-                    cache: false
-                    smooth: true
                 }
             }
 

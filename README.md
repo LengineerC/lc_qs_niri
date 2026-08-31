@@ -238,6 +238,7 @@ scheme-vibrant
 | `qs ipc call settings setTimeFormat "HH:mm:ss"` | 设置 Qt 时间格式 |
 | `qs ipc call settings setDateFormat "yyyy-MM-dd ddd"` | 设置 Qt 日期格式 |
 | `qs ipc call settings setWallpaperFillMode PreserveAspectCrop` | 设置壁纸显示形式 |
+| `qs ipc call settings setLaunchpadBackgroundMode window` | 设置启动台背景模式 |
 | `qs ipc call settings reset` | 将全部 Shell 设置恢复默认值 |
 
 `setWallpaperFillMode` 支持：
@@ -251,6 +252,9 @@ TileVertically
 TileHorizontally
 Pad
 ```
+
+`setLaunchpadBackgroundMode` 支持 `window`（模糊当前窗口）和
+`wallpaper`（模糊当前壁纸）。
 
 注意：`settings reset` 会立即恢复所有设置默认值，包括语言、字体、缩放、
 壁纸选项、天气位置和剪切板限制。

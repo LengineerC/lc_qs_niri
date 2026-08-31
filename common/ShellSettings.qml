@@ -41,6 +41,9 @@ Singleton {
     property bool wallpaperAutoTheme: true
     property string wallpaperFillMode: "PreserveAspectCrop"
     property string wallpaperTransition: "random"
+    // "window" uses Niri's regular compositor blur; "wallpaper" renders a
+    // blurred copy of the current wallpaper inside Launchpad.
+    property string launchpadBackgroundMode: "window"
     property bool showCpuUsage: true
     property bool showMemoryUsage: true
     property bool showCpuTemperature: false
@@ -115,7 +118,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 20,
+            version: 21,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             shadowEnabled: shadowEnabled,
@@ -145,6 +148,7 @@ Singleton {
             wallpaperAutoTheme: wallpaperAutoTheme,
             wallpaperFillMode: wallpaperFillMode,
             wallpaperTransition: wallpaperTransition,
+            launchpadBackgroundMode: launchpadBackgroundMode,
             showCpuUsage: showCpuUsage,
             showMemoryUsage: showMemoryUsage,
             showCpuTemperature: showCpuTemperature,
@@ -161,7 +165,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 20)
+            if (state.version !== 21)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -291,6 +295,12 @@ Singleton {
                 wallpaperTransition = state.wallpaperTransition;
             else
                 needsMigration = true;
+            if (["window", "wallpaper"].indexOf(
+                    state.launchpadBackgroundMode) >= 0) {
+                launchpadBackgroundMode = state.launchpadBackgroundMode;
+            } else {
+                needsMigration = true;
+            }
             if (typeof state.showCpuUsage === "boolean")
                 showCpuUsage = state.showCpuUsage;
             else
@@ -373,6 +383,7 @@ Singleton {
         wallpaperAutoTheme = true;
         wallpaperFillMode = "PreserveAspectCrop";
         wallpaperTransition = "random";
+        launchpadBackgroundMode = "window";
         showCpuUsage = true;
         showMemoryUsage = true;
         showCpuTemperature = false;
@@ -417,6 +428,7 @@ Singleton {
     onWallpaperAutoThemeChanged: scheduleSave()
     onWallpaperFillModeChanged: scheduleSave()
     onWallpaperTransitionChanged: scheduleSave()
+    onLaunchpadBackgroundModeChanged: scheduleSave()
     onShowCpuUsageChanged: scheduleSave()
     onShowMemoryUsageChanged: scheduleSave()
     onShowCpuTemperatureChanged: scheduleSave()
@@ -516,6 +528,11 @@ Singleton {
                 root.wallpaperTransition = transition;
         }
 
+        function setLaunchpadBackgroundMode(mode: string): void {
+            if (["window", "wallpaper"].indexOf(mode) >= 0)
+                root.launchpadBackgroundMode = mode;
+        }
+
         function setScreenCornerColor(color: string): void {
             if (/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(color))
                 root.screenCornerColor = color;
@@ -553,6 +570,7 @@ Singleton {
                 wallpaperAutoTheme: root.wallpaperAutoTheme,
                 wallpaperFillMode: root.wallpaperFillMode,
                 wallpaperTransition: root.wallpaperTransition,
+                launchpadBackgroundMode: root.launchpadBackgroundMode,
                 showCpuUsage: root.showCpuUsage,
                 showMemoryUsage: root.showMemoryUsage,
                 showCpuTemperature: root.showCpuTemperature,

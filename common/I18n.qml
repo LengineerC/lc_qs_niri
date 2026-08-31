@@ -265,6 +265,12 @@ Singleton {
         wallpaperTransitionIris: ["光圈绽放", "Iris bloom"],
         wallpaperTransitionPixelate: ["像素化", "Pixelate"],
         wallpaperTransitionPortal: ["传送门", "Portal"],
+        launchpadBackground: ["启动台背景", "Launchpad background"],
+        launchpadBackgroundHint: [
+            "选择模糊当前窗口或壁纸",
+            "Choose whether to blur the current windows or wallpaper"],
+        launchpadBlurWindow: ["当前窗口", "Current windows"],
+        launchpadBlurWallpaper: ["壁纸", "Wallpaper"],
         wallpaperStretch: ["拉伸", "Stretch"],
         wallpaperFit: ["适合", "Fit"],
         wallpaperFill: ["填充", "Fill"],

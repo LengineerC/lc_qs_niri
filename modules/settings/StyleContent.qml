@@ -440,6 +440,60 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
+            implicitHeight: launchpadBackgroundRow.implicitHeight
+                + Appearance.px(20)
+            radius: Appearance.smallRadius
+            color: Appearance.layer3
+            border.width: 1
+            border.color: Appearance.outline
+
+            RowLayout {
+                id: launchpadBackgroundRow
+
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                    margins: Appearance.px(10)
+                }
+                spacing: Appearance.px(8)
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    PanelText {
+                        text: I18n.tr("launchpadBackground")
+                        color: Appearance.layer0Text
+                    }
+
+                    PanelText {
+                        text: I18n.tr("launchpadBackgroundHint")
+                        color: Appearance.subtext
+                        font.pixelSize: Appearance.smallFontSize
+                    }
+                }
+
+                ModeButton {
+                    label: I18n.tr("launchpadBlurWindow")
+                    selected: ShellSettings.launchpadBackgroundMode
+                        === "window"
+                    onClicked:
+                        ShellSettings.launchpadBackgroundMode = "window"
+                }
+
+                ModeButton {
+                    label: I18n.tr("launchpadBlurWallpaper")
+                    selected: ShellSettings.launchpadBackgroundMode
+                        === "wallpaper"
+                    onClicked:
+                        ShellSettings.launchpadBackgroundMode = "wallpaper"
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
             implicitHeight: themeOptions.implicitHeight + Appearance.px(20)
             radius: Appearance.smallRadius
             color: Appearance.layer3
