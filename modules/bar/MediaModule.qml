@@ -41,9 +41,9 @@ MouseArea {
         }
         radius: Appearance.smallRadius
         color: root.containsMouse
-            ? Appearance.layer1Hover : Appearance.layer1
+            ? Appearance.barLayer1Hover : Appearance.barLayer1
         border.width: 1
-        border.color: Appearance.layer0Border
+        border.color: Appearance.barLayer0Border
 
         Behavior on color {
             enabled: !Theme.paletteTransitionRunning
@@ -74,8 +74,8 @@ MouseArea {
                 antialiasing: true
                 readonly property real value: MediaService.progress
                 readonly property color trackColor:
-                    Appearance.withAlpha(Appearance.subtext, 0.25)
-                readonly property color progressColor: Appearance.primary
+                    Appearance.withAlpha(Appearance.barSubtext, 0.25)
+                readonly property color progressColor: Appearance.barPrimary
 
                 onValueChanged: requestPaint()
                 onTrackColorChanged: requestPaint()
@@ -109,7 +109,7 @@ MouseArea {
             Text {
                 anchors.centerIn: parent
                 text: MediaService.isPlaying ? "󰏤" : "󰝚"
-                color: Appearance.layer0Text
+                color: Appearance.barLayer0Text
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(13)
@@ -128,7 +128,7 @@ MouseArea {
                     ? title + "  •  " + player.trackArtist : title;
             }
             color: MediaService.available
-                ? Appearance.layer0Text : Appearance.subtext
+                ? Appearance.barLayer0Text : Appearance.barSubtext
             elide: Text.ElideRight
             font {
                 family: Appearance.fontFamily

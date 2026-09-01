@@ -93,9 +93,9 @@ MouseArea {
         }
         radius: Appearance.smallRadius
         color: root.containsMouse
-            ? Appearance.layer1Hover : Appearance.layer1
+            ? Appearance.barLayer1Hover : Appearance.barLayer1
         border.width: 1
-        border.color: Appearance.layer0Border
+        border.color: Appearance.barLayer0Border
 
         Behavior on color {
             enabled: !Theme.paletteTransitionRunning
@@ -112,7 +112,7 @@ MouseArea {
         Text {
             visible: root.shownResources.length === 0
             text: "󰍛"
-            color: Appearance.layer0Text
+            color: Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.px(18)
@@ -141,7 +141,7 @@ MouseArea {
                     Layout.maximumWidth: reservedWidth
                     text: parent.modelData.text
                     color: parent.modelData.warning
-                        ? Theme.palette.m3error : Appearance.layer0Text
+                        ? Appearance.barError : Appearance.barLayer0Text
                     horizontalAlignment: Text.AlignLeft
                     font {
                         family: Appearance.fontFamily

@@ -20,10 +20,10 @@ Rectangle {
     implicitHeight: contentLayout.implicitHeight + Appearance.px(20)
     radius: Appearance.smallRadius
     color: cardArea.containsMouse
-        ? Appearance.layer1Hover : Appearance.layer1
+        ? Appearance.barLayer1Hover : Appearance.barLayer1
     border.width: historical ? 1 : 2
     border.color: historical
-        ? Appearance.outline : Appearance.primary
+        ? Appearance.barOutline : Appearance.barPrimary
 
     function timeText() {
         const date = new Date(notificationEntry.timestamp);
@@ -72,7 +72,7 @@ Rectangle {
                     Layout.fillWidth: true
                     text: root.notificationEntry.appName
                         || I18n.tr("unknownApplication")
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     elide: Text.ElideRight
                     font {
                         family: Appearance.fontFamily
@@ -82,7 +82,7 @@ Rectangle {
 
                 Text {
                     text: root.timeText()
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Appearance.smallFontSize
@@ -94,7 +94,7 @@ Rectangle {
                 Layout.fillWidth: true
                 text: root.notificationEntry.summary
                     || I18n.tr("notification")
-                color: Appearance.layer0Text
+                color: Appearance.barLayer0Text
                 elide: Text.ElideRight
                 font {
                     family: Appearance.fontFamily
@@ -107,7 +107,7 @@ Rectangle {
                 Layout.fillWidth: true
                 visible: text.length > 0
                 text: root.notificationEntry.body
-                color: Appearance.layer1Text
+                color: Appearance.barLayer1Text
                 wrapMode: Text.Wrap
                 elide: Text.ElideRight
                 maximumLineCount: 2
@@ -124,13 +124,13 @@ Rectangle {
             implicitHeight: Appearance.px(27)
             radius: Appearance.fullRadius
             color: actionArea.containsMouse
-                ? Appearance.layer1Active : "transparent"
+                ? Appearance.barLayer1Active : "transparent"
 
             Text {
                 anchors.centerIn: parent
                 text: root.historical ? "󰆴" : "󰄬"
                 color: root.historical
-                    ? Theme.palette.m3error : Appearance.primary
+                    ? Appearance.barError : Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(14)

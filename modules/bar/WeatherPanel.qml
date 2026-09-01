@@ -13,13 +13,21 @@ Item {
 
     // StyledPopup disables this after closing so the Canvas does no idle work.
     property bool active: visible
+    readonly property color chartBrightColor:
+        ShellSettings.barFrostedGlass ? "#f5ffffff" : Appearance.barPrimary
+    readonly property color chartDimColor:
+        ShellSettings.barFrostedGlass ? "#8affffff" : Appearance.barTertiary
+    readonly property color chartSurfaceColor:
+        ShellSettings.barFrostedGlass
+            ? Appearance.withAlpha(Appearance.barGlassBaseColor, 0.48)
+            : Appearance.barLayer3
 
     implicitWidth: Appearance.px(850)
     implicitHeight: contentColumn.implicitHeight
         + Appearance.px(28)
 
     component PanelText: Text {
-        color: Appearance.layer1Text
+        color: Appearance.barLayer1Text
 
         font {
             family: Appearance.fontFamily
@@ -40,15 +48,15 @@ Item {
         radius: Appearance.px(8)
 
         color: selected
-            ? Appearance.primaryContainer
+            ? Appearance.barPrimaryContainer
             : area.containsMouse
-                ? Appearance.layer1Active
-                : Appearance.layer3
+                ? Appearance.barLayer1Active
+                : Appearance.barLayer3
 
         border.width: 1
         border.color: selected
-            ? Appearance.primary
-            : Appearance.outline
+            ? Appearance.barPrimary
+            : Appearance.barOutline
 
         PanelText {
             id: label
@@ -57,8 +65,8 @@ Item {
             text: button.text
 
             color: button.selected
-                ? Appearance.primaryContainerText
-                : Appearance.subtext
+                ? Appearance.barPrimaryContainerText
+                : Appearance.barSubtext
 
             font {
                 pixelSize: Appearance.smallFontSize
@@ -102,7 +110,7 @@ Item {
 
         PanelText {
             text: legend.label
-            color: Appearance.subtext
+            color: Appearance.barSubtext
             font.pixelSize: Appearance.smallFontSize
         }
     }
@@ -118,9 +126,11 @@ Item {
         implicitHeight: Appearance.px(48)
 
         radius: Appearance.px(9)
-        color: Appearance.withAlpha(Appearance.layer2, 0.86)
+        color: ShellSettings.barFrostedGlass
+            ? Appearance.withAlpha(Appearance.barGlassBaseColor, 0.66)
+            : Appearance.withAlpha(Appearance.barLayer2, 0.86)
         border.width: 1
-        border.color: Appearance.withAlpha(Appearance.outline, 0.82)
+        border.color: Appearance.withAlpha(Appearance.barOutline, 0.82)
 
         RowLayout {
             anchors {
@@ -136,12 +146,12 @@ Item {
                 Layout.alignment: Qt.AlignVCenter
 
                 radius: Appearance.fullRadius
-                color: Appearance.primaryContainer
+                color: Appearance.barPrimaryContainer
 
                 Text {
                     anchors.centerIn: parent
                     text: metric.icon
-                    color: Appearance.primaryContainerText
+                    color: Appearance.barPrimaryContainerText
 
                     font {
                         family: Appearance.iconFontFamily
@@ -157,7 +167,7 @@ Item {
                 PanelText {
                     Layout.fillWidth: true
                     text: metric.label
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     elide: Text.ElideRight
                     font.pixelSize: Appearance.smallFontSize
                 }
@@ -165,7 +175,7 @@ Item {
                 PanelText {
                     Layout.fillWidth: true
                     text: metric.value
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     elide: Text.ElideRight
 
                     font {
@@ -254,7 +264,7 @@ Item {
                 context.translate(centerX, centerY);
                 context.rotate(phase * 0.045);
                 context.strokeStyle = Appearance.withAlpha(
-                    Appearance.primary, 0.18);
+                    Appearance.barPrimary, 0.18);
                 context.lineWidth = Appearance.px(2);
                 context.lineCap = "round";
 
@@ -275,11 +285,11 @@ Item {
                     centerX, centerY, 0,
                     centerX, centerY, radius * 2.4);
                 glow.addColorStop(0, Appearance.withAlpha(
-                    Appearance.primary, 0.22));
+                    Appearance.barPrimary, 0.22));
                 glow.addColorStop(0.42, Appearance.withAlpha(
-                    Appearance.primary, 0.09));
+                    Appearance.barPrimary, 0.09));
                 glow.addColorStop(1, Appearance.withAlpha(
-                    Appearance.primary, 0));
+                    Appearance.barPrimary, 0));
                 context.fillStyle = glow;
                 context.beginPath();
                 context.arc(centerX, centerY,
@@ -294,7 +304,7 @@ Item {
                     const pulse = 0.35 + 0.25 * Math.sin(
                         phase * 1.4 + index * 1.7);
                     context.fillStyle = Appearance.withAlpha(
-                        Appearance.primary, pulse);
+                        Appearance.barPrimary, pulse);
                     context.beginPath();
                     context.arc(x, y,
                         Appearance.px(index % 5 === 0 ? 1.3 : 0.8),
@@ -303,7 +313,7 @@ Item {
                 }
 
                 context.fillStyle = Appearance.withAlpha(
-                    Appearance.primary, 0.2);
+                    Appearance.barPrimary, 0.2);
                 context.beginPath();
                 const moonRadius = radius * 1.12;
                 context.moveTo(centerX + moonRadius * 0.32,
@@ -338,7 +348,7 @@ Item {
                 cloudScale, alpha) {
             const unit = Appearance.px(18) * cloudScale;
             context.fillStyle = Appearance.withAlpha(
-                Appearance.layer0Text, alpha);
+                Appearance.barLayer0Text, alpha);
             context.beginPath();
             context.arc(centerX - unit * 0.8, centerY,
                 unit * 0.72, Math.PI, Math.PI * 2);
@@ -379,7 +389,7 @@ Item {
         function drawRain(context, lightRain) {
             const count = lightRain ? 24 : 42;
             context.strokeStyle = Appearance.withAlpha(
-                Appearance.primary, lightRain ? 0.22 : 0.32);
+                Appearance.barPrimary, lightRain ? 0.22 : 0.32);
             context.lineWidth = Appearance.px(1.25);
             context.lineCap = "round";
 
@@ -411,7 +421,7 @@ Item {
                     height + Appearance.px(16)) - Appearance.px(8);
                 const radius = Appearance.px(1 + index % 3 * 0.45);
                 context.fillStyle = Appearance.withAlpha(
-                    Appearance.layer0Text, 0.25 + (index % 4) * 0.04);
+                    Appearance.barLayer0Text, 0.25 + (index % 4) * 0.04);
                 context.beginPath();
                 context.arc(x, y, radius, 0, Math.PI * 2);
                 context.fill();
@@ -425,17 +435,17 @@ Item {
             const gradient = context.createLinearGradient(
                 left, centerY, right, centerY);
             gradient.addColorStop(0,
-                Appearance.withAlpha(Appearance.layer0Text, 0));
+                Appearance.withAlpha(Appearance.barLayer0Text, 0));
             gradient.addColorStop(0.18,
-                Appearance.withAlpha(Appearance.layer0Text,
+                Appearance.withAlpha(Appearance.barLayer0Text,
                     alpha * 0.62));
             gradient.addColorStop(0.5,
-                Appearance.withAlpha(Appearance.layer0Text, alpha));
+                Appearance.withAlpha(Appearance.barLayer0Text, alpha));
             gradient.addColorStop(0.82,
-                Appearance.withAlpha(Appearance.layer0Text,
+                Appearance.withAlpha(Appearance.barLayer0Text,
                     alpha * 0.62));
             gradient.addColorStop(1,
-                Appearance.withAlpha(Appearance.layer0Text, 0));
+                Appearance.withAlpha(Appearance.barLayer0Text, 0));
 
             context.fillStyle = gradient;
             context.beginPath();
@@ -487,11 +497,11 @@ Item {
 
             const strength = Math.sin(cycle / 0.16 * Math.PI);
             context.fillStyle = Appearance.withAlpha(
-                Appearance.primary, 0.055 * strength);
+                Appearance.barPrimary, 0.055 * strength);
             context.fillRect(0, 0, width, height);
 
             context.strokeStyle = Appearance.withAlpha(
-                Appearance.primary, 0.55 * strength);
+                Appearance.barPrimary, 0.55 * strength);
             context.lineWidth = Appearance.px(1.7);
             context.lineJoin = "round";
             context.beginPath();
@@ -512,15 +522,15 @@ Item {
             context.clip();
 
             const baseStart = Appearance.mix(
-                Appearance.layer3,
-                daytime ? Appearance.primaryContainer
+                Appearance.barLayer3,
+                daytime ? Appearance.barPrimaryContainer
                     : Appearance.layer0,
                 daytime ? 0.22 : 0.34);
             const baseEnd = Appearance.mix(
-                Appearance.layer3,
+                Appearance.barLayer3,
                 weatherKind === "thunder"
-                    ? Appearance.tertiary
-                    : Appearance.primaryContainer,
+                    ? Appearance.barTertiary
+                    : Appearance.barPrimaryContainer,
                 weatherKind === "thunder" ? 0.14 : 0.1);
             const gradient = context.createLinearGradient(
                 0, 0, width, height);
@@ -625,9 +635,9 @@ Item {
         readonly property real bottomPadding: Appearance.px(48)
 
         readonly property color primaryLine:
-            Appearance.primary
+            root.chartBrightColor
         readonly property color secondaryLine:
-            Theme.palette.m3tertiary
+            root.chartDimColor
 
         function repaint() {
             chartCanvas.requestPaint();
@@ -704,8 +714,8 @@ Item {
 
                 context.lineWidth = 1;
                 context.strokeStyle = Appearance.withAlpha(
-                    Appearance.outline, 0.36);
-                context.fillStyle = Appearance.subtext;
+                    Appearance.barOutline, 0.36);
+                context.fillStyle = Appearance.barSubtext;
                 context.font =
                     Appearance.smallFontSize
                     + "px " + Appearance.fontFamily;
@@ -1055,8 +1065,8 @@ Item {
                             )
 
                             color: index === 0
-                                ? Appearance.primary
-                                : Appearance.subtext
+                                ? Appearance.barPrimary
+                                : Appearance.barSubtext
 
                             font {
                                 family: Appearance.iconFontFamily
@@ -1074,8 +1084,8 @@ Item {
                                     modelData.time)
 
                             color: index === 0
-                                ? Appearance.primary
-                                : Appearance.subtext
+                                ? Appearance.barPrimary
+                                : Appearance.barSubtext
 
                             font.pixelSize:
                                 Appearance.smallFontSize
@@ -1129,9 +1139,9 @@ Item {
         readonly property real bottomPadding: Appearance.px(50)
 
         readonly property color maximumColor:
-            Appearance.primary
+            root.chartBrightColor
         readonly property color minimumColor:
-            Theme.palette.m3tertiary
+            root.chartDimColor
 
         function repaint() {
             chartCanvas.requestPaint();
@@ -1208,8 +1218,8 @@ Item {
 
                 context.lineWidth = 1;
                 context.strokeStyle = Appearance.withAlpha(
-                    Appearance.outline, 0.36);
-                context.fillStyle = Appearance.subtext;
+                    Appearance.barOutline, 0.36);
+                context.fillStyle = Appearance.barSubtext;
                 context.font =
                     Appearance.smallFontSize
                     + "px " + Appearance.fontFamily;
@@ -1482,8 +1492,8 @@ Item {
                                 modelData.weatherCode, 1)
 
                             color: index === 0
-                                ? Appearance.primary
-                                : Appearance.subtext
+                                ? Appearance.barPrimary
+                                : Appearance.barSubtext
 
                             font {
                                 family: Appearance.iconFontFamily
@@ -1501,8 +1511,8 @@ Item {
                                     modelData.date)
 
                             color: index === 0
-                                ? Appearance.primary
-                                : Appearance.subtext
+                                ? Appearance.barPrimary
+                                : Appearance.barSubtext
 
                             font.pixelSize:
                                 Appearance.smallFontSize
@@ -1526,6 +1536,7 @@ Item {
         spacing: Appearance.px(10)
 
         PopupHeader {
+            useBarPalette: true
             icon: WeatherService.currentIcon
             iconSize: Appearance.px(22)
             title: I18n.tr("weather")
@@ -1537,7 +1548,7 @@ Item {
                 implicitHeight: Appearance.px(30)
                 radius: Appearance.fullRadius
                 color: refreshArea.containsMouse
-                    ? Appearance.layer1Active : "transparent"
+                    ? Appearance.barLayer1Active : "transparent"
                 opacity: WeatherService.loading ? 0.55 : 1
 
                 Text {
@@ -1545,7 +1556,7 @@ Item {
 
                     anchors.centerIn: parent
                     text: "󰑐"
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(15)
@@ -1584,9 +1595,9 @@ Item {
             implicitHeight: Appearance.px(190)
 
             radius: Appearance.smallRadius
-            color: Appearance.layer3
+            color: Appearance.barLayer3
             border.width: 1
-            border.color: Appearance.outline
+            border.color: Appearance.barOutline
 
             WeatherBackdrop {
                 anchors {
@@ -1625,12 +1636,12 @@ Item {
                         Layout.alignment: Qt.AlignVCenter
 
                         radius: Appearance.fullRadius
-                        color: Appearance.primaryContainer
+                        color: Appearance.barPrimaryContainer
 
                         Text {
                             anchors.centerIn: parent
                             text: WeatherService.currentIcon
-                            color: Appearance.primaryContainerText
+                            color: Appearance.barPrimaryContainerText
 
                             font {
                                 family: Appearance.iconFontFamily
@@ -1646,7 +1657,7 @@ Item {
 
                         PanelText {
                             text: WeatherService.currentTemperature
-                            color: Appearance.layer0Text
+                            color: Appearance.barLayer0Text
 
                             font {
                                 pixelSize: Appearance.px(31)
@@ -1660,7 +1671,7 @@ Item {
                             text: WeatherService.description(
                                 WeatherService.current.weatherCode)
 
-                            color: Appearance.layer0Text
+                            color: Appearance.barLayer0Text
                             elide: Text.ElideRight
 
                             font {
@@ -1677,7 +1688,7 @@ Item {
                                     WeatherService.current
                                         .apparentTemperature)
 
-                            color: Appearance.subtext
+                            color: Appearance.barSubtext
                             elide: Text.ElideRight
                             font.pixelSize: Appearance.smallFontSize
                         }
@@ -1690,7 +1701,7 @@ Item {
                     Layout.bottomMargin: Appearance.px(2)
 
                     implicitWidth: 1
-                    color: Appearance.outline
+                    color: Appearance.barOutline
                     opacity: 0.65
                 }
 
@@ -1775,7 +1786,7 @@ Item {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: WeatherService.loading ? "󰔟" : "󰅚"
-                    color: Appearance.primary
+                    color: Appearance.barPrimary
 
                     font {
                         family: Appearance.iconFontFamily
@@ -1787,7 +1798,7 @@ Item {
                     text: WeatherService.loading
                         ? I18n.tr("weatherLoading")
                         : I18n.tr("weatherUnavailable")
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                 }
             }
         }
@@ -1809,13 +1820,13 @@ Item {
                 PanelText {
                     Layout.fillWidth: true
                     text: I18n.tr("hourlyForecast")
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     font.weight: Font.DemiBold
                 }
 
                 LegendItem {
                     visible: hourlyChart.mode === 0
-                    markerColor: Appearance.primary
+                    markerColor: root.chartBrightColor
                     Layout.alignment: Qt.AlignVCenter
                     label: I18n.tr("temperature")
                 }
@@ -1823,20 +1834,20 @@ Item {
                 LegendItem {
                     visible: hourlyChart.mode === 0
                     Layout.alignment: Qt.AlignVCenter
-                    markerColor: Theme.palette.m3tertiary
+                    markerColor: root.chartDimColor
                     label: I18n.tr("feelsLike")
                 }
 
                 LegendItem {
                     visible: hourlyChart.mode === 1
-                    markerColor: Appearance.primary
+                    markerColor: root.chartBrightColor
                     Layout.alignment: Qt.AlignVCenter
                     label: I18n.tr("precipitation")
                 }
 
                 LegendItem {
                     visible: hourlyChart.mode === 1
-                    markerColor: Theme.palette.m3tertiary
+                    markerColor: root.chartDimColor
                     Layout.alignment: Qt.AlignVCenter
                     label: I18n.tr("humidity")
                 }
@@ -1868,9 +1879,9 @@ Item {
                 implicitHeight: Appearance.px(198)
 
                 radius: Appearance.smallRadius
-                color: Appearance.layer3
+                color: root.chartSurfaceColor
                 border.width: 1
-                border.color: Appearance.outline
+                border.color: Appearance.barOutline
 
                 HourlyChart {
                     id: hourlyChart
@@ -1900,21 +1911,21 @@ Item {
                 PanelText {
                     Layout.fillWidth: true
                     text: I18n.tr("dailyForecast")
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     font.weight: Font.DemiBold
                 }
 
                 LegendItem {
                     visible: dailyChart.mode === 0
                     Layout.alignment: Qt.AlignVCenter
-                    markerColor: Appearance.primary
+                    markerColor: root.chartBrightColor
                     label: I18n.tr("highTemperature")
                 }
 
                 LegendItem {
                     visible: dailyChart.mode === 0
                     Layout.alignment: Qt.AlignVCenter
-                    markerColor: Theme.palette.m3tertiary
+                    markerColor: root.chartDimColor
                     label: I18n.tr("lowTemperature")
                 }
 
@@ -1938,9 +1949,9 @@ Item {
                 implicitHeight: Appearance.px(210)
 
                 radius: Appearance.smallRadius
-                color: Appearance.layer3
+                color: root.chartSurfaceColor
                 border.width: 1
-                border.color: Appearance.outline
+                border.color: Appearance.barOutline
 
                 DailyChart {
                     id: dailyChart
@@ -1958,7 +1969,7 @@ Item {
             visible: WeatherService.error !== ""
 
             text: WeatherService.error
-            color: Theme.palette.m3error
+            color: Appearance.barError
             elide: Text.ElideRight
             horizontalAlignment: Text.AlignRight
             font.pixelSize: Appearance.smallFontSize

@@ -30,7 +30,7 @@ Scope {
             blurMax: Math.max(1, Math.round(
                 ShellSettings.shadowBlurRadius * Appearance.scale))
             shadowColor: Appearance.withAlpha(
-                Theme.palette.m3shadow,
+                Appearance.barShadow,
                 ShellSettings.shadowOpacity
                     * Math.max(0, Math.min(1,
                         connectorCorner.effectsOpacity)))
@@ -58,9 +58,18 @@ Scope {
             id: barWindow
 
             required property ShellScreen modelData
-            // Hide only the bar body. The lower corner pair then stops at the
-            // screen edge instead of moving out of view with the bar.
+            // Translate the Bar body out of view without changing the stable
+            // layer-shell geometry or exclusive zone.
             readonly property real hiddenOffset: -Appearance.barHeight
+            // The Bar blur follows its visible slide and turns off at the
+            // endpoint. Connector regions need to turn off immediately:
+            // their translated position is the overview's top edge.
+            readonly property bool glassEffectActive:
+                ShellSettings.barFrostedGlass
+                    && NiriService.barRetractionProgress < 0.999
+            readonly property bool connectorGlassEffectActive:
+                ShellSettings.barFrostedGlass
+                    && NiriService.barRetractionProgress <= 0.001
 
             screen: modelData
 
@@ -88,16 +97,42 @@ Scope {
 
             // QuickShell 0.3's ext-background-effect support lets the
             // compositor blur only these visible shapes even though this
-            // merged Bar/Panel surface is screen-height. The surfaces add a
-            // translucent Material tint rather than an opaque background.
+            // merged Bar/Panel surface is screen-height. Glass mode adds a
+            // fixed neutral tint rather than an opaque Material background.
             BackgroundEffect.blurRegion: Region {
                 Region {
-                    item: ShellSettings.barFrostedGlass
+                    item: barWindow.glassEffectActive
                         ? barContent.barMask : null
                 }
 
                 Region {
-                    item: ShellSettings.barFrostedGlass
+                    item: barWindow.connectorGlassEffectActive
+                        ? barContent.leftCornerBlurBounds : null
+
+                    Region {
+                        item: barWindow.connectorGlassEffectActive
+                            ? barContent.leftCornerBlurCutout : null
+                        shape: RegionShape.Ellipse
+                        intersection: Intersection.Subtract
+                    }
+                }
+
+                Region {
+                    item: barWindow.connectorGlassEffectActive
+                        ? barContent.rightCornerBlurBounds : null
+
+                    Region {
+                        item: barWindow.connectorGlassEffectActive
+                            ? barContent.rightCornerBlurCutout : null
+                        shape: RegionShape.Ellipse
+                        intersection: Intersection.Subtract
+                    }
+                }
+
+                Region {
+                    // Panels close when overview starts; do not let their
+                    // exit animation keep a blurred patch at the top edge.
+                    item: barWindow.connectorGlassEffectActive
                         ? barContent.popupMask : null
                     radius: Appearance.normalRadius
                 }
@@ -228,9 +263,12 @@ Scope {
                     // drawn again in the foreground strip below.
                     z: -1
                     x: 0
-                    y: Appearance.barHeight - 1
+                    y: Appearance.barHeight
+                        - (ShellSettings.barFrostedGlass ? 0 : 1)
                     width: parent.width
                     height: Appearance.cornerSize
+                    visible: !ShellSettings.barFrostedGlass
+                        && NiriService.barRetractionProgress <= 0.001
 
                     BarConnectorCorner {
                         anchors {
@@ -252,14 +290,17 @@ Scope {
                 }
 
                 Item {
-                    // Only the opaque corner shapes belong above BarContent.
+                    // Only the visible corner shapes belong above BarContent.
                     // They cover the bar's bottom-edge shadow without putting
                     // the connector's own shadow on top of the panel.
                     z: 1
                     x: 0
-                    y: Appearance.barHeight - 1
+                    y: Appearance.barHeight
+                        - (ShellSettings.barFrostedGlass ? 0 : 1)
                     width: parent.width
                     height: Appearance.cornerSize
+                    visible: !ShellSettings.barFrostedGlass
+                        && NiriService.barRetractionProgress <= 0.001
 
                     RoundCorner {
                         anchors {
@@ -267,6 +308,7 @@ Scope {
                             left: parent.left
                         }
                         implicitSize: Appearance.cornerSize
+                        layerEnabled: !ShellSettings.barFrostedGlass
                         color: Appearance.barSurfaceColor
                         corner: RoundCorner.CornerEnum.TopLeft
                     }
@@ -277,6 +319,7 @@ Scope {
                             right: parent.right
                         }
                         implicitSize: Appearance.cornerSize
+                        layerEnabled: !ShellSettings.barFrostedGlass
                         color: Appearance.barSurfaceColor
                         corner: RoundCorner.CornerEnum.TopRight
                     }
@@ -413,6 +456,14 @@ Scope {
             WlrLayershell.keyboardFocus: leftSidebar.shown
                 ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
+            BackgroundEffect.blurRegion: Region {
+                Region {
+                    item: ShellSettings.barFrostedGlass
+                        ? leftSidebar.maskItem : null
+                    radius: Appearance.cornerSize
+                }
+            }
+
             Region {
                 id: sidebarMask
 
@@ -492,13 +543,16 @@ Scope {
             // The sidebar is remapped to acquire focus and therefore sits
             // above the Top-layer bar window. Redraw only the intersecting
             // connector fill in this window so the sidebar cannot cover it.
-            // y = -1 keeps the curve aligned with the bar-side copy.
+            // Opaque mode keeps the historical 1 px overlap; glass mode uses
+            // an exact edge so the translucent pixels are not blended twice.
             RoundCorner {
                 z: 100
                 x: 0
-                y: -1
+                y: ShellSettings.barFrostedGlass ? 0 : -1
                 visible: leftSidebar.surfaceVisible
+                    && !ShellSettings.barFrostedGlass
                 implicitSize: Appearance.cornerSize
+                layerEnabled: !ShellSettings.barFrostedGlass
                 color: Appearance.barSurfaceColor
                 corner: RoundCorner.CornerEnum.TopLeft
             }

@@ -24,9 +24,9 @@ MouseArea {
         }
         radius: Appearance.smallRadius
         color: root.containsMouse
-            ? Appearance.layer1Hover : Appearance.layer1
+            ? Appearance.barLayer1Hover : Appearance.barLayer1
         border.width: 1
-        border.color: Appearance.outline
+        border.color: Appearance.barOutline
         scale: root.pressed ? 0.94 : 1
 
         Behavior on color {
@@ -56,7 +56,7 @@ MouseArea {
                     !(WeatherService.loading && !WeatherService.ready)
                 text: WeatherService.currentIcon
                 rotation: 0
-                color: Appearance.primary
+                color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(19)
@@ -70,7 +70,7 @@ MouseArea {
                 visible:
                     WeatherService.loading && !WeatherService.ready
                 text: "󰔟"
-                color: Appearance.primary
+                color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(19)
@@ -89,7 +89,7 @@ MouseArea {
 
         Text {
             text: WeatherService.currentTemperature
-            color: Appearance.layer0Text
+            color: Appearance.barLayer0Text
             font {
                 family: Appearance.fontFamily
                 pixelSize: Appearance.smallFontSize + 1

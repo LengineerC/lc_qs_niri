@@ -30,8 +30,8 @@ MouseArea {
         anchors.centerIn: parent
         radius: Appearance.fullRadius
         color: root.containsMouse
-            ? Appearance.layer1Hover
-            : Appearance.withAlpha(Appearance.layer1Hover, 0)
+            ? Appearance.barLayer1Hover
+            : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
         scale: root.pressed ? 0.88 : 1
 
         Text {
@@ -42,7 +42,7 @@ MouseArea {
                     ? "󰂞" : "󰂚"
             color: NotificationService.unreadCount > 0
                     && !NotificationService.doNotDisturb
-                ? Appearance.primary : Appearance.layer0Text
+                ? Appearance.barPrimary : Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.px(17)
@@ -62,14 +62,14 @@ MouseArea {
                 unreadText.implicitWidth + Appearance.px(4))
             height: Appearance.px(9)
             radius: Appearance.fullRadius
-            color: Appearance.tertiary
+            color: Appearance.barTertiary
 
             Text {
                 id: unreadText
                 anchors.centerIn: parent
                 text: NotificationService.unreadCount > 99
                     ? "99+" : NotificationService.unreadCount
-                color: Theme.palette.m3onTertiary
+                color: Appearance.barOnPrimary
                 font {
                     family: Appearance.fontFamily
                     pixelSize: Appearance.px(6)

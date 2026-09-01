@@ -79,10 +79,16 @@ Item {
         }
         implicitHeight: toastContent.implicitHeight + Appearance.px(22)
         radius: Appearance.normalRadius
-        color: Appearance.layer1
+        // This window deliberately does not request compositor blur: Niri
+        // expands that effect into the right-side transparent window margin.
+        // A denser glass tint keeps notification text readable on wallpaper.
+        color: ShellSettings.barFrostedGlass
+            ? Appearance.withAlpha(
+                Appearance.barGlassBaseColor, 0.84)
+            : Appearance.layer1
         border.width: 1
         border.color: root.notificationEntry.urgency === 2
-            ? Theme.palette.m3error : Appearance.outline
+            ? Appearance.barError : Appearance.barOutline
 
         // MultiEffect allocates an offscreen texture. Render the shadow only
         // after movement has settled so a burst cannot allocate and blur many
@@ -96,7 +102,8 @@ Item {
                 Math.min(ShellSettings.shadowBlurRadius, 10)
                     * Appearance.scale))
             shadowColor: Appearance.withAlpha(
-                Theme.palette.m3shadow, ShellSettings.shadowOpacity * 0.7
+                Appearance.barShadow,
+                ShellSettings.shadowOpacity * 0.55
             )
             shadowVerticalOffset: Math.round(
                 ShellSettings.shadowOffsetY * 0.5
@@ -137,7 +144,7 @@ Item {
                     Text {
                         Layout.fillWidth: true
                         text: root.notificationEntry.appName
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
                         elide: Text.ElideRight
                         font {
                             family: Appearance.fontFamily
@@ -147,7 +154,7 @@ Item {
 
                     Text {
                         text: I18n.tr("justNow")
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
                         font {
                             family: Appearance.fontFamily
                             pixelSize: Appearance.smallFontSize
@@ -159,7 +166,7 @@ Item {
                     Layout.fillWidth: true
                     text: root.notificationEntry.summary
                         || I18n.tr("notification")
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     elide: Text.ElideRight
                     font {
                         family: Appearance.fontFamily
@@ -172,7 +179,7 @@ Item {
                     Layout.fillWidth: true
                     visible: text.length > 0
                     text: root.notificationEntry.body
-                    color: Appearance.layer1Text
+                    color: Appearance.barLayer1Text
                     wrapMode: Text.Wrap
                     elide: Text.ElideRight
                     maximumLineCount: 3
@@ -186,6 +193,8 @@ Item {
             CloseButton {
                 Layout.alignment: Qt.AlignTop
                 enabled: !root.notificationEntry.closing
+                iconColor: Appearance.barSubtext
+                hoverColor: Appearance.barLayer1Active
                 onClicked: NotificationService.markRead(
                     root.notificationEntry.notificationId)
             }

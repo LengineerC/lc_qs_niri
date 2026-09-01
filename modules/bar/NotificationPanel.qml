@@ -32,7 +32,7 @@ Item {
     }
 
     component PanelText: Text {
-        color: Appearance.layer1Text
+        color: Appearance.barLayer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -51,9 +51,9 @@ Item {
         implicitHeight: Appearance.px(30)
         radius: Appearance.px(9)
         color: buttonArea.containsMouse
-            ? Appearance.layer1Active : Appearance.layer1
+            ? Appearance.barLayer1Active : Appearance.barLayer1
         border.width: 1
-        border.color: Appearance.outline
+        border.color: Appearance.barOutline
 
         RowLayout {
             id: buttonRow
@@ -63,7 +63,7 @@ Item {
             Text {
                 text: button.icon
                 color: button.destructive
-                    ? Theme.palette.m3error : Appearance.primary
+                    ? Appearance.barError : Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(14)
@@ -74,7 +74,7 @@ Item {
                 visible: button.label.length > 0
                 text: button.label
                 color: button.destructive
-                    ? Theme.palette.m3error : Appearance.layer1Text
+                    ? Appearance.barError : Appearance.barLayer1Text
                 font.pixelSize: Appearance.smallFontSize
             }
         }
@@ -100,6 +100,7 @@ Item {
         spacing: Appearance.px(9)
 
         PopupHeader {
+            useBarPalette: true
             icon: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
             iconSize: Appearance.px(19)
             title: I18n.tr("notifications")
@@ -155,7 +156,7 @@ Item {
                     Layout.fillWidth: true
                     text: I18n.tr("unreadNotifications")
                         + "  " + NotificationService.unreadCount
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     font.weight: Font.DemiBold
                 }
 
@@ -166,7 +167,7 @@ Item {
                     Layout.bottomMargin: Appearance.px(8)
                     horizontalAlignment: Text.AlignHCenter
                     text: I18n.tr("noUnreadNotifications")
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                 }
             }
 
@@ -193,7 +194,7 @@ Item {
                     visible: notificationDelegate.firstHistory
                     width: parent.width
                     height: visible ? 1 : 0
-                    color: Appearance.outline
+                    color: Appearance.barOutline
                 }
 
                 RowLayout {
@@ -205,7 +206,7 @@ Item {
                         text: I18n.tr("notificationHistory")
                             + "  "
                             + NotificationService.historyEntries.length
-                        color: Appearance.layer0Text
+                        color: Appearance.barLayer0Text
                         font.weight: Font.DemiBold
                     }
 
@@ -250,13 +251,13 @@ Item {
                         Layout.fillWidth: true
                         Layout.topMargin: Appearance.px(5)
                         implicitHeight: 1
-                        color: Appearance.outline
+                        color: Appearance.barOutline
                     }
 
                     PanelText {
                         Layout.fillWidth: true
                         text: I18n.tr("notificationHistory") + "  0"
-                        color: Appearance.layer0Text
+                        color: Appearance.barLayer0Text
                         font.weight: Font.DemiBold
                     }
 
@@ -265,7 +266,7 @@ Item {
                         Layout.topMargin: Appearance.px(8)
                         horizontalAlignment: Text.AlignHCenter
                         text: I18n.tr("noNotificationHistory")
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
                     }
                 }
             }

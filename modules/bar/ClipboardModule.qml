@@ -20,14 +20,14 @@ MouseArea {
         anchors.verticalCenter: parent.verticalCenter
         radius: Appearance.fullRadius
         color: root.containsMouse
-            ? Appearance.layer1Hover
-            : Appearance.withAlpha(Appearance.layer1Hover, 0)
+            ? Appearance.barLayer1Hover
+            : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
         scale: root.pressed ? 0.88 : 1
 
         Text {
             anchors.centerIn: parent
             text: "󰅇"
-            color: Appearance.layer0Text
+            color: Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.px(17)

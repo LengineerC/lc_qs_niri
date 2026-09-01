@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls as Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
@@ -119,7 +120,7 @@ Item {
     }
 
     component PanelText: Text {
-        color: Appearance.layer1Text
+        color: Appearance.barLayer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -137,9 +138,9 @@ Item {
             Layout.fillWidth: true
             implicitHeight: Appearance.px(42)
             radius: Appearance.px(12)
-            color: Appearance.layer1
+            color: Appearance.barLayer1
             border.width: searchInput.activeFocus ? 1 : 0
-            border.color: Appearance.primary
+            border.color: Appearance.barPrimary
 
             RowLayout {
                 anchors {
@@ -152,7 +153,7 @@ Item {
                 Text {
                     text: "󰍉"
                     color: searchInput.activeFocus
-                        ? Appearance.primary : Appearance.subtext
+                        ? Appearance.barPrimary : Appearance.barSubtext
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(17)
@@ -165,10 +166,10 @@ Item {
                     Layout.fillWidth: true
                     padding: 0
                     placeholderText: I18n.tr("searchApplications")
-                    color: Appearance.layer0Text
-                    placeholderTextColor: Appearance.subtext
-                    selectionColor: Appearance.primaryContainer
-                    selectedTextColor: Appearance.primaryContainerText
+                    color: Appearance.barLayer0Text
+                    placeholderTextColor: Appearance.barSubtext
+                    selectionColor: Appearance.barPrimaryContainer
+                    selectedTextColor: Appearance.barPrimaryContainerText
                     selectByMouse: true
                     background: null
                     font {
@@ -206,12 +207,12 @@ Item {
                     implicitHeight: Appearance.px(25)
                     radius: Appearance.fullRadius
                     color: clearArea.containsMouse
-                        ? Appearance.layer1Active : "transparent"
+                        ? Appearance.barLayer1Active : "transparent"
 
                     Text {
                         anchors.centerIn: parent
                         text: "󰅖"
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Appearance.px(13)
@@ -238,14 +239,14 @@ Item {
             PanelText {
                 Layout.fillWidth: true
                 text: I18n.tr("applications")
-                color: Appearance.layer0Text
+                color: Appearance.barLayer0Text
                 font.weight: Font.DemiBold
             }
 
             PanelText {
                 text: root.filteredApplications.length
                     + " / " + root.applications.length
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 font.pixelSize: Appearance.smallFontSize
             }
         }
@@ -281,11 +282,11 @@ Item {
                     radius: Appearance.px(12)
                     color: applicationEntry.ListView.isCurrentItem
                             || entryArea.containsMouse
-                        ? Appearance.layer1Hover
-                        : Appearance.withAlpha(Appearance.layer1Hover, 0)
+                        ? Appearance.barLayer1Hover
+                        : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
                     border.width:
                         applicationEntry.ListView.isCurrentItem ? 1 : 0
-                    border.color: Appearance.primary
+                    border.color: Appearance.barPrimary
                     scale: 0.99
 
                     MouseArea {
@@ -313,7 +314,7 @@ Item {
                             implicitWidth: Appearance.px(40)
                             implicitHeight: Appearance.px(40)
                             radius: Appearance.px(11)
-                            color: Appearance.primaryContainer
+                            color: Appearance.barPrimaryContainer
 
                             IconImage {
                                 anchors {
@@ -324,6 +325,13 @@ Item {
                                 source: Quickshell.iconPath(
                                     applicationEntry.modelData.icon,
                                     "application-x-executable")
+                                layer.enabled:
+                                    ShellSettings.barFrostedGlass
+                                layer.effect: MultiEffect {
+                                    saturation: -1
+                                    brightness: 0.12
+                                    contrast: 0.08
+                                }
                             }
                         }
 
@@ -335,7 +343,7 @@ Item {
                             PanelText {
                                 Layout.fillWidth: true
                                 text: applicationEntry.modelData.name
-                                color: Appearance.layer0Text
+                                color: Appearance.barLayer0Text
                                 elide: Text.ElideRight
                                 font.weight: Font.DemiBold
                             }
@@ -345,7 +353,7 @@ Item {
                                 text: applicationEntry.modelData.comment
                                     || applicationEntry.modelData.genericName
                                     || applicationEntry.modelData.id
-                                color: Appearance.subtext
+                                color: Appearance.barSubtext
                                 elide: Text.ElideRight
                                 font.pixelSize: Appearance.smallFontSize
                             }
@@ -354,7 +362,7 @@ Item {
                         Text {
                             text: "󰁔"
                             color: applicationEntry.ListView.isCurrentItem
-                                ? Appearance.primary : Appearance.subtext
+                                ? Appearance.barPrimary : Appearance.barSubtext
                             opacity: applicationEntry.ListView.isCurrentItem
                                 || entryArea.containsMouse ? 1 : 0
                             font {
@@ -386,7 +394,7 @@ Item {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰍉"
-                    color: Appearance.primary
+                    color: Appearance.barPrimary
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(34)
@@ -396,7 +404,7 @@ Item {
                 PanelText {
                     Layout.alignment: Qt.AlignHCenter
                     text: I18n.tr("noApplicationsFound")
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                 }
             }
         }

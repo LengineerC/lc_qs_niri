@@ -252,9 +252,12 @@ Scope {
             Rectangle {
                 anchors.fill: parent
                 opacity: launchpadWindow.revealProgress
-                color: Appearance.withAlpha(
-                    Theme.palette.m3background,
-                    Theme.darkMode ? 0.48 : 0.34)
+                color: ShellSettings.barFrostedGlass
+                    ? Appearance.withAlpha(
+                        Appearance.barGlassBaseColor, 0.56)
+                    : Appearance.withAlpha(
+                        Theme.palette.m3background,
+                        Theme.darkMode ? 0.48 : 0.34)
             }
 
             MouseArea {

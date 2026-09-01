@@ -67,10 +67,10 @@ ClippingRectangle {
     Layout.fillWidth: true
     implicitHeight: Appearance.px(175)
     radius: Appearance.px(24)
-    color: Appearance.layer3
+    color: Appearance.barLayer3
     border.width: 1
     border.color: Appearance.withAlpha(
-        Appearance.outline, 0.58)
+        Appearance.barOutline, 0.58)
     clip: true
 
     Component.onCompleted: syncDurationFields()
@@ -151,7 +151,7 @@ ClippingRectangle {
                 const radius = Appearance.px(
                     index % 3 === 0 ? 1.5 : 0.9);
                 context.strokeStyle = Appearance.withAlpha(
-                    Appearance.primaryContainerText,
+                    Appearance.barPrimaryContainerText,
                     0.08 + index % 4 * 0.015);
                 context.lineWidth = Appearance.px(0.8);
                 context.beginPath();
@@ -174,10 +174,10 @@ ClippingRectangle {
             const depthGradient = context.createLinearGradient(
                 0, frontSurface, 0, height);
             depthGradient.addColorStop(0,
-                Appearance.withAlpha(Appearance.primary, 0.09));
+                Appearance.withAlpha(Appearance.barPrimary, 0.09));
             depthGradient.addColorStop(1,
                 Appearance.withAlpha(
-                    Appearance.primaryContainer, 0.22));
+                    Appearance.barPrimaryContainer, 0.22));
             context.fillStyle = depthGradient;
             context.fillRect(0, Math.max(0, frontSurface),
                 width, Math.max(0, height - frontSurface));
@@ -188,7 +188,7 @@ ClippingRectangle {
                 rearAmplitude,
                 Appearance.px(92),
                 1.45,
-                Appearance.withAlpha(Appearance.tertiary, 0.1)
+                Appearance.withAlpha(Appearance.barTertiary, 0.1)
             );
             drawWave(
                 context,
@@ -196,7 +196,7 @@ ClippingRectangle {
                 frontAmplitude,
                 Appearance.px(74),
                 0,
-                Appearance.withAlpha(Appearance.primary, 0.13)
+                Appearance.withAlpha(Appearance.barPrimary, 0.13)
             );
             drawBubbles(context, frontSurface);
         }
@@ -249,7 +249,7 @@ ClippingRectangle {
                     anchors.centerIn: parent
                     text: "󰑓"
                     color: resetButton.containsMouse
-                        ? Appearance.primary : Appearance.layer1Text
+                        ? Appearance.barPrimary : Appearance.barLayer1Text
                     scale: resetButton.pressed ? 0.86 : 1
                     font {
                         family: Appearance.iconFontFamily
@@ -281,7 +281,7 @@ ClippingRectangle {
                 height: width
                 radius: Appearance.fullRadius
                 color: FocusTimerService.running
-                    ? Appearance.primary : Appearance.outline
+                    ? Appearance.barPrimary : Appearance.barOutline
 
                 SequentialAnimation on opacity {
                     running: FocusTimerService.running
@@ -310,7 +310,7 @@ ClippingRectangle {
                     ShapePath {
                         fillColor: "transparent"
                         strokeColor: Appearance.withAlpha(
-                            Appearance.outline, 0.42)
+                            Appearance.barOutline, 0.42)
                         strokeWidth: Appearance.px(5)
                         capStyle: ShapePath.RoundCap
 
@@ -326,7 +326,7 @@ ClippingRectangle {
 
                     ShapePath {
                         fillColor: "transparent"
-                        strokeColor: Appearance.primary
+                        strokeColor: Appearance.barPrimary
                         strokeWidth: Appearance.px(5)
                         capStyle: ShapePath.RoundCap
 
@@ -349,7 +349,7 @@ ClippingRectangle {
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: root.timeText
-                        color: Appearance.layer0Text
+                        color: Appearance.barLayer0Text
                         font {
                             family: Appearance.monospaceFontFamily
                             pixelSize: Appearance.px(
@@ -363,7 +363,7 @@ ClippingRectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: FocusTimerService.mode === "custom"
                             ? I18n.tr("customTime") : "5 min"
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
                         font {
                             family: Appearance.fontFamily
                             pixelSize: Appearance.px(9)
@@ -400,19 +400,19 @@ ClippingRectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 radius: Appearance.px(8)
-                color: Appearance.layer1
+                color: Appearance.barLayer1
                 border.width: 1
                 border.color: hourInput.activeFocus
-                    ? Appearance.primary
-                    : Appearance.withAlpha(Appearance.outline, 0.4)
+                    ? Appearance.barPrimary
+                    : Appearance.withAlpha(Appearance.barOutline, 0.4)
 
                 TextInput {
                     id: hourInput
 
                     anchors.fill: parent
-                    color: Appearance.layer0Text
-                    selectionColor: Appearance.primaryContainer
-                    selectedTextColor: Appearance.primaryContainerText
+                    color: Appearance.barLayer0Text
+                    selectionColor: Appearance.barPrimaryContainer
+                    selectedTextColor: Appearance.barPrimaryContainerText
                     horizontalAlignment: TextInput.AlignHCenter
                     verticalAlignment: TextInput.AlignVCenter
                     inputMethodHints: Qt.ImhDigitsOnly
@@ -429,7 +429,7 @@ ClippingRectangle {
 
             Text {
                 text: ":"
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 font.family: Appearance.monospaceFontFamily
                 font.pixelSize: Appearance.px(11)
             }
@@ -438,19 +438,19 @@ ClippingRectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 radius: Appearance.px(8)
-                color: Appearance.layer1
+                color: Appearance.barLayer1
                 border.width: 1
                 border.color: minuteInput.activeFocus
-                    ? Appearance.primary
-                    : Appearance.withAlpha(Appearance.outline, 0.4)
+                    ? Appearance.barPrimary
+                    : Appearance.withAlpha(Appearance.barOutline, 0.4)
 
                 TextInput {
                     id: minuteInput
 
                     anchors.fill: parent
-                    color: Appearance.layer0Text
-                    selectionColor: Appearance.primaryContainer
-                    selectedTextColor: Appearance.primaryContainerText
+                    color: Appearance.barLayer0Text
+                    selectionColor: Appearance.barPrimaryContainer
+                    selectedTextColor: Appearance.barPrimaryContainerText
                     horizontalAlignment: TextInput.AlignHCenter
                     verticalAlignment: TextInput.AlignVCenter
                     inputMethodHints: Qt.ImhDigitsOnly
@@ -467,7 +467,7 @@ ClippingRectangle {
 
             Text {
                 text: ":"
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 font.family: Appearance.monospaceFontFamily
                 font.pixelSize: Appearance.px(11)
             }
@@ -476,19 +476,19 @@ ClippingRectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 radius: Appearance.px(8)
-                color: Appearance.layer1
+                color: Appearance.barLayer1
                 border.width: 1
                 border.color: secondInput.activeFocus
-                    ? Appearance.primary
-                    : Appearance.withAlpha(Appearance.outline, 0.4)
+                    ? Appearance.barPrimary
+                    : Appearance.withAlpha(Appearance.barOutline, 0.4)
 
                 TextInput {
                     id: secondInput
 
                     anchors.fill: parent
-                    color: Appearance.layer0Text
-                    selectionColor: Appearance.primaryContainer
-                    selectedTextColor: Appearance.primaryContainerText
+                    color: Appearance.barLayer0Text
+                    selectionColor: Appearance.barPrimaryContainer
+                    selectedTextColor: Appearance.barPrimaryContainerText
                     horizontalAlignment: TextInput.AlignHCenter
                     verticalAlignment: TextInput.AlignVCenter
                     inputMethodHints: Qt.ImhDigitsOnly
@@ -516,13 +516,13 @@ ClippingRectangle {
                     anchors.fill: parent
                     radius: Appearance.px(9)
                     color: applyButton.containsMouse
-                        ? Appearance.primaryContainer
-                        : Appearance.withAlpha(Appearance.primary, 0.1)
+                        ? Appearance.barPrimaryContainer
+                        : Appearance.withAlpha(Appearance.barPrimary, 0.1)
 
                     Text {
                         anchors.centerIn: parent
                         text: "󰄬"
-                        color: Appearance.primary
+                        color: Appearance.barPrimary
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Appearance.px(14)

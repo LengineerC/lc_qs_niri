@@ -38,7 +38,7 @@ Item {
     }
 
     component PanelText: Text {
-        color: Appearance.layer1Text
+        color: Appearance.barLayer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -63,9 +63,9 @@ Item {
         // Keep the animated surface opaque. Animating from layer1 to an
         // alpha-only error color exposed the popup background mid-transition
         // and looked like a one-frame hover flash.
-        color: hovered ? destructive ? Appearance.mix(Appearance.layer1, Theme.palette.m3error, 0.14) : Appearance.layer1Hover : Appearance.layer1
+        color: hovered ? destructive ? Appearance.mix(Appearance.barLayer1, Appearance.barError, 0.14) : Appearance.barLayer1Hover : Appearance.barLayer1
         border.width: 1
-        border.color: hovered && destructive ? Theme.palette.m3error : Appearance.outline
+        border.color: hovered && destructive ? Appearance.barError : Appearance.barOutline
         scale: actionPressArea.pressed ? 0.985 : 1
 
         function beginHold() {
@@ -107,7 +107,7 @@ Item {
                     width: actionButton.width - 2
                     height: parent.height
                     radius: Math.max(0, actionButton.radius - 1)
-                    color: actionButton.destructive ? Appearance.mix(Appearance.layer1, Theme.palette.m3error, 0.32) : Appearance.primaryContainer
+                    color: actionButton.destructive ? Appearance.mix(Appearance.barLayer1, Appearance.barError, 0.32) : Appearance.barPrimaryContainer
                 }
             }
         }
@@ -124,12 +124,12 @@ Item {
                 implicitWidth: Appearance.px(34)
                 implicitHeight: Appearance.px(34)
                 radius: Appearance.px(10)
-                color: actionButton.destructive ? Appearance.withAlpha(Theme.palette.m3error, 0.14) : Appearance.primaryContainer
+                color: actionButton.destructive ? Appearance.withAlpha(Appearance.barError, 0.14) : Appearance.barPrimaryContainer
 
                 Text {
                     anchors.centerIn: parent
                     text: actionButton.icon
-                    color: actionButton.destructive ? Theme.palette.m3error : Appearance.primaryContainerText
+                    color: actionButton.destructive ? Appearance.barError : Appearance.barPrimaryContainerText
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(17)
@@ -140,13 +140,13 @@ Item {
             PanelText {
                 Layout.fillWidth: true
                 text: actionButton.label
-                color: actionButton.destructive ? Theme.palette.m3error : Appearance.layer0Text
+                color: actionButton.destructive ? Appearance.barError : Appearance.barLayer0Text
                 font.weight: Font.DemiBold
             }
 
             Text {
                 text: "󰅂"
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(15)
@@ -235,6 +235,7 @@ Item {
         spacing: Appearance.px(9)
 
         PopupHeader {
+            useBarPalette: true
             icon: "󰐥"
             title: I18n.tr("powerMenu")
         }
@@ -243,9 +244,9 @@ Item {
             Layout.fillWidth: true
             implicitHeight: Appearance.px(104)
             radius: Appearance.smallRadius
-            color: Appearance.layer3
+            color: Appearance.barLayer3
             border.width: 1
-            border.color: Appearance.outline
+            border.color: Appearance.barOutline
 
             RowLayout {
                 anchors {
@@ -265,7 +266,7 @@ Item {
                     PanelText {
                         Layout.fillWidth: true
                         text: UserService.displayName
-                        color: Appearance.layer0Text
+                        color: Appearance.barLayer0Text
                         elide: Text.ElideRight
                         font {
                             pixelSize: Appearance.largeFontSize
@@ -276,7 +277,7 @@ Item {
                     PanelText {
                         visible: UserService.loginName && UserService.loginName !== UserService.displayName
                         text: "@" + UserService.loginName
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
                         font.pixelSize: Appearance.smallFontSize
                     }
 
@@ -285,7 +286,7 @@ Item {
 
                         Text {
                             text: "󰥔"
-                            color: Appearance.primary
+                            color: Appearance.barPrimary
                             font {
                                 family: Appearance.iconFontFamily
                                 pixelSize: Appearance.px(14)
@@ -294,7 +295,7 @@ Item {
 
                         PanelText {
                             text: I18n.tr("systemUptime") + " · " + UserService.formatUptime()
-                            color: Appearance.subtext
+                            color: Appearance.barSubtext
                             font.pixelSize: Appearance.smallFontSize
                         }
                     }

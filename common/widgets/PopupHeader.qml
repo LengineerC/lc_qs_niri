@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell.Widgets
 import qs.common
@@ -20,11 +21,17 @@ ColumnLayout {
     property bool showActions: true
     property bool showCloseButton: false
     property bool showDivider: true
+    property bool useBarPalette: false
+    property bool monochromeIcon: false
 
-    property color iconColor: Appearance.primary
-    property color titleColor: Appearance.layer0Text
-    property color subtitleColor: Appearance.subtext
-    property color dividerColor: Appearance.outline
+    property color iconColor: useBarPalette
+        ? Appearance.barPrimary : Appearance.primary
+    property color titleColor: useBarPalette
+        ? Appearance.barLayer0Text : Appearance.layer0Text
+    property color subtitleColor: useBarPalette
+        ? Appearance.barSubtext : Appearance.subtext
+    property color dividerColor: useBarPalette
+        ? Appearance.barOutline : Appearance.outline
     property real dividerOpacity: 0.55
 
     property int iconSize: Appearance.px(21)
@@ -67,6 +74,13 @@ ColumnLayout {
                 source: root.iconSource
                 implicitSize: root.iconSize
                 asynchronous: true
+                layer.enabled: root.monochromeIcon
+                    && ShellSettings.barFrostedGlass
+                layer.effect: MultiEffect {
+                    saturation: -1
+                    brightness: 0.12
+                    contrast: 0.08
+                }
             }
 
             Text {
@@ -123,6 +137,10 @@ ColumnLayout {
         CloseButton {
             visible: root.showCloseButton
             Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+            iconColor: root.useBarPalette
+                ? Appearance.barSubtext : Appearance.subtext
+            hoverColor: root.useBarPalette
+                ? Appearance.barLayer1Active : Appearance.layer1Active
             onClicked: root.closeClicked()
         }
     }

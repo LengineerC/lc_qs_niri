@@ -18,10 +18,12 @@ ClippingRectangle {
 
     implicitHeight: Appearance.px(184)
     radius: Appearance.normalRadius
-    color: Appearance.layer1
+    color: ShellSettings.barFrostedGlass
+        ? Appearance.withAlpha(Appearance.barGlassBaseColor, 0.72)
+        : Appearance.barLayer1
     border.width: MediaService.activePlayer === player ? 2 : 1
     border.color: MediaService.activePlayer === player
-        ? Appearance.primary : Appearance.outline
+        ? Appearance.barPrimary : Appearance.barOutline
 
     scale: 0.99
 
@@ -33,7 +35,8 @@ ClippingRectangle {
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
         cache: true
-        opacity: status === Image.Ready ? 0.22 : 0
+        opacity: status === Image.Ready
+            ? (ShellSettings.barFrostedGlass ? 0.12 : 0.22) : 0
         layer.enabled: opacity > 0
         layer.effect: MultiEffect {
             blurEnabled: true
@@ -49,14 +52,16 @@ ClippingRectangle {
 
     Rectangle {
         anchors.fill: parent
-        color: Appearance.withAlpha(Appearance.layer1, 0.72)
+        color: ShellSettings.barFrostedGlass
+            ? Appearance.withAlpha(Appearance.barGlassBaseColor, 0.58)
+            : Appearance.withAlpha(Appearance.barLayer1, 0.72)
     }
 
     MediaWaveform {
         anchors.fill: parent
         points: root.visualizerPoints
         live: root.player.isPlaying
-        waveColor: Appearance.primary
+        waveColor: Appearance.barPrimary
     }
 
     MouseArea {
@@ -75,7 +80,7 @@ ClippingRectangle {
             Layout.fillHeight: true
             implicitWidth: height
             radius: Appearance.smallRadius
-            color: Appearance.layer3
+            color: Appearance.barLayer3
             clip: true
 
             Image {
@@ -92,7 +97,7 @@ ClippingRectangle {
                 anchors.centerIn: parent
                 visible: coverArt.status !== Image.Ready
                 text: "󰝚"
-                color: Appearance.primary
+                color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(45)
@@ -113,7 +118,7 @@ ClippingRectangle {
                     Layout.fillWidth: true
                     text: MediaService.cleanTitle(root.player.trackTitle)
                         || I18n.tr("unknownTitle")
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     elide: Text.ElideRight
                     font {
                         family: Appearance.fontFamily
@@ -128,8 +133,8 @@ ClippingRectangle {
                     implicitHeight: Appearance.px(24)
                     radius: Appearance.fullRadius
                     color: MediaService.activePlayer === root.player
-                        ? Appearance.primaryContainer
-                        : Appearance.layer1Active
+                        ? Appearance.barPrimaryContainer
+                        : Appearance.barLayer1Active
 
                     Text {
                         id: playerIdentity
@@ -145,8 +150,8 @@ ClippingRectangle {
                         horizontalAlignment: Text.AlignHCenter
                         elide: Text.ElideRight
                         color: MediaService.activePlayer === root.player
-                            ? Appearance.primaryContainerText
-                            : Appearance.subtext
+                            ? Appearance.barPrimaryContainerText
+                            : Appearance.barSubtext
                         font {
                             family: Appearance.fontFamily
                             pixelSize: Appearance.smallFontSize
@@ -159,7 +164,7 @@ ClippingRectangle {
                 Layout.fillWidth: true
                 text: root.player.trackArtist
                     || I18n.tr("unknownArtist")
-                color: Appearance.layer1Text
+                color: Appearance.barLayer1Text
                 elide: Text.ElideRight
                 font {
                     family: Appearance.fontFamily
@@ -171,7 +176,7 @@ ClippingRectangle {
                 Layout.fillWidth: true
                 visible: text.length > 0
                 text: root.player.trackAlbum
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 elide: Text.ElideRight
                 font {
                     family: Appearance.fontFamily
@@ -188,7 +193,7 @@ ClippingRectangle {
                 Text {
                     text: MediaService.formatTime(
                         root.progress * Math.max(0, root.player.length))
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Appearance.smallFontSize
@@ -196,6 +201,7 @@ ClippingRectangle {
                 }
 
                 WavySeekBar {
+                    useBarPalette: true
                     id: seekBar
 
                     Layout.fillWidth: true
@@ -213,7 +219,7 @@ ClippingRectangle {
 
                 Text {
                     text: MediaService.formatTime(root.player.length)
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Appearance.smallFontSize
@@ -269,10 +275,10 @@ ClippingRectangle {
                 ? Appearance.smallRadius : Appearance.fullRadius)
             : Appearance.fullRadius
         color: primary
-            ? Appearance.primaryContainer
+            ? Appearance.barPrimaryContainer
             : buttonMouse.containsMouse
-                ? Appearance.layer1Active
-                : Appearance.withAlpha(Appearance.layer1Active, 0)
+                ? Appearance.barLayer1Active
+                : Appearance.withAlpha(Appearance.barLayer1Active, 0)
         scale: buttonMouse.pressed ? 0.88 : 1
         opacity: enabled ? 1 : 0.35
 
@@ -280,8 +286,8 @@ ClippingRectangle {
             anchors.centerIn: parent
             text: button.icon
             color: button.primary
-                ? Appearance.primaryContainerText
-                : Appearance.layer0Text
+                ? Appearance.barPrimaryContainerText
+                : Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.px(button.primary ? 21 : 17)

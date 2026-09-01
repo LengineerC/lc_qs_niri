@@ -237,9 +237,9 @@ Item {
             bottomMargin: Appearance.px(4)
         }
         radius: Appearance.smallRadius
-        color: Appearance.layer1
+        color: Appearance.barLayer1
         border.width: 1
-        border.color: Appearance.layer0Border
+        border.color: Appearance.barLayer0Border
     }
 
     Item {
@@ -265,7 +265,7 @@ Item {
             height: root.activeIndicatorHeight
             radius: Appearance.fullRadius
             color: root.indicatorStyle === "circle"
-                ? Appearance.secondaryContainer : Appearance.primary
+                ? Appearance.barSecondaryContainer : Appearance.barPrimary
 
             Behavior on x {
                 NumberAnimation {
@@ -307,11 +307,11 @@ Item {
                 ? Appearance.px(16) : Appearance.px(22)
             radius: Appearance.fullRadius
             color: root.dotIndicator && root.hoverItem?.selected
-                ? Appearance.withAlpha(Appearance.layer0Text, 0.08)
+                ? Appearance.withAlpha(Appearance.barLayer0Text, 0.08)
                 : root.hoverItem?.selected
-                ? Appearance.mix(Appearance.secondaryContainer,
-                    Appearance.secondaryContainerText, 0.12)
-                : Appearance.layer1Hover
+                ? Appearance.mix(Appearance.barSecondaryContainer,
+                    Appearance.barSecondaryContainerText, 0.12)
+                : Appearance.barLayer1Hover
         }
 
         Row {
@@ -394,10 +394,10 @@ Item {
                             ? Appearance.px(22) : Appearance.px(20)
                         radius: Appearance.fullRadius
                         color: workspaceDelegate.beingDragged
-                            ? Appearance.primaryContainer : "transparent"
+                            ? Appearance.barPrimaryContainer : "transparent"
                         border.width: root.indicatorStyle === "circle"
                                 && workspaceDelegate.model.isUrgent ? 1 : 0
-                        border.color: Appearance.tertiary
+                        border.color: Appearance.barTertiary
                     }
 
                     Rectangle {
@@ -409,13 +409,13 @@ Item {
                         height: Appearance.px(6)
                         radius: Appearance.fullRadius
                         color: workspaceDelegate.model.isUrgent
-                            ? Appearance.tertiary
+                            ? Appearance.barTertiary
                             : workspaceDelegate.selected
                                     && !workspaceDelegate.beingDragged
                                 ? "transparent"
                                     : workspaceDelegate.beingDragged
-                                        ? Appearance.primaryContainerText
-                                        : Appearance.subtext
+                                        ? Appearance.barPrimaryContainerText
+                                        : Appearance.barSubtext
 
                         Behavior on color {
                             ColorAnimation {
@@ -429,9 +429,9 @@ Item {
                         visible: !root.dotIndicator
                         text: model.name || model.index
                         color: workspaceDelegate.selected
-                            ? Appearance.secondaryContainerText
+                            ? Appearance.barSecondaryContainerText
                             : model.isUrgent
-                                ? Appearance.tertiary : Appearance.subtext
+                                ? Appearance.barTertiary : Appearance.barSubtext
                         font {
                             family: Appearance.fontFamily
                             pixelSize: Appearance.smallFontSize

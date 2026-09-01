@@ -431,7 +431,7 @@ Item {
             opacity: ShellSettings.barFrostedGlass
                 ? Appearance.popupGlassTintOpacity : 1
             border.width: 1
-            border.color: Appearance.layer0Border
+            border.color: Appearance.barLayer0Border
 
             Behavior on opacity {
                 NumberAnimation { duration: Appearance.fastDuration }
@@ -448,11 +448,12 @@ Item {
             spacing: Appearance.px(8)
 
             PopupHeader {
+                useBarPalette: true
                 icon: root.popupIcon
-                iconColor: Appearance.layer1Text
+                iconColor: Appearance.barLayer1Text
                 iconSize: Appearance.px(18)
                 title: root.popupTitle
-                titleColor: Appearance.layer1Text
+                titleColor: Appearance.barLayer1Text
                 titleFontSize: Appearance.fontSize + Appearance.px(2)
                 dividerSpacing: Appearance.px(8)
                 onCloseClicked: root.close()
@@ -468,7 +469,7 @@ Item {
 
                     Text {
                         text: modelData.icon
-                        color: Appearance.layer1Text
+                        color: Appearance.barLayer1Text
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Appearance.fontSize + Appearance.px(3)
@@ -478,7 +479,7 @@ Item {
                     Text {
                         Layout.fillWidth: true
                         text: modelData.label
-                        color: Appearance.layer1Text
+                        color: Appearance.barLayer1Text
                         elide: Text.ElideRight
                         font {
                             family: Appearance.fontFamily
@@ -488,7 +489,7 @@ Item {
 
                     Text {
                         text: modelData.value
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
                         font {
                             family: Appearance.fontFamily
                             pixelSize: Appearance.smallFontSize

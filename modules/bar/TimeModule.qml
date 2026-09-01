@@ -11,9 +11,9 @@ MouseArea {
 
     property bool showDate: true
 
-    readonly property color digitColor: Appearance.primary
+    readonly property color digitColor: Appearance.barPrimary
     readonly property color colonColor:
-        Appearance.mix(Appearance.tertiary, Appearance.subtext, 0.35)
+        Appearance.mix(Appearance.barTertiary, Appearance.barSubtext, 0.35)
     readonly property int clockFontSize:
         Appearance.fontSize + Appearance.px(3)
     readonly property int digitWidth:
@@ -53,9 +53,9 @@ MouseArea {
         }
         radius: Appearance.smallRadius
         color: root.containsMouse
-            ? Appearance.layer1Hover : Appearance.layer1
+            ? Appearance.barLayer1Hover : Appearance.barLayer1
         border.width: 1
-        border.color: Appearance.outline
+        border.color: Appearance.barOutline
         scale: root.pressed ? 0.94 : 1
 
         Behavior on color {
@@ -120,7 +120,7 @@ MouseArea {
             visible: root.showDate
             Layout.leftMargin: Appearance.px(4)
             text: "|"
-            color: Appearance.subtext
+            color: Appearance.barSubtext
             verticalAlignment: Text.AlignVCenter
             font {
                 family: Appearance.fontFamily
@@ -131,7 +131,7 @@ MouseArea {
         Text {
             visible: root.showDate
             text: root.dateText
-            color: Appearance.layer1Text
+            color: Appearance.barLayer1Text
             verticalAlignment: Text.AlignVCenter
             font {
                 family: Appearance.fontFamily

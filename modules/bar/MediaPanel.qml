@@ -34,6 +34,7 @@ Item {
         spacing: Appearance.px(9)
 
         PopupHeader {
+            useBarPalette: true
             icon: "󰝚"
             iconSize: Appearance.px(22)
             title: I18n.tr("media")
@@ -46,7 +47,7 @@ Item {
                     + " " + I18n.tr(
                         MediaService.players.length === 1
                             ? "mediaPlayer" : "mediaPlayers")
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 font {
                     family: Appearance.fontFamily
                     pixelSize: Appearance.smallFontSize
@@ -98,7 +99,7 @@ Item {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰝛"
-                    color: Appearance.primary
+                    color: Appearance.barPrimary
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(46)
@@ -108,7 +109,7 @@ Item {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: I18n.tr("noMediaPlaying")
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Appearance.largeFontSize
@@ -119,7 +120,7 @@ Item {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: I18n.tr("mprisPlayerHint")
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     horizontalAlignment: Text.AlignHCenter
                     font {
                         family: Appearance.fontFamily

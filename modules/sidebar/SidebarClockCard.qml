@@ -12,9 +12,9 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: content.implicitHeight + Appearance.px(28)
     radius: Appearance.smallRadius
-    color: Appearance.layer3
+    color: Appearance.barLayer3
     border.width: 1
-    border.color: Appearance.outline
+    border.color: Appearance.barOutline
 
     Timer {
         interval: 1000
@@ -35,7 +35,7 @@ Rectangle {
 
         Text {
             text: "󰥔"
-            color: Appearance.primary
+            color: Appearance.barPrimary
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.px(28)
@@ -50,7 +50,7 @@ Rectangle {
                 Layout.fillWidth: true
                 text: I18n.locale.toString(
                     root.now, ShellSettings.timeFormat)
-                color: Appearance.layer0Text
+                color: Appearance.barLayer0Text
                 font {
                     family: Appearance.fontFamily
                     pixelSize: Appearance.px(25)
@@ -62,7 +62,7 @@ Rectangle {
                 Layout.fillWidth: true
                 text: I18n.locale.toString(
                     root.now, ShellSettings.dateFormat)
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 elide: Text.ElideRight
                 font {
                     family: Appearance.fontFamily

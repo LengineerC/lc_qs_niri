@@ -10,6 +10,13 @@ import qs.services
 Item {
     id: root
 
+    property bool useBarPalette: true
+
+    BarPalette {
+        id: panelPalette
+        enabled: root.useBarPalette
+    }
+
     signal closeRequested
 
     readonly property var filteredEntries: {
@@ -99,7 +106,7 @@ Item {
     }
 
     component PanelText: Text {
-        color: Appearance.layer1Text
+        color: panelPalette.layer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -130,6 +137,7 @@ Item {
         spacing: Appearance.px(10)
 
         PopupHeader {
+            useBarPalette: root.useBarPalette
             icon: "󰅇"
             title: I18n.tr("clipboard")
             subtitle: I18n.tr("clipboardHistoryHint")
@@ -139,9 +147,9 @@ Item {
                 implicitHeight: Appearance.px(28)
                 radius: Appearance.fullRadius
                 color: clearMouse.containsMouse
-                    ? Theme.palette.m3errorContainer
+                    ? panelPalette.errorContainer
                     : Appearance.withAlpha(
-                        Theme.palette.m3errorContainer, 0)
+                        panelPalette.errorContainer, 0)
 
 
                 PanelText {
@@ -150,7 +158,7 @@ Item {
                     anchors.centerIn: parent
                     text: "󰃢  " + I18n.tr("clear")
                     color: clearMouse.containsMouse
-                        ? Theme.palette.m3onErrorContainer : Appearance.subtext
+                        ? panelPalette.onErrorContainer : panelPalette.subtext
                     font.pixelSize: Appearance.smallFontSize
                 }
 
@@ -175,9 +183,9 @@ Item {
             Layout.fillWidth: true
             implicitHeight: Appearance.px(38)
             radius: Appearance.px(11)
-            color: Appearance.layer1
+            color: panelPalette.layer1
             border.width: searchInput.activeFocus ? 1 : 0
-            border.color: Appearance.primary
+            border.color: panelPalette.primary
 
             RowLayout {
                 anchors {
@@ -190,7 +198,7 @@ Item {
                 Text {
                     text: "󰍉"
                     color: searchInput.activeFocus
-                        ? Appearance.primary : Appearance.subtext
+                        ? panelPalette.primary : panelPalette.subtext
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(16)
@@ -203,10 +211,10 @@ Item {
                     Layout.fillWidth: true
                     padding: 0
                     placeholderText: I18n.tr("searchClipboard")
-                    color: Appearance.layer0Text
-                    placeholderTextColor: Appearance.subtext
-                    selectionColor: Appearance.primaryContainer
-                    selectedTextColor: Appearance.primaryContainerText
+                    color: panelPalette.layer0Text
+                    placeholderTextColor: panelPalette.subtext
+                    selectionColor: panelPalette.primaryContainer
+                    selectedTextColor: panelPalette.primaryContainerText
                     selectByMouse: true
                     background: null
                     font {
@@ -235,12 +243,12 @@ Item {
                     implicitHeight: Appearance.px(24)
                     radius: Appearance.fullRadius
                     color: searchClearMouse.containsMouse
-                        ? Appearance.layer1Active : "transparent"
+                        ? panelPalette.layer1Active : "transparent"
 
                     Text {
                         anchors.centerIn: parent
                         text: "󰅖"
-                        color: Appearance.subtext
+                        color: panelPalette.subtext
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Appearance.px(13)
@@ -291,12 +299,12 @@ Item {
                         ? Appearance.px(182) : Appearance.px(104)
                     radius: Appearance.smallRadius
                     color: historyEntry.selected
-                        ? Appearance.primaryContainer
+                        ? panelPalette.primaryContainer
                         : entryMouse.containsMouse
-                            ? Appearance.layer1Hover : Appearance.layer1
+                            ? panelPalette.layer1Hover : panelPalette.layer1
                     border.width: historyEntry.selected ? 2 : 1
                     border.color: historyEntry.selected
-                        ? Appearance.primary : Appearance.outline
+                        ? panelPalette.primary : panelPalette.outline
                     clip: true
 
                     MouseArea {
@@ -339,8 +347,8 @@ Item {
                             Layout.fillHeight: true
                             text: historyEntry.modelData.preview
                             color: historyEntry.selected
-                                ? Appearance.primaryContainerText
-                                : Appearance.layer0Text
+                                ? panelPalette.primaryContainerText
+                                : panelPalette.layer0Text
                             wrapMode: Text.WrapAnywhere
                             elide: Text.ElideRight
                             maximumLineCount: 4
@@ -351,8 +359,8 @@ Item {
                             text: root.formatSize(
                                 historyEntry.modelData.size)
                             color: historyEntry.selected
-                                ? Appearance.primaryContainerText
-                                : Appearance.subtext
+                                ? panelPalette.primaryContainerText
+                                : panelPalette.subtext
                             font.pixelSize: Appearance.smallFontSize
                         }
                     }
@@ -367,15 +375,15 @@ Item {
                         implicitHeight: Appearance.px(28)
                         radius: Appearance.fullRadius
                         color: deleteMouse.containsMouse
-                            ? Theme.palette.m3errorContainer
-                            : Appearance.layer2
+                            ? panelPalette.errorContainer
+                            : panelPalette.layer2
 
                         Text {
                             anchors.centerIn: parent
                             text: "󰆴"
                             color: deleteMouse.containsMouse
-                                ? Theme.palette.m3onErrorContainer
-                                : Appearance.subtext
+                                ? panelPalette.onErrorContainer
+                                : panelPalette.subtext
                             font {
                                 family: Appearance.iconFontFamily
                                 pixelSize: Appearance.px(14)
@@ -409,7 +417,7 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: searchInput.text
                         ? "󰍉" : "󰅇"
-                    color: Appearance.subtext
+                    color: panelPalette.subtext
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(36)
@@ -421,7 +429,7 @@ Item {
                     text: searchInput.text
                         ? I18n.tr("noSearchResults")
                         : I18n.tr("clipboardEmpty")
-                    color: Appearance.subtext
+                    color: panelPalette.subtext
                 }
             }
 

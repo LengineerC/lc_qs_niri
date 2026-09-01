@@ -8,6 +8,13 @@ import qs.services
 Rectangle {
     id: root
 
+    property bool useBarPalette: false
+
+    BarPalette {
+        id: cardPalette
+        enabled: root.useBarPalette
+    }
+
     MouseArea {
         anchors.fill: parent
         onClicked: forceActiveFocus()
@@ -47,21 +54,26 @@ Rectangle {
             value: FastfetchService.shellName || unknownValue
         }
     ]
-    readonly property var paletteColors: [
-        Appearance.primary,
-        Theme.palette.m3secondary,
-        Theme.palette.m3tertiary,
-        Theme.palette.m3success,
-        Theme.palette.m3surfaceVariant,
-        Theme.palette.m3primaryContainer
-    ]
+    readonly property var paletteColors:
+        root.useBarPalette && ShellSettings.barFrostedGlass
+        ? [
+            "#f0ffffff", "#c9ffffff", "#a3ffffff",
+            "#7dffffff", "#57ffffff", "#31ffffff"
+        ] : [
+            cardPalette.primary,
+            Theme.palette.m3secondary,
+            Theme.palette.m3tertiary,
+            Theme.palette.m3success,
+            Theme.palette.m3surfaceVariant,
+            Theme.palette.m3primaryContainer
+        ]
 
     Layout.fillWidth: true
     implicitHeight: content.implicitHeight + Appearance.px(28)
     radius: Appearance.px(24)
-    color: Appearance.layer3
+    color: cardPalette.layer3
     border.width: 1
-    border.color: Appearance.withAlpha(Appearance.outline, 0.58)
+    border.color: Appearance.withAlpha(cardPalette.outline, 0.58)
     clip: true
 
     ColumnLayout {
@@ -81,12 +93,12 @@ Rectangle {
         //         Layout.preferredWidth: Appearance.px(34)
         //         Layout.preferredHeight: Appearance.px(34)
         //         radius: Appearance.px(11)
-        //         color: Appearance.primaryContainer
+        //         color: cardPalette.primaryContainer
 
         //         Text {
         //             anchors.centerIn: parent
         //             text: ">"
-        //             color: Appearance.primaryContainerText
+        //             color: cardPalette.primaryContainerText
         //             font {
         //                 family: Appearance.monospaceFontFamily
         //                 pixelSize: Appearance.px(16)
@@ -98,7 +110,7 @@ Rectangle {
         //     Text {
         //         Layout.fillWidth: true
         //         text: "fastfetch"
-        //         color: Appearance.layer0Text
+        //         color: cardPalette.layer0Text
         //         font {
         //             family: Appearance.monospaceFontFamily
         //             pixelSize: Appearance.px(15)
@@ -111,9 +123,9 @@ Rectangle {
         //         Layout.preferredHeight: Appearance.px(7)
         //         radius: Appearance.fullRadius
         //         color: FastfetchService.errorMessage
-        //             ? Theme.palette.m3error
+        //             ? cardPalette.error
         //             : FastfetchService.loading
-        //                 ? Appearance.tertiary : Appearance.primary
+        //                 ? cardPalette.tertiary : cardPalette.primary
 
         //         SequentialAnimation on opacity {
         //             running: FastfetchService.loading
@@ -145,16 +157,16 @@ Rectangle {
                     height: width
                     radius: Appearance.px(34)
                     color: Appearance.withAlpha(
-                        Appearance.primary, 0.075)
+                        cardPalette.primary, 0.075)
                     border.width: 1
                     border.color: Appearance.withAlpha(
-                        Appearance.primary, 0.12)
+                        cardPalette.primary, 0.12)
 
                     Text {
                         anchors.centerIn: parent
                         anchors.verticalCenterOffset: Appearance.px(2)
                         text: FastfetchService.systemIcon
-                        color: Appearance.primary
+                        color: cardPalette.primary
                         font {
                             family: "Symbols Nerd Font"
                             pixelSize: Appearance.px(72)
@@ -171,7 +183,7 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     text: FastfetchService.title
-                    color: Appearance.primary
+                    color: cardPalette.primary
                     elide: Text.ElideRight
                     font {
                         family: Appearance.monospaceFontFamily
@@ -184,7 +196,7 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
                     color: Appearance.withAlpha(
-                        Appearance.outline, 0.75)
+                        cardPalette.outline, 0.75)
                 }
 
                 Repeater {
@@ -203,7 +215,7 @@ Rectangle {
                             Layout.preferredWidth: Appearance.px(18)
                             horizontalAlignment: Text.AlignHCenter
                             text: informationRow.modelData.icon
-                            color: Appearance.primary
+                            color: cardPalette.primary
                             font {
                                 family: Appearance.iconFontFamily
                                 pixelSize: Appearance.px(15)
@@ -213,7 +225,7 @@ Rectangle {
                         Text {
                             Layout.preferredWidth: Appearance.px(42)
                             text: informationRow.modelData.label + ":"
-                            color: Appearance.layer1Text
+                            color: cardPalette.layer1Text
                             font {
                                 family: Appearance.monospaceFontFamily
                                 pixelSize: Appearance.px(13)
@@ -224,7 +236,7 @@ Rectangle {
                         Text {
                             Layout.fillWidth: true
                             text: informationRow.modelData.value
-                            color: Appearance.layer0Text
+                            color: cardPalette.layer0Text
                             elide: Text.ElideRight
                             font {
                                 family: Appearance.monospaceFontFamily
@@ -251,7 +263,7 @@ Rectangle {
                             color: modelData
                             border.width: 1
                             border.color: Appearance.withAlpha(
-                                Appearance.layer0Text, 0.08)
+                                cardPalette.layer0Text, 0.08)
                         }
                     }
                 }
@@ -262,7 +274,7 @@ Rectangle {
             Layout.fillWidth: true
             visible: FastfetchService.errorMessage.length > 0
             text: FastfetchService.errorMessage
-            color: Theme.palette.m3error
+            color: cardPalette.error
             elide: Text.ElideRight
             font {
                 family: Appearance.fontFamily

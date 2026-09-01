@@ -282,7 +282,7 @@ Item {
 
     Component {
         id: fastfetchComponent
-        FastfetchCard {}
+        FastfetchCard { useBarPalette: true }
     }
 
     Component {
@@ -310,18 +310,21 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Appearance.cornerSize
-        color: Appearance.barBgColor
+        color: ShellSettings.barFrostedGlass
+            ? Appearance.barSurfaceColor : Appearance.barBgColor
         border.width: 1
-        border.color: Appearance.layer0Border
+        border.color: Appearance.barLayer0Border
 
         layer.enabled: ShellSettings.shadowEnabled
+            && !ShellSettings.barFrostedGlass
         layer.effect: MultiEffect {
             shadowEnabled: ShellSettings.shadowEnabled
+                && !ShellSettings.barFrostedGlass
             shadowBlur: 1
             blurMax: Math.max(1, Math.round(
                 ShellSettings.shadowBlurRadius * Appearance.scale))
             shadowColor: Appearance.withAlpha(
-                Theme.palette.m3shadow, ShellSettings.shadowOpacity)
+                Appearance.barShadow, ShellSettings.shadowOpacity)
             shadowVerticalOffset: Math.round(
                 ShellSettings.shadowOffsetY * Appearance.scale)
         }
@@ -432,14 +435,14 @@ Item {
                             radius: Appearance.px(24)
                             color: moduleDelegate.dragging
                                 ? Appearance.withAlpha(
-                                    Appearance.primary, 0.08)
+                                    Appearance.barPrimary, 0.08)
                                 : "transparent"
                             border.width: moduleDelegate.dropTarget
                                 ? Appearance.px(2) : 1
                             border.color: moduleDelegate.dropTarget
-                                ? Appearance.primary
+                                ? Appearance.barPrimary
                                 : Appearance.withAlpha(
-                                    Appearance.primary, 0.34)
+                                    Appearance.barPrimary, 0.34)
 
                             MouseArea {
                                 id: dragArea
@@ -517,15 +520,15 @@ Item {
                                 height: Appearance.px(18)
                                 radius: height / 2
                                 color: Appearance.withAlpha(
-                                    Appearance.layer0, 0.84)
+                                    Appearance.barLayer0, 0.84)
                                 border.width: 1
                                 border.color: Appearance.withAlpha(
-                                    Appearance.primary, 0.45)
+                                    Appearance.barPrimary, 0.45)
 
                                 Text {
                                     anchors.centerIn: parent
                                     text: "󰇙"
-                                    color: Appearance.primary
+                                    color: Appearance.barPrimary
                                     font {
                                         family: Appearance.iconFontFamily
                                         pixelSize: Appearance.px(13)
@@ -552,12 +555,12 @@ Item {
             radius: width / 2
             z: 50
             color: root.editMode
-                ? Appearance.primaryContainer
-                : Appearance.withAlpha(Appearance.layer0, 0.78)
+                ? Appearance.barPrimaryContainer
+                : Appearance.withAlpha(Appearance.barLayer0, 0.78)
             border.width: 1
             border.color: root.editMode
-                ? Appearance.withAlpha(Appearance.primary, 0.72)
-                : Appearance.withAlpha(Appearance.outline, 0.42)
+                ? Appearance.withAlpha(Appearance.barPrimary, 0.72)
+                : Appearance.withAlpha(Appearance.barOutline, 0.42)
             opacity: root.editMode || editMouse.containsMouse ? 1 : 0.64
 
             Behavior on opacity {
@@ -568,8 +571,8 @@ Item {
                 anchors.centerIn: parent
                 text: root.editMode ? "󰄬" : "󰏫"
                 color: root.editMode
-                    ? Appearance.onPrimaryContainer
-                    : Appearance.primary
+                    ? Appearance.barPrimaryContainerText
+                    : Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(16)

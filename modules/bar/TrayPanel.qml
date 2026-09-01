@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Controls as Controls
 import QtQuick.Layouts
 import Quickshell
@@ -62,7 +63,7 @@ Item {
     }
 
     component PanelText: Text {
-        color: Appearance.layer1Text
+        color: Appearance.barLayer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -81,6 +82,7 @@ Item {
         spacing: Appearance.px(10)
 
         // PopupHeader {
+        //     useBarPalette: true
         //     icon: "󰀻"
         //     iconSize: Appearance.px(20)
         //     title: I18n.tr("systemTray")
@@ -104,7 +106,7 @@ Item {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰀻"
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     opacity: 0.7
                     font {
                         family: Appearance.iconFontFamily
@@ -115,7 +117,7 @@ Item {
                 PanelText {
                     Layout.alignment: Qt.AlignHCenter
                     text: I18n.tr("noTrayApplications")
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                 }
             }
 
@@ -155,16 +157,16 @@ Item {
                             height: Appearance.px(56)
                             radius: Appearance.smallRadius
                             color: trayMouse.containsMouse
-                                ? Appearance.layer1Hover
+                                ? Appearance.barLayer1Hover
                                 : modelData.status
                                     === Status.NeedsAttention
-                                    ? Appearance.primaryContainer
-                                    : Appearance.layer1
+                                    ? Appearance.barPrimaryContainer
+                                    : Appearance.barLayer1
                             border.width: 1
                             border.color: modelData.status
                                     === Status.NeedsAttention
-                                ? Appearance.primary
-                                : Appearance.outline
+                                ? Appearance.barPrimary
+                                : Appearance.barOutline
                             scale: trayMouse.pressed ? 0.8 : 0.85
 
                             function openMenu() {
@@ -186,6 +188,13 @@ Item {
                                 cache: true
                                 retainWhileLoading: true
                                 smooth: true
+                                layer.enabled:
+                                    ShellSettings.barFrostedGlass
+                                layer.effect: MultiEffect {
+                                    saturation: -1
+                                    brightness: 0.12
+                                    contrast: 0.08
+                                }
                             }
 
                             PanelText {
@@ -195,7 +204,7 @@ Item {
                                 text: root.itemTitle(
                                     trayDelegate.modelData)
                                     .slice(0, 1).toUpperCase()
-                                color: Appearance.primary
+                                color: Appearance.barPrimary
                                 font.weight: Font.Bold
                             }
 

@@ -7,6 +7,7 @@ Item {
     id: root
 
     property real value: 0
+    property bool useBarPalette: false
     property bool playing: false
     property bool seekable: true
     property bool dragging: false
@@ -30,9 +31,11 @@ Item {
         antialiasing: true
         property real amplitude: root.playing
             ? Appearance.px(2.2) : 0
-        readonly property color fillColor: Appearance.primary
+        readonly property color fillColor: root.useBarPalette
+            ? Appearance.barPrimary : Appearance.primary
         readonly property color trackColor:
-            Appearance.withAlpha(Appearance.subtext, 0.32)
+            Appearance.withAlpha(root.useBarPalette
+                ? Appearance.barSubtext : Appearance.subtext, 0.32)
 
         onAmplitudeChanged: requestPaint()
         onFillColorChanged: requestPaint()
@@ -116,7 +119,8 @@ Item {
         width: Appearance.px(root.dragging ? 2 : 3)
         height: Appearance.px(16)
         radius: Appearance.fullRadius
-        color: Appearance.primary
+        color: root.useBarPalette
+            ? Appearance.barPrimary : Appearance.primary
         x: Math.max(0, Math.min(parent.width - width,
             parent.width * root.displayValue - width / 2))
         anchors.verticalCenter: parent.verticalCenter

@@ -14,6 +14,7 @@ Item {
     property alias bottomVisualMargin: shape.anchors.bottomMargin
 
     property int implicitSize: 25
+    property bool layerEnabled: true
     // Stay transparent until the caller's theme colour binding is evaluated.
     property color color: "transparent"
 
@@ -37,7 +38,7 @@ Item {
             left: root.isLeft ? parent.left : undefined
             right: root.isRight ? parent.right : undefined
         }
-        layer.enabled: true
+        layer.enabled: root.layerEnabled
         layer.smooth: true
         preferredRendererType: Shape.CurveRenderer
 

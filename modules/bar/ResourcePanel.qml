@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls as Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
@@ -13,6 +14,7 @@ Item {
     id: root
 
     property bool active: false
+    property bool useBarPalette: true
     property string processScope: "all"
     property string sortKey: "cpu"
     property bool sortDescending: true
@@ -24,6 +26,11 @@ Item {
     property bool viewerRegistered: false
 
     signal closeRequested
+
+    BarPalette {
+        id: panelPalette
+        enabled: root.useBarPalette
+    }
 
     readonly property var filteredProcesses: {
         const query = searchInput.text.trim().toLocaleLowerCase();
@@ -154,7 +161,7 @@ Item {
     Component.onDestruction: setViewerActive(false)
 
     component PanelText: Text {
-        color: Appearance.layer1Text
+        color: panelPalette.layer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -168,7 +175,7 @@ Item {
 
         Text {
             text: parent.icon
-            color: Appearance.primary
+            color: panelPalette.primary
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.px(18)
@@ -177,7 +184,7 @@ Item {
 
         PanelText {
             text: parent.label
-            color: Appearance.subtext
+            color: panelPalette.subtext
             font.pixelSize: Appearance.smallFontSize
         }
     }
@@ -193,18 +200,18 @@ Item {
         implicitHeight: Appearance.px(32)
         radius: Appearance.px(9)
         color: selected
-            ? Appearance.primaryContainer
+            ? panelPalette.primaryContainer
             : scopeArea.containsMouse
-                ? Appearance.layer1Active : Appearance.layer1
+                ? panelPalette.layer1Active : panelPalette.layer1
         border.width: selected ? 1 : 0
-        border.color: Appearance.primary
+        border.color: panelPalette.primary
 
         PanelText {
             id: scopeLabel
             anchors.centerIn: parent
             text: scopeButton.label
             color: scopeButton.selected
-                ? Appearance.primaryContainerText : Appearance.layer1Text
+                ? panelPalette.primaryContainerText : panelPalette.layer1Text
             font.pixelSize: Appearance.smallFontSize
         }
 
@@ -227,13 +234,13 @@ Item {
         implicitHeight: Appearance.px(30)
         radius: Appearance.px(9)
         color: diskSwitchArea.containsMouse && enabled
-            ? Appearance.layer1Active : Appearance.layer1
+            ? panelPalette.layer1Active : panelPalette.layer1
         opacity: enabled ? 1 : 0.38
 
         Text {
             anchors.centerIn: parent
             text: diskSwitchButton.icon
-            color: Appearance.layer1Text
+            color: panelPalette.layer1Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.px(14)
@@ -261,9 +268,9 @@ Item {
         Layout.preferredWidth: Appearance.px(220)
         implicitHeight: Appearance.px(60)
         radius: Appearance.px(12)
-        color: Appearance.layer1
+        color: panelPalette.layer1
         border.width: 1
-        border.color: Appearance.layer0Border
+        border.color: panelPalette.layer0Border
 
         RowLayout {
             anchors {
@@ -277,12 +284,12 @@ Item {
                 implicitWidth: Appearance.px(30)
                 implicitHeight: Appearance.px(30)
                 radius: Appearance.fullRadius
-                color: Appearance.primaryContainer
+                color: panelPalette.primaryContainer
 
                 Text {
                     anchors.centerIn: parent
                     text: networkRateCard.icon
-                    color: Appearance.primaryContainerText
+                    color: panelPalette.primaryContainerText
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(15)
@@ -296,7 +303,7 @@ Item {
 
                 PanelText {
                     text: networkRateCard.label
-                    color: Appearance.subtext
+                    color: panelPalette.subtext
                     font.pixelSize: Appearance.smallFontSize
                 }
 
@@ -304,7 +311,7 @@ Item {
                     Layout.fillWidth: true
                     text: ResourceService.formatRate(
                         networkRateCard.bytesPerSecond)
-                    color: Appearance.layer0Text
+                    color: panelPalette.layer0Text
                     elide: Text.ElideRight
                     font.weight: Font.DemiBold
                 }
@@ -324,7 +331,7 @@ Item {
         implicitHeight: Appearance.px(38)
         radius: Appearance.px(8)
         color: menuArea.containsMouse && enabled
-            ? Appearance.layer1Active : "transparent"
+            ? panelPalette.layer1Active : "transparent"
         opacity: enabled ? 1 : 0.42
 
         RowLayout {
@@ -338,7 +345,7 @@ Item {
             Text {
                 text: menuAction.icon
                 color: menuAction.destructive
-                    ? Theme.palette.m3error : Appearance.primary
+                    ? panelPalette.error : panelPalette.primary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(15)
@@ -349,7 +356,7 @@ Item {
                 Layout.fillWidth: true
                 text: menuAction.label
                 color: menuAction.destructive
-                    ? Theme.palette.m3error : Appearance.layer0Text
+                    ? panelPalette.error : panelPalette.layer0Text
                 font.pixelSize: Appearance.smallFontSize
             }
         }
@@ -373,13 +380,14 @@ Item {
         spacing: Appearance.px(10)
 
         PopupHeader {
+            useBarPalette: root.useBarPalette
             icon: "󰍛"
             title: I18n.tr("systemMonitor")
             showActions: ResourceService.actionMessage.length > 0
 
             PanelText {
                 text: ResourceService.actionMessage
-                color: Appearance.subtext
+                color: panelPalette.subtext
                 font.pixelSize: Appearance.smallFontSize
             }
         }
@@ -392,9 +400,9 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: Appearance.px(104)
                 radius: Appearance.smallRadius
-                color: Appearance.layer3
+                color: panelPalette.layer3
                 border.width: 1
-                border.color: Appearance.outline
+                border.color: panelPalette.outline
 
                 RowLayout {
                     anchors {
@@ -419,7 +427,7 @@ Item {
                         PanelText {
                             Layout.fillWidth: true
                             text: ResourceService.cpuModel
-                            color: Appearance.layer0Text
+                            color: panelPalette.layer0Text
                             elide: Text.ElideRight
                             font.weight: Font.DemiBold
                         }
@@ -456,9 +464,9 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: Appearance.px(104)
                 radius: Appearance.smallRadius
-                color: Appearance.layer3
+                color: panelPalette.layer3
                 border.width: 1
-                border.color: Appearance.outline
+                border.color: panelPalette.outline
 
                 RowLayout {
                     anchors {
@@ -481,7 +489,7 @@ Item {
 
                         PanelText {
                             text: I18n.tr("memory")
-                            color: Appearance.layer0Text
+                            color: panelPalette.layer0Text
                             font.weight: Font.DemiBold
                         }
 
@@ -516,9 +524,9 @@ Item {
             Layout.fillWidth: true
             implicitHeight: Appearance.px(82)
             radius: Appearance.smallRadius
-            color: Appearance.layer3
+            color: panelPalette.layer3
             border.width: 1
-            border.color: Appearance.outline
+            border.color: panelPalette.outline
 
             WheelHandler {
                 enabled: ResourceService.filesystems.length > 1
@@ -561,7 +569,7 @@ Item {
                                 ? I18n.tr("disk") + "  "
                                     + filesystemCard.filesystem.target
                                 : I18n.tr("noFilesystems")
-                            color: Appearance.layer0Text
+                            color: panelPalette.layer0Text
                             elide: Text.ElideMiddle
                             font.weight: Font.DemiBold
                         }
@@ -575,7 +583,7 @@ Item {
                                         * 100
                                     : 0
                             ).toFixed(1) + "%"
-                            color: Appearance.subtext
+                            color: panelPalette.subtext
                         }
                     }
 
@@ -587,7 +595,7 @@ Item {
                                 + "  ·  "
                                 + filesystemCard.filesystem.source
                             : ResourceService.filesystemError
-                        color: Appearance.subtext
+                        color: panelPalette.subtext
                         elide: Text.ElideMiddle
                         font.pixelSize: Appearance.smallFontSize
                     }
@@ -617,7 +625,7 @@ Item {
                         ? (ResourceService.selectedFilesystemIndex + 1)
                             + "/" + ResourceService.filesystems.length
                         : "0/0"
-                    color: Appearance.subtext
+                    color: panelPalette.subtext
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: Appearance.smallFontSize
                 }
@@ -635,9 +643,9 @@ Item {
             Layout.fillWidth: true
             implicitHeight: Appearance.px(82)
             radius: Appearance.smallRadius
-            color: Appearance.layer3
+            color: panelPalette.layer3
             border.width: 1
-            border.color: Appearance.outline
+            border.color: panelPalette.outline
 
             RowLayout {
                 anchors {
@@ -651,12 +659,12 @@ Item {
                     implicitWidth: Appearance.px(46)
                     implicitHeight: Appearance.px(46)
                     radius: Appearance.fullRadius
-                    color: Appearance.primaryContainer
+                    color: panelPalette.primaryContainer
 
                     Text {
                         anchors.centerIn: parent
                         text: "󰛳"
-                        color: Appearance.primaryContainerText
+                        color: panelPalette.primaryContainerText
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Appearance.px(21)
@@ -670,14 +678,14 @@ Item {
 
                     PanelText {
                         text: I18n.tr("networkSpeed")
-                        color: Appearance.layer0Text
+                        color: panelPalette.layer0Text
                         font.weight: Font.DemiBold
                     }
 
                     PanelText {
                         text: ResourceService.networkInterface
                             || I18n.tr("unknown")
-                        color: Appearance.subtext
+                        color: panelPalette.subtext
                         font.pixelSize: Appearance.smallFontSize
                     }
                 }
@@ -702,9 +710,9 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             radius: Appearance.smallRadius
-            color: Appearance.layer3
+            color: panelPalette.layer3
             border.width: 1
-            border.color: Appearance.outline
+            border.color: panelPalette.outline
 
             ColumnLayout {
                 anchors {
@@ -721,9 +729,9 @@ Item {
                         Layout.fillWidth: true
                         implicitHeight: Appearance.px(36)
                         radius: Appearance.px(10)
-                        color: Appearance.layer1
+                        color: panelPalette.layer1
                         border.width: searchInput.activeFocus ? 1 : 0
-                        border.color: Appearance.primary
+                        border.color: panelPalette.primary
 
                         RowLayout {
                             anchors {
@@ -736,8 +744,8 @@ Item {
                             Text {
                                 text: "󰍉"
                                 color: searchInput.activeFocus
-                                    ? Appearance.primary
-                                    : Appearance.subtext
+                                    ? panelPalette.primary
+                                    : panelPalette.subtext
                                 font {
                                     family: Appearance.iconFontFamily
                                     pixelSize: Appearance.px(15)
@@ -750,12 +758,12 @@ Item {
                                 padding: 0
                                 placeholderText:
                                     I18n.tr("searchProcesses")
-                                color: Appearance.layer0Text
-                                placeholderTextColor: Appearance.subtext
+                                color: panelPalette.layer0Text
+                                placeholderTextColor: panelPalette.subtext
                                 selectionColor:
-                                    Appearance.primaryContainer
+                                    panelPalette.primaryContainer
                                 selectedTextColor:
-                                    Appearance.primaryContainerText
+                                    panelPalette.primaryContainerText
                                 selectByMouse: true
                                 background: null
                                 font {
@@ -770,8 +778,8 @@ Item {
                                 visible: searchInput.text.length > 0
                                 text: "󰅖"
                                 color: clearSearchArea.containsMouse
-                                    ? Appearance.primary
-                                    : Appearance.subtext
+                                    ? panelPalette.primary
+                                    : panelPalette.subtext
                                 font {
                                     family: Appearance.iconFontFamily
                                     pixelSize: Appearance.px(13)
@@ -817,7 +825,7 @@ Item {
                     PanelText {
                         Layout.fillWidth: true
                         text: I18n.tr("name")
-                        color: Appearance.subtext
+                        color: panelPalette.subtext
                         font.weight: Font.DemiBold
                     }
 
@@ -825,7 +833,7 @@ Item {
                         Layout.preferredWidth: Appearance.px(86)
                         text: "CPU" + root.sortArrow("cpu")
                         color: root.sortKey === "cpu"
-                            ? Appearance.primary : Appearance.subtext
+                            ? panelPalette.primary : panelPalette.subtext
                         horizontalAlignment: Text.AlignHCenter
                         font.weight: Font.DemiBold
 
@@ -842,7 +850,7 @@ Item {
                         Layout.preferredWidth: Appearance.px(112)
                         text: "PSS" + root.sortArrow("memory")
                         color: root.sortKey === "memory"
-                            ? Appearance.primary : Appearance.subtext
+                            ? panelPalette.primary : panelPalette.subtext
                         horizontalAlignment: Text.AlignHCenter
                         font.weight: Font.DemiBold
 
@@ -858,7 +866,7 @@ Item {
                     PanelText {
                         Layout.preferredWidth: Appearance.px(76)
                         text: "PID"
-                        color: Appearance.subtext
+                        color: panelPalette.subtext
                         horizontalAlignment: Text.AlignHCenter
                         font.weight: Font.DemiBold
                     }
@@ -871,7 +879,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     implicitHeight: 1
-                    color: Appearance.outline
+                    color: panelPalette.outline
                 }
 
                 Item {
@@ -942,10 +950,10 @@ Item {
                             radius: Appearance.px(11)
                             color: processArea.containsMouse
                                 || expanded
-                                ? Appearance.layer1Hover
-                                : Appearance.layer1
+                                ? panelPalette.layer1Hover
+                                : panelPalette.layer1
                             border.width: expanded ? 1 : 0
-                            border.color: Appearance.primary
+                            border.color: panelPalette.primary
                             clip: true
 
                             MouseArea {
@@ -998,13 +1006,20 @@ Item {
                                                         .desktopEntry.icon,
                                                     "application-x-executable")
                                                 : ""
+                                            layer.enabled:
+                                                ShellSettings.barFrostedGlass
+                                            layer.effect: MultiEffect {
+                                                saturation: -1
+                                                brightness: 0.12
+                                                contrast: 0.08
+                                            }
                                         }
 
                                         Text {
                                             anchors.centerIn: parent
                                             visible: !processIcon.visible
                                             text: "󰒓"
-                                            color: Appearance.primary
+                                            color: panelPalette.primary
                                             font {
                                                 family:
                                                     Appearance.iconFontFamily
@@ -1017,7 +1032,7 @@ Item {
                                     PanelText {
                                         Layout.fillWidth: true
                                         text: processEntry.modelData.name
-                                        color: Appearance.layer0Text
+                                        color: panelPalette.layer0Text
                                         elide: Text.ElideRight
                                         font.weight: Font.DemiBold
                                     }
@@ -1027,13 +1042,13 @@ Item {
                                             Appearance.px(86)
                                         implicitHeight: Appearance.px(30)
                                         radius: Appearance.fullRadius
-                                        color: Appearance.layer1Active
+                                        color: panelPalette.layer1Active
 
                                         PanelText {
                                             anchors.centerIn: parent
                                             text: processEntry.modelData.cpu
                                                 .toFixed(1) + "%"
-                                            color: Appearance.layer0Text
+                                            color: panelPalette.layer0Text
                                             font.weight: Font.DemiBold
                                         }
                                     }
@@ -1047,7 +1062,7 @@ Item {
                                                 >= 1024 * 1024
                                             ? Theme.palette
                                                 .m3tertiaryContainer
-                                            : Appearance.layer1Active
+                                            : panelPalette.layer1Active
 
                                         PanelText {
                                             anchors.centerIn: parent
@@ -1058,7 +1073,7 @@ Item {
                                                     .pssKb >= 1024 * 1024
                                                 ? Theme.palette
                                                     .m3onTertiaryContainer
-                                                : Appearance.layer0Text
+                                                : panelPalette.layer0Text
                                             font.weight: Font.DemiBold
                                         }
                                     }
@@ -1067,7 +1082,7 @@ Item {
                                         Layout.preferredWidth:
                                             Appearance.px(76)
                                         text: processEntry.modelData.pid
-                                        color: Appearance.subtext
+                                        color: panelPalette.subtext
                                         horizontalAlignment:
                                             Text.AlignHCenter
                                     }
@@ -1077,7 +1092,7 @@ Item {
                                             Appearance.px(18)
                                         text: processEntry.expanded
                                             ? "󰅃" : "󰅀"
-                                        color: Appearance.subtext
+                                        color: panelPalette.subtext
                                         font {
                                             family:
                                                 Appearance.iconFontFamily
@@ -1091,7 +1106,7 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
                                     radius: Appearance.px(8)
-                                    color: Appearance.layer2
+                                    color: panelPalette.layer2
 
                                     ColumnLayout {
                                         anchors {
@@ -1111,7 +1126,7 @@ Item {
                                                     + processEntry
                                                         .modelData.command
                                                 color:
-                                                    Appearance.layer0Text
+                                                    panelPalette.layer0Text
                                                 elide: Text.ElideRight
                                                 font.pixelSize:
                                                     Appearance.smallFontSize
@@ -1122,8 +1137,8 @@ Item {
                                                 color:
                                                     copyCommandArea
                                                         .containsMouse
-                                                    ? Appearance.primary
-                                                    : Appearance.subtext
+                                                    ? panelPalette.primary
+                                                    : panelPalette.subtext
                                                 font {
                                                     family: Appearance
                                                         .iconFontFamily
@@ -1160,7 +1175,7 @@ Item {
                                                 + processEntry.modelData
                                                     .memoryPercent.toFixed(1)
                                                 + "%)"
-                                            color: Appearance.subtext
+                                            color: panelPalette.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
                                         }
@@ -1192,7 +1207,7 @@ Item {
                         Text {
                             Layout.alignment: Qt.AlignHCenter
                             text: "󰘦"
-                            color: Appearance.primary
+                            color: panelPalette.primary
                             font {
                                 family: Appearance.iconFontFamily
                                 pixelSize: Appearance.px(32)
@@ -1204,7 +1219,7 @@ Item {
                             text: searchInput.text
                                 ? I18n.tr("noSearchResults")
                                 : I18n.tr("noProcesses")
-                            color: Appearance.subtext
+                            color: panelPalette.subtext
                         }
                     }
 
@@ -1235,9 +1250,9 @@ Item {
         implicitHeight: contextColumn.implicitHeight
             + Appearance.px(12)
         radius: Appearance.px(12)
-        color: Appearance.layer2
+        color: panelPalette.layer2
         border.width: 1
-        border.color: Appearance.outline
+        border.color: panelPalette.outline
 
         ColumnLayout {
             id: contextColumn
@@ -1275,7 +1290,7 @@ Item {
                 Layout.leftMargin: Appearance.px(8)
                 Layout.rightMargin: Appearance.px(8)
                 implicitHeight: 1
-                color: Appearance.outline
+                color: panelPalette.outline
             }
 
             MenuAction {
@@ -1308,7 +1323,7 @@ Item {
         z: 100
         visible: root.confirmEntry !== null
         color: Appearance.withAlpha(
-            Theme.palette.m3scrim, 0.55)
+            panelPalette.scrim, 0.55)
 
         MouseArea {
             anchors.fill: parent
@@ -1320,9 +1335,9 @@ Item {
             implicitHeight: confirmColumn.implicitHeight
                 + Appearance.px(28)
             radius: Appearance.normalRadius
-            color: Appearance.layer2
+            color: panelPalette.layer2
             border.width: 1
-            border.color: Appearance.outline
+            border.color: panelPalette.outline
 
             ColumnLayout {
                 id: confirmColumn
@@ -1337,7 +1352,7 @@ Item {
                 PanelText {
                     Layout.fillWidth: true
                     text: I18n.tr("confirmForceStop")
-                    color: Appearance.layer0Text
+                    color: panelPalette.layer0Text
                     font {
                         pixelSize: Appearance.largeFontSize
                         weight: Font.DemiBold
@@ -1349,14 +1364,14 @@ Item {
                     text: root.confirmEntry
                         ? root.confirmEntry.name + "  (PID "
                             + root.confirmEntry.pid + ")" : ""
-                    color: Appearance.subtext
+                    color: panelPalette.subtext
                     elide: Text.ElideRight
                 }
 
                 PanelText {
                     Layout.fillWidth: true
                     text: I18n.tr("forceStopWarning")
-                    color: Theme.palette.m3error
+                    color: panelPalette.error
                     wrapMode: Text.WordWrap
                     font.pixelSize: Appearance.smallFontSize
                 }
@@ -1378,16 +1393,16 @@ Item {
                         implicitHeight: Appearance.px(34)
                         radius: Appearance.px(9)
                         color: forceArea.containsMouse
-                            ? Theme.palette.m3error
-                            : Theme.palette.m3errorContainer
+                            ? panelPalette.error
+                            : panelPalette.errorContainer
 
                         PanelText {
                             id: forceLabel
                             anchors.centerIn: parent
                             text: I18n.tr("forceStop")
                             color: forceArea.containsMouse
-                                ? Theme.palette.m3onError
-                                : Theme.palette.m3onErrorContainer
+                                ? panelPalette.onError
+                                : panelPalette.onErrorContainer
                             font.weight: Font.DemiBold
                         }
 

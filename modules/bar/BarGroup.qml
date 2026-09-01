@@ -13,10 +13,10 @@ MouseArea {
     implicitHeight: Appearance.barHeight
 
     Rectangle {
-        color: root.containsMouse ? Appearance.layer1Hover : Appearance.layer1
+        color: root.containsMouse ? Appearance.barLayer1Hover : Appearance.barLayer1
         radius: Appearance.smallRadius
         border.width: 1
-        border.color: Appearance.layer0Border
+        border.color: Appearance.barLayer0Border
 
         anchors {
             fill: parent

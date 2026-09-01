@@ -9,7 +9,7 @@ Canvas {
 
     property var points: []
     property bool live: false
-    property color waveColor: Appearance.primary
+    property color waveColor: Appearance.barPrimary
     property int smoothing: 2
     property real maximumValue: 1000
 

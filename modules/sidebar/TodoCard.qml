@@ -22,10 +22,10 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: Appearance.px(175)
     radius: Appearance.px(24)
-    color: Appearance.layer3
+    color: Appearance.barLayer3
     border.width: 1
     border.color: Appearance.withAlpha(
-        Appearance.outline, 0.58)
+        Appearance.barOutline, 0.58)
     clip: true
 
     MouseArea {
@@ -44,11 +44,11 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: Appearance.px(32)
             radius: Appearance.px(11)
-            color: Appearance.layer1
+            color: Appearance.barLayer1
             border.width: 1
             border.color: taskInput.activeFocus
-                ? Appearance.withAlpha(Appearance.primary, 0.7)
-                : Appearance.withAlpha(Appearance.outline, 0.4)
+                ? Appearance.withAlpha(Appearance.barPrimary, 0.7)
+                : Appearance.withAlpha(Appearance.barOutline, 0.4)
 
             MouseArea {
                 anchors.fill: parent
@@ -62,7 +62,7 @@ Rectangle {
                     verticalCenter: parent.verticalCenter
                 }
                 text: "󰄬"
-                color: Appearance.primary
+                color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(14)
@@ -79,9 +79,9 @@ Rectangle {
                     rightMargin: Appearance.px(4)
                     verticalCenter: parent.verticalCenter
                 }
-                color: Appearance.layer0Text
-                selectionColor: Appearance.primaryContainer
-                selectedTextColor: Appearance.primaryContainerText
+                color: Appearance.barLayer0Text
+                selectionColor: Appearance.barPrimaryContainer
+                selectedTextColor: Appearance.barPrimaryContainerText
                 clip: true
                 maximumLength: 160
                 verticalAlignment: TextInput.AlignVCenter
@@ -97,7 +97,7 @@ Rectangle {
                     visible: taskInput.text.length === 0
                         && !taskInput.activeFocus
                     text: I18n.tr("addTask")
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     verticalAlignment: Text.AlignVCenter
                     elide: Text.ElideRight
                     font: taskInput.font
@@ -122,13 +122,13 @@ Rectangle {
                     anchors.fill: parent
                     radius: Appearance.px(9)
                     color: addButton.containsMouse
-                        ? Appearance.primaryContainer
-                        : Appearance.withAlpha(Appearance.primary, 0.1)
+                        ? Appearance.barPrimaryContainer
+                        : Appearance.withAlpha(Appearance.barPrimary, 0.1)
 
                     Text {
                         anchors.centerIn: parent
                         text: "+"
-                        color: Appearance.primary
+                        color: Appearance.barPrimary
                         font {
                             family: Appearance.monospaceFontFamily
                             pixelSize: Appearance.px(17)
@@ -164,7 +164,7 @@ Rectangle {
                     anchors.fill: parent
                     radius: Appearance.px(10)
                     color: taskRow.containsMouse
-                        ? Appearance.layer1Hover : "transparent"
+                        ? Appearance.barLayer1Hover : "transparent"
                 }
 
                 Rectangle {
@@ -177,16 +177,16 @@ Rectangle {
                     height: width
                     radius: Appearance.px(6)
                     color: taskRow.modelData.completed
-                        ? Appearance.primary : "transparent"
+                        ? Appearance.barPrimary : "transparent"
                     border.width: 1
                     border.color: taskRow.modelData.completed
-                        ? Appearance.primary : Appearance.outline
+                        ? Appearance.barPrimary : Appearance.barOutline
 
                     Text {
                         anchors.centerIn: parent
                         visible: taskRow.modelData.completed
                         text: "✓"
-                        color: Theme.palette.m3onPrimary
+                        color: Appearance.barOnPrimary
                         font {
                             family: Appearance.fontFamily
                             pixelSize: Appearance.px(10)
@@ -205,7 +205,7 @@ Rectangle {
                     }
                     text: taskRow.modelData.text
                     color: taskRow.modelData.completed
-                        ? Appearance.subtext : Appearance.layer0Text
+                        ? Appearance.barSubtext : Appearance.barLayer0Text
                     elide: Text.ElideRight
                     font {
                         family: Appearance.fontFamily
@@ -236,7 +236,7 @@ Rectangle {
                         anchors.centerIn: parent
                         text: "󰅖"
                         color: deleteButton.containsMouse
-                            ? Theme.palette.m3error : Appearance.subtext
+                            ? Appearance.barError : Appearance.barSubtext
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Appearance.px(13)
@@ -262,7 +262,7 @@ Rectangle {
                 visible: TodoService.initialized
                     && TodoService.tasks.length === 0
                 text: I18n.tr("noPendingTasks")
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 font {
                     family: Appearance.fontFamily
                     pixelSize: Appearance.px(11)

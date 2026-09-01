@@ -104,11 +104,11 @@ Rectangle {
         content.implicitHeight + Appearance.px(24)
 
     radius: Appearance.px(24)
-    color: Appearance.layer3
+    color: Appearance.barLayer3
 
     border.width: 1
     border.color: Appearance.withAlpha(
-        Appearance.outline, 0.58)
+        Appearance.barOutline, 0.58)
 
     Rectangle {
         anchors {
@@ -119,7 +119,7 @@ Rectangle {
         height: Appearance.px(92)
         radius: root.radius
         color: Appearance.withAlpha(
-            Appearance.primary, 0.045)
+            Appearance.barPrimary, 0.045)
     }
 
     MouseArea {
@@ -1150,19 +1150,19 @@ Rectangle {
                 implicitHeight: Appearance.px(7)
                 radius: Appearance.fullRadius
                 color: root.operationError.length > 0
-                    ? Theme.palette.m3error
+                    ? Appearance.barError
                     : root.dirty || root.saving
-                        ? Appearance.primary
+                        ? Appearance.barPrimary
                         : Appearance.withAlpha(
-                            Appearance.layer0Text, 0.42)
+                            Appearance.barLayer0Text, 0.42)
             }
 
             Text {
                 Layout.fillWidth: true
                 text: root.statusText
                 color: root.operationError.length > 0
-                    ? Theme.palette.m3error
-                    : Appearance.subtext
+                    ? Appearance.barError
+                    : Appearance.barSubtext
                 elide: Text.ElideRight
                 font {
                     family: Appearance.fontFamily
@@ -1250,13 +1250,13 @@ Rectangle {
                 implicitHeight: Appearance.px(42)
 
                 radius: Appearance.px(14)
-                color: Appearance.layer1
+                color: Appearance.barLayer1
 
                 border.width: 1
                 border.color:
                     renameEditor.activeFocus
-                        ? Appearance.primary
-                        : Appearance.layer0Border
+                        ? Appearance.barPrimary
+                        : Appearance.barLayer0Border
 
                 TextInput {
                     id: renameEditor
@@ -1270,11 +1270,11 @@ Rectangle {
                     verticalAlignment:
                         TextInput.AlignVCenter
 
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     selectionColor:
-                        Appearance.primaryContainer
+                        Appearance.barPrimaryContainer
                     selectedTextColor:
-                        Appearance.primaryContainerText
+                        Appearance.barPrimaryContainerText
 
                     selectByMouse: true
                     clip: true
@@ -1320,12 +1320,12 @@ Rectangle {
             implicitHeight: Appearance.px(54)
 
             radius: Appearance.px(17)
-            color: Appearance.layer1
+            color: Appearance.barLayer1
 
             border.width: 1
             border.color: noteSelectorPopup.opened
-                ? Appearance.withAlpha(Appearance.primary, 0.72)
-                : Appearance.layer0Border
+                ? Appearance.withAlpha(Appearance.barPrimary, 0.72)
+                : Appearance.barLayer0Border
 
             RowLayout {
                 anchors {
@@ -1340,12 +1340,12 @@ Rectangle {
                     implicitWidth: Appearance.px(34)
                     implicitHeight: Appearance.px(34)
                     radius: Appearance.px(11)
-                    color: Appearance.primaryContainer
+                    color: Appearance.barPrimaryContainer
 
                     Text {
                         anchors.centerIn: parent
                         text: "󰠮"
-                        color: Appearance.primaryContainerText
+                        color: Appearance.barPrimaryContainerText
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Appearance.px(18)
@@ -1364,7 +1364,7 @@ Rectangle {
 
                     color: selectorMouse.containsMouse
                         || noteSelectorPopup.opened
-                            ? Appearance.layer1Active
+                            ? Appearance.barLayer1Active
                             : "transparent"
 
                     Text {
@@ -1384,8 +1384,8 @@ Rectangle {
                         text: root.currentNoteDisplayName
 
                         color: root.currentFileName.length > 0
-                            ? Appearance.layer0Text
-                            : Appearance.subtext
+                            ? Appearance.barLayer0Text
+                            : Appearance.barSubtext
 
                         elide: Text.ElideMiddle
                         verticalAlignment:
@@ -1415,7 +1415,7 @@ Rectangle {
                             ? "󰅀"
                             : "󰅂"
 
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
 
                         font {
                             family:
@@ -1453,7 +1453,7 @@ Rectangle {
                     text: noteFolderModel.count > 0
                         ? String(noteFolderModel.count) : ""
                     visible: noteFolderModel.count > 0
-                    color: Appearance.primary
+                    color: Appearance.barPrimary
 
                     font {
                         family: Appearance.fontFamily
@@ -1490,10 +1490,10 @@ Rectangle {
 
                 background: Rectangle {
                     radius: Appearance.px(16)
-                    color: Appearance.layer3
+                    color: Appearance.barLayer3
 
                     border.width: 1
-                    border.color: Appearance.layer0Border
+                    border.color: Appearance.barLayer0Border
                 }
 
                 contentItem: ListView {
@@ -1537,9 +1537,9 @@ Rectangle {
                         radius: Appearance.px(12)
 
                         color: noteOption.selected
-                            ? Appearance.primaryContainer
+                            ? Appearance.barPrimaryContainer
                             : optionMouse.containsMouse
-                                ? Appearance.layer1Active
+                                ? Appearance.barLayer1Active
                                 : "transparent"
 
                         Text {
@@ -1557,8 +1557,8 @@ Rectangle {
                             )
 
                             color: noteOption.selected
-                                ? Appearance.primaryContainerText
-                                : Appearance.layer0Text
+                                ? Appearance.barPrimaryContainerText
+                                : Appearance.barLayer0Text
 
                             elide: Text.ElideMiddle
                             verticalAlignment:
@@ -1621,8 +1621,8 @@ Rectangle {
             // 外层本身就是边框。
             color: editor.activeFocus
                 ? Appearance.withAlpha(
-                    Appearance.primary, 0.78)
-                : Appearance.layer0Border
+                    Appearance.barPrimary, 0.78)
+                : Appearance.barLayer0Border
 
             antialiasing: true
 
@@ -1650,7 +1650,7 @@ Rectangle {
                         - root.outlineWidth
                 )
 
-                color: Appearance.layer1
+                color: Appearance.barLayer1
                 clip: true
 
                 Flickable {
@@ -1695,11 +1695,11 @@ Rectangle {
                         textFormat: TextEdit.PlainText
                         wrapMode: TextEdit.Wrap
 
-                        color: Appearance.layer0Text
+                        color: Appearance.barLayer0Text
                         selectionColor:
-                            Appearance.primaryContainer
+                            Appearance.barPrimaryContainer
                         selectedTextColor:
-                            Appearance.primaryContainerText
+                            Appearance.barPrimaryContainerText
 
                         selectByMouse: true
                         persistentSelection: true
@@ -1749,7 +1749,7 @@ Rectangle {
                             ? I18n.tr("markdownNotePlaceholder")
                             : I18n.tr("noNotes")
 
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
 
                         font {
                             family: Appearance.fontFamily
@@ -1797,10 +1797,10 @@ Rectangle {
                         wrapMode: Text.Wrap
 
                         color: editor.text.length > 0
-                            ? Appearance.layer0Text
-                            : Appearance.subtext
+                            ? Appearance.barLayer0Text
+                            : Appearance.barSubtext
 
-                        linkColor: Appearance.primary
+                        linkColor: Appearance.barPrimary
 
                         font {
                             family: Appearance.fontFamily
@@ -1830,13 +1830,13 @@ Rectangle {
 
                     radius: Appearance.fullRadius
                     color: root.previewMode
-                        ? Appearance.primaryContainer
-                        : Appearance.layer2
+                        ? Appearance.barPrimaryContainer
+                        : Appearance.barLayer2
 
                     border.width: 1
                     border.color: root.previewMode
-                        ? Appearance.primary
-                        : Appearance.layer0Border
+                        ? Appearance.barPrimary
+                        : Appearance.barLayer0Border
 
                     /*
                     * 平时保持低透明度，悬停时变清晰。
@@ -1859,8 +1859,8 @@ Rectangle {
                             : "󰈈"
 
                         color: root.previewMode
-                            ? Appearance.primaryContainerText
-                            : Appearance.layer0Text
+                            ? Appearance.barPrimaryContainerText
+                            : Appearance.barLayer0Text
 
                         font {
                             family: Appearance.iconFontFamily
@@ -1924,14 +1924,14 @@ Rectangle {
             ? "transparent"
             : button.destructive
                 ? Appearance.withAlpha(
-                    Theme.palette.m3error,
+                    Appearance.barError,
                     buttonMouse.containsMouse ? 0.18 : 0.1)
                 : button.accent
-                    ? Appearance.primaryContainer
+                    ? Appearance.barPrimaryContainer
                     : buttonMouse.containsMouse
-                        ? Appearance.layer1Active
+                        ? Appearance.barLayer1Active
                         : Appearance.withAlpha(
-                            Appearance.layer1, 0.72)
+                            Appearance.barLayer1, 0.72)
 
         scale: buttonMouse.pressed
             ? 0.88
@@ -1946,10 +1946,10 @@ Rectangle {
 
             text: button.icon
             color: button.destructive
-                ? Theme.palette.m3error
+                ? Appearance.barError
                 : button.accent
-                    ? Appearance.primaryContainerText
-                    : Appearance.layer0Text
+                    ? Appearance.barPrimaryContainerText
+                    : Appearance.barLayer0Text
 
             font {
                 family:

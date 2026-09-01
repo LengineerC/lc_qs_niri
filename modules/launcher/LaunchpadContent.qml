@@ -2,10 +2,12 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls as Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 import qs.common
+import qs.common.widgets
 
 Item {
     id: root
@@ -153,7 +155,7 @@ Item {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 text: I18n.tr("launcher")
-                color: Appearance.layer0Text
+                color: Appearance.barLayer0Text
                 font {
                     family: Appearance.fontFamily
                     pixelSize: Appearance.px(24)
@@ -165,11 +167,11 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: Appearance.px(48)
                 radius: Appearance.smallRadius
-                color: Appearance.withAlpha(Appearance.layer2, 0.78)
-                border.width: 1
-                border.color: searchInput.activeFocus
-                    ? Appearance.withAlpha(Appearance.primary, 0.9)
-                    : Appearance.withAlpha(Appearance.layer0Text, 0.16)
+                // Match the search field in the launcher panel opened by a
+                // left click on the Bar's system icon.
+                color: Appearance.barLayer1
+                border.width: searchInput.activeFocus ? 1 : 0
+                border.color: Appearance.barPrimary
 
                 RowLayout {
                     anchors {
@@ -182,7 +184,7 @@ Item {
                     Text {
                         text: "󰍉"
                         color: searchInput.activeFocus
-                            ? Appearance.primary : Appearance.layer1Text
+                            ? Appearance.barPrimary : Appearance.barSubtext
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Appearance.px(18)
@@ -195,10 +197,10 @@ Item {
                         Layout.fillWidth: true
                         padding: 0
                         placeholderText: I18n.tr("searchApplications")
-                        color: Appearance.layer0Text
-                        placeholderTextColor: Appearance.subtext
-                        selectionColor: Appearance.primaryContainer
-                        selectedTextColor: Appearance.primaryContainerText
+                        color: Appearance.barLayer0Text
+                        placeholderTextColor: Appearance.barSubtext
+                        selectionColor: Appearance.barPrimaryContainer
+                        selectedTextColor: Appearance.barPrimaryContainerText
                         selectByMouse: true
                         background: null
                         font {
@@ -242,12 +244,12 @@ Item {
                         implicitHeight: Appearance.px(28)
                         radius: Appearance.fullRadius
                         color: clearArea.containsMouse
-                            ? Appearance.layer1Active : "transparent"
+                            ? Appearance.barLayer1Active : "transparent"
 
                         Text {
                             anchors.centerIn: parent
                             text: "󰅖"
-                            color: Appearance.layer1Text
+                            color: Appearance.barLayer1Text
                             font {
                                 family: Appearance.iconFontFamily
                                 pixelSize: Appearance.px(13)
@@ -270,7 +272,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 text: root.filteredApplications.length
                     + " / " + root.applications.length
-                color: Appearance.withAlpha(Appearance.layer0Text, 0.66)
+                color: Appearance.withAlpha(Appearance.barLayer0Text, 0.66)
                 font {
                     family: Appearance.fontFamily
                     pixelSize: Appearance.smallFontSize
@@ -319,12 +321,15 @@ Item {
                         radius: Appearance.normalRadius
                         color: applicationDelegate.GridView.isCurrentItem
                                 || appArea.containsMouse
-                            ? Appearance.withAlpha(Appearance.layer2, 0.62)
-                            : Appearance.withAlpha(Appearance.layer2, 0)
+                            ? (ShellSettings.barFrostedGlass
+                                ? Appearance.barLayer2
+                                : Appearance.withAlpha(
+                                    Appearance.barLayer2, 0.62))
+                            : Appearance.withAlpha(Appearance.barLayer2, 0)
                         border.width:
                             applicationDelegate.GridView.isCurrentItem ? 1 : 0
                         border.color: Appearance.withAlpha(
-                            Appearance.primary, 0.82)
+                            Appearance.barPrimary, 0.82)
 
                         Behavior on color {
                             ColorAnimation {
@@ -360,11 +365,13 @@ Item {
                             width: Appearance.px(70)
                             height: width
                             radius: Appearance.px(18)
-                            color: Appearance.withAlpha(
-                                Appearance.primaryContainer, 0.72)
+                            color: ShellSettings.barFrostedGlass
+                                ? Appearance.barPrimaryContainer
+                                : Appearance.withAlpha(
+                                    Appearance.barPrimaryContainer, 0.72)
                             border.width: 1
                             border.color: Appearance.withAlpha(
-                                Appearance.layer0Text, 0.1)
+                                Appearance.barLayer0Text, 0.1)
 
                             IconImage {
                                 anchors {
@@ -375,6 +382,13 @@ Item {
                                 source: Quickshell.iconPath(
                                     applicationDelegate.modelData.icon,
                                     "application-x-executable")
+                                layer.enabled:
+                                    ShellSettings.barFrostedGlass
+                                layer.effect: MultiEffect {
+                                    saturation: -1
+                                    brightness: 0.12
+                                    contrast: 0.08
+                                }
                             }
                         }
 
@@ -382,7 +396,7 @@ Item {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
                             text: applicationDelegate.modelData.name
-                            color: Appearance.layer0Text
+                            color: Appearance.barLayer0Text
                             elide: Text.ElideRight
                             maximumLineCount: 1
                             font {
@@ -403,7 +417,7 @@ Item {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰍉"
-                    color: Appearance.primary
+                    color: Appearance.barPrimary
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(42)
@@ -413,7 +427,7 @@ Item {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: I18n.tr("noApplicationsFound")
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Appearance.largeFontSize

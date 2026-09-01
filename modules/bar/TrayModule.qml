@@ -26,8 +26,8 @@ MouseArea {
         anchors.centerIn: parent
         radius: Appearance.fullRadius
         color: root.containsMouse || root.expanded
-            ? Appearance.layer1Hover
-            : Appearance.withAlpha(Appearance.layer1Hover, 0)
+            ? Appearance.barLayer1Hover
+            : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
         scale: root.pressed ? 0.88 : 1
 
         Text {
@@ -35,7 +35,7 @@ MouseArea {
             text: ""
             rotation: root.expanded ? 180 : 0
             color: root.needsAttention
-                ? Appearance.primary : Appearance.layer0Text
+                ? Appearance.barPrimary : Appearance.barLayer0Text
             font {
                 family: Appearance.fontFamily
                 pixelSize: Appearance.px(11)
@@ -61,7 +61,7 @@ MouseArea {
             width: Appearance.px(6)
             height: width
             radius: width / 2
-            color: Appearance.tertiary
+            color: Appearance.barTertiary
         }
 
         Behavior on color {

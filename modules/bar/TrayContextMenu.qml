@@ -168,9 +168,15 @@ PopupWindow {
             implicitHeight: menuLayout.implicitHeight
                 + Appearance.px(12)
             radius: Appearance.normalRadius
-            color: Appearance.layer0
+            // PopupWindow cannot reliably constrain Niri's blur to its card
+            // bounds. Use a denser translucent black surface so the menu
+            // matches glass panels without leaking blur into its padding.
+            color: ShellSettings.barFrostedGlass
+                ? Appearance.withAlpha(
+                    Appearance.barGlassBaseColor, 0.9)
+                : Appearance.layer0
             border.width: 1
-            border.color: Appearance.layer0Border
+            border.color: Appearance.barOutline
             opacity: root.presented ? 1 : 0
             scale: root.presented ? 1 : 0.96
             transformOrigin: Item.Top
@@ -189,7 +195,7 @@ PopupWindow {
                     ShellSettings.shadowBlurRadius
                         * Appearance.scale))
                 shadowColor: Appearance.withAlpha(
-                    Theme.palette.m3shadow,
+                    Appearance.barShadow,
                     ShellSettings.shadowOpacity)
                 shadowVerticalOffset: Math.round(
                     ShellSettings.shadowOffsetY
@@ -215,11 +221,13 @@ PopupWindow {
                 spacing: Appearance.px(4)
 
                 PopupHeader {
+                    useBarPalette: true
                     icon: "󰀻"
                     iconSource: root.menuIcon
                     iconSize: String(root.menuIcon).length > 0
                         ? Appearance.px(22) : Appearance.px(17)
                     iconSlotSize: Appearance.px(24)
+                    monochromeIcon: true
                     title: root.menuTitle
                     titleFontSize: Appearance.fontSize
                     contentLeftMargin: Appearance.px(6)
@@ -380,9 +388,9 @@ PopupWindow {
                             ? Appearance.px(40) : 0
                         radius: Appearance.px(10)
                         color: backMouse.containsMouse
-                            ? Appearance.layer1Hover
+                            ? Appearance.barLayer1Hover
                             : Appearance.withAlpha(
-                                Appearance.layer1Hover, 0)
+                                Appearance.barLayer1Hover, 0)
 
                         RowLayout {
                             anchors {
@@ -394,7 +402,7 @@ PopupWindow {
 
                             Text {
                                 text: "󰅁"
-                                color: Appearance.primary
+                                color: Appearance.barPrimary
                                 font {
                                     family: Appearance.iconFontFamily
                                     pixelSize: Appearance.px(15)
@@ -404,7 +412,7 @@ PopupWindow {
                             Text {
                                 Layout.fillWidth: true
                                 text: submenu.submenuTitle
-                                color: Appearance.layer0Text
+                                color: Appearance.barLayer0Text
                                 elide: Text.ElideRight
                                 font {
                                     family: Appearance.fontFamily

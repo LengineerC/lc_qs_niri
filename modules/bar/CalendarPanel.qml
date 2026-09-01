@@ -79,7 +79,7 @@ Item {
     }
 
     component PanelText: Text {
-        color: Appearance.layer1Text
+        color: Appearance.barLayer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -96,14 +96,14 @@ Item {
         implicitHeight: Appearance.px(28)
         radius: Appearance.fullRadius
         color: buttonMouse.containsMouse
-            ? Appearance.layer1Active
-            : Appearance.withAlpha(Appearance.layer1Active, 0)
+            ? Appearance.barLayer1Active
+            : Appearance.withAlpha(Appearance.barLayer1Active, 0)
         scale: buttonMouse.pressed ? 0.88 : 1
 
         Text {
             anchors.centerIn: parent
             text: button.icon
-            color: Appearance.layer1Text
+            color: Appearance.barLayer1Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.px(15)
@@ -170,6 +170,7 @@ Item {
         spacing: Appearance.px(8)
 
         PopupHeader {
+            useBarPalette: true
             icon: "󰃭"
             title: I18n.tr("calendar")
             subtitle: I18n.locale.toString(
@@ -182,9 +183,9 @@ Item {
             Layout.fillWidth: true
             implicitHeight: Appearance.px(74)
             radius: Appearance.smallRadius
-            color: Appearance.layer3
+            color: Appearance.barLayer3
             border.width: 1
-            border.color: Appearance.outline
+            border.color: Appearance.barOutline
 
             RowLayout {
                 anchors.centerIn: parent
@@ -193,7 +194,7 @@ Item {
                 PanelText {
                     text: I18n.locale.toString(
                         root.currentDate, "HH")
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     font {
                         pixelSize: Appearance.px(34)
                         weight: Font.Bold
@@ -202,7 +203,7 @@ Item {
 
                 PanelText {
                     text: ":"
-                    color: Appearance.primary
+                    color: Appearance.barPrimary
                     font {
                         pixelSize: Appearance.px(32)
                         weight: Font.Bold
@@ -212,7 +213,7 @@ Item {
                 PanelText {
                     text: I18n.locale.toString(
                         root.currentDate, "mm")
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     font {
                         pixelSize: Appearance.px(34)
                         weight: Font.Bold
@@ -221,7 +222,7 @@ Item {
 
                 PanelText {
                     text: ":"
-                    color: Appearance.primary
+                    color: Appearance.barPrimary
                     font {
                         pixelSize: Appearance.px(32)
                         weight: Font.Bold
@@ -231,7 +232,7 @@ Item {
                 PanelText {
                     text: I18n.locale.toString(
                         root.currentDate, "ss")
-                    color: Appearance.tertiary
+                    color: Appearance.barTertiary
                     font {
                         pixelSize: Appearance.px(34)
                         weight: Font.Bold
@@ -254,15 +255,15 @@ Item {
                 implicitHeight: Appearance.px(32)
                 radius: Appearance.fullRadius
                 color: monthMouse.containsMouse
-                    ? Appearance.layer1Hover
-                    : Appearance.withAlpha(Appearance.layer1Hover, 0)
+                    ? Appearance.barLayer1Hover
+                    : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
 
                 PanelText {
                     anchors.centerIn: parent
                     text: I18n.locale.toString(
                         root.displayedDate, "MMMM yyyy")
                     color: root.displayingCurrentMonth
-                        ? Appearance.primary : Appearance.layer0Text
+                        ? Appearance.barPrimary : Appearance.barLayer0Text
                     font.weight: Font.DemiBold
                 }
 
@@ -307,7 +308,7 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                     text: root.shortWeekDayName(modelData)
                     color: modelData === 0 || modelData === 6
-                        ? Appearance.tertiary : Appearance.subtext
+                        ? Appearance.barTertiary : Appearance.barSubtext
                     font {
                         pixelSize: Appearance.smallFontSize
                         weight: Font.DemiBold
@@ -351,24 +352,24 @@ Item {
                     implicitHeight: Appearance.px(34)
                     radius: Appearance.px(10)
                     color: today
-                        ? Appearance.primary
+                        ? Appearance.barPrimary
                         : selected
-                            ? Appearance.secondaryContainer
+                            ? Appearance.barSecondaryContainer
                             : dayMouse.containsMouse
-                                ? Appearance.layer1Hover
+                                ? Appearance.barLayer1Hover
                                 : Appearance.withAlpha(
-                                    Appearance.layer1Hover, 0)
+                                    Appearance.barLayer1Hover, 0)
 
                     PanelText {
                         anchors.centerIn: parent
                         text: dayCell.cellDate.getDate()
                         color: dayCell.today
-                            ? Theme.palette.m3onPrimary
+                            ? Appearance.barOnPrimary
                             : dayCell.selected
-                                ? Appearance.secondaryContainerText
+                                ? Appearance.barSecondaryContainerText
                                 : dayCell.weekend
-                                    ? Appearance.tertiary
-                                    : Appearance.layer1Text
+                                    ? Appearance.barTertiary
+                                    : Appearance.barLayer1Text
                         opacity: dayCell.inDisplayedMonth ? 1 : 0.38
                         font {
                             pixelSize: Appearance.fontSize
@@ -409,16 +410,16 @@ Item {
         //     implicitHeight: Appearance.px(30)
         //     radius: Appearance.fullRadius
         //     color: todayMouse.containsMouse
-        //         ? Appearance.primaryContainer : Appearance.layer1
+        //         ? Appearance.barPrimaryContainer : Appearance.barLayer1
         //     border.width: 1
-        //     border.color: Appearance.outline
+        //     border.color: Appearance.barOutline
 
         //     PanelText {
         //         id: todayLabel
 
         //         anchors.centerIn: parent
         //         text: I18n.tr("today")
-        //         color: Appearance.primary
+        //         color: Appearance.barPrimary
         //         font.weight: Font.DemiBold
         //     }
 

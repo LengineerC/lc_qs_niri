@@ -24,9 +24,9 @@ MouseArea {
             bottomMargin: Appearance.px(4)
         }
         radius: Appearance.smallRadius
-        color: root.containsMouse ? Appearance.layer1Hover : Appearance.layer1
+        color: root.containsMouse ? Appearance.barLayer1Hover : Appearance.barLayer1
         border.width: 1
-        border.color: Appearance.layer0Border
+        border.color: Appearance.barLayer0Border
 
         Behavior on color {
             enabled: !Theme.paletteTransitionRunning
@@ -45,9 +45,9 @@ MouseArea {
         Text {
             text: BatteryService.powerIcon()
             color: BatteryService.low
-                ? Theme.palette.m3error
+                ? Appearance.barError
                 : BatteryService.pluggedIn
-                    ? Appearance.primary : Appearance.layer0Text
+                    ? Appearance.barPrimary : Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.fontSize + Appearance.px(4)
@@ -58,7 +58,7 @@ MouseArea {
             visible: BatteryService.hasBattery
             text: BatteryService.percent + "%"
             color: BatteryService.low
-                ? Theme.palette.m3error : Appearance.layer0Text
+                ? Appearance.barError : Appearance.barLayer0Text
             font {
                 family: Appearance.fontFamily
                 pixelSize: Appearance.smallFontSize + 1
@@ -70,14 +70,14 @@ MouseArea {
             implicitWidth: powerStatus.implicitWidth + Appearance.px(12)
             implicitHeight: Appearance.px(22)
             radius: Appearance.fullRadius
-            color: Appearance.primaryContainer
+            color: Appearance.barPrimaryContainer
 
             Text {
                 id: powerStatus
 
                 anchors.centerIn: parent
                 text: BatteryService.barStatusText
-                color: Appearance.primaryContainerText
+                color: Appearance.barPrimaryContainerText
                 font {
                     family: Appearance.fontFamily
                     pixelSize: Appearance.smallFontSize

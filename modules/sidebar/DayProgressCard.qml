@@ -77,7 +77,7 @@ ClippingRectangle {
     color: decimalHour >= 6 && decimalHour < 18
         ? dayTopColor : nightTopColor
     border.width: 1
-    border.color: Appearance.withAlpha(Appearance.outline, 0.58)
+    border.color: Appearance.withAlpha(Appearance.barOutline, 0.58)
 
     onNowChanged: skyCanvas.requestPaint()
     onActiveChanged: {
@@ -460,10 +460,10 @@ ClippingRectangle {
                 implicitWidth: periodRow.implicitWidth + Appearance.px(16)
                 implicitHeight: Appearance.px(28)
                 radius: Appearance.fullRadius
-                color: Appearance.withAlpha(Appearance.layer1, 0.76)
+                color: Appearance.withAlpha(Appearance.barLayer1, 0.76)
                 border.width: 1
                 border.color: Appearance.withAlpha(
-                    Appearance.outline, 0.45)
+                    Appearance.barOutline, 0.45)
 
                 RowLayout {
                     id: periodRow
@@ -472,7 +472,7 @@ ClippingRectangle {
 
                     Text {
                         text: root.periodIcon
-                        color: Appearance.primary
+                        color: Appearance.barPrimary
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Appearance.px(13)
@@ -481,7 +481,7 @@ ClippingRectangle {
 
                     Text {
                         text: root.periodLabel
-                        color: Appearance.layer0Text
+                        color: Appearance.barLayer0Text
                         font {
                             family: Appearance.fontFamily
                             pixelSize: Appearance.px(10)
@@ -498,10 +498,10 @@ ClippingRectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: Appearance.px(58)
             radius: Appearance.px(14)
-            color: Appearance.withAlpha(Appearance.layer1, 0.76)
+            color: Appearance.withAlpha(Appearance.barLayer1, 0.76)
             border.width: 1
             border.color: Appearance.withAlpha(
-                Appearance.outline, 0.38)
+                Appearance.barOutline, 0.38)
 
             RowLayout {
                 anchors {
@@ -541,7 +541,7 @@ ClippingRectangle {
             Text {
                 Layout.fillWidth: true
                 text: progressStat.label
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 elide: Text.ElideRight
                 font {
                     family: Appearance.fontFamily
@@ -552,7 +552,7 @@ ClippingRectangle {
 
             Text {
                 text: root.percentText(progressStat.value)
-                color: Appearance.layer0Text
+                color: Appearance.barLayer0Text
                 font {
                     family: Appearance.monospaceFontFamily
                     pixelSize: Appearance.px(9)
@@ -565,14 +565,14 @@ ClippingRectangle {
             Layout.fillWidth: true
             implicitHeight: Appearance.px(5)
             radius: Appearance.fullRadius
-            color: Appearance.withAlpha(Appearance.outline, 0.28)
+            color: Appearance.withAlpha(Appearance.barOutline, 0.28)
 
             Rectangle {
                 width: parent.width * Math.max(0,
                     Math.min(1, progressStat.value))
                 height: parent.height
                 radius: parent.radius
-                color: Appearance.primary
+                color: Appearance.barPrimary
 
                 Behavior on width {
                     NumberAnimation {

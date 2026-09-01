@@ -9,15 +9,17 @@ Singleton {
 
     // Derived from the mutable Material 3 palette in Theme.qml.
     property color barBgColor: Theme.palette.m3background
-    readonly property real barGlassTintOpacity:
-        Theme.darkMode ? 0.42 : 0.52
-    readonly property real popupGlassTintOpacity:
-        Theme.darkMode ? 0.18 : 0.14
+    readonly property color barGlassBaseColor: "#080a0d"
+    readonly property real barGlassTintOpacity: 0.52
+    readonly property real popupGlassTintOpacity: 0.18
+    readonly property color barSurfaceBaseColor:
+        ShellSettings.barFrostedGlass
+            ? barGlassBaseColor : barBgColor
     property color barSurfaceColor: ShellSettings.barFrostedGlass
-        ? withAlpha(Theme.palette.m3background,
-            barGlassTintOpacity)
+        ? withAlpha(barGlassBaseColor, barGlassTintOpacity)
         : Theme.palette.m3background
-    property color popupSurfaceColor: Theme.palette.m3surfaceContainer
+    property color popupSurfaceColor: ShellSettings.barFrostedGlass
+        ? barGlassBaseColor : Theme.palette.m3surfaceContainer
     property color layer0: Theme.palette.m3background
     property color layer0Border: mix(Theme.palette.m3outlineVariant,
         Theme.palette.m3background, 0.4)
@@ -39,6 +41,57 @@ Singleton {
     property color secondaryContainerText: Theme.palette.m3onSecondaryContainer
     property color tertiary: Theme.palette.m3tertiary
     property color shadow: withAlpha(Theme.palette.m3shadow, 0.7)
+
+    // Bar-only palette. Glass mode is deliberately independent from Matugen;
+    // the rest of the shell continues using the Material palette above.
+    readonly property color barLayer0Text: ShellSettings.barFrostedGlass
+        ? "#f5ffffff" : layer0Text
+    readonly property color barLayer1Text: ShellSettings.barFrostedGlass
+        ? "#d6ffffff" : layer1Text
+    readonly property color barSubtext: ShellSettings.barFrostedGlass
+        ? "#a6ffffff" : subtext
+    readonly property color barOutline: ShellSettings.barFrostedGlass
+        ? "#3dffffff" : outline
+    readonly property color barLayer0Border: ShellSettings.barFrostedGlass
+        ? "#33ffffff" : layer0Border
+    readonly property color barLayer0: ShellSettings.barFrostedGlass
+        ? "#52080a0d" : layer0
+    readonly property color barLayer1: ShellSettings.barFrostedGlass
+        ? "#18ffffff" : layer1
+    readonly property color barLayer1Hover: ShellSettings.barFrostedGlass
+        ? "#35ffffff" : layer1Hover
+    readonly property color barLayer1Active: ShellSettings.barFrostedGlass
+        ? "#48ffffff" : layer1Active
+    readonly property color barLayer2: ShellSettings.barFrostedGlass
+        ? "#20ffffff" : layer2
+    readonly property color barLayer3: ShellSettings.barFrostedGlass
+        ? "#2bffffff" : layer3
+    readonly property color barPrimary: ShellSettings.barFrostedGlass
+        ? "#edffffff" : primary
+    readonly property color barOnPrimary: ShellSettings.barFrostedGlass
+        ? "#f0000000" : Theme.palette.m3onPrimary
+    readonly property color barPrimaryContainer:
+        ShellSettings.barFrostedGlass ? "#3dffffff" : primaryContainer
+    readonly property color barPrimaryContainerText:
+        ShellSettings.barFrostedGlass ? "#f5ffffff" : primaryContainerText
+    readonly property color barSecondaryContainer:
+        ShellSettings.barFrostedGlass ? "#2effffff" : secondaryContainer
+    readonly property color barSecondaryContainerText:
+        ShellSettings.barFrostedGlass ? "#f5ffffff" : secondaryContainerText
+    readonly property color barTertiary: ShellSettings.barFrostedGlass
+        ? "#d9ffffff" : tertiary
+    readonly property color barError: ShellSettings.barFrostedGlass
+        ? "#ffff6b6b" : Theme.palette.m3error
+    readonly property color barErrorContainer: ShellSettings.barFrostedGlass
+        ? "#45ff6b6b" : Theme.palette.m3errorContainer
+    readonly property color barOnError: ShellSettings.barFrostedGlass
+        ? "#ffffffff" : Theme.palette.m3onError
+    readonly property color barOnErrorContainer: ShellSettings.barFrostedGlass
+        ? "#ffffdada" : Theme.palette.m3onErrorContainer
+    readonly property color barShadow: ShellSettings.barFrostedGlass
+        ? "#b3000000" : Theme.palette.m3shadow
+    readonly property color barScrim: ShellSettings.barFrostedGlass
+        ? "#8c000000" : Theme.palette.m3scrim
 
     function mix(first, second, amount) {
         return Qt.rgba(

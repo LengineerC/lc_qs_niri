@@ -16,7 +16,7 @@ Item {
     implicitHeight: contentColumn.implicitHeight + Appearance.px(28)
 
     component PanelText: Text {
-        color: Appearance.layer1Text
+        color: Appearance.barLayer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -35,11 +35,11 @@ Item {
         implicitHeight: Appearance.px(62)
         radius: Appearance.smallRadius
         color: active
-            ? Appearance.primaryContainer
+            ? Appearance.barPrimaryContainer
             : profileMouse.containsMouse
-                ? Appearance.layer1Hover : Appearance.layer1
+                ? Appearance.barLayer1Hover : Appearance.barLayer1
         border.width: 1
-        border.color: active ? Appearance.primary : Appearance.outline
+        border.color: active ? Appearance.barPrimary : Appearance.barOutline
 
         Column {
             anchors.centerIn: parent
@@ -49,7 +49,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: profileButton.icon
                 color: profileButton.active
-                    ? Appearance.primaryContainerText : Appearance.layer1Text
+                    ? Appearance.barPrimaryContainerText : Appearance.barLayer1Text
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(20)
@@ -60,7 +60,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: profileButton.label
                 color: profileButton.active
-                    ? Appearance.primaryContainerText : Appearance.layer1Text
+                    ? Appearance.barPrimaryContainerText : Appearance.barLayer1Text
                 font.pixelSize: Appearance.smallFontSize
             }
         }
@@ -93,9 +93,10 @@ Item {
         spacing: Appearance.px(10)
 
         PopupHeader {
+            useBarPalette: true
             icon: BatteryService.powerIcon()
             iconColor: BatteryService.low
-                ? Theme.palette.m3error : Appearance.primary
+                ? Appearance.barError : Appearance.barPrimary
             iconSize: Appearance.px(23)
             title: BatteryService.panelTitle
             // onCloseClicked: root.closeRequested()
@@ -105,9 +106,9 @@ Item {
             Layout.fillWidth: true
             implicitHeight: Appearance.px(92)
             radius: Appearance.smallRadius
-            color: Appearance.layer1
+            color: Appearance.barLayer1
             border.width: 1
-            border.color: Appearance.outline
+            border.color: Appearance.barOutline
 
             Item {
                 anchors {
@@ -125,7 +126,7 @@ Item {
                     }
                     text: BatteryService.powerIcon()
                     color: BatteryService.low
-                        ? Theme.palette.m3error : Appearance.primary
+                        ? Appearance.barError : Appearance.barPrimary
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(42)
@@ -140,7 +141,7 @@ Item {
                         verticalCenter: parent.verticalCenter
                     }
                     text: BatteryService.profileName
-                    color: Appearance.primary
+                    color: Appearance.barPrimary
                     font.weight: Font.DemiBold
                 }
 
@@ -160,7 +161,7 @@ Item {
                             ? BatteryService.percent + "%"
                             : I18n.tr("externalPower")
                         color: BatteryService.low
-                            ? Theme.palette.m3error : Appearance.layer0Text
+                            ? Appearance.barError : Appearance.barLayer0Text
                         font {
                             pixelSize: Appearance.px(26)
                             weight: Font.Bold
@@ -177,7 +178,7 @@ Item {
                             return BatteryService.statusText + " · "
                                 + remaining;
                         }
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
                         font.pixelSize: Appearance.smallFontSize
                         elide: Text.ElideRight
                     }
@@ -186,7 +187,7 @@ Item {
                         visible: !BatteryService.hasBattery
                         width: parent.width
                         text: I18n.tr("noBatteryDetected")
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
                         font.pixelSize: Appearance.smallFontSize
                         elide: Text.ElideRight
                     }
@@ -203,7 +204,7 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: Appearance.px(68)
                 radius: Appearance.smallRadius
-                color: Appearance.layer3
+                color: Appearance.barLayer3
 
                 Column {
                     anchors.centerIn: parent
@@ -212,7 +213,7 @@ Item {
                     PanelText {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: I18n.tr("batteryCapacity")
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
                         font.pixelSize: Appearance.smallFontSize
                     }
 
@@ -221,7 +222,7 @@ Item {
                         text: BatteryService.capacityWh > 0
                             ? BatteryService.capacityWh.toFixed(1) + " Wh"
                             : I18n.tr("unknown")
-                        color: Appearance.layer0Text
+                        color: Appearance.barLayer0Text
                         font.weight: Font.Bold
                     }
                 }
@@ -231,7 +232,7 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: Appearance.px(68)
                 radius: Appearance.smallRadius
-                color: Appearance.layer3
+                color: Appearance.barLayer3
 
                 Column {
                     anchors.centerIn: parent
@@ -240,7 +241,7 @@ Item {
                     PanelText {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: I18n.tr("batteryHealth")
-                        color: Appearance.subtext
+                        color: Appearance.barSubtext
                         font.pixelSize: Appearance.smallFontSize
                     }
 
@@ -251,7 +252,7 @@ Item {
                             : I18n.tr("unknown")
                         color: BatteryService.healthAvailable
                                 && BatteryService.health < 80
-                            ? Theme.palette.m3error : Appearance.layer0Text
+                            ? Appearance.barError : Appearance.barLayer0Text
                         font.weight: Font.Bold
                     }
                 }
@@ -261,7 +262,7 @@ Item {
         PanelText {
             Layout.fillWidth: true
             text: I18n.tr("powerProfile")
-            color: Appearance.layer0Text
+            color: Appearance.barLayer0Text
             font.weight: Font.DemiBold
         }
 
@@ -296,7 +297,7 @@ Item {
             text: I18n.tr("performanceLimited")
                 + PerformanceDegradationReason.toString(
                     BatteryService.degradationReason)
-            color: Theme.palette.m3error
+            color: Appearance.barError
             wrapMode: Text.WordWrap
             font.pixelSize: Appearance.smallFontSize
         }

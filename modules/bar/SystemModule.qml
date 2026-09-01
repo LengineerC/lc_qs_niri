@@ -24,9 +24,9 @@ MouseArea {
             bottomMargin: Appearance.px(4)
         }
         radius: Appearance.smallRadius
-        color: root.containsMouse ? Appearance.layer1Hover : Appearance.layer1
+        color: root.containsMouse ? Appearance.barLayer1Hover : Appearance.barLayer1
         border.width: 1
-        border.color: Appearance.layer0Border
+        border.color: Appearance.barLayer0Border
 
         Behavior on color {
             enabled: !Theme.paletteTransitionRunning
@@ -43,7 +43,7 @@ MouseArea {
         Text {
             visible: SystemService.wifiEnabled
             text: SystemService.wifiIcon()
-            color: Appearance.layer0Text
+            color: Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.fontSize + Appearance.px(3)
@@ -54,7 +54,7 @@ MouseArea {
             visible: SystemService.bluetoothEnabled
             text: SystemService.connectedBluetoothDevices.length > 0
                 ? "󰂱" : "󰂯"
-            color: Appearance.layer0Text
+            color: Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.fontSize + Appearance.px(3)
@@ -65,7 +65,7 @@ MouseArea {
             visible: SystemService.sinkReady
             text: SystemService.volumeIcon()
             color: SystemService.muted
-                ? Appearance.subtext : Appearance.layer0Text
+                ? Appearance.barSubtext : Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.fontSize + Appearance.px(3)

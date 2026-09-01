@@ -12,6 +12,7 @@ Item {
     id: root
 
     property bool embedded: false
+    property bool useBarPalette: !embedded
     property bool active: visible
     property string outputName: ""
     property string expandedSection: embedded ? "wifi" : ""
@@ -19,6 +20,11 @@ Item {
     readonly property var brightnessState:
         BrightnessService.stateFor(outputName)
     signal closeRequested
+
+    BarPalette {
+        id: panelPalette
+        enabled: root.useBarPalette
+    }
 
     function submitWifiPassword() {
         const ssid = SystemService.passwordRequestedSsid;
@@ -80,7 +86,7 @@ Item {
     implicitHeight: Appearance.px(680)
 
     component PanelText: Text {
-        color: Appearance.layer1Text
+        color: panelPalette.layer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -97,14 +103,14 @@ Item {
             width: slider.availableWidth
             height: Appearance.px(8)
             radius: Appearance.fullRadius
-            color: Appearance.layer1Active
+            color: panelPalette.layer1Active
             border.width: 1
-            border.color: Appearance.outline
+            border.color: panelPalette.outline
             Rectangle {
                 width: slider.visualPosition * parent.width
                 height: parent.height
                 radius: parent.radius
-                color: Appearance.primary
+                color: panelPalette.primary
             }
         }
         handle: Rectangle {
@@ -114,7 +120,7 @@ Item {
             implicitWidth: Appearance.px(5)
             implicitHeight: Appearance.px(24)
             radius: Appearance.fullRadius
-            color: Appearance.primary
+            color: panelPalette.primary
         }
     }
 
@@ -134,9 +140,9 @@ Item {
         implicitHeight: Appearance.px(76)
         radius: Appearance.smallRadius
         color: bodyArea.containsMouse
-            ? Appearance.layer1Hover : Appearance.layer3
+            ? panelPalette.layer1Hover : panelPalette.layer3
         border.width: 1
-        border.color: Appearance.outline
+        border.color: panelPalette.outline
 
         Rectangle {
             id: iconButton
@@ -149,16 +155,16 @@ Item {
             height: Appearance.px(58)
             radius: Appearance.px(12)
             color: iconArea.containsMouse
-                ? Appearance.layer1Active
+                ? panelPalette.layer1Active
                 : card.active
-                    ? Appearance.primaryContainer : Appearance.layer1
+                    ? panelPalette.primaryContainer : panelPalette.layer1
             scale: iconArea.pressed ? 0.9 : 1
 
             Text {
                 anchors.centerIn: parent
                 text: card.icon
                 color: card.active
-                    ? Appearance.primaryContainerText : Appearance.subtext
+                    ? panelPalette.primaryContainerText : panelPalette.subtext
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(25)
@@ -202,14 +208,14 @@ Item {
                 width: parent.width
                 text: card.title
                 elide: Text.ElideRight
-                color: Appearance.layer0Text
+                color: panelPalette.layer0Text
                 font.pixelSize: Appearance.fontSize + Appearance.px(1)
             }
             PanelText {
                 width: parent.width
                 text: card.subtitle
                 elide: Text.ElideRight
-                color: Appearance.subtext
+                color: panelPalette.subtext
                 font.pixelSize: Appearance.smallFontSize
             }
         }
@@ -225,7 +231,7 @@ Item {
             }
             text: "󰅀"
             rotation: card.expanded ? 90 : 0
-            color: Appearance.subtext
+            color: panelPalette.subtext
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.px(15)
@@ -273,6 +279,7 @@ Item {
             spacing: Appearance.px(10)
 
             SettingsPageHeader {
+                useBarPalette: root.useBarPalette
                 visible: root.embedded
                 icon: "󰒓"
                 title: I18n.tr("networkDevices")
@@ -280,6 +287,7 @@ Item {
             }
 
             PopupHeader {
+                useBarPalette: root.useBarPalette
                 visible: !root.embedded
                 icon: "󰒓"
                 title: I18n.tr("networkDevices")
@@ -291,7 +299,7 @@ Item {
 
                 Text {
                     text: SystemService.volumeIcon()
-                    color: Appearance.layer1Text
+                    color: panelPalette.layer1Text
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(20)
@@ -311,12 +319,12 @@ Item {
                 PanelText {
                     Layout.preferredWidth: Appearance.px(44)
                     text: Math.round(SystemService.volume * 100) + "%"
-                    color: Appearance.subtext
+                    color: panelPalette.subtext
                 }
 
                 Text {
                     text: SystemService.microphoneIcon()
-                    color: Appearance.layer1Text
+                    color: panelPalette.layer1Text
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(20)
@@ -336,7 +344,7 @@ Item {
                 PanelText {
                     Layout.preferredWidth: Appearance.px(44)
                     text: Math.round(SystemService.microphoneVolume * 100) + "%"
-                    color: Appearance.subtext
+                    color: panelPalette.subtext
                 }
             }
 
@@ -344,9 +352,9 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: Appearance.px(82)
                 radius: Appearance.px(12)
-                color: Appearance.layer3
+                color: panelPalette.layer3
                 border.width: 1
-                border.color: Appearance.outline
+                border.color: panelPalette.outline
 
                 ColumnLayout {
                     anchors {
@@ -365,7 +373,7 @@ Item {
                         Text {
                             text: "󰃠"
                             color: root.brightnessState.available
-                                ? Appearance.primary : Appearance.subtext
+                                ? panelPalette.primary : panelPalette.subtext
                             font {
                                 family: Appearance.iconFontFamily
                                 pixelSize: Appearance.px(21)
@@ -380,7 +388,7 @@ Item {
                                 Layout.fillWidth: true
                                 text: I18n.tr("brightness") + " · "
                                     + (root.outputName || I18n.tr("unknown"))
-                                color: Appearance.layer0Text
+                                color: panelPalette.layer0Text
                                 elide: Text.ElideRight
                             }
 
@@ -390,8 +398,8 @@ Item {
                                     || root.brightnessState.reason
                                 visible: text.length > 0
                                 color: root.brightnessState.error
-                                    ? Theme.palette.m3error
-                                    : Appearance.subtext
+                                    ? panelPalette.error
+                                    : panelPalette.subtext
                                 elide: Text.ElideRight
                                 font.pixelSize: Appearance.smallFontSize
                             }
@@ -403,7 +411,7 @@ Item {
                             text: root.brightnessState.available
                                 ? Math.round(root.brightnessState.percent) + "%"
                                 : "—"
-                            color: Appearance.subtext
+                            color: panelPalette.subtext
                         }
                     }
 
@@ -508,7 +516,7 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: wifiColumn.implicitHeight + Appearance.px(20)
                 radius: Appearance.smallRadius
-                color: Appearance.layer1
+                color: panelPalette.layer1
 
                 ColumnLayout {
                     id: wifiColumn
@@ -525,13 +533,13 @@ Item {
                         PanelText {
                             Layout.fillWidth: true
                             text: I18n.tr("wifiNetworks")
-                            color: Appearance.layer0Text
+                            color: panelPalette.layer0Text
                             font.weight: Font.DemiBold
                         }
                         PanelText {
                             text: SystemService.wifiScanning
                                 ? I18n.tr("scanning") : "󰑐"
-                            color: Appearance.primary
+                            color: panelPalette.primary
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: SystemService.refreshWifi(true)
@@ -547,11 +555,11 @@ Item {
                             implicitHeight: Appearance.px(54)
                             radius: Appearance.px(10)
                             color: wifiMouse.containsMouse
-                                ? Appearance.layer1Hover : Appearance.layer2
+                                ? panelPalette.layer1Hover : panelPalette.layer2
                             border.width: modelData.active ? 2
                                 : SystemService.wifiDetailsSsid
                                     === modelData.ssid ? 1 : 0
-                            border.color: Appearance.primary
+                            border.color: panelPalette.primary
                             RowLayout {
                                 anchors {
                                     fill: parent
@@ -559,7 +567,7 @@ Item {
                                 }
                                 Text {
                                     text: SystemService.wifiIcon(modelData.strength)
-                                    color: Appearance.primary
+                                    color: panelPalette.primary
                                     font {
                                         family: Appearance.iconFontFamily
                                         pixelSize: Appearance.px(18)
@@ -572,7 +580,7 @@ Item {
                                         Layout.fillWidth: true
                                         text: modelData.ssid
                                         elide: Text.ElideRight
-                                        color: Appearance.layer0Text
+                                        color: panelPalette.layer0Text
                                     }
                                     PanelText {
                                         text: (modelData.active
@@ -580,7 +588,7 @@ Item {
                                             + (modelData.secure
                                                 ? I18n.tr("secure") + " · " : "")
                                             + modelData.strength + "%"
-                                        color: Appearance.subtext
+                                        color: panelPalette.subtext
                                         font.pixelSize: Appearance.smallFontSize
                                     }
                                 }
@@ -593,9 +601,9 @@ Item {
                                     radius: Appearance.fullRadius
                                     color: SystemService.wifiDetailsSsid
                                             === modelData.ssid
-                                        ? Appearance.primaryContainer
+                                        ? panelPalette.primaryContainer
                                         : wifiDetailsMouse.containsMouse
-                                            ? Appearance.layer1Active
+                                            ? panelPalette.layer1Active
                                             : "transparent"
 
                                     Text {
@@ -603,8 +611,8 @@ Item {
                                         text: "󰋼"
                                         color: SystemService.wifiDetailsSsid
                                                 === modelData.ssid
-                                            ? Appearance.primaryContainerText
-                                            : Appearance.subtext
+                                            ? panelPalette.primaryContainerText
+                                            : panelPalette.subtext
                                         font {
                                             family: Appearance.iconFontFamily
                                             pixelSize: Appearance.px(17)
@@ -644,9 +652,9 @@ Item {
                         implicitHeight: wifiDetailsColumn.implicitHeight
                             + Appearance.px(20)
                         radius: Appearance.px(12)
-                        color: Appearance.layer2
+                        color: panelPalette.layer2
                         border.width: 1
-                        border.color: Appearance.outline
+                        border.color: panelPalette.outline
 
                         ColumnLayout {
                             id: wifiDetailsColumn
@@ -667,13 +675,13 @@ Item {
                                     Layout.preferredWidth: Appearance.px(38)
                                     Layout.preferredHeight: Appearance.px(38)
                                     radius: Appearance.fullRadius
-                                    color: Appearance.primaryContainer
+                                    color: panelPalette.primaryContainer
 
                                     Text {
                                         anchors.centerIn: parent
                                         text: SystemService.wifiIcon(
                                             SystemService.wifiDetails.strength)
-                                        color: Appearance.primaryContainerText
+                                        color: panelPalette.primaryContainerText
                                         font {
                                             family: Appearance.iconFontFamily
                                             pixelSize: Appearance.px(19)
@@ -688,7 +696,7 @@ Item {
                                     PanelText {
                                         Layout.fillWidth: true
                                         text: SystemService.wifiDetailsSsid
-                                        color: Appearance.layer0Text
+                                        color: panelPalette.layer0Text
                                         elide: Text.ElideRight
                                         font.weight: Font.DemiBold
                                     }
@@ -699,8 +707,8 @@ Item {
                                                 + I18n.tr("networkDetails")
                                             : I18n.tr("networkDetails")
                                         color: SystemService.wifiDetails.active
-                                            ? Appearance.primary
-                                            : Appearance.subtext
+                                            ? panelPalette.primary
+                                            : panelPalette.subtext
                                         font.pixelSize:
                                             Appearance.smallFontSize
                                     }
@@ -709,7 +717,7 @@ Item {
                                 PanelText {
                                     visible: SystemService.wifiDetailsLoading
                                     text: I18n.tr("loading") + "…"
-                                    color: Appearance.subtext
+                                    color: panelPalette.subtext
                                     font.pixelSize: Appearance.smallFontSize
                                 }
 
@@ -718,13 +726,13 @@ Item {
                                     Layout.preferredHeight: Appearance.px(32)
                                     radius: Appearance.fullRadius
                                     color: closeWifiDetailsMouse.containsMouse
-                                        ? Appearance.layer1Active
+                                        ? panelPalette.layer1Active
                                         : "transparent"
 
                                     Text {
                                         anchors.centerIn: parent
                                         text: "󰅖"
-                                        color: Appearance.subtext
+                                        color: panelPalette.subtext
                                         font {
                                             family: Appearance.iconFontFamily
                                             pixelSize: Appearance.px(16)
@@ -745,7 +753,7 @@ Item {
                             Rectangle {
                                 Layout.fillWidth: true
                                 implicitHeight: 1
-                                color: Appearance.outline
+                                color: panelPalette.outline
                                 opacity: 0.7
                             }
 
@@ -773,7 +781,7 @@ Item {
                                         PanelText {
                                             Layout.fillWidth: true
                                             text: wifiDetailField.modelData.label
-                                            color: Appearance.subtext
+                                            color: panelPalette.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
                                         }
@@ -781,7 +789,7 @@ Item {
                                         PanelText {
                                             Layout.fillWidth: true
                                             text: wifiDetailField.modelData.value
-                                            color: Appearance.layer0Text
+                                            color: panelPalette.layer0Text
                                             wrapMode: Text.WrapAnywhere
                                             maximumLineCount: 2
                                             elide: Text.ElideRight
@@ -798,10 +806,10 @@ Item {
                         implicitHeight: wifiPasswordColumn.implicitHeight
                             + Appearance.px(20)
                         radius: Appearance.px(12)
-                        color: Appearance.layer2
+                        color: panelPalette.layer2
                         border.width: 1
                         border.color: wifiPassword.activeFocus
-                            ? Appearance.primary : Appearance.outline
+                            ? panelPalette.primary : panelPalette.outline
 
                         ColumnLayout {
                             id: wifiPasswordColumn
@@ -820,7 +828,7 @@ Item {
 
                                 Text {
                                     text: "󰌾"
-                                    color: Appearance.primary
+                                    color: panelPalette.primary
                                     font {
                                         family: Appearance.iconFontFamily
                                         pixelSize: Appearance.px(19)
@@ -834,14 +842,14 @@ Item {
                                     PanelText {
                                         Layout.fillWidth: true
                                         text: I18n.tr("wifiPassword")
-                                        color: Appearance.layer0Text
+                                        color: panelPalette.layer0Text
                                         font.weight: Font.DemiBold
                                     }
 
                                     PanelText {
                                         Layout.fillWidth: true
                                         text: SystemService.passwordRequestedSsid
-                                        color: Appearance.subtext
+                                        color: panelPalette.subtext
                                         elide: Text.ElideRight
                                         font.pixelSize:
                                             Appearance.smallFontSize
@@ -853,13 +861,13 @@ Item {
                                     Layout.preferredHeight: Appearance.px(32)
                                     radius: Appearance.fullRadius
                                     color: cancelWifiMouse.containsMouse
-                                        ? Appearance.layer1Active
+                                        ? panelPalette.layer1Active
                                         : "transparent"
 
                                     Text {
                                         anchors.centerIn: parent
                                         text: "󰅖"
-                                        color: Appearance.subtext
+                                        color: panelPalette.subtext
                                         font {
                                             family: Appearance.iconFontFamily
                                             pixelSize: Appearance.px(16)
@@ -886,10 +894,10 @@ Item {
                                     Layout.fillWidth: true
                                     implicitHeight: Appearance.px(40)
                                     radius: Appearance.px(10)
-                                    color: Appearance.layer1
+                                    color: panelPalette.layer1
                                     border.width: wifiPassword.activeFocus
                                         ? 1 : 0
-                                    border.color: Appearance.primary
+                                    border.color: panelPalette.primary
 
                                     Controls.TextField {
                                         id: wifiPassword
@@ -902,15 +910,15 @@ Item {
                                             leftMargin: Appearance.px(10)
                                         }
                                         padding: 0
-                                        color: Appearance.layer0Text
+                                        color: panelPalette.layer0Text
                                         placeholderText:
                                             I18n.tr("wifiPasswordHint")
                                         placeholderTextColor:
-                                            Appearance.subtext
+                                            panelPalette.subtext
                                         selectionColor:
-                                            Appearance.primaryContainer
+                                            panelPalette.primaryContainer
                                         selectedTextColor:
-                                            Appearance.primaryContainerText
+                                            panelPalette.primaryContainerText
                                         selectByMouse: true
                                         echoMode: root.wifiPasswordVisible
                                             ? TextInput.Normal
@@ -940,14 +948,14 @@ Item {
                                         height: Appearance.px(32)
                                         radius: Appearance.fullRadius
                                         color: showWifiPasswordMouse.containsMouse
-                                            ? Appearance.layer1Active
+                                            ? panelPalette.layer1Active
                                             : "transparent"
 
                                         Text {
                                             anchors.centerIn: parent
                                             text: root.wifiPasswordVisible
                                                 ? "󰈈" : "󰈉"
-                                            color: Appearance.subtext
+                                            color: panelPalette.subtext
                                             font {
                                                 family:
                                                     Appearance.iconFontFamily
@@ -988,8 +996,8 @@ Item {
                                     implicitHeight: Appearance.px(40)
                                     radius: Appearance.px(10)
                                     color: canConnect
-                                        ? Appearance.primaryContainer
-                                        : Appearance.layer1Active
+                                        ? panelPalette.primaryContainer
+                                        : panelPalette.layer1Active
                                     opacity: canConnect ? 1 : 0.65
 
                                     PanelText {
@@ -998,8 +1006,8 @@ Item {
                                             ? I18n.tr("loading") + "…"
                                             : I18n.tr("connect")
                                         color: parent.canConnect
-                                            ? Appearance.primaryContainerText
-                                            : Appearance.subtext
+                                            ? panelPalette.primaryContainerText
+                                            : panelPalette.subtext
                                         font.weight: Font.DemiBold
                                     }
 
@@ -1019,7 +1027,7 @@ Item {
                                 visible: SystemService.statusMessage !== ""
                                 Layout.fillWidth: true
                                 text: SystemService.statusMessage
-                                color: Theme.palette.m3error
+                                color: panelPalette.error
                                 wrapMode: Text.WordWrap
                                 font.pixelSize: Appearance.smallFontSize
                             }
@@ -1033,7 +1041,7 @@ Item {
                 Layout.fillWidth: true
                 implicitHeight: bluetoothColumn.implicitHeight + Appearance.px(20)
                 radius: Appearance.smallRadius
-                color: Appearance.layer1
+                color: panelPalette.layer1
 
                 ColumnLayout {
                     id: bluetoothColumn
@@ -1050,13 +1058,13 @@ Item {
                         PanelText {
                             Layout.fillWidth: true
                             text: I18n.tr("bluetoothDevices")
-                            color: Appearance.layer0Text
+                            color: panelPalette.layer0Text
                             font.weight: Font.DemiBold
                         }
                         PanelText {
                             text: SystemService.bluetoothDiscovering
                                 ? I18n.tr("scanning") : I18n.tr("scan")
-                            color: Appearance.primary
+                            color: panelPalette.primary
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: SystemService.setBluetoothDiscovering(true)
@@ -1072,7 +1080,7 @@ Item {
                             implicitHeight: Appearance.px(52)
                             radius: Appearance.px(10)
                             color: bluetoothMouse.containsMouse
-                                ? Appearance.layer1Hover : Appearance.layer2
+                                ? panelPalette.layer1Hover : panelPalette.layer2
                             RowLayout {
                                 anchors {
                                     fill: parent
@@ -1081,7 +1089,7 @@ Item {
                                 Text {
                                     text: "󰂯"
                                     color: modelData.connected
-                                        ? Appearance.primary : Appearance.subtext
+                                        ? panelPalette.primary : panelPalette.subtext
                                     font {
                                         family: Appearance.iconFontFamily
                                         pixelSize: Appearance.px(18)
@@ -1094,7 +1102,7 @@ Item {
                                         Layout.fillWidth: true
                                         text: modelData.name || modelData.deviceName
                                         elide: Text.ElideRight
-                                        color: Appearance.layer0Text
+                                        color: panelPalette.layer0Text
                                     }
                                     PanelText {
                                         text: modelData.connected
@@ -1104,14 +1112,14 @@ Item {
                                                 : modelData.paired
                                                     ? I18n.tr("paired")
                                                     : I18n.tr("availableToConnect")
-                                        color: Appearance.subtext
+                                        color: panelPalette.subtext
                                         font.pixelSize: Appearance.smallFontSize
                                     }
                                 }
                                 PanelText {
                                     text: modelData.connected
                                         ? I18n.tr("disconnect") : I18n.tr("connect")
-                                    color: Appearance.primary
+                                    color: panelPalette.primary
                                 }
                             }
                             MouseArea {
@@ -1132,7 +1140,7 @@ Item {
                 implicitHeight: outputColumn.implicitHeight
                     + Appearance.px(20)
                 radius: Appearance.smallRadius
-                color: Appearance.layer1
+                color: panelPalette.layer1
 
                 ColumnLayout {
                     id: outputColumn
@@ -1148,7 +1156,7 @@ Item {
                     PanelText {
                         Layout.fillWidth: true
                         text: I18n.tr("audioOutputs")
-                        color: Appearance.layer0Text
+                        color: panelPalette.layer0Text
                         font.weight: Font.DemiBold
                     }
 
@@ -1156,7 +1164,7 @@ Item {
                         visible: SystemService.outputDevices.length === 0
                         Layout.fillWidth: true
                         text: I18n.tr("noAudioDevices")
-                        color: Appearance.subtext
+                        color: panelPalette.subtext
                     }
 
                     Repeater {
@@ -1172,9 +1180,9 @@ Item {
                             implicitHeight: Appearance.px(52)
                             radius: Appearance.px(10)
                             color: outputMouse.containsMouse
-                                ? Appearance.layer1Hover : Appearance.layer2
+                                ? panelPalette.layer1Hover : panelPalette.layer2
                             border.width: selected ? 2 : 0
-                            border.color: Appearance.primary
+                            border.color: panelPalette.primary
 
                             RowLayout {
                                 anchors {
@@ -1186,8 +1194,8 @@ Item {
                                 Text {
                                     text: "󰕾"
                                     color: parent.parent.selected
-                                        ? Appearance.primary
-                                        : Appearance.subtext
+                                        ? panelPalette.primary
+                                        : panelPalette.subtext
                                     font {
                                         family: Appearance.iconFontFamily
                                         pixelSize: Appearance.px(18)
@@ -1203,13 +1211,13 @@ Item {
                                         text: SystemService.audioDeviceName(
                                             modelData)
                                         elide: Text.ElideRight
-                                        color: Appearance.layer0Text
+                                        color: panelPalette.layer0Text
                                     }
 
                                     PanelText {
                                         visible: parent.parent.parent.selected
                                         text: I18n.tr("currentDevice")
-                                        color: Appearance.primary
+                                        color: panelPalette.primary
                                         font.pixelSize:
                                             Appearance.smallFontSize
                                     }
@@ -1218,7 +1226,7 @@ Item {
                                 PanelText {
                                     visible: parent.parent.selected
                                     text: "󰄬"
-                                    color: Appearance.primary
+                                    color: panelPalette.primary
                                     font.family:
                                         Appearance.iconFontFamily
                                 }
@@ -1245,7 +1253,7 @@ Item {
                 implicitHeight: inputColumn.implicitHeight
                     + Appearance.px(20)
                 radius: Appearance.smallRadius
-                color: Appearance.layer1
+                color: panelPalette.layer1
 
                 ColumnLayout {
                     id: inputColumn
@@ -1261,7 +1269,7 @@ Item {
                     PanelText {
                         Layout.fillWidth: true
                         text: I18n.tr("audioInputs")
-                        color: Appearance.layer0Text
+                        color: panelPalette.layer0Text
                         font.weight: Font.DemiBold
                     }
 
@@ -1269,7 +1277,7 @@ Item {
                         visible: SystemService.inputDevices.length === 0
                         Layout.fillWidth: true
                         text: I18n.tr("noAudioDevices")
-                        color: Appearance.subtext
+                        color: panelPalette.subtext
                     }
 
                     Repeater {
@@ -1285,9 +1293,9 @@ Item {
                             implicitHeight: Appearance.px(52)
                             radius: Appearance.px(10)
                             color: inputMouse.containsMouse
-                                ? Appearance.layer1Hover : Appearance.layer2
+                                ? panelPalette.layer1Hover : panelPalette.layer2
                             border.width: selected ? 2 : 0
-                            border.color: Appearance.primary
+                            border.color: panelPalette.primary
 
                             RowLayout {
                                 anchors {
@@ -1299,8 +1307,8 @@ Item {
                                 Text {
                                     text: "󰍬"
                                     color: parent.parent.selected
-                                        ? Appearance.primary
-                                        : Appearance.subtext
+                                        ? panelPalette.primary
+                                        : panelPalette.subtext
                                     font {
                                         family: Appearance.iconFontFamily
                                         pixelSize: Appearance.px(18)
@@ -1316,13 +1324,13 @@ Item {
                                         text: SystemService.audioDeviceName(
                                             modelData)
                                         elide: Text.ElideRight
-                                        color: Appearance.layer0Text
+                                        color: panelPalette.layer0Text
                                     }
 
                                     PanelText {
                                         visible: parent.parent.parent.selected
                                         text: I18n.tr("currentDevice")
-                                        color: Appearance.primary
+                                        color: panelPalette.primary
                                         font.pixelSize:
                                             Appearance.smallFontSize
                                     }
@@ -1331,7 +1339,7 @@ Item {
                                 PanelText {
                                     visible: parent.parent.selected
                                     text: "󰄬"
-                                    color: Appearance.primary
+                                    color: panelPalette.primary
                                     font.family:
                                         Appearance.iconFontFamily
                                 }
@@ -1357,7 +1365,7 @@ Item {
                     && SystemService.passwordRequestedSsid === ""
                 Layout.fillWidth: true
                 text: SystemService.statusMessage
-                color: Theme.palette.m3error
+                color: panelPalette.error
                 wrapMode: Text.WordWrap
                 font.pixelSize: Appearance.smallFontSize
             }

@@ -29,9 +29,9 @@ Item {
         anchors.fill: parent
         antialiasing: true
         readonly property color trackColor:
-            Appearance.withAlpha(Appearance.subtext, 0.24)
+            Appearance.withAlpha(Appearance.barSubtext, 0.24)
         readonly property color progressColor: root.warning
-            ? Theme.palette.m3error : Appearance.primary
+            ? Appearance.barError : Appearance.barPrimary
 
         onTrackColorChanged: requestPaint()
         onProgressColorChanged: requestPaint()
@@ -79,7 +79,7 @@ Item {
         anchors.centerIn: parent
         text: root.icon
         color: root.warning
-            ? Theme.palette.m3error : Appearance.layer0Text
+            ? Appearance.barError : Appearance.barLayer0Text
         font {
             family: Appearance.iconFontFamily
             pixelSize: Appearance.px(root.iconSize)

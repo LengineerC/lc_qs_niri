@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import Quickshell
 import "file:///home/lengineerc/.config/quickshell/lc_qs_niri/Caelestia/Blobs" as Blobs
 import qs.common
+import qs.common.widgets
 import qs.services
 
 Item {
@@ -13,6 +14,10 @@ Item {
 
     implicitHeight: Appearance.barHeight
     readonly property Item barMask: barInputRegion
+    readonly property Item leftCornerBlurBounds: leftConnectorBlurBounds
+    readonly property Item leftCornerBlurCutout: leftConnectorBlurCutout
+    readonly property Item rightCornerBlurBounds: rightConnectorBlurBounds
+    readonly property Item rightCornerBlurCutout: rightConnectorBlurCutout
     readonly property Item popupMask: popup.popupMaskItem
     readonly property bool barContainsMouse: barHover.hovered
         && barHover.point.position.y >= 0
@@ -26,6 +31,8 @@ Item {
         && LeftSidebarService.targetOutputName === root.outputName
     readonly property bool hostWindowActive: Window.active
     readonly property int edgeMargin: Appearance.cornerSize
+    readonly property int connectorTop:
+        Appearance.barHeight - Appearance.px(1)
 
     property real effectsOpacity: 1
     readonly property real compactLevel: width <= Appearance.px(1000) ? 2
@@ -90,7 +97,7 @@ Item {
             root.notificationPanelShown && root.hostWindowActive)
 
     component BarText: Text {
-        color: Appearance.layer1Text
+        color: Appearance.barLayer1Text
         verticalAlignment: Text.AlignVCenter
         font {
             family: Appearance.fontFamily
@@ -99,7 +106,7 @@ Item {
     }
 
     component BarIcon: Text {
-        color: Appearance.secondaryContainerText
+        color: Appearance.barSecondaryContainerText
         verticalAlignment: Text.AlignVCenter
         font {
             family: Appearance.iconFontFamily
@@ -114,6 +121,44 @@ Item {
 
         width: root.width
         height: Appearance.barHeight
+    }
+
+    // Geometry used to construct the two concave connector blur regions.
+    // These items never receive input or draw pixels.
+    Item {
+        id: leftConnectorBlurBounds
+
+        x: 0
+        y: root.connectorTop
+        width: Appearance.cornerSize
+        height: Appearance.cornerSize
+    }
+
+    Item {
+        id: leftConnectorBlurCutout
+
+        x: 0
+        y: root.connectorTop
+        width: Appearance.cornerSize * 2
+        height: Appearance.cornerSize * 2
+    }
+
+    Item {
+        id: rightConnectorBlurBounds
+
+        x: root.width - Appearance.cornerSize
+        y: root.connectorTop
+        width: Appearance.cornerSize
+        height: Appearance.cornerSize
+    }
+
+    Item {
+        id: rightConnectorBlurCutout
+
+        x: root.width - Appearance.cornerSize * 2
+        y: root.connectorTop
+        width: Appearance.cornerSize * 2
+        height: Appearance.cornerSize * 2
     }
 
     // This handler belongs to the common ancestor of every bar control, so
@@ -158,14 +203,17 @@ Item {
         // material does not otherwise give us a separate tint-opacity stage.
         opacity: ShellSettings.barFrostedGlass
             ? Appearance.barGlassTintOpacity : 1
+        // The Bar and popup share one Blob layer, so the shadow follows their
+        // combined outline instead of being drawn between the two surfaces.
         layer.enabled: ShellSettings.shadowEnabled
+            && root.effectsOpacity > 0.001
         layer.effect: MultiEffect {
             shadowEnabled: ShellSettings.shadowEnabled
             shadowBlur: 1
             blurMax: Math.max(1, Math.round(
                 ShellSettings.shadowBlurRadius * Appearance.scale))
             shadowColor: Appearance.withAlpha(
-                Theme.palette.m3shadow,
+                Appearance.barShadow,
                 ShellSettings.shadowOpacity
                     * Math.max(0, Math.min(1, root.effectsOpacity)))
             shadowVerticalOffset: Math.round(
@@ -175,7 +223,7 @@ Item {
         Blobs.BlobGroup {
             id: barBlobGroup
 
-            color: Appearance.barBgColor
+            color: Appearance.barSurfaceBaseColor
             smoothing: Appearance.px(20)
         }
 
@@ -203,17 +251,49 @@ Item {
         Blobs.BlobRect {
             id: popupBackground
 
-            readonly property real extraHeight: 0.2
+            // The old 20% overlap could reach more than 100 px into the Bar
+            // for tall panels. That is invisible with an opaque fill but
+            // becomes a clearly brighter double layer with glass. A tiny
+            // overlap is enough for BlobGroup to keep one continuous shape.
+            readonly property real overlapHeight:
+                ShellSettings.barFrostedGlass
+                    ? Appearance.px(2) : popup.height * 0.2
 
             visible: popup.revealProgress > 0
             group: barBlobGroup
             x: popup.x
-            y: Appearance.barHeight - popup.height * extraHeight
+            y: Appearance.barHeight - overlapHeight
             width: visible ? popup.width : 0
             height: visible
-                ? popup.height * (1 + extraHeight) : 0
+                ? popup.height + overlapHeight : 0
             radius: Appearance.normalRadius
             deformScale: 0.000002
+        }
+
+        // In glass mode the connector corners must be captured by the same
+        // layer as the Bar. Parent opacity and the shadow are then applied
+        // once to the combined silhouette, avoiding a second blend over the
+        // shadow beneath the Bar edge.
+        RoundCorner {
+            x: 0
+            y: root.connectorTop
+            visible: ShellSettings.barFrostedGlass
+                && root.effectsOpacity >= 0.999
+            implicitSize: Appearance.cornerSize
+            layerEnabled: false
+            color: Appearance.barSurfaceBaseColor
+            corner: RoundCorner.CornerEnum.TopLeft
+        }
+
+        RoundCorner {
+            x: parent.width - width
+            y: root.connectorTop
+            visible: ShellSettings.barFrostedGlass
+                && root.effectsOpacity >= 0.999
+            implicitSize: Appearance.cornerSize
+            layerEnabled: false
+            color: Appearance.barSurfaceBaseColor
+            corner: RoundCorner.CornerEnum.TopRight
         }
     }
 
@@ -255,15 +335,15 @@ Item {
                 color: launcherControl.containsMouse
                     || popup.shown && popup.anchorItem === launcherControl
                     || root.sidebarShown
-                    ? Appearance.secondaryContainer
+                    ? Appearance.barSecondaryContainer
                     : Appearance.withAlpha(
-                        Appearance.secondaryContainer, 0)
+                        Appearance.barSecondaryContainer, 0)
                 scale: launcherControl.pressed ? 0.88 : 1
 
                 Text {
                     anchors.centerIn: parent
                     text: "󰣇"
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(21)
@@ -312,6 +392,12 @@ Item {
                 sourceSize.height: Appearance.px(20)
                 smooth: true
                 visible: ShellSettings.showActiveWindowIcon && source !== ""
+                layer.enabled: ShellSettings.barFrostedGlass
+                layer.effect: MultiEffect {
+                    saturation: -1
+                    brightness: 0.12
+                    contrast: 0.08
+                }
             }
 
             Column {
@@ -330,7 +416,7 @@ Item {
                     width: parent.width
                     text: NiriService.focusedWindow?.appId
                         ?? I18n.tr("desktop")
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     elide: Text.ElideRight
                     font {
                         family: Appearance.fontFamily
@@ -342,7 +428,7 @@ Item {
                     width: parent.width
                     text: NiriService.focusedWindow?.title
                         ?? I18n.tr("noFocusedWindow")
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     elide: Text.ElideRight
                     font {
                         family: Appearance.fontFamily
@@ -528,14 +614,14 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 radius: Appearance.fullRadius
                 color: settingsControl.containsMouse
-                    ? Appearance.layer1Hover
-                    : Appearance.withAlpha(Appearance.layer1Hover, 0)
+                    ? Appearance.barLayer1Hover
+                    : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
                 scale: settingsControl.pressed ? 0.88 : 1
 
                 Text {
                     anchors.centerIn: parent
                     text: "󰒓"
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(17)

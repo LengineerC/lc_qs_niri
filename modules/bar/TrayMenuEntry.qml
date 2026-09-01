@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
@@ -25,17 +26,17 @@ Rectangle {
     readonly property bool partiallyChecked:
         menuEntry.checkState === Qt.PartiallyChecked
     readonly property color foreground: entryMouse.containsMouse
-        ? Appearance.primaryContainerText : Appearance.layer0Text
+        ? Appearance.barPrimaryContainerText : Appearance.barLayer0Text
 
     Layout.fillWidth: true
     Layout.topMargin: separator ? Appearance.px(4) : 0
     Layout.bottomMargin: separator ? Appearance.px(4) : 0
     implicitHeight: separator ? Appearance.px(1) : Appearance.px(40)
     radius: Appearance.px(10)
-    color: separator ? Appearance.outline
+    color: separator ? Appearance.barOutline
         : entryMouse.containsMouse && root.enabled
-            ? Appearance.primaryContainer
-            : Appearance.withAlpha(Appearance.primaryContainer, 0)
+            ? Appearance.barPrimaryContainer
+            : Appearance.withAlpha(Appearance.barPrimaryContainer, 0)
     opacity: separator || root.enabled ? 1 : 0.42
     enabled: !separator && menuEntry.enabled
     scale: entryMouse.pressed ? 0.98 : 1
@@ -67,7 +68,7 @@ Rectangle {
                 color: "transparent"
                 border.width: Appearance.px(2)
                 border.color: root.checked
-                    ? Appearance.primary : root.foreground
+                    ? Appearance.barPrimary : root.foreground
 
                 Rectangle {
                     anchors.centerIn: parent
@@ -75,7 +76,7 @@ Rectangle {
                         ? Appearance.px(8) : 0
                     height: width
                     radius: width / 2
-                    color: Appearance.primary
+                    color: Appearance.barPrimary
 
                     Behavior on width {
                         NumberAnimation {
@@ -94,7 +95,7 @@ Rectangle {
                 height: width
                 radius: Appearance.px(5)
                 color: root.checked || root.partiallyChecked
-                    ? Appearance.primary : "transparent"
+                    ? Appearance.barPrimary : "transparent"
                 border.width: root.checked || root.partiallyChecked
                     ? 0 : Appearance.px(2)
                 border.color: root.foreground
@@ -103,7 +104,7 @@ Rectangle {
                     anchors.centerIn: parent
                     text: root.partiallyChecked ? "−" : "✓"
                     visible: root.checked || root.partiallyChecked
-                    color: Appearance.primaryContainer
+                    color: Appearance.barPrimaryContainer
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Appearance.px(12)
@@ -125,6 +126,12 @@ Rectangle {
                 source: root.menuEntry.icon
                 implicitSize: Appearance.px(20)
                 asynchronous: true
+                layer.enabled: ShellSettings.barFrostedGlass
+                layer.effect: MultiEffect {
+                    saturation: -1
+                    brightness: 0.12
+                    contrast: 0.08
+                }
             }
         }
 

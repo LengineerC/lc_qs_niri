@@ -51,6 +51,7 @@ Scope {
         ClipboardPanel {
             anchors.fill: parent
             visible: clipboardWindow.visible
+            useBarPalette: false
             onCloseRequested: clipboardWindow.closeWindow()
         }
 
@@ -95,6 +96,7 @@ Scope {
         ResourcePanel {
             anchors.fill: parent
             active: systemMonitorWindow.visible
+            useBarPalette: false
             onCloseRequested: systemMonitorWindow.closeWindow()
         }
 
