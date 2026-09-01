@@ -19,6 +19,7 @@ PopupWindow {
     property bool openedOnce: false
     property bool switchingMenu: false
     property int switchGeneration: 0
+    property real stableMenuHeight: 0
     readonly property bool pointerInside: menuHover.hovered
 
     signal menuOpened(var menu)
@@ -132,10 +133,31 @@ PopupWindow {
             if (generation !== root.switchGeneration
                     || !root.visible)
                 return;
+            // The DBus page is still settling. Position only after its
+            // debounced height has been committed to the popup window.
+            if (menuResizeTimer.running) {
+                restart();
+                return;
+            }
             root.anchor.updateAnchor();
             root.switchingMenu = false;
             root.presented = true;
             menuFocus.forceActiveFocus();
+        }
+    }
+
+    Timer {
+        id: menuResizeTimer
+
+        // Root menus need to appear promptly. Submenu navigation waits until
+        // the StackView transition and batched DBus updates have settled, so
+        // the Wayland popup is resized once instead of on every animation
+        // frame.
+        interval: root.switchingMenu ? 55
+            : Math.max(70, Appearance.fastDuration + 17)
+        onTriggered: {
+            root.stableMenuHeight = Math.max(0,
+                menuStack.currentItem?.implicitHeight ?? 0);
         }
     }
 
@@ -173,7 +195,7 @@ PopupWindow {
             // matches glass panels without leaking blur into its padding.
             color: ShellSettings.barFrostedGlass
                 ? Appearance.withAlpha(
-                    Appearance.barGlassBaseColor, 0.9)
+                    Appearance.barGlassBaseColor, 0.76)
                 : Appearance.layer0
             border.width: 1
             border.color: Appearance.barOutline
@@ -242,7 +264,8 @@ PopupWindow {
                     id: menuStack
 
                     Layout.fillWidth: true
-                    implicitHeight: currentItem?.implicitHeight ?? 0
+                    implicitHeight: root.stableMenuHeight
+                    onCurrentItemChanged: menuResizeTimer.restart()
                     pushEnter: Transition {
                         ParallelAnimation {
                             NumberAnimation {
@@ -294,10 +317,11 @@ PopupWindow {
                         }
                     }
 
-                    Behavior on implicitHeight {
-                        NumberAnimation {
-                            duration: Appearance.fastDuration
-                            easing.type: Easing.OutCubic
+                    Connections {
+                        target: menuStack.currentItem
+                        ignoreUnknownSignals: true
+                        function onImplicitHeightChanged() {
+                            menuResizeTimer.restart();
                         }
                     }
                 }

@@ -1079,7 +1079,7 @@ Item {
                                 parent.horizontalCenter
 
                             text: index === 0
-                                ? "现在"
+                                ? I18n.tr("weatherNow")
                                 : WeatherService.timeFromIso(
                                     modelData.time)
 
@@ -1506,7 +1506,7 @@ Item {
                                 parent.horizontalCenter
 
                             text: index === 0
-                                ? "今天"
+                                ? I18n.tr("weatherToday")
                                 : WeatherService.dayName(
                                     modelData.date)
 

@@ -47,7 +47,8 @@ Item {
 
         anchors.fill: parent
         radius: Appearance.fullRadius
-        color: Appearance.primaryContainer
+        color: ShellSettings.barFrostedGlass
+            ? Appearance.barLayer1Active : Appearance.primaryContainer
         clip: true
 
         Text {
@@ -56,7 +57,8 @@ Item {
                 || !root.hasProfileImage
                     && avatarImage.status !== Image.Ready
             text: "󰂚"
-            color: Appearance.primary
+            color: ShellSettings.barFrostedGlass
+                ? Appearance.barPrimary : Appearance.primary
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Math.round(root.implicitSize * 0.48)
@@ -105,9 +107,11 @@ Item {
             bottom: parent.bottom
         }
         radius: Appearance.fullRadius
-        color: Appearance.layer1
+        color: ShellSettings.barFrostedGlass
+            ? Appearance.barGlassBaseColor : Appearance.layer1
         border.width: 1
-        border.color: Appearance.outline
+        border.color: ShellSettings.barFrostedGlass
+            ? Appearance.barOutline : Appearance.outline
 
         IconImage {
             anchors {

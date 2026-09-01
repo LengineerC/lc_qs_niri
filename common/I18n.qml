@@ -78,6 +78,8 @@ Singleton {
         restoreSystemProfile: ["恢复系统头像", "Use system avatar"],
         weather: ["天气", "Weather"],
         weatherLocation: ["天气位置", "Weather location"],
+        weatherNow: ["现在", "Now"],
+        weatherToday: ["今天", "Today"],
         weatherLocationHint: ["输入城市、区县或邮政编码",
             "Enter a city, district, or postal code"],
         searchLocation: ["搜索位置", "Search location"],

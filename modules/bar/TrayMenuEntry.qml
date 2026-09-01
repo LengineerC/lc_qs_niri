@@ -104,7 +104,10 @@ Rectangle {
                     anchors.centerIn: parent
                     text: root.partiallyChecked ? "−" : "✓"
                     visible: root.checked || root.partiallyChecked
-                    color: Appearance.barPrimaryContainer
+                    // The checked surface uses barPrimary. barOnPrimary keeps
+                    // the glyph legible both in fixed dark glass mode and in
+                    // the regular Matugen palette.
+                    color: Appearance.barOnPrimary
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Appearance.px(12)

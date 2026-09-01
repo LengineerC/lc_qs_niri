@@ -1271,10 +1271,8 @@ Rectangle {
                         TextInput.AlignVCenter
 
                     color: Appearance.barLayer0Text
-                    selectionColor:
-                        Appearance.barPrimaryContainer
-                    selectedTextColor:
-                        Appearance.barPrimaryContainerText
+                    selectionColor: Appearance.barPrimary
+                    selectedTextColor: Appearance.barOnPrimary
 
                     selectByMouse: true
                     clip: true
@@ -1618,15 +1616,18 @@ Rectangle {
 
             radius: Appearance.px(20)
 
-            // 外层本身就是边框。
-            color: editor.activeFocus
-                ? Appearance.withAlpha(
-                    Appearance.barPrimary, 0.78)
+            // Keep the translucent editor surface independent from focus.
+            // Using the parent fill as an outline lets that bright color show
+            // through the glass child and washes out the whole editor.
+            color: "transparent"
+            border.width: root.outlineWidth
+            border.color: editor.activeFocus
+                ? Appearance.barPrimary
                 : Appearance.barLayer0Border
 
             antialiasing: true
 
-            Behavior on color {
+            Behavior on border.color {
                 ColorAnimation {
                     duration: Appearance.fastDuration
                 }
@@ -1696,10 +1697,8 @@ Rectangle {
                         wrapMode: TextEdit.Wrap
 
                         color: Appearance.barLayer0Text
-                        selectionColor:
-                            Appearance.barPrimaryContainer
-                        selectedTextColor:
-                            Appearance.barPrimaryContainerText
+                        selectionColor: Appearance.barPrimary
+                        selectedTextColor: Appearance.barOnPrimary
 
                         selectByMouse: true
                         persistentSelection: true

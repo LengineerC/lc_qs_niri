@@ -10,7 +10,7 @@ Singleton {
     // Derived from the mutable Material 3 palette in Theme.qml.
     property color barBgColor: Theme.palette.m3background
     readonly property color barGlassBaseColor: "#080a0d"
-    readonly property real barGlassTintOpacity: 0.52
+    readonly property real barGlassTintOpacity: 0.68
     readonly property real popupGlassTintOpacity: 0.18
     readonly property color barSurfaceBaseColor:
         ShellSettings.barFrostedGlass

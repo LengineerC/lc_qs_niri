@@ -157,6 +157,7 @@ Item {
         if (sourceIndex > 0 && targetIndex > 0
                 && sourceIndex !== targetIndex) {
             NiriService.moveWorkspaceToIndex(workspaceId, targetIndex);
+            postDragRefresh.restart();
         }
     }
 
@@ -210,6 +211,37 @@ Item {
         onTriggered: root.wheelLocked = false
     }
 
+    Timer {
+        id: postDragRefresh
+
+        interval: Math.max(120, Appearance.spatialDuration + 34)
+        onTriggered: root.refreshActiveItem()
+    }
+
+    Connections {
+        target: NiriService.workspaces
+        ignoreUnknownSignals: true
+
+        function onRowsMoved() {
+            activeRefresh.restart();
+            postDragRefresh.restart();
+        }
+
+        function onRowsInserted() {
+            activeRefresh.restart();
+        }
+
+        function onModelReset() {
+            activeRefresh.restart();
+            postDragRefresh.restart();
+        }
+
+        function onLayoutChanged() {
+            activeRefresh.restart();
+            postDragRefresh.restart();
+        }
+    }
+
     WheelHandler {
         target: null
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
@@ -254,10 +286,15 @@ Item {
             id: activeIndicator
 
             z: 0
-            visible: root.draggedItem === null
-                && root.activeItem !== null && root.activeItem.visible
+            // Keep the active pill visible when another workspace is being
+            // dragged across it. Only the active workspace itself uses the
+            // delegate's drag appearance while it is picked up.
+            visible: root.activeItem !== null && root.activeItem.visible
+                && root.activeItem.workspaceActive
+                && root.draggedItem !== root.activeItem
             x: root.activeItem
                 ? workspaceRow.x + root.activeItem.x
+                    + root.activeItem.dragShift
                     + (root.activeItem.width - width) / 2
                 : 0
             anchors.verticalCenter: parent.verticalCenter
@@ -271,8 +308,11 @@ Item {
 
             Behavior on x {
                 NumberAnimation {
-                    duration: Appearance.spatialDuration
-                    easing.type: Easing.BezierSpline
+                    duration: root.draggedItem !== null
+                        ? Appearance.fastDuration
+                        : Appearance.spatialDuration
+                    easing.type: root.draggedItem !== null
+                        ? Easing.OutCubic : Easing.BezierSpline
                     easing.bezierCurve: Appearance.spatialCurve
                 }
             }
@@ -340,8 +380,7 @@ Item {
                     readonly property bool shouldShow: onThisOutput
                         && (ShellSettings.showEmptyWorkspaces
                             || !workspaceEmpty || workspaceActive)
-                    readonly property bool selected:
-                        root.activeItem === workspaceDelegate
+                    readonly property bool selected: workspaceActive
                     readonly property bool beingDragged:
                         root.draggedItem === workspaceDelegate
                     readonly property real dragShift:
@@ -399,6 +438,25 @@ Item {
                         border.width: root.indicatorStyle === "circle"
                                 && workspaceDelegate.model.isUrgent ? 1 : 0
                         border.color: Appearance.barTertiary
+                    }
+
+                    Rectangle {
+                        // If Niri resets/replaces model rows during a reorder,
+                        // draw the active state from the delegate's own role
+                        // until activeRefresh resolves the global indicator to
+                        // this new item. It occupies the exact same geometry,
+                        // so the handoff is invisible.
+                        anchors.centerIn: parent
+                        visible: workspaceDelegate.workspaceActive
+                            && !workspaceDelegate.beingDragged
+                            && (!activeIndicator.visible
+                                || root.activeItem !== workspaceDelegate)
+                        width: root.activeIndicatorWidth
+                        height: root.activeIndicatorHeight
+                        radius: Appearance.fullRadius
+                        color: root.indicatorStyle === "circle"
+                            ? Appearance.barSecondaryContainer
+                            : Appearance.barPrimary
                     }
 
                     Rectangle {
