@@ -139,7 +139,13 @@ Scope {
             Repeater {
                 id: toastRepeater
 
-                model: NotificationService.popupEntries
+                // A plain JavaScript array resets every delegate whenever a
+                // toast is removed. ScriptModel diffs entries by their stable
+                // id, preserving the other cards and their loaded avatars.
+                model: ScriptModel {
+                    values: NotificationService.popupEntries
+                    objectProp: "notificationId"
+                }
 
                 delegate: NotificationToastCard {
                     required property var modelData

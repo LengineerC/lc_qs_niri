@@ -261,6 +261,8 @@ Item {
                     + (root.activeItem.width - width) / 2
                 : 0
             anchors.verticalCenter: parent.verticalCenter
+            // anchors.verticalCenterOffset: root.dotIndicator
+            //     ? Appearance.px(1) : 0
             width: root.activeIndicatorWidth
             height: root.activeIndicatorHeight
             radius: Appearance.fullRadius
