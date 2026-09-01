@@ -1620,6 +1620,32 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(1)
+
+                            PanelText {
+                                text: I18n.tr("barFrostedGlass")
+                                color: Appearance.layer0Text
+                            }
+
+                            PanelText {
+                                text: I18n.tr("barFrostedGlassHint")
+                                color: Appearance.subtext
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        SettingSwitch {
+                            checked: ShellSettings.barFrostedGlass
+                            onToggled: checked =>
+                                ShellSettings.barFrostedGlass = checked
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
                         spacing: Appearance.px(10)
 
                         ColumnLayout {

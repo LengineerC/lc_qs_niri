@@ -46,7 +46,7 @@ Scope {
             anchors.fill: parent
             z: 1
             implicitSize: Appearance.cornerSize
-            color: Appearance.barBgColor
+            color: Appearance.barSurfaceColor
             corner: connectorCorner.corner
         }
     }
@@ -85,6 +85,23 @@ Scope {
                     && (barContent.popupShown
                         || barContent.barContainsMouse)
                 ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
+            // QuickShell 0.3's ext-background-effect support lets the
+            // compositor blur only these visible shapes even though this
+            // merged Bar/Panel surface is screen-height. The surfaces add a
+            // translucent Material tint rather than an opaque background.
+            BackgroundEffect.blurRegion: Region {
+                Region {
+                    item: ShellSettings.barFrostedGlass
+                        ? barContent.barMask : null
+                }
+
+                Region {
+                    item: ShellSettings.barFrostedGlass
+                        ? barContent.popupMask : null
+                    radius: Appearance.normalRadius
+                }
+            }
 
             Region {
                 id: normalMask
@@ -250,7 +267,7 @@ Scope {
                             left: parent.left
                         }
                         implicitSize: Appearance.cornerSize
-                        color: Appearance.barBgColor
+                        color: Appearance.barSurfaceColor
                         corner: RoundCorner.CornerEnum.TopLeft
                     }
 
@@ -260,7 +277,7 @@ Scope {
                             right: parent.right
                         }
                         implicitSize: Appearance.cornerSize
-                        color: Appearance.barBgColor
+                        color: Appearance.barSurfaceColor
                         corner: RoundCorner.CornerEnum.TopRight
                     }
                 }
@@ -302,7 +319,7 @@ Scope {
             }
 
             exclusionMode: ExclusionMode.Ignore
-            color: Appearance.barBgColor
+            color: Appearance.barSurfaceColor
 
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.namespace:
@@ -482,7 +499,7 @@ Scope {
                 y: -1
                 visible: leftSidebar.surfaceVisible
                 implicitSize: Appearance.cornerSize
-                color: Appearance.barBgColor
+                color: Appearance.barSurfaceColor
                 corner: RoundCorner.CornerEnum.TopLeft
             }
         }

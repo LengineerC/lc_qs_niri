@@ -9,6 +9,15 @@ Singleton {
 
     // Derived from the mutable Material 3 palette in Theme.qml.
     property color barBgColor: Theme.palette.m3background
+    readonly property real barGlassTintOpacity:
+        Theme.darkMode ? 0.42 : 0.52
+    readonly property real popupGlassTintOpacity:
+        Theme.darkMode ? 0.18 : 0.14
+    property color barSurfaceColor: ShellSettings.barFrostedGlass
+        ? withAlpha(Theme.palette.m3background,
+            barGlassTintOpacity)
+        : Theme.palette.m3background
+    property color popupSurfaceColor: Theme.palette.m3surfaceContainer
     property color layer0: Theme.palette.m3background
     property color layer0Border: mix(Theme.palette.m3outlineVariant,
         Theme.palette.m3background, 0.4)
@@ -73,6 +82,8 @@ Singleton {
     readonly property var exitCurve: [0.3, 0, 0.8, 0.15, 1, 1]
 
     Behavior on barBgColor { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on barSurfaceColor { ColorAnimation { duration: root.spatialDuration } }
+    Behavior on popupSurfaceColor { ColorAnimation { duration: root.spatialDuration } }
     Behavior on layer0 { ColorAnimation { duration: root.spatialDuration } }
     Behavior on layer0Border { ColorAnimation { duration: root.spatialDuration } }
     Behavior on layer1 { ColorAnimation { duration: root.spatialDuration } }

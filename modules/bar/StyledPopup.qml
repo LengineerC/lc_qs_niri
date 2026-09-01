@@ -427,9 +427,15 @@ Item {
             width: parent.width - 14
             height: root.popupHeight - 14
             radius: Appearance.smallRadius
-            color: Appearance.layer2
+            color: Appearance.popupSurfaceColor
+            opacity: ShellSettings.barFrostedGlass
+                ? Appearance.popupGlassTintOpacity : 1
             border.width: 1
             border.color: Appearance.layer0Border
+
+            Behavior on opacity {
+                NumberAnimation { duration: Appearance.fastDuration }
+            }
         }
 
         ColumnLayout {

@@ -134,7 +134,14 @@ Item {
         width: root.width
         height: Appearance.barHeight
 
+        // The Blob surface below is sufficient in glass mode. Keeping this
+        // fallback visible would stack two tints and make the bar opaque.
         color: Appearance.barBgColor
+        opacity: ShellSettings.barFrostedGlass ? 0 : 1
+
+        Behavior on opacity {
+            NumberAnimation { duration: Appearance.fastDuration }
+        }
     }
 
     Item {
@@ -147,6 +154,10 @@ Item {
             + Math.ceil((ShellSettings.shadowBlurRadius
                 + Math.abs(ShellSettings.shadowOffsetY) + 4)
                 * Appearance.scale)
+        // Apply opacity to the rendered Blob layer itself. The native Blob
+        // material does not otherwise give us a separate tint-opacity stage.
+        opacity: ShellSettings.barFrostedGlass
+            ? Appearance.barGlassTintOpacity : 1
         layer.enabled: ShellSettings.shadowEnabled
         layer.effect: MultiEffect {
             shadowEnabled: ShellSettings.shadowEnabled
@@ -166,6 +177,10 @@ Item {
 
             color: Appearance.barBgColor
             smoothing: Appearance.px(20)
+        }
+
+        Behavior on opacity {
+            NumberAnimation { duration: Appearance.fastDuration }
         }
 
         Blobs.BlobRect {

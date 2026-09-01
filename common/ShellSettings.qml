@@ -13,6 +13,7 @@ Singleton {
     property bool showEmptyWorkspaces: true
     // circle, dots
     property string workspaceIndicatorStyle: "circle"
+    property bool barFrostedGlass: false
     property bool shadowEnabled: true
     property int shadowBlurRadius: 18
     property real shadowOpacity: 0.45
@@ -120,10 +121,11 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 22,
+            version: 23,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             workspaceIndicatorStyle: workspaceIndicatorStyle,
+            barFrostedGlass: barFrostedGlass,
             shadowEnabled: shadowEnabled,
             shadowBlurRadius: shadowBlurRadius,
             shadowOpacity: shadowOpacity,
@@ -168,7 +170,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 22)
+            if (state.version !== 23)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -182,6 +184,10 @@ Singleton {
             } else {
                 needsMigration = true;
             }
+            if (typeof state.barFrostedGlass === "boolean")
+                barFrostedGlass = state.barFrostedGlass;
+            else
+                needsMigration = true;
             if (typeof state.shadowEnabled === "boolean")
                 shadowEnabled = state.shadowEnabled;
             else
@@ -366,6 +372,7 @@ Singleton {
         showActiveWindowIcon = true;
         showEmptyWorkspaces = true;
         workspaceIndicatorStyle = "circle";
+        barFrostedGlass = false;
         shadowEnabled = true;
         shadowBlurRadius = 18;
         shadowOpacity = 0.45;
@@ -412,6 +419,7 @@ Singleton {
     onShowActiveWindowIconChanged: scheduleSave()
     onShowEmptyWorkspacesChanged: scheduleSave()
     onWorkspaceIndicatorStyleChanged: scheduleSave()
+    onBarFrostedGlassChanged: scheduleSave()
     onShadowEnabledChanged: scheduleSave()
     onShadowBlurRadiusChanged: scheduleSave()
     onShadowOpacityChanged: scheduleSave()
@@ -515,6 +523,10 @@ Singleton {
             }
         }
 
+        function setBarFrostedGlass(enabled: bool): void {
+            root.barFrostedGlass = enabled;
+        }
+
         function setCalendarWeekStart(day: int): void {
             if ([-1, 0, 1, 6].indexOf(day) >= 0)
                 root.calendarWeekStart = day;
@@ -564,6 +576,7 @@ Singleton {
                 showActiveWindowIcon: root.showActiveWindowIcon,
                 showEmptyWorkspaces: root.showEmptyWorkspaces,
                 workspaceIndicatorStyle: root.workspaceIndicatorStyle,
+                barFrostedGlass: root.barFrostedGlass,
                 shadowEnabled: root.shadowEnabled,
                 shadowBlurRadius: root.shadowBlurRadius,
                 shadowOpacity: root.shadowOpacity,
