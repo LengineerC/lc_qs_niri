@@ -1732,6 +1732,53 @@ Item {
                         }
                     }
 
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(6)
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(1)
+
+                            PanelText {
+                                text: I18n.tr("workspaceIndicatorStyle")
+                                color: Appearance.layer0Text
+                            }
+
+                            PanelText {
+                                text: I18n.tr("workspaceIndicatorStyleHint")
+                                color: Appearance.subtext
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(6)
+
+                            Repeater {
+                                model: [
+                                    { value: "circle",
+                                        key: "workspaceStyleCircle" },
+                                    { value: "dots",
+                                        key: "workspaceStyleDots" }
+                                ]
+
+                                delegate: ChoiceChip {
+                                    required property var modelData
+
+                                    label: I18n.tr(modelData.key)
+                                    selected: ShellSettings
+                                        .workspaceIndicatorStyle
+                                            === modelData.value
+                                    onChosen: ShellSettings
+                                        .workspaceIndicatorStyle =
+                                            modelData.value
+                                }
+                            }
+                        }
+                    }
+
                     RowLayout {
                         Layout.fillWidth: true
 

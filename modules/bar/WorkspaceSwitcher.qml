@@ -18,6 +18,17 @@ Item {
     property int dragSourceWorkspaceIndex: -1
     property int dragTargetWorkspaceIndex: -1
     readonly property real padding: Appearance.px(5)
+    readonly property string indicatorStyle:
+        ShellSettings.workspaceIndicatorStyle
+    readonly property bool dotIndicator: indicatorStyle === "dots"
+    readonly property real delegateWidth: dotIndicator
+        ? Appearance.px(22) : Appearance.px(26)
+    readonly property real activeIndicatorWidth:
+        indicatorStyle === "circle" ? Appearance.px(22)
+        : Appearance.px(16)
+    readonly property real activeIndicatorHeight:
+        indicatorStyle === "circle" ? Appearance.px(22)
+        : Appearance.px(7)
 
     implicitWidth: workspaceRow.implicitWidth + padding * 2
     implicitHeight: Appearance.barHeight
@@ -250,16 +261,31 @@ Item {
                     + (root.activeItem.width - width) / 2
                 : 0
             anchors.verticalCenter: parent.verticalCenter
-            width: Appearance.px(22)
-            height: Appearance.px(22)
+            width: root.activeIndicatorWidth
+            height: root.activeIndicatorHeight
             radius: Appearance.fullRadius
-            color: Appearance.secondaryContainer
+            color: root.indicatorStyle === "circle"
+                ? Appearance.secondaryContainer : Appearance.primary
 
             Behavior on x {
                 NumberAnimation {
                     duration: Appearance.spatialDuration
                     easing.type: Easing.BezierSpline
                     easing.bezierCurve: Appearance.spatialCurve
+                }
+            }
+
+            Behavior on width {
+                NumberAnimation {
+                    duration: Appearance.fastDuration
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            Behavior on height {
+                NumberAnimation {
+                    duration: Appearance.fastDuration
+                    easing.type: Easing.OutCubic
                 }
             }
         }
@@ -275,10 +301,14 @@ Item {
                     + (root.hoverItem.width - width) / 2
                 : 0
             anchors.verticalCenter: parent.verticalCenter
-            width: Appearance.px(22)
-            height: Appearance.px(22)
+            width: root.dotIndicator
+                ? Appearance.px(20) : Appearance.px(22)
+            height: root.dotIndicator
+                ? Appearance.px(16) : Appearance.px(22)
             radius: Appearance.fullRadius
-            color: root.hoverItem?.selected
+            color: root.dotIndicator && root.hoverItem?.selected
+                ? Appearance.withAlpha(Appearance.layer0Text, 0.08)
+                : root.hoverItem?.selected
                 ? Appearance.mix(Appearance.secondaryContainer,
                     Appearance.secondaryContainerText, 0.12)
                 : Appearance.layer1Hover
@@ -317,7 +347,7 @@ Item {
                         root.workspaceDragShift(workspaceDelegate)
 
                     visible: shouldShow
-                    width: shouldShow ? Appearance.px(26) : 0
+                    width: shouldShow ? root.delegateWidth : 0
                     height: shouldShow ? Appearance.px(26) : 0
                     z: beingDragged ? 3 : 1
                     scale: beingDragged ? 1.13 : 1
@@ -355,18 +385,48 @@ Item {
                     Component.onCompleted: activeRefresh.restart()
 
                     Rectangle {
+                        id: dragBackground
+
                         anchors.centerIn: parent
-                        width: Appearance.px(22)
-                        height: Appearance.px(22)
+                        width: root.indicatorStyle === "circle"
+                            ? Appearance.px(22) : Appearance.px(20)
+                        height: root.indicatorStyle === "circle"
+                            ? Appearance.px(22) : Appearance.px(20)
                         radius: Appearance.fullRadius
                         color: workspaceDelegate.beingDragged
                             ? Appearance.primaryContainer : "transparent"
-                        border.width: workspaceDelegate.model.isUrgent ? 1 : 0
+                        border.width: root.indicatorStyle === "circle"
+                                && workspaceDelegate.model.isUrgent ? 1 : 0
                         border.color: Appearance.tertiary
+                    }
+
+                    Rectangle {
+                        id: compactMarker
+
+                        visible: root.dotIndicator
+                        anchors.centerIn: parent
+                        width: Appearance.px(6)
+                        height: Appearance.px(6)
+                        radius: Appearance.fullRadius
+                        color: workspaceDelegate.model.isUrgent
+                            ? Appearance.tertiary
+                            : workspaceDelegate.selected
+                                    && !workspaceDelegate.beingDragged
+                                ? "transparent"
+                                    : workspaceDelegate.beingDragged
+                                        ? Appearance.primaryContainerText
+                                        : Appearance.subtext
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Appearance.fastDuration
+                            }
+                        }
                     }
 
                     Text {
                         anchors.centerIn: parent
+                        visible: !root.dotIndicator
                         text: model.name || model.index
                         color: workspaceDelegate.selected
                             ? Appearance.secondaryContainerText
@@ -377,6 +437,12 @@ Item {
                             pixelSize: Appearance.smallFontSize
                             weight: workspaceDelegate.selected
                                 ? Font.DemiBold : Font.Medium
+                        }
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Appearance.fastDuration
+                            }
                         }
                     }
 

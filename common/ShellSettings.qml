@@ -11,6 +11,8 @@ Singleton {
 
     property bool showActiveWindowIcon: true
     property bool showEmptyWorkspaces: true
+    // circle, dots
+    property string workspaceIndicatorStyle: "circle"
     property bool shadowEnabled: true
     property int shadowBlurRadius: 18
     property real shadowOpacity: 0.45
@@ -118,9 +120,10 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 21,
+            version: 22,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
+            workspaceIndicatorStyle: workspaceIndicatorStyle,
             shadowEnabled: shadowEnabled,
             shadowBlurRadius: shadowBlurRadius,
             shadowOpacity: shadowOpacity,
@@ -165,7 +168,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 21)
+            if (state.version !== 22)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -173,6 +176,12 @@ Singleton {
                 showEmptyWorkspaces = state.showEmptyWorkspaces;
             else
                 needsMigration = true;
+            if (["circle", "dots"].indexOf(
+                    state.workspaceIndicatorStyle) >= 0) {
+                workspaceIndicatorStyle = state.workspaceIndicatorStyle;
+            } else {
+                needsMigration = true;
+            }
             if (typeof state.shadowEnabled === "boolean")
                 shadowEnabled = state.shadowEnabled;
             else
@@ -356,6 +365,7 @@ Singleton {
     function resetDefaults() {
         showActiveWindowIcon = true;
         showEmptyWorkspaces = true;
+        workspaceIndicatorStyle = "circle";
         shadowEnabled = true;
         shadowBlurRadius = 18;
         shadowOpacity = 0.45;
@@ -401,6 +411,7 @@ Singleton {
 
     onShowActiveWindowIconChanged: scheduleSave()
     onShowEmptyWorkspacesChanged: scheduleSave()
+    onWorkspaceIndicatorStyleChanged: scheduleSave()
     onShadowEnabledChanged: scheduleSave()
     onShadowBlurRadiusChanged: scheduleSave()
     onShadowOpacityChanged: scheduleSave()
@@ -498,6 +509,12 @@ Singleton {
                 root.barCenterAlignment = mode;
         }
 
+        function setWorkspaceIndicatorStyle(style: string): void {
+            if (["circle", "dots"].indexOf(style) >= 0) {
+                root.workspaceIndicatorStyle = style;
+            }
+        }
+
         function setCalendarWeekStart(day: int): void {
             if ([-1, 0, 1, 6].indexOf(day) >= 0)
                 root.calendarWeekStart = day;
@@ -546,6 +563,7 @@ Singleton {
             return JSON.stringify({
                 showActiveWindowIcon: root.showActiveWindowIcon,
                 showEmptyWorkspaces: root.showEmptyWorkspaces,
+                workspaceIndicatorStyle: root.workspaceIndicatorStyle,
                 shadowEnabled: root.shadowEnabled,
                 shadowBlurRadius: root.shadowBlurRadius,
                 shadowOpacity: root.shadowOpacity,
