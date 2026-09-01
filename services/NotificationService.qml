@@ -44,7 +44,11 @@ Singleton {
 
     component NotificationExitTimer: Timer {
         required property string notificationId
-        interval: root.toastExitDuration
+        // Keep the transparent layer alive for two compositor frames after
+        // the card and its blur region have moved off-screen.  Destroying the
+        // last delegate at exactly the animation duration can otherwise race
+        // the final Wayland commit and briefly flash the whole toast area.
+        interval: root.toastExitDuration + 34
         running: true
         repeat: false
         onTriggered: {

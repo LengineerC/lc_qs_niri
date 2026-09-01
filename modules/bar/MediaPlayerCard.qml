@@ -19,7 +19,7 @@ ClippingRectangle {
     implicitHeight: Appearance.px(184)
     radius: Appearance.normalRadius
     color: ShellSettings.barFrostedGlass
-        ? Appearance.withAlpha(Appearance.barGlassBaseColor, 0.72)
+        ? Appearance.withAlpha(Appearance.barGlassBaseColor, 0.36)
         : Appearance.barLayer1
     border.width: MediaService.activePlayer === player ? 2 : 1
     border.color: MediaService.activePlayer === player
@@ -53,7 +53,7 @@ ClippingRectangle {
     Rectangle {
         anchors.fill: parent
         color: ShellSettings.barFrostedGlass
-            ? Appearance.withAlpha(Appearance.barGlassBaseColor, 0.58)
+            ? Appearance.withAlpha(Appearance.barGlassBaseColor, 0.18)
             : Appearance.withAlpha(Appearance.barLayer1, 0.72)
     }
 

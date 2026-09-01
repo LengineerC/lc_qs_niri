@@ -61,14 +61,18 @@ Rectangle {
             value: FastfetchService.shellName || unknownValue
         }
     ]
-    readonly property var paletteColors: [
-        Appearance.primary,
-        Theme.palette.m3secondary,
-        Theme.palette.m3tertiary,
-        Theme.palette.m3success,
-        Theme.palette.m3surfaceVariant,
-        Theme.palette.m3primaryContainer
-    ]
+    readonly property var paletteColors:
+        ShellSettings.barFrostedGlass ? [
+            "#f0ffffff", "#c9ffffff", "#a3ffffff",
+            "#7dffffff", "#57ffffff", "#31ffffff"
+        ] : [
+            Appearance.barPrimary,
+            Theme.palette.m3secondary,
+            Theme.palette.m3tertiary,
+            Theme.palette.m3success,
+            Theme.palette.m3surfaceVariant,
+            Theme.palette.m3primaryContainer
+        ]
 
     function fontSize(baseSize) {
         return Math.max(Appearance.px(8), Math.round(
@@ -84,9 +88,9 @@ Rectangle {
     Layout.fillWidth: true
     Layout.fillHeight: true
     radius: Appearance.normalRadius
-    color: Appearance.layer2
+    color: Appearance.barLayer2
     border.width: 1
-    border.color: Appearance.outline
+    border.color: Appearance.barOutline
     clip: true
 
     ColumnLayout {
@@ -105,12 +109,12 @@ Rectangle {
                 Layout.preferredWidth: Appearance.px(30)
                 Layout.preferredHeight: width
                 radius: Appearance.px(9)
-                color: Appearance.primaryContainer
+                color: Appearance.barPrimaryContainer
 
                 Text {
                     anchors.centerIn: parent
                     text: ">"
-                    color: Appearance.primaryContainerText
+                    color: Appearance.barPrimaryContainerText
                     font {
                         family: Appearance.monospaceFontFamily
                         pixelSize: root.fontSize(14)
@@ -122,7 +126,7 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: "fastfetch"
-                color: Appearance.layer0Text
+                color: Appearance.barLayer0Text
                 elide: Text.ElideRight
                 font {
                     family: Appearance.monospaceFontFamily
@@ -136,9 +140,9 @@ Rectangle {
                 Layout.preferredHeight: width
                 radius: Appearance.fullRadius
                 color: FastfetchService.errorMessage
-                    ? Theme.palette.m3error
+                    ? Appearance.barError
                     : FastfetchService.loading
-                        ? Appearance.tertiary : Appearance.primary
+                        ? Appearance.barTertiary : Appearance.barPrimary
             }
         }
 
@@ -157,16 +161,16 @@ Rectangle {
                     width: root.logoExtent
                     height: width
                     radius: width * 0.3
-                    color: Appearance.layer3
+                    color: Appearance.barLayer3
                     border.width: 1
                     border.color: Appearance.withAlpha(
-                        Appearance.primary, 0.14)
+                        Appearance.barPrimary, 0.14)
 
                     Text {
                         anchors.centerIn: parent
                         anchors.verticalCenterOffset: Appearance.px(1)
                         text: FastfetchService.systemIcon
-                        color: Appearance.primary
+                        color: Appearance.barPrimary
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Math.min(
@@ -185,7 +189,7 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     text: FastfetchService.title
-                    color: Appearance.primary
+                    color: Appearance.barPrimary
                     elide: Text.ElideRight
                     font {
                         family: Appearance.monospaceFontFamily
@@ -197,7 +201,7 @@ Rectangle {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
-                    color: Appearance.outline
+                    color: Appearance.barOutline
                 }
 
                 Repeater {
@@ -216,7 +220,7 @@ Rectangle {
                         Text {
                             Layout.preferredWidth: Appearance.px(16)
                             text: informationRow.modelData.icon
-                            color: Appearance.primary
+                            color: Appearance.barPrimary
                             horizontalAlignment: Text.AlignHCenter
                             font {
                                 family: Appearance.iconFontFamily
@@ -227,7 +231,7 @@ Rectangle {
                         Text {
                             Layout.preferredWidth: Appearance.px(40)
                             text: informationRow.modelData.label + ":"
-                            color: Appearance.layer1Text
+                            color: Appearance.barLayer1Text
                             font {
                                 family: Appearance.monospaceFontFamily
                                 pixelSize: root.fontSize(10)
@@ -238,7 +242,7 @@ Rectangle {
                         Text {
                             Layout.fillWidth: true
                             text: informationRow.modelData.value
-                            color: Appearance.layer0Text
+                            color: Appearance.barLayer0Text
                             elide: Text.ElideRight
                             font {
                                 family: Appearance.monospaceFontFamily

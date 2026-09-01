@@ -15,10 +15,10 @@ Rectangle {
     readonly property string artSource:
         MediaService.artSource(player)
 
-    color: Appearance.layer2
+    color: Appearance.barLayer2
     radius: Appearance.normalRadius
     border.width: 1
-    border.color: Appearance.outline
+    border.color: Appearance.barOutline
     clip: true
 
     Image {
@@ -46,7 +46,10 @@ Rectangle {
 
     Rectangle {
         anchors.fill: parent
-        color: Appearance.withAlpha(Appearance.layer2, 0.5)
+        color: ShellSettings.barFrostedGlass
+            ? Appearance.withAlpha(
+                Appearance.barGlassBaseColor, 0.48)
+            : Appearance.withAlpha(Appearance.barLayer2, 0.5)
     }
 
     ColumnLayout {
@@ -59,7 +62,7 @@ Rectangle {
         Text {
             Layout.fillWidth: true
             text: I18n.tr("media")
-            color: Appearance.subtext
+            color: Appearance.barSubtext
             elide: Text.ElideRight
             font {
                 family: Appearance.fontFamily
@@ -76,7 +79,7 @@ Rectangle {
                     root.player?.trackTitle)
                     || I18n.tr("unknownTitle")
                 : I18n.tr("noMedia")
-            color: Appearance.layer0Text
+            color: Appearance.barLayer0Text
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             font {
@@ -92,7 +95,7 @@ Rectangle {
                 ? String(root.player?.trackArtist
                     || I18n.tr("unknownArtist"))
                 : I18n.tr("noMediaPlaying")
-            color: Appearance.subtext
+            color: Appearance.barSubtext
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             font {
@@ -112,7 +115,7 @@ Rectangle {
                 text: MediaService.formatTime(
                     lockSeekBar.displayValue
                         * Math.max(0, root.player?.length ?? 0))
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 font {
                     family: Appearance.monospaceFontFamily
                     pixelSize: Appearance.smallFontSize
@@ -122,6 +125,7 @@ Rectangle {
             WavySeekBar {
                 id: lockSeekBar
 
+                useBarPalette: true
                 Layout.fillWidth: true
                 implicitHeight: Appearance.px(18)
                 value: MediaService.ratioFor(root.player)
@@ -140,7 +144,7 @@ Rectangle {
             Text {
                 text: MediaService.formatTime(
                     root.player?.length ?? 0)
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 font {
                     family: Appearance.monospaceFontFamily
                     pixelSize: Appearance.smallFontSize
@@ -187,8 +191,8 @@ Rectangle {
         implicitHeight: Appearance.px(36)
         radius: Appearance.fullRadius
         color: primary
-            ? Appearance.primaryContainer
-            : Appearance.layer3
+            ? Appearance.barPrimaryContainer
+            : Appearance.barLayer3
         opacity: enabled ? 1 : 0.45
         scale: buttonArea.pressed ? 0.94 : 1
 
@@ -196,8 +200,8 @@ Rectangle {
             anchors.centerIn: parent
             text: mediaButton.icon
             color: mediaButton.primary
-                ? Appearance.primaryContainerText
-                : Appearance.layer0Text
+                ? Appearance.barPrimaryContainerText
+                : Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.px(17)

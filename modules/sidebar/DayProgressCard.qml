@@ -460,7 +460,10 @@ ClippingRectangle {
                 implicitWidth: periodRow.implicitWidth + Appearance.px(16)
                 implicitHeight: Appearance.px(28)
                 radius: Appearance.fullRadius
-                color: Appearance.withAlpha(Appearance.barLayer1, 0.76)
+                color: ShellSettings.barFrostedGlass
+                    ? Appearance.withAlpha(
+                        Appearance.barGlassBaseColor, 0.62)
+                    : Appearance.withAlpha(Appearance.barLayer1, 0.76)
                 border.width: 1
                 border.color: Appearance.withAlpha(
                     Appearance.barOutline, 0.45)
@@ -498,7 +501,10 @@ ClippingRectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: Appearance.px(58)
             radius: Appearance.px(14)
-            color: Appearance.withAlpha(Appearance.barLayer1, 0.76)
+            color: ShellSettings.barFrostedGlass
+                ? Appearance.withAlpha(
+                    Appearance.barGlassBaseColor, 0.62)
+                : Appearance.withAlpha(Appearance.barLayer1, 0.76)
             border.width: 1
             border.color: Appearance.withAlpha(
                 Appearance.barOutline, 0.38)

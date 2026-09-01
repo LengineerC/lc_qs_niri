@@ -14,6 +14,9 @@ Singleton {
     // circle, dots
     property string workspaceIndicatorStyle: "circle"
     property bool barFrostedGlass: false
+    property bool monochromeAppIcons: true
+    readonly property bool monochromeAppIconsActive:
+        barFrostedGlass && monochromeAppIcons
     property bool shadowEnabled: true
     property int shadowBlurRadius: 18
     property real shadowOpacity: 0.45
@@ -121,11 +124,12 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 23,
+            version: 24,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             workspaceIndicatorStyle: workspaceIndicatorStyle,
             barFrostedGlass: barFrostedGlass,
+            monochromeAppIcons: monochromeAppIcons,
             shadowEnabled: shadowEnabled,
             shadowBlurRadius: shadowBlurRadius,
             shadowOpacity: shadowOpacity,
@@ -170,7 +174,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 23)
+            if (state.version !== 24)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -186,6 +190,10 @@ Singleton {
             }
             if (typeof state.barFrostedGlass === "boolean")
                 barFrostedGlass = state.barFrostedGlass;
+            else
+                needsMigration = true;
+            if (typeof state.monochromeAppIcons === "boolean")
+                monochromeAppIcons = state.monochromeAppIcons;
             else
                 needsMigration = true;
             if (typeof state.shadowEnabled === "boolean")
@@ -373,6 +381,7 @@ Singleton {
         showEmptyWorkspaces = true;
         workspaceIndicatorStyle = "circle";
         barFrostedGlass = false;
+        monochromeAppIcons = true;
         shadowEnabled = true;
         shadowBlurRadius = 18;
         shadowOpacity = 0.45;
@@ -420,6 +429,7 @@ Singleton {
     onShowEmptyWorkspacesChanged: scheduleSave()
     onWorkspaceIndicatorStyleChanged: scheduleSave()
     onBarFrostedGlassChanged: scheduleSave()
+    onMonochromeAppIconsChanged: scheduleSave()
     onShadowEnabledChanged: scheduleSave()
     onShadowBlurRadiusChanged: scheduleSave()
     onShadowOpacityChanged: scheduleSave()
@@ -527,6 +537,10 @@ Singleton {
             root.barFrostedGlass = enabled;
         }
 
+        function setMonochromeAppIcons(enabled: bool): void {
+            root.monochromeAppIcons = enabled;
+        }
+
         function setCalendarWeekStart(day: int): void {
             if ([-1, 0, 1, 6].indexOf(day) >= 0)
                 root.calendarWeekStart = day;
@@ -577,6 +591,7 @@ Singleton {
                 showEmptyWorkspaces: root.showEmptyWorkspaces,
                 workspaceIndicatorStyle: root.workspaceIndicatorStyle,
                 barFrostedGlass: root.barFrostedGlass,
+                monochromeAppIcons: root.monochromeAppIcons,
                 shadowEnabled: root.shadowEnabled,
                 shadowBlurRadius: root.shadowBlurRadius,
                 shadowOpacity: root.shadowOpacity,

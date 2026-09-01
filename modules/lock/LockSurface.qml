@@ -28,7 +28,7 @@ WlSessionLockSurface {
     readonly property real compactRadius: compactSize / 4
     readonly property real panelRadius: Appearance.px(42)
 
-    color: Appearance.layer0
+    color: Appearance.barLayer0
 
     function focusAuth() {
         lockContent.forceAuthFocus();
@@ -67,8 +67,10 @@ WlSessionLockSurface {
 
     Rectangle {
         anchors.fill: parent
-        color: Appearance.withAlpha(
-            Theme.palette.m3scrim, 0.48)
+        color: ShellSettings.barFrostedGlass
+            ? "#5c000000"
+            : Appearance.withAlpha(
+                Theme.palette.m3scrim, 0.48)
     }
 
     MouseArea {
@@ -110,14 +112,17 @@ WlSessionLockSurface {
         rotation: root.containerRotation
         scale: root.containerScale
         clip: true
-        color: Appearance.withAlpha(Appearance.layer0, 0.96)
+        color: ShellSettings.barFrostedGlass
+            ? Appearance.withAlpha(
+                Appearance.barGlassBaseColor, 0.72)
+            : Appearance.withAlpha(Appearance.barLayer0, 0.96)
         border.width: 1
-        border.color: Appearance.layer0Border
+        border.color: Appearance.barLayer0Border
 
         layer.enabled: true
         layer.effect: MultiEffect {
             shadowEnabled: true
-            shadowColor: Appearance.shadow
+            shadowColor: Appearance.barShadow
             shadowBlur: 0.72
             shadowVerticalOffset: Appearance.px(8)
         }
@@ -129,7 +134,7 @@ WlSessionLockSurface {
             text: "󰌾"
             rotation: 0
             opacity: 1
-            color: Appearance.layer0Text
+            color: Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: root.compactSize * 0.48

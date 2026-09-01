@@ -126,7 +126,7 @@ Rectangle {
                 source: root.menuEntry.icon
                 implicitSize: Appearance.px(20)
                 asynchronous: true
-                layer.enabled: ShellSettings.barFrostedGlass
+                layer.enabled: ShellSettings.monochromeAppIconsActive
                 layer.effect: MultiEffect {
                     saturation: -1
                     brightness: 0.12

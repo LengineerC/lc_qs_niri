@@ -392,7 +392,7 @@ Item {
                 sourceSize.height: Appearance.px(20)
                 smooth: true
                 visible: ShellSettings.showActiveWindowIcon && source !== ""
-                layer.enabled: ShellSettings.barFrostedGlass
+                layer.enabled: ShellSettings.monochromeAppIconsActive
                 layer.effect: MultiEffect {
                     saturation: -1
                     brightness: 0.12

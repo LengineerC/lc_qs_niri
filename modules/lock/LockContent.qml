@@ -54,7 +54,7 @@ Item {
                     Text {
                         Layout.fillWidth: true
                         text: I18n.tr("weather")
-                        color: Appearance.primary
+                        color: Appearance.barPrimary
                         horizontalAlignment: Text.AlignHCenter
                         elide: Text.ElideRight
                         font {
@@ -72,7 +72,7 @@ Item {
                         Text {
                             Layout.preferredWidth: Appearance.px(58)
                             text: WeatherService.currentIcon
-                            color: Appearance.primary
+                            color: Appearance.barPrimary
                             horizontalAlignment: Text.AlignHCenter
                             font {
                                 family: Appearance.iconFontFamily
@@ -92,7 +92,7 @@ Item {
                                         WeatherService.current
                                             .weatherCode)
                                     : I18n.tr("weatherUnavailable")
-                                color: Appearance.layer0Text
+                                color: Appearance.barLayer0Text
                                 elide: Text.ElideRight
                                 font {
                                     family: Appearance.fontFamily
@@ -109,7 +109,7 @@ Item {
                                             WeatherService.current
                                                 .humidity)
                                         : "--%")
-                                color: Appearance.subtext
+                                color: Appearance.barSubtext
                                 elide: Text.ElideRight
                                 font {
                                     family: Appearance.fontFamily
@@ -125,7 +125,7 @@ Item {
                             Text {
                                 Layout.fillWidth: true
                                 text: WeatherService.currentTemperature
-                                color: Appearance.primary
+                                color: Appearance.barPrimary
                                 horizontalAlignment: Text.AlignRight
                                 font {
                                     family: Appearance.fontFamily
@@ -143,7 +143,7 @@ Item {
                                                 WeatherService.current
                                                     .apparentTemperature)
                                         : "--°C")
-                                color: Appearance.subtext
+                                color: Appearance.barSubtext
                                 horizontalAlignment: Text.AlignRight
                                 elide: Text.ElideLeft
                                 font {
@@ -176,7 +176,7 @@ Item {
                                     Layout.fillWidth: true
                                     text: WeatherService.timeFromIso(
                                         forecastItem.modelData.time)
-                                    color: Appearance.subtext
+                                    color: Appearance.barSubtext
                                     horizontalAlignment: Text.AlignHCenter
                                     font {
                                         family: Appearance.fontFamily
@@ -189,7 +189,7 @@ Item {
                                     text: WeatherService.icon(
                                         forecastItem.modelData.weatherCode,
                                         forecastItem.modelData.isDay)
-                                    color: Appearance.layer0Text
+                                    color: Appearance.barLayer0Text
                                     horizontalAlignment: Text.AlignHCenter
                                     verticalAlignment: Text.AlignVCenter
                                     font {
@@ -202,7 +202,7 @@ Item {
                                     Layout.fillWidth: true
                                     text: WeatherService.formatTemperature(
                                         forecastItem.modelData.temperature)
-                                    color: Appearance.layer1Text
+                                    color: Appearance.barLayer1Text
                                     horizontalAlignment: Text.AlignHCenter
                                     font {
                                         family: Appearance.fontFamily
@@ -247,7 +247,7 @@ Item {
                 Text {
                     text: I18n.locale.toString(
                         root.now, "HH")
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Math.min(
@@ -259,7 +259,7 @@ Item {
 
                 Text {
                     text: ":"
-                    color: Appearance.primary
+                    color: Appearance.barPrimary
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Math.min(
@@ -272,7 +272,7 @@ Item {
                 Text {
                     text: I18n.locale.toString(
                         root.now, "mm")
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Math.min(
@@ -287,7 +287,7 @@ Item {
                 Layout.fillWidth: true
                 text: I18n.locale.toString(
                     root.now, "dddd, MMMM d")
-                color: Appearance.tertiary
+                color: Appearance.barTertiary
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
                 font {
@@ -309,7 +309,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 text: UserService.displayName
-                color: Appearance.layer0Text
+                color: Appearance.barLayer0Text
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
                 font {
@@ -329,13 +329,13 @@ Item {
                 implicitHeight: Appearance.px(58)
                 radius: Appearance.fullRadius
                 color: passwordInput.activeFocus
-                    ? Appearance.layer3 : Appearance.layer2
+                    ? Appearance.barLayer3 : Appearance.barLayer2
                 border.width: passwordInput.activeFocus ? 2 : 1
                 border.color: root.context?.showFailure
-                    ? Theme.palette.m3error
+                    ? Appearance.barError
                     : passwordInput.activeFocus
-                        ? Appearance.primary
-                        : Appearance.outline
+                        ? Appearance.barPrimary
+                        : Appearance.barOutline
 
                 RowLayout {
                     anchors {
@@ -351,8 +351,8 @@ Item {
                         text: root.context?.unlockInProgress
                             ? "󰔟" : "󰌾"
                         color: root.context?.showFailure
-                            ? Theme.palette.m3error
-                            : Appearance.primary
+                            ? Appearance.barError
+                            : Appearance.barPrimary
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Appearance.px(18)
@@ -373,10 +373,10 @@ Item {
                         id: passwordInput
 
                         Layout.fillWidth: true
-                        color: Appearance.layer0Text
-                        selectionColor: Appearance.primary
+                        color: Appearance.barLayer0Text
+                        selectionColor: Appearance.barPrimary
                         selectedTextColor:
-                            Theme.palette.m3onPrimary
+                            Appearance.barOnPrimary
                         echoMode: TextInput.Password
                         passwordCharacter: "●"
                         passwordMaskDelay: 0
@@ -407,7 +407,7 @@ Item {
                             }
                             visible: !passwordInput.text
                             text: I18n.tr("enterPassword")
-                            color: Appearance.subtext
+                            color: Appearance.barSubtext
                             verticalAlignment: Text.AlignVCenter
                             elide: Text.ElideRight
                             font {
@@ -422,16 +422,16 @@ Item {
                         implicitHeight: Appearance.px(43)
                         radius: Appearance.fullRadius
                         color: unlockArea.containsMouse
-                            ? Appearance.primary
-                            : Appearance.primaryContainer
+                            ? Appearance.barPrimary
+                            : Appearance.barPrimaryContainer
                         scale: unlockArea.pressed ? 0.92 : 1
 
                         Text {
                             anchors.centerIn: parent
                             text: "󰌑"
                             color: unlockArea.containsMouse
-                                ? Theme.palette.m3onPrimary
-                                : Appearance.primaryContainerText
+                                ? Appearance.barOnPrimary
+                                : Appearance.barPrimaryContainerText
                             font {
                                 family: Appearance.iconFontFamily
                                 pixelSize: Appearance.px(18)
@@ -484,8 +484,8 @@ Item {
                         ? I18n.tr("incorrectPassword")
                         : ""
                 color: root.context?.showFailure
-                    ? Theme.palette.m3error
-                    : Appearance.subtext
+                    ? Appearance.barError
+                    : Appearance.barSubtext
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
                 font {
@@ -497,7 +497,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 text: I18n.tr("unlockHint")
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 opacity: 0.72
                 horizontalAlignment: Text.AlignHCenter
                 font {
@@ -535,7 +535,7 @@ Item {
                     Text {
                         Layout.fillWidth: true
                         text: I18n.tr("systemResources")
-                        color: Appearance.layer0Text
+                        color: Appearance.barLayer0Text
                         elide: Text.ElideRight
                         font {
                             family: Appearance.fontFamily
@@ -662,10 +662,10 @@ Item {
     }
 
     component LockCard: Rectangle {
-        color: Appearance.layer2
+        color: Appearance.barLayer2
         radius: Appearance.normalRadius
         border.width: 1
-        border.color: Appearance.outline
+        border.color: Appearance.barOutline
         clip: true
     }
 
@@ -678,7 +678,7 @@ Item {
 
         Text {
             text: icon
-            color: Appearance.primary
+            color: Appearance.barPrimary
             font {
                 family: Appearance.iconFontFamily
                 pixelSize: Appearance.px(15)
@@ -688,7 +688,7 @@ Item {
         Text {
             Layout.fillWidth: true
             text: label
-            color: Appearance.subtext
+            color: Appearance.barSubtext
             elide: Text.ElideRight
             font {
                 family: Appearance.fontFamily
@@ -698,7 +698,7 @@ Item {
 
         Text {
             text: value
-            color: Appearance.layer0Text
+            color: Appearance.barLayer0Text
             font {
                 family: Appearance.fontFamily
                 pixelSize: Appearance.smallFontSize
@@ -723,7 +723,7 @@ Item {
 
             Text {
                 text: gauge.icon
-                color: Appearance.primary
+                color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(15)
@@ -733,7 +733,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 text: gauge.label
-                color: Appearance.subtext
+                color: Appearance.barSubtext
                 elide: Text.ElideRight
                 font {
                     family: Appearance.fontFamily
@@ -743,7 +743,7 @@ Item {
 
             Text {
                 text: gauge.valueText
-                color: Appearance.layer0Text
+                color: Appearance.barLayer0Text
                 font {
                     family: Appearance.fontFamily
                     pixelSize: Appearance.smallFontSize
@@ -756,14 +756,14 @@ Item {
             Layout.fillWidth: true
             implicitHeight: Appearance.px(6)
             radius: Appearance.fullRadius
-            color: Appearance.layer3
+            color: Appearance.barLayer3
 
             Rectangle {
                 width: parent.width * Math.max(
                     0, Math.min(1, gauge.value))
                 height: parent.height
                 radius: parent.radius
-                color: Appearance.primary
+                color: Appearance.barPrimary
 
                 Behavior on width {
                     NumberAnimation {
@@ -784,9 +784,9 @@ Item {
 
         implicitHeight: Appearance.px(40)
         radius: Appearance.px(10)
-        color: Appearance.layer3
+        color: Appearance.barLayer3
         border.width: 1
-        border.color: Appearance.layer0Border
+        border.color: Appearance.barLayer0Border
 
         RowLayout {
             anchors {
@@ -798,7 +798,7 @@ Item {
 
             Text {
                 text: networkRate.icon
-                color: Appearance.primary
+                color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(16)
@@ -812,7 +812,7 @@ Item {
                 Text {
                     Layout.fillWidth: true
                     text: networkRate.label
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     elide: Text.ElideRight
                     font {
                         family: Appearance.fontFamily
@@ -823,7 +823,7 @@ Item {
                 Text {
                     Layout.fillWidth: true
                     text: networkRate.value
-                    color: Appearance.layer0Text
+                    color: Appearance.barLayer0Text
                     elide: Text.ElideRight
                     font {
                         family: Appearance.monospaceFontFamily

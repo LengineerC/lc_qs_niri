@@ -13,10 +13,10 @@ Rectangle {
     readonly property int unreadCount:
         NotificationService.unreadCount
 
-    color: Appearance.layer2
+    color: Appearance.barLayer2
     radius: Appearance.normalRadius
     border.width: 1
-    border.color: Appearance.outline
+    border.color: Appearance.barOutline
     clip: true
 
     function formatTime(timestamp) {
@@ -42,7 +42,7 @@ Rectangle {
 
             Text {
                 text: "󰂚"
-                color: Appearance.primary
+                color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
                     pixelSize: Appearance.px(18)
@@ -55,7 +55,7 @@ Rectangle {
                     ? I18n.tr("newNotificationCount")
                         .arg(root.unreadCount)
                     : I18n.tr("notifications")
-                color: Appearance.layer0Text
+                color: Appearance.barLayer0Text
                 elide: Text.ElideRight
                 font {
                     family: Appearance.fontFamily
@@ -69,7 +69,7 @@ Rectangle {
                     + Appearance.px(14)
                 implicitHeight: Appearance.px(28)
                 radius: Appearance.fullRadius
-                color: Appearance.primaryContainer
+                color: Appearance.barPrimaryContainer
 
                 RowLayout {
                     id: privacyRow
@@ -78,7 +78,7 @@ Rectangle {
 
                     Text {
                         text: "󰌾"
-                        color: Appearance.primaryContainerText
+                        color: Appearance.barPrimaryContainerText
                         font {
                             family: Appearance.iconFontFamily
                             pixelSize: Appearance.px(12)
@@ -87,7 +87,7 @@ Rectangle {
 
                     Text {
                         text: I18n.tr("private")
-                        color: Appearance.primaryContainerText
+                        color: Appearance.barPrimaryContainerText
                         font {
                             family: Appearance.fontFamily
                             pixelSize: Appearance.smallFontSize
@@ -101,7 +101,7 @@ Rectangle {
         Text {
             Layout.fillWidth: true
             text: I18n.tr("notificationContentHidden")
-            color: Appearance.subtext
+            color: Appearance.barSubtext
             wrapMode: Text.Wrap
             font {
                 family: Appearance.fontFamily
@@ -121,7 +121,7 @@ Rectangle {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰂛"
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     font {
                         family: Appearance.iconFontFamily
                         pixelSize: Appearance.px(42)
@@ -131,7 +131,7 @@ Rectangle {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: I18n.tr("noUnreadNotifications")
-                    color: Appearance.subtext
+                    color: Appearance.barSubtext
                     font {
                         family: Appearance.fontFamily
                         pixelSize: Appearance.fontSize
@@ -154,9 +154,9 @@ Rectangle {
                     width: ListView.view.width
                     height: Appearance.px(58)
                     radius: Appearance.smallRadius
-                    color: Appearance.layer3
+                    color: Appearance.barLayer3
                     border.width: 1
-                    border.color: Appearance.outline
+                    border.color: Appearance.barOutline
 
                     RowLayout {
                         anchors {
@@ -169,12 +169,12 @@ Rectangle {
                             implicitWidth: Appearance.px(36)
                             implicitHeight: Appearance.px(36)
                             radius: Appearance.px(10)
-                            color: Appearance.primaryContainer
+                            color: Appearance.barPrimaryContainer
 
                             Text {
                                 anchors.centerIn: parent
                                 text: "󰌾"
-                                color: Appearance.primaryContainerText
+                                color: Appearance.barPrimaryContainerText
                                 font {
                                     family: Appearance.iconFontFamily
                                     pixelSize: Appearance.px(16)
@@ -191,7 +191,7 @@ Rectangle {
                                 text: notificationDelegate.modelData
                                     ?.appName
                                     || I18n.tr("unknownApplication")
-                                color: Appearance.layer0Text
+                                color: Appearance.barLayer0Text
                                 elide: Text.ElideRight
                                 font {
                                     family: Appearance.fontFamily
@@ -202,7 +202,7 @@ Rectangle {
 
                             Text {
                                 text: I18n.tr("newNotification")
-                                color: Appearance.subtext
+                                color: Appearance.barSubtext
                                 font {
                                     family: Appearance.fontFamily
                                     pixelSize: Appearance.smallFontSize
@@ -214,7 +214,7 @@ Rectangle {
                             text: root.formatTime(
                                 notificationDelegate.modelData
                                     ?.timestamp)
-                            color: Appearance.subtext
+                            color: Appearance.barSubtext
                             font {
                                 family: Appearance.fontFamily
                                 pixelSize: Appearance.smallFontSize

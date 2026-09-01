@@ -22,13 +22,13 @@ Item {
         ShellSettings.workspaceIndicatorStyle
     readonly property bool dotIndicator: indicatorStyle === "dots"
     readonly property real delegateWidth: dotIndicator
-        ? Appearance.px(22) : Appearance.px(26)
+        ? Appearance.px(24) : Appearance.px(26)
     readonly property real activeIndicatorWidth:
         indicatorStyle === "circle" ? Appearance.px(22)
-        : Appearance.px(16)
+        : Appearance.px(20)
     readonly property real activeIndicatorHeight:
         indicatorStyle === "circle" ? Appearance.px(22)
-        : Appearance.px(7)
+        : Appearance.px(9)
 
     implicitWidth: workspaceRow.implicitWidth + padding * 2
     implicitHeight: Appearance.barHeight
@@ -301,10 +301,9 @@ Item {
                     + (root.hoverItem.width - width) / 2
                 : 0
             anchors.verticalCenter: parent.verticalCenter
-            width: root.dotIndicator
-                ? Appearance.px(20) : Appearance.px(22)
+            width: Appearance.px(22)
             height: root.dotIndicator
-                ? Appearance.px(16) : Appearance.px(22)
+                ? Appearance.px(18) : Appearance.px(22)
             radius: Appearance.fullRadius
             color: root.dotIndicator && root.hoverItem?.selected
                 ? Appearance.withAlpha(Appearance.barLayer0Text, 0.08)
@@ -405,8 +404,8 @@ Item {
 
                         visible: root.dotIndicator
                         anchors.centerIn: parent
-                        width: Appearance.px(6)
-                        height: Appearance.px(6)
+                        width: Appearance.px(8)
+                        height: Appearance.px(8)
                         radius: Appearance.fullRadius
                         color: workspaceDelegate.model.isUrgent
                             ? Appearance.barTertiary

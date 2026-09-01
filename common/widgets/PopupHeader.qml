@@ -75,7 +75,7 @@ ColumnLayout {
                 implicitSize: root.iconSize
                 asynchronous: true
                 layer.enabled: root.monochromeIcon
-                    && ShellSettings.barFrostedGlass
+                    && ShellSettings.monochromeAppIconsActive
                 layer.effect: MultiEffect {
                     saturation: -1
                     brightness: 0.12

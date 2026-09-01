@@ -383,7 +383,7 @@ Item {
                                     applicationDelegate.modelData.icon,
                                     "application-x-executable")
                                 layer.enabled:
-                                    ShellSettings.barFrostedGlass
+                                    ShellSettings.monochromeAppIconsActive
                                 layer.effect: MultiEffect {
                                     saturation: -1
                                     brightness: 0.12

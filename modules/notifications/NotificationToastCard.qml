@@ -16,6 +16,7 @@ Item {
 
     implicitWidth: Appearance.px(400)
     implicitHeight: toastSurface.implicitHeight + Appearance.px(20)
+    readonly property real blurSurfaceHeight: toastSurface.height
     property bool entered: false
     property bool componentReady: false
     property bool animateTransitions: false
@@ -79,12 +80,9 @@ Item {
         }
         implicitHeight: toastContent.implicitHeight + Appearance.px(22)
         radius: Appearance.normalRadius
-        // This window deliberately does not request compositor blur: Niri
-        // expands that effect into the right-side transparent window margin.
-        // A denser glass tint keeps notification text readable on wallpaper.
         color: ShellSettings.barFrostedGlass
             ? Appearance.withAlpha(
-                Appearance.barGlassBaseColor, 0.84)
+                Appearance.barGlassBaseColor, 0.62)
             : Appearance.layer1
         border.width: 1
         border.color: root.notificationEntry.urgency === 2
@@ -94,6 +92,7 @@ Item {
         // after movement has settled so a burst cannot allocate and blur many
         // short-lived textures on every animation frame.
         layer.enabled: ShellSettings.shadowEnabled
+            && !ShellSettings.barFrostedGlass
             && root.showing && !root.transitionRunning
         layer.effect: MultiEffect {
             shadowEnabled: true
@@ -202,7 +201,11 @@ Item {
     }
 
     opacity: showing ? 1 : 0
-    x: showing ? 0 : Appearance.px(90)
+    // Closing cards leave the layer surface completely. Their numeric blur
+    // region follows this x value, so it is already off-screen before the
+    // delegate and compositor region are destroyed.
+    x: showing ? 0 : notificationEntry.closing
+        ? root.width + Appearance.px(24) : Appearance.px(90)
     scale: showing ? 1 : 0.96
 
     Behavior on opacity {

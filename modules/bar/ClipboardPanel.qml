@@ -143,23 +143,34 @@ Item {
             subtitle: I18n.tr("clipboardHistoryHint")
 
             Rectangle {
-                implicitWidth: clearLabel.implicitWidth + Appearance.px(18)
-                implicitHeight: Appearance.px(28)
-                radius: Appearance.fullRadius
+                implicitWidth: clearRow.implicitWidth + Appearance.px(16)
+                implicitHeight: Appearance.px(30)
+                radius: Appearance.px(9)
                 color: clearMouse.containsMouse
-                    ? panelPalette.errorContainer
-                    : Appearance.withAlpha(
-                        panelPalette.errorContainer, 0)
+                    ? Appearance.barLayer1Active
+                    : Appearance.barLayer1
+                border.width: 1
+                border.color: Appearance.barOutline
 
-
-                PanelText {
-                    id: clearLabel
-
+                RowLayout {
+                    id: clearRow
                     anchors.centerIn: parent
-                    text: "󰃢  " + I18n.tr("clear")
-                    color: clearMouse.containsMouse
-                        ? panelPalette.onErrorContainer : panelPalette.subtext
-                    font.pixelSize: Appearance.smallFontSize
+                    spacing: Appearance.px(5)
+
+                    Text {
+                        text: "󰃢"
+                        color: Appearance.barError
+                        font {
+                            family: Appearance.iconFontFamily
+                            pixelSize: Appearance.px(14)
+                        }
+                    }
+
+                    PanelText {
+                        text: I18n.tr("clear")
+                        color: Appearance.barError
+                        font.pixelSize: Appearance.smallFontSize
+                    }
                 }
 
                 MouseArea {
@@ -172,6 +183,8 @@ Item {
                         ? Qt.PointingHandCursor : Qt.ArrowCursor
                     onClicked: ClipboardService.clearHistory()
                 }
+
+                opacity: clearMouse.enabled ? 1 : 0.4
 
                 Behavior on color {
                     ColorAnimation { duration: Appearance.fastDuration }
