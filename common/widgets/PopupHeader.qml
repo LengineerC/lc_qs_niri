@@ -74,6 +74,9 @@ ColumnLayout {
                 source: root.iconSource
                 implicitSize: root.iconSize
                 asynchronous: true
+                opacity: root.monochromeIcon
+                        && ShellSettings.monochromeAppIconsActive
+                    ? Appearance.monochromeAppIconOpacity : 1
                 layer.enabled: root.monochromeIcon
                     && ShellSettings.monochromeAppIconsActive
                 layer.effect: MultiEffect {

@@ -760,10 +760,8 @@ Item {
                                     I18n.tr("searchProcesses")
                                 color: panelPalette.layer0Text
                                 placeholderTextColor: panelPalette.subtext
-                                selectionColor:
-                                    panelPalette.primaryContainer
-                                selectedTextColor:
-                                    panelPalette.primaryContainerText
+                                selectionColor: panelPalette.primary
+                                selectedTextColor: panelPalette.onPrimary
                                 selectByMouse: true
                                 background: null
                                 font {
@@ -1006,6 +1004,11 @@ Item {
                                                         .desktopEntry.icon,
                                                     "application-x-executable")
                                                 : ""
+                                            opacity: ShellSettings
+                                                    .monochromeAppIconsActive
+                                                ? Appearance
+                                                    .monochromeAppIconOpacity
+                                                : 1
                                             layer.enabled:
                                                 ShellSettings
                                                     .monochromeAppIconsActive

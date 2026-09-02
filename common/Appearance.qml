@@ -12,6 +12,7 @@ Singleton {
     readonly property color barGlassBaseColor: "#080a0d"
     readonly property real barGlassTintOpacity: 0.68
     readonly property real popupGlassTintOpacity: 0.18
+    readonly property real monochromeAppIconOpacity: 0.75
     readonly property color barSurfaceBaseColor:
         ShellSettings.barFrostedGlass
             ? barGlassBaseColor : barBgColor

@@ -11,7 +11,32 @@ Scope {
         id: managedWindow
 
         visible: false
-        color: Appearance.layer2
+        color: "transparent"
+
+        Rectangle {
+            anchors.fill: parent
+            z: -100
+            color: ShellSettings.barFrostedGlass
+                ? Appearance.withAlpha(
+                    Appearance.barGlassBaseColor, 0.66)
+                : Appearance.layer2
+            border.width: 1
+            border.color: ShellSettings.barFrostedGlass
+                ? Appearance.barLayer0Border
+                : Appearance.layer0Border
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: Appearance.spatialDuration
+                }
+            }
+
+            Behavior on border.color {
+                ColorAnimation {
+                    duration: Appearance.spatialDuration
+                }
+            }
+        }
 
         function openWindow() {
             show();
@@ -51,7 +76,7 @@ Scope {
         ClipboardPanel {
             anchors.fill: parent
             visible: clipboardWindow.visible
-            useBarPalette: false
+            useBarPalette: ShellSettings.barFrostedGlass
             onCloseRequested: clipboardWindow.closeWindow()
         }
 
@@ -96,7 +121,7 @@ Scope {
         ResourcePanel {
             anchors.fill: parent
             active: systemMonitorWindow.visible
-            useBarPalette: false
+            useBarPalette: ShellSettings.barFrostedGlass
             onCloseRequested: systemMonitorWindow.closeWindow()
         }
 

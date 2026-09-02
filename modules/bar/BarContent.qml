@@ -392,6 +392,8 @@ Item {
                 sourceSize.height: Appearance.px(20)
                 smooth: true
                 visible: ShellSettings.showActiveWindowIcon && source !== ""
+                opacity: ShellSettings.monochromeAppIconsActive
+                    ? Appearance.monochromeAppIconOpacity : 1
                 layer.enabled: ShellSettings.monochromeAppIconsActive
                 layer.effect: MultiEffect {
                     saturation: -1

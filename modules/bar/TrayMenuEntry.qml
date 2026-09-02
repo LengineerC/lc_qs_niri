@@ -129,6 +129,8 @@ Rectangle {
                 source: root.menuEntry.icon
                 implicitSize: Appearance.px(20)
                 asynchronous: true
+                opacity: ShellSettings.monochromeAppIconsActive
+                    ? Appearance.monochromeAppIconOpacity : 1
                 layer.enabled: ShellSettings.monochromeAppIconsActive
                 layer.effect: MultiEffect {
                     saturation: -1

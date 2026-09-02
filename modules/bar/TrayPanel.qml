@@ -188,6 +188,8 @@ Item {
                                 cache: true
                                 retainWhileLoading: true
                                 smooth: true
+                                opacity: ShellSettings.monochromeAppIconsActive
+                                    ? Appearance.monochromeAppIconOpacity : 1
                                 layer.enabled:
                                     ShellSettings.monochromeAppIconsActive
                                 layer.effect: MultiEffect {

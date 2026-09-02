@@ -226,8 +226,8 @@ Item {
                     placeholderText: I18n.tr("searchClipboard")
                     color: panelPalette.layer0Text
                     placeholderTextColor: panelPalette.subtext
-                    selectionColor: panelPalette.primaryContainer
-                    selectedTextColor: panelPalette.primaryContainerText
+                    selectionColor: panelPalette.primary
+                    selectedTextColor: panelPalette.onPrimary
                     selectByMouse: true
                     background: null
                     font {

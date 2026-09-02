@@ -382,6 +382,8 @@ Item {
                                 source: Quickshell.iconPath(
                                     applicationDelegate.modelData.icon,
                                     "application-x-executable")
+                                opacity: ShellSettings.monochromeAppIconsActive
+                                    ? Appearance.monochromeAppIconOpacity : 1
                                 layer.enabled:
                                     ShellSettings.monochromeAppIconsActive
                                 layer.effect: MultiEffect {
