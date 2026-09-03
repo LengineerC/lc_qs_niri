@@ -3,11 +3,12 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
+import Quickshell.Widgets
 import qs.common
 import qs.modules.bar
 import qs.services
 
-Rectangle {
+ClippingRectangle {
     id: root
 
     readonly property var player: MediaService.activePlayer
@@ -19,7 +20,6 @@ Rectangle {
     radius: Appearance.normalRadius
     border.width: 1
     border.color: Appearance.barOutline
-    clip: true
 
     Image {
         id: cover
