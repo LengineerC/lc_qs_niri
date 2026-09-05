@@ -279,7 +279,6 @@ Item {
             x: 0
             y: root.connectorTop
             visible: ShellSettings.barFrostedGlass
-                && root.effectsOpacity >= 0.999
             implicitSize: Appearance.cornerSize
             layerEnabled: false
             color: Appearance.barSurfaceBaseColor
@@ -290,7 +289,6 @@ Item {
             x: parent.width - width
             y: root.connectorTop
             visible: ShellSettings.barFrostedGlass
-                && root.effectsOpacity >= 0.999
             implicitSize: Appearance.cornerSize
             layerEnabled: false
             color: Appearance.barSurfaceBaseColor

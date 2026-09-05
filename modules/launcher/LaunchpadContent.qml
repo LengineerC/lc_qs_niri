@@ -163,108 +163,160 @@ Item {
                 }
             }
 
-            Rectangle {
+            Item {
                 Layout.fillWidth: true
                 implicitHeight: Appearance.px(48)
-                radius: Appearance.smallRadius
-                // Match the search field in the launcher panel opened by a
-                // left click on the Bar's system icon.
-                color: Appearance.barLayer1
-                border.width: searchInput.activeFocus ? 1 : 0
-                border.color: Appearance.barPrimary
 
-                RowLayout {
-                    anchors {
-                        fill: parent
-                        leftMargin: Appearance.px(16)
-                        rightMargin: Appearance.px(10)
-                    }
-                    spacing: Appearance.px(9)
+                Rectangle {
+                    id: searchField
 
-                    AppText {
-                        text: "󰍉"
-                        color: searchInput.activeFocus
-                            ? Appearance.barPrimary : Appearance.barSubtext
-                        font {
-                            family: Appearance.iconFontFamily
-                            weight: Font.Normal
-                            pixelSize: Appearance.px(18)
+                    readonly property bool expanded:
+                        searchInput.text.length > 0
+
+                    anchors.centerIn: parent
+                    width: expanded
+                        ? parent.width
+                        : Math.min(parent.width, Appearance.px(280))
+                    height: expanded
+                        ? Appearance.px(48) : Appearance.px(40)
+                    radius: Appearance.smallRadius
+                    clip: true
+                    // Match the search field in the launcher panel opened by
+                    // a left click on the Bar's system icon.
+                    color: Appearance.barLayer1
+                    border.width: searchInput.activeFocus ? 1 : 0
+                    border.color: Appearance.barPrimary
+
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: Appearance.spatialDuration
+                            easing.type: Easing.OutCubic
                         }
                     }
 
-                    AppTextField {
-                        id: searchInput
-
-                        Layout.fillWidth: true
-                        padding: 0
-                        placeholderText: I18n.tr("searchApplications")
-                        color: Appearance.barLayer0Text
-                        placeholderTextColor: Appearance.barSubtext
-                        selectionColor: Appearance.barPrimaryContainer
-                        selectedTextColor: Appearance.barPrimaryContainerText
-                        selectByMouse: true
-                        background: null
-                        font {
-                            family: Appearance.fontFamily
-                            pixelSize: Appearance.fontSize
-                        }
-
-                        Keys.onPressed: event => {
-                            if (event.key === Qt.Key_Right) {
-                                root.moveSelection(1);
-                                event.accepted = true;
-                            } else if (event.key === Qt.Key_Left) {
-                                root.moveSelection(-1);
-                                event.accepted = true;
-                            } else if (event.key === Qt.Key_Down) {
-                                root.moveSelection(root.gridColumns);
-                                event.accepted = true;
-                            } else if (event.key === Qt.Key_Up) {
-                                root.moveSelection(-root.gridColumns);
-                                event.accepted = true;
-                            } else if (event.key === Qt.Key_PageDown) {
-                                root.moveSelection(root.gridColumns * 3);
-                                event.accepted = true;
-                            } else if (event.key === Qt.Key_PageUp) {
-                                root.moveSelection(-root.gridColumns * 3);
-                                event.accepted = true;
-                            } else if (event.key === Qt.Key_Return
-                                    || event.key === Qt.Key_Enter) {
-                                root.launchCurrent();
-                                event.accepted = true;
-                            } else if (event.key === Qt.Key_Escape) {
-                                root.closeRequested();
-                                event.accepted = true;
-                            }
+                    Behavior on height {
+                        NumberAnimation {
+                            duration: Appearance.fastDuration
+                            easing.type: Easing.OutCubic
                         }
                     }
 
-                    Rectangle {
-                        visible: searchInput.text.length > 0
-                        implicitWidth: Appearance.px(28)
-                        implicitHeight: Appearance.px(28)
-                        radius: Appearance.fullRadius
-                        color: clearArea.containsMouse
-                            ? Appearance.barLayer1Active : "transparent"
+                    RowLayout {
+                        anchors {
+                            fill: parent
+                            leftMargin: Appearance.px(16)
+                            rightMargin: Appearance.px(10)
+                        }
+                        spacing: Appearance.px(9)
 
                         AppText {
-                            anchors.centerIn: parent
-                            text: "󰅖"
-                            color: Appearance.barLayer1Text
+                            text: "󰍉"
+                            color: searchInput.activeFocus
+                                ? Appearance.barPrimary
+                                : Appearance.barSubtext
                             font {
                                 family: Appearance.iconFontFamily
                                 weight: Font.Normal
-                                pixelSize: Appearance.px(13)
+                                pixelSize: Appearance.px(18)
                             }
                         }
 
-                        MouseArea {
-                            id: clearArea
+                        AppTextField {
+                            id: searchInput
 
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: searchInput.clear()
+                            Layout.fillWidth: true
+                            padding: 0
+                            placeholderText: I18n.tr("searchApplications")
+                            color: Appearance.barLayer0Text
+                            placeholderTextColor: Appearance.barSubtext
+                            selectionColor: Appearance.barPrimaryContainer
+                            selectedTextColor:
+                                Appearance.barPrimaryContainerText
+                            selectByMouse: true
+                            cursorDelegate: Rectangle {
+                                id: searchCursor
+
+                                width: Appearance.px(1)
+                                color: Appearance.barPrimary
+                                visible: searchField.expanded
+                                    && searchInput.activeFocus
+                                opacity: 1
+
+                                Timer {
+                                    interval: 500
+                                    running: searchCursor.visible
+                                    repeat: true
+                                    onTriggered: searchCursor.opacity =
+                                        searchCursor.opacity > 0 ? 0 : 1
+                                    onRunningChanged: {
+                                        if (running)
+                                            searchCursor.opacity = 1;
+                                    }
+                                }
+                            }
+                            background: null
+                            font {
+                                family: Appearance.fontFamily
+                                pixelSize: Appearance.fontSize
+                            }
+
+                            Keys.onPressed: event => {
+                                if (event.key === Qt.Key_Right) {
+                                    root.moveSelection(1);
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_Left) {
+                                    root.moveSelection(-1);
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_Down) {
+                                    root.moveSelection(root.gridColumns);
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_Up) {
+                                    root.moveSelection(-root.gridColumns);
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_PageDown) {
+                                    root.moveSelection(root.gridColumns * 3);
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_PageUp) {
+                                    root.moveSelection(-root.gridColumns * 3);
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_Return
+                                        || event.key === Qt.Key_Enter) {
+                                    root.launchCurrent();
+                                    event.accepted = true;
+                                } else if (event.key === Qt.Key_Escape) {
+                                    root.closeRequested();
+                                    event.accepted = true;
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            visible: searchInput.text.length > 0
+                            implicitWidth: Appearance.px(28)
+                            implicitHeight: Appearance.px(28)
+                            radius: Appearance.fullRadius
+                            color: clearArea.containsMouse
+                                ? Appearance.barLayer1Active : "transparent"
+
+                            AppText {
+                                anchors.centerIn: parent
+                                text: "󰅖"
+                                color: Appearance.barLayer1Text
+                                font {
+                                    family: Appearance.iconFontFamily
+                                    weight: Font.Normal
+                                    pixelSize: Appearance.px(13)
+                                }
+                            }
+
+                            MouseArea {
+                                id: clearArea
+
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: searchInput.clear()
+                            }
                         }
                     }
                 }

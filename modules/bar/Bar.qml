@@ -60,16 +60,19 @@ Scope {
             required property ShellScreen modelData
             // Translate the Bar body out of view without changing the stable
             // layer-shell geometry or exclusive zone.
-            readonly property real hiddenOffset: -Appearance.barHeight
-            // The Bar blur follows its visible slide and turns off at the
-            // endpoint. Connector regions need to turn off immediately:
-            // their translated position is the overview's top edge.
+            // Retract the complete silhouette. The connector corners extend
+            // below the Bar, so moving only by barHeight would leave them
+            // visible at the top edge after the animation finishes.
+            readonly property real hiddenOffset:
+                -(Appearance.barHeight + Appearance.cornerSize)
+            // Keep every part of the glass silhouette active while it slides.
+            // The blur is disabled only after the complete shape is offscreen.
             readonly property bool glassEffectActive:
                 ShellSettings.barFrostedGlass
                     && NiriService.barRetractionProgress < 0.999
             readonly property bool connectorGlassEffectActive:
                 ShellSettings.barFrostedGlass
-                    && NiriService.barRetractionProgress <= 0.001
+                    && NiriService.barRetractionProgress < 0.999
 
             screen: modelData
 
@@ -268,7 +271,6 @@ Scope {
                     width: parent.width
                     height: Appearance.cornerSize
                     visible: !ShellSettings.barFrostedGlass
-                        && NiriService.barRetractionProgress <= 0.001
 
                     BarConnectorCorner {
                         anchors {
@@ -300,7 +302,6 @@ Scope {
                     width: parent.width
                     height: Appearance.cornerSize
                     visible: !ShellSettings.barFrostedGlass
-                        && NiriService.barRetractionProgress <= 0.001
 
                     RoundCorner {
                         anchors {
