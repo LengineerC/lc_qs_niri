@@ -93,13 +93,14 @@ ClippingRectangle {
                 cache: true
             }
 
-            Text {
+            AppText {
                 anchors.centerIn: parent
                 visible: coverArt.status !== Image.Ready
                 text: "󰝚"
                 color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(45)
                 }
             }
@@ -114,7 +115,7 @@ ClippingRectangle {
                 Layout.fillWidth: true
                 spacing: Appearance.px(7)
 
-                Text {
+                AppText {
                     Layout.fillWidth: true
                     text: MediaService.cleanTitle(root.player.trackTitle)
                         || I18n.tr("unknownTitle")
@@ -136,7 +137,7 @@ ClippingRectangle {
                         ? Appearance.barPrimaryContainer
                         : Appearance.barLayer1Active
 
-                    Text {
+                    AppText {
                         id: playerIdentity
 
                         anchors {
@@ -160,7 +161,7 @@ ClippingRectangle {
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: root.player.trackArtist
                     || I18n.tr("unknownArtist")
@@ -172,7 +173,7 @@ ClippingRectangle {
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 visible: text.length > 0
                 text: root.player.trackAlbum
@@ -190,7 +191,7 @@ ClippingRectangle {
                 Layout.fillWidth: true
                 spacing: Appearance.px(8)
 
-                Text {
+                AppText {
                     text: MediaService.formatTime(
                         root.progress * Math.max(0, root.player.length))
                     color: Appearance.barSubtext
@@ -217,7 +218,7 @@ ClippingRectangle {
                     }
                 }
 
-                Text {
+                AppText {
                     text: MediaService.formatTime(root.player.length)
                     color: Appearance.barSubtext
                     font {
@@ -282,7 +283,7 @@ ClippingRectangle {
         scale: buttonMouse.pressed ? 0.88 : 1
         opacity: enabled ? 1 : 0.35
 
-        Text {
+        AppText {
             anchors.centerIn: parent
             text: button.icon
             color: button.primary
@@ -290,6 +291,7 @@ ClippingRectangle {
                 : Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(button.primary ? 21 : 17)
             }
         }

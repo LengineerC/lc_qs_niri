@@ -78,7 +78,7 @@ Item {
             new Date(2024, 0, 7 + day), "ddd");
     }
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: Appearance.barLayer1Text
         font {
             family: Appearance.fontFamily
@@ -100,12 +100,13 @@ Item {
             : Appearance.withAlpha(Appearance.barLayer1Active, 0)
         scale: buttonMouse.pressed ? 0.88 : 1
 
-        Text {
+        AppText {
             anchors.centerIn: parent
             text: button.icon
             color: Appearance.barLayer1Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(15)
             }
         }

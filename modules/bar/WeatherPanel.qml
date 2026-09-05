@@ -26,7 +26,7 @@ Item {
     implicitHeight: contentColumn.implicitHeight
         + Appearance.px(28)
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: Appearance.barLayer1Text
 
         font {
@@ -148,13 +148,14 @@ Item {
                 radius: Appearance.fullRadius
                 color: Appearance.barPrimaryContainer
 
-                Text {
+                AppText {
                     anchors.centerIn: parent
                     text: metric.icon
                     color: Appearance.barPrimaryContainerText
 
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(14)
                     }
                 }
@@ -652,6 +653,14 @@ Item {
                 repaint();
         }
 
+        Connections {
+            target: Appearance
+
+            function onFontWeightChanged() {
+                hourlyChart.repaint();
+            }
+        }
+
         Canvas {
             id: chartCanvas
 
@@ -717,8 +726,9 @@ Item {
                     Appearance.barOutline, 0.36);
                 context.fillStyle = Appearance.barSubtext;
                 context.font =
-                    Appearance.smallFontSize
-                    + "px " + Appearance.fontFamily;
+                    Appearance.fontWeight + " "
+                    + Appearance.smallFontSize
+                    + "px \"" + Appearance.fontFamily + "\"";
                 context.textAlign = "right";
                 context.textBaseline = "middle";
 
@@ -787,8 +797,8 @@ Item {
                 const fontSize = Appearance.smallFontSize;
 
                 context.fillStyle = color;
-                context.font = fontSize
-                    + "px " + Appearance.fontFamily;
+                context.font = Appearance.fontWeight + " " + fontSize
+                    + "px \"" + Appearance.fontFamily + "\"";
                 context.textBaseline = "middle";
 
                 for (let index = 0; index < values.length; ++index) {
@@ -1055,7 +1065,7 @@ Item {
 
                         spacing: Appearance.px(2)
 
-                        Text {
+                        AppText {
                             anchors.horizontalCenter:
                                 parent.horizontalCenter
 
@@ -1070,6 +1080,7 @@ Item {
 
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: Appearance.px(15)
                             }
                         }
@@ -1156,6 +1167,14 @@ Item {
                 repaint();
         }
 
+        Connections {
+            target: Appearance
+
+            function onFontWeightChanged() {
+                dailyChart.repaint();
+            }
+        }
+
         Canvas {
             id: chartCanvas
 
@@ -1221,8 +1240,9 @@ Item {
                     Appearance.barOutline, 0.36);
                 context.fillStyle = Appearance.barSubtext;
                 context.font =
-                    Appearance.smallFontSize
-                    + "px " + Appearance.fontFamily;
+                    Appearance.fontWeight + " "
+                    + Appearance.smallFontSize
+                    + "px \"" + Appearance.fontFamily + "\"";
                 context.textAlign = "right";
                 context.textBaseline = "middle";
 
@@ -1292,8 +1312,8 @@ Item {
 
                 context.fillStyle = color;
                 context.textBaseline = "middle";
-                context.font = fontSize
-                    + "px " + Appearance.fontFamily;
+                context.font = Appearance.fontWeight + " " + fontSize
+                    + "px \"" + Appearance.fontFamily + "\"";
 
                 for (let index = 0; index < values.length; ++index) {
                     const value = Number(values[index]);
@@ -1484,7 +1504,7 @@ Item {
 
                         spacing: Appearance.px(2)
 
-                        Text {
+                        AppText {
                             anchors.horizontalCenter:
                                 parent.horizontalCenter
 
@@ -1497,6 +1517,7 @@ Item {
 
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: Appearance.px(15)
                             }
                         }
@@ -1551,7 +1572,7 @@ Item {
                     ? Appearance.barLayer1Active : "transparent"
                 opacity: WeatherService.loading ? 0.55 : 1
 
-                Text {
+                AppText {
                     id: refreshIcon
 
                     anchors.centerIn: parent
@@ -1559,6 +1580,7 @@ Item {
                     color: Appearance.barSubtext
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(15)
                     }
 
@@ -1638,13 +1660,14 @@ Item {
                         radius: Appearance.fullRadius
                         color: Appearance.barPrimaryContainer
 
-                        Text {
+                        AppText {
                             anchors.centerIn: parent
                             text: WeatherService.currentIcon
                             color: Appearance.barPrimaryContainerText
 
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: Appearance.px(46)
                             }
                         }
@@ -1783,13 +1806,14 @@ Item {
                 visible: !WeatherService.ready
                 spacing: Appearance.px(8)
 
-                Text {
+                AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: WeatherService.loading ? "󰔟" : "󰅚"
                     color: Appearance.barPrimary
 
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(28)
                     }
                 }

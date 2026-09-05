@@ -467,16 +467,17 @@ Item {
                     Layout.fillWidth: true
                     spacing: Appearance.px(7)
 
-                    Text {
+                    AppText {
                         text: modelData.icon
                         color: Appearance.barLayer1Text
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.fontSize + Appearance.px(3)
                         }
                     }
 
-                    Text {
+                    AppText {
                         Layout.fillWidth: true
                         text: modelData.label
                         color: Appearance.barLayer1Text
@@ -487,7 +488,7 @@ Item {
                         }
                     }
 
-                    Text {
+                    AppText {
                         text: modelData.value
                         color: Appearance.barSubtext
                         font {

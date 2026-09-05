@@ -162,7 +162,7 @@ Rectangle {
                     border.color: Appearance.withAlpha(
                         cardPalette.primary, 0.12)
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
                         anchors.verticalCenterOffset: Appearance.px(2)
                         text: FastfetchService.systemIcon
@@ -180,7 +180,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 spacing: Appearance.px(4)
 
-                Text {
+                AppText {
                     Layout.fillWidth: true
                     text: FastfetchService.title
                     color: cardPalette.primary
@@ -211,18 +211,19 @@ Rectangle {
                         Layout.preferredHeight: Appearance.px(21)
                         spacing: Appearance.px(5)
 
-                        Text {
+                        AppText {
                             Layout.preferredWidth: Appearance.px(18)
                             horizontalAlignment: Text.AlignHCenter
                             text: informationRow.modelData.icon
                             color: cardPalette.primary
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: Appearance.px(15)
                             }
                         }
 
-                        Text {
+                        AppText {
                             Layout.preferredWidth: Appearance.px(42)
                             text: informationRow.modelData.label + ":"
                             color: cardPalette.layer1Text
@@ -233,7 +234,7 @@ Rectangle {
                             }
                         }
 
-                        Text {
+                        AppText {
                             Layout.fillWidth: true
                             text: informationRow.modelData.value
                             color: cardPalette.layer0Text
@@ -270,7 +271,7 @@ Rectangle {
             }
         }
 
-        Text {
+        AppText {
             Layout.fillWidth: true
             visible: FastfetchService.errorMessage.length > 0
             text: FastfetchService.errorMessage

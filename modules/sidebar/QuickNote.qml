@@ -1157,7 +1157,7 @@ Rectangle {
                             Appearance.barLayer0Text, 0.42)
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: root.statusText
                 color: root.operationError.length > 0
@@ -1258,7 +1258,7 @@ Rectangle {
                         ? Appearance.barPrimary
                         : Appearance.barLayer0Border
 
-                TextInput {
+                AppTextInput {
                     id: renameEditor
 
                     anchors {
@@ -1340,12 +1340,13 @@ Rectangle {
                     radius: Appearance.px(11)
                     color: Appearance.barPrimaryContainer
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
                         text: "󰠮"
                         color: Appearance.barPrimaryContainerText
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(18)
                         }
                     }
@@ -1365,7 +1366,7 @@ Rectangle {
                             ? Appearance.barLayer1Active
                             : "transparent"
 
-                    Text {
+                    AppText {
                         anchors {
                             left: parent.left
                             right: dropIcon.left
@@ -1397,7 +1398,7 @@ Rectangle {
                         }
                     }
 
-                    Text {
+                    AppText {
                         id: dropIcon
 
                         anchors {
@@ -1418,6 +1419,7 @@ Rectangle {
                         font {
                             family:
                                 Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize:
                                 Appearance.px(15)
                         }
@@ -1447,7 +1449,7 @@ Rectangle {
                     }
                 }
 
-                Text {
+                AppText {
                     text: noteFolderModel.count > 0
                         ? String(noteFolderModel.count) : ""
                     visible: noteFolderModel.count > 0
@@ -1540,7 +1542,7 @@ Rectangle {
                                 ? Appearance.barLayer1Active
                                 : "transparent"
 
-                        Text {
+                        AppText {
                             anchors {
                                 fill: parent
                                 leftMargin:
@@ -1673,7 +1675,7 @@ Rectangle {
 
                     clip: true
 
-                    TextEdit {
+                    AppTextEdit {
                         id: editor
 
                         x: Appearance.px(16)
@@ -1732,7 +1734,7 @@ Rectangle {
                         }
                     }
 
-                    Text {
+                    AppText {
                         anchors {
                             left: parent.left
                             top: parent.top
@@ -1776,7 +1778,7 @@ Rectangle {
 
                     clip: true
 
-                    Text {
+                    AppText {
                         id: previewText
 
                         x: Appearance.px(16)
@@ -1850,7 +1852,7 @@ Rectangle {
                         ? 0.86
                         : 1
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
 
                         text: root.previewMode
@@ -1863,6 +1865,7 @@ Rectangle {
 
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(15)
                         }
                     }
@@ -1940,7 +1943,7 @@ Rectangle {
             ? 1
             : 0.35
 
-        Text {
+        AppText {
             anchors.centerIn: parent
 
             text: button.icon
@@ -1953,6 +1956,7 @@ Rectangle {
             font {
                 family:
                     Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(17)
             }
         }

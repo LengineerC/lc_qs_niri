@@ -30,7 +30,7 @@ MouseArea {
             : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
         scale: root.pressed ? 0.88 : 1
 
-        Text {
+        AppText {
             anchors.centerIn: parent
             text: ""
             rotation: root.expanded ? 180 : 0

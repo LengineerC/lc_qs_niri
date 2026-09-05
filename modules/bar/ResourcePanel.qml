@@ -160,7 +160,7 @@ Item {
 
     Component.onDestruction: setViewerActive(false)
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: panelPalette.layer1Text
         font {
             family: Appearance.fontFamily
@@ -173,11 +173,12 @@ Item {
         required property string label
         spacing: Appearance.px(4)
 
-        Text {
+        AppText {
             text: parent.icon
             color: panelPalette.primary
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(18)
             }
         }
@@ -237,12 +238,13 @@ Item {
             ? panelPalette.layer1Active : panelPalette.layer1
         opacity: enabled ? 1 : 0.38
 
-        Text {
+        AppText {
             anchors.centerIn: parent
             text: diskSwitchButton.icon
             color: panelPalette.layer1Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(14)
             }
         }
@@ -286,12 +288,13 @@ Item {
                 radius: Appearance.fullRadius
                 color: panelPalette.primaryContainer
 
-                Text {
+                AppText {
                     anchors.centerIn: parent
                     text: networkRateCard.icon
                     color: panelPalette.primaryContainerText
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(15)
                     }
                 }
@@ -342,12 +345,13 @@ Item {
             }
             spacing: Appearance.px(9)
 
-            Text {
+            AppText {
                 text: menuAction.icon
                 color: menuAction.destructive
                     ? panelPalette.error : panelPalette.primary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(15)
                 }
             }
@@ -661,12 +665,13 @@ Item {
                     radius: Appearance.fullRadius
                     color: panelPalette.primaryContainer
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
                         text: "󰛳"
                         color: panelPalette.primaryContainerText
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(21)
                         }
                     }
@@ -741,18 +746,19 @@ Item {
                             }
                             spacing: Appearance.px(7)
 
-                            Text {
+                            AppText {
                                 text: "󰍉"
                                 color: searchInput.activeFocus
                                     ? panelPalette.primary
                                     : panelPalette.subtext
                                 font {
                                     family: Appearance.iconFontFamily
+                                    weight: Font.Normal
                                     pixelSize: Appearance.px(15)
                                 }
                             }
 
-                            Controls.TextField {
+                            AppTextField {
                                 id: searchInput
                                 Layout.fillWidth: true
                                 padding: 0
@@ -772,7 +778,7 @@ Item {
                                 onTextChanged: root.resetProcessScroll()
                             }
 
-                            Text {
+                            AppText {
                                 visible: searchInput.text.length > 0
                                 text: "󰅖"
                                 color: clearSearchArea.containsMouse
@@ -780,6 +786,7 @@ Item {
                                     : panelPalette.subtext
                                 font {
                                     family: Appearance.iconFontFamily
+                                    weight: Font.Normal
                                     pixelSize: Appearance.px(13)
                                 }
 
@@ -1019,7 +1026,7 @@ Item {
                                             }
                                         }
 
-                                        Text {
+                                        AppText {
                                             anchors.centerIn: parent
                                             visible: !processIcon.visible
                                             text: "󰒓"
@@ -1027,6 +1034,7 @@ Item {
                                             font {
                                                 family:
                                                     Appearance.iconFontFamily
+                                                weight: Font.Normal
                                                 pixelSize:
                                                     Appearance.px(17)
                                             }
@@ -1091,7 +1099,7 @@ Item {
                                             Text.AlignHCenter
                                     }
 
-                                    Text {
+                                    AppText {
                                         Layout.preferredWidth:
                                             Appearance.px(18)
                                         text: processEntry.expanded
@@ -1100,6 +1108,7 @@ Item {
                                         font {
                                             family:
                                                 Appearance.iconFontFamily
+                                            weight: Font.Normal
                                             pixelSize: Appearance.px(14)
                                         }
                                     }
@@ -1136,7 +1145,7 @@ Item {
                                                     Appearance.smallFontSize
                                             }
 
-                                            Text {
+                                            AppText {
                                                 text: "󰆏"
                                                 color:
                                                     copyCommandArea
@@ -1208,12 +1217,13 @@ Item {
                             && !ResourceService.processRefreshing
                         spacing: Appearance.px(7)
 
-                        Text {
+                        AppText {
                             Layout.alignment: Qt.AlignHCenter
                             text: "󰘦"
                             color: panelPalette.primary
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: Appearance.px(32)
                             }
                         }

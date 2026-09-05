@@ -13,7 +13,7 @@ Item {
 
     signal closeRequested
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: Appearance.layer1Text
         font {
             family: Appearance.fontFamily
@@ -41,11 +41,12 @@ Item {
             anchors.centerIn: parent
             spacing: Appearance.px(6)
 
-            Text {
+            AppText {
                 text: button.icon
                 color: button.selected ? Appearance.primaryContainerText : Appearance.primary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(15)
                 }
             }

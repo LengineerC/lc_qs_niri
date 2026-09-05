@@ -140,7 +140,7 @@ Item {
                     Layout.fillWidth: true
                     spacing: Appearance.px(6)
 
-                    Text {
+                    AppText {
                         Layout.fillWidth: true
                         text: root.notificationEntry.appName
                         color: Appearance.barSubtext
@@ -151,7 +151,7 @@ Item {
                         }
                     }
 
-                    Text {
+                    AppText {
                         text: I18n.tr("justNow")
                         color: Appearance.barSubtext
                         font {
@@ -161,7 +161,7 @@ Item {
                     }
                 }
 
-                Text {
+                AppText {
                     Layout.fillWidth: true
                     text: root.notificationEntry.summary
                         || I18n.tr("notification")
@@ -174,7 +174,7 @@ Item {
                     }
                 }
 
-                Text {
+                AppText {
                     Layout.fillWidth: true
                     visible: text.length > 0
                     text: root.notificationEntry.body

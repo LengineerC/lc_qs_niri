@@ -40,34 +40,37 @@ MouseArea {
         anchors.centerIn: parent
         spacing: Appearance.px(root.compact ? 8 : 13)
 
-        Text {
+        AppText {
             visible: SystemService.wifiEnabled
             text: SystemService.wifiIcon()
             color: Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.fontSize + Appearance.px(3)
             }
         }
 
-        Text {
+        AppText {
             visible: SystemService.bluetoothEnabled
             text: SystemService.connectedBluetoothDevices.length > 0
                 ? "󰂱" : "󰂯"
             color: Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.fontSize + Appearance.px(3)
             }
         }
 
-        Text {
+        AppText {
             visible: SystemService.sinkReady
             text: SystemService.volumeIcon()
             color: SystemService.muted
                 ? Appearance.barSubtext : Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.fontSize + Appearance.px(3)
             }
         }

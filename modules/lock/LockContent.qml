@@ -51,7 +51,7 @@ Item {
                     }
                     spacing: Appearance.px(6)
 
-                    Text {
+                    AppText {
                         Layout.fillWidth: true
                         text: I18n.tr("weather")
                         color: Appearance.barPrimary
@@ -69,7 +69,7 @@ Item {
                         Layout.preferredHeight: Appearance.px(55)
                         spacing: Appearance.px(10)
 
-                        Text {
+                        AppText {
                             Layout.preferredWidth: Appearance.px(58)
                             text: WeatherService.currentIcon
                             color: Appearance.barPrimary
@@ -85,7 +85,7 @@ Item {
                             Layout.fillWidth: true
                             spacing: Appearance.px(2)
 
-                            Text {
+                            AppText {
                                 Layout.fillWidth: true
                                 text: WeatherService.ready
                                     ? WeatherService.description(
@@ -101,7 +101,7 @@ Item {
                                 }
                             }
 
-                            Text {
+                            AppText {
                                 Layout.fillWidth: true
                                 text: I18n.tr("humidity") + ": "
                                     + (WeatherService.ready
@@ -122,7 +122,7 @@ Item {
                             Layout.preferredWidth: Appearance.px(68)
                             spacing: 0
 
-                            Text {
+                            AppText {
                                 Layout.fillWidth: true
                                 text: WeatherService.currentTemperature
                                 color: Appearance.barPrimary
@@ -134,7 +134,7 @@ Item {
                                 }
                             }
 
-                            Text {
+                            AppText {
                                 Layout.fillWidth: true
                                 text: I18n.tr("feelsLike") + ": "
                                     + (WeatherService.ready
@@ -172,7 +172,7 @@ Item {
                                 Layout.preferredWidth: 1
                                 spacing: 10
 
-                                Text {
+                                AppText {
                                     Layout.fillWidth: true
                                     text: WeatherService.timeFromIso(
                                         forecastItem.modelData.time)
@@ -184,7 +184,7 @@ Item {
                                     }
                                 }
 
-                                Text {
+                                AppText {
                                     Layout.fillWidth: true
                                     text: WeatherService.icon(
                                         forecastItem.modelData.weatherCode,
@@ -194,11 +194,12 @@ Item {
                                     verticalAlignment: Text.AlignVCenter
                                     font {
                                         family: Appearance.iconFontFamily
+                                        weight: Font.Normal
                                         pixelSize: Appearance.px(40)
                                     }
                                 }
 
-                                Text {
+                                AppText {
                                     Layout.fillWidth: true
                                     text: WeatherService.formatTemperature(
                                         forecastItem.modelData.temperature)
@@ -244,7 +245,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 spacing: Appearance.px(5)
 
-                Text {
+                AppText {
                     text: I18n.locale.toString(
                         root.now, "HH")
                     color: Appearance.barLayer0Text
@@ -257,7 +258,7 @@ Item {
                     }
                 }
 
-                Text {
+                AppText {
                     text: ":"
                     color: Appearance.barPrimary
                     font {
@@ -269,7 +270,7 @@ Item {
                     }
                 }
 
-                Text {
+                AppText {
                     text: I18n.locale.toString(
                         root.now, "mm")
                     color: Appearance.barLayer0Text
@@ -283,7 +284,7 @@ Item {
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: I18n.locale.toString(
                     root.now, "dddd, MMMM d")
@@ -306,7 +307,7 @@ Item {
                 imageInset: Appearance.px(3)
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: UserService.displayName
                 color: Appearance.barLayer0Text
@@ -345,7 +346,7 @@ Item {
                     }
                     spacing: Appearance.px(10)
 
-                    Text {
+                    AppText {
                         id: authStateIcon
 
                         text: root.context?.unlockInProgress
@@ -355,6 +356,7 @@ Item {
                             : Appearance.barPrimary
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(18)
                         }
 
@@ -369,7 +371,7 @@ Item {
                         }
                     }
 
-                    TextInput {
+                    AppTextInput {
                         id: passwordInput
 
                         Layout.fillWidth: true
@@ -400,7 +402,7 @@ Item {
                                 root.context.tryUnlock();
                         }
 
-                        Text {
+                        AppText {
                             anchors {
                                 fill: parent
                                 verticalCenter: parent.verticalCenter
@@ -426,7 +428,7 @@ Item {
                             : Appearance.barPrimaryContainer
                         scale: unlockArea.pressed ? 0.92 : 1
 
-                        Text {
+                        AppText {
                             anchors.centerIn: parent
                             text: "󰌑"
                             color: unlockArea.containsMouse
@@ -434,6 +436,7 @@ Item {
                                 : Appearance.barPrimaryContainerText
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: Appearance.px(18)
                             }
                         }
@@ -473,7 +476,7 @@ Item {
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 Layout.leftMargin: Appearance.px(20)
                 Layout.rightMargin: Appearance.px(20)
@@ -494,7 +497,7 @@ Item {
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: I18n.tr("unlockHint")
                 color: Appearance.barSubtext
@@ -532,7 +535,7 @@ Item {
                     }
                     spacing: Appearance.px(15)
 
-                    Text {
+                    AppText {
                         Layout.fillWidth: true
                         text: I18n.tr("systemResources")
                         color: Appearance.barLayer0Text
@@ -676,16 +679,17 @@ Item {
 
         spacing: Appearance.px(8)
 
-        Text {
+        AppText {
             text: icon
             color: Appearance.barPrimary
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(15)
             }
         }
 
-        Text {
+        AppText {
             Layout.fillWidth: true
             text: label
             color: Appearance.barSubtext
@@ -696,7 +700,7 @@ Item {
             }
         }
 
-        Text {
+        AppText {
             text: value
             color: Appearance.barLayer0Text
             font {
@@ -721,16 +725,17 @@ Item {
             Layout.fillWidth: true
             spacing: Appearance.px(7)
 
-            Text {
+            AppText {
                 text: gauge.icon
                 color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(15)
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: gauge.label
                 color: Appearance.barSubtext
@@ -741,7 +746,7 @@ Item {
                 }
             }
 
-            Text {
+            AppText {
                 text: gauge.valueText
                 color: Appearance.barLayer0Text
                 font {
@@ -796,11 +801,12 @@ Item {
             }
             spacing: Appearance.px(7)
 
-            Text {
+            AppText {
                 text: networkRate.icon
                 color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(16)
                 }
             }
@@ -809,7 +815,7 @@ Item {
                 Layout.fillWidth: true
                 spacing: 0
 
-                Text {
+                AppText {
                     Layout.fillWidth: true
                     text: networkRate.label
                     color: Appearance.barSubtext
@@ -820,7 +826,7 @@ Item {
                     }
                 }
 
-                Text {
+                AppText {
                     Layout.fillWidth: true
                     text: networkRate.value
                     color: Appearance.barLayer0Text

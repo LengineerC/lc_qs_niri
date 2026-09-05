@@ -525,12 +525,13 @@ Item {
                                 border.color: Appearance.withAlpha(
                                     Appearance.barPrimary, 0.45)
 
-                                Text {
+                                AppText {
                                     anchors.centerIn: parent
                                     text: "󰇙"
                                     color: Appearance.barPrimary
                                     font {
                                         family: Appearance.iconFontFamily
+                                        weight: Font.Normal
                                         pixelSize: Appearance.px(13)
                                     }
                                 }
@@ -567,7 +568,7 @@ Item {
                 NumberAnimation { duration: Appearance.fastDuration }
             }
 
-            Text {
+            AppText {
                 anchors.centerIn: parent
                 text: root.editMode ? "󰄬" : "󰏫"
                 color: root.editMode
@@ -575,6 +576,7 @@ Item {
                     : Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(16)
                 }
             }

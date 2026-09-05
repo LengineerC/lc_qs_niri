@@ -152,7 +152,7 @@ Item {
                 root.width - Appearance.px(72))
             spacing: Appearance.px(11)
 
-            Text {
+            AppText {
                 Layout.alignment: Qt.AlignHCenter
                 text: I18n.tr("launcher")
                 color: Appearance.barLayer0Text
@@ -181,17 +181,18 @@ Item {
                     }
                     spacing: Appearance.px(9)
 
-                    Text {
+                    AppText {
                         text: "󰍉"
                         color: searchInput.activeFocus
                             ? Appearance.barPrimary : Appearance.barSubtext
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(18)
                         }
                     }
 
-                    Controls.TextField {
+                    AppTextField {
                         id: searchInput
 
                         Layout.fillWidth: true
@@ -246,12 +247,13 @@ Item {
                         color: clearArea.containsMouse
                             ? Appearance.barLayer1Active : "transparent"
 
-                        Text {
+                        AppText {
                             anchors.centerIn: parent
                             text: "󰅖"
                             color: Appearance.barLayer1Text
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: Appearance.px(13)
                             }
                         }
@@ -268,7 +270,7 @@ Item {
                 }
             }
 
-            Text {
+            AppText {
                 Layout.alignment: Qt.AlignHCenter
                 text: root.filteredApplications.length
                     + " / " + root.applications.length
@@ -394,7 +396,7 @@ Item {
                             }
                         }
 
-                        Text {
+                        AppText {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
                             text: applicationDelegate.modelData.name
@@ -416,17 +418,18 @@ Item {
                 visible: applicationGrid.count === 0
                 spacing: Appearance.px(10)
 
-                Text {
+                AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰍉"
                     color: Appearance.barPrimary
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(42)
                     }
                 }
 
-                Text {
+                AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: I18n.tr("noApplicationsFound")
                     color: Appearance.barLayer0Text

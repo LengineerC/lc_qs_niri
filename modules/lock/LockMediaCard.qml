@@ -59,7 +59,7 @@ ClippingRectangle {
         }
         spacing: Appearance.px(15)
 
-        Text {
+        AppText {
             Layout.fillWidth: true
             text: I18n.tr("media")
             color: Appearance.barSubtext
@@ -72,7 +72,7 @@ ClippingRectangle {
 
         Item { Layout.fillHeight: true }
 
-        Text {
+        AppText {
             Layout.fillWidth: true
             text: root.hasMedia
                 ? MediaService.cleanTitle(
@@ -89,7 +89,7 @@ ClippingRectangle {
             }
         }
 
-        Text {
+        AppText {
             Layout.fillWidth: true
             text: root.hasMedia
                 ? String(root.player?.trackArtist
@@ -111,7 +111,7 @@ ClippingRectangle {
                 && (root.player?.length ?? 0) > 0
             spacing: Appearance.px(7)
 
-            Text {
+            AppText {
                 text: MediaService.formatTime(
                     lockSeekBar.displayValue
                         * Math.max(0, root.player?.length ?? 0))
@@ -141,7 +141,7 @@ ClippingRectangle {
                 }
             }
 
-            Text {
+            AppText {
                 text: MediaService.formatTime(
                     root.player?.length ?? 0)
                 color: Appearance.barSubtext
@@ -196,7 +196,7 @@ ClippingRectangle {
         opacity: enabled ? 1 : 0.45
         scale: buttonArea.pressed ? 0.94 : 1
 
-        Text {
+        AppText {
             anchors.centerIn: parent
             text: mediaButton.icon
             color: mediaButton.primary
@@ -204,6 +204,7 @@ ClippingRectangle {
                 : Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(17)
             }
         }

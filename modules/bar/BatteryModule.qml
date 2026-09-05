@@ -42,7 +42,7 @@ MouseArea {
         anchors.centerIn: parent
         spacing: Appearance.px(5)
 
-        Text {
+        AppText {
             text: BatteryService.powerIcon()
             color: BatteryService.low
                 ? Appearance.barError
@@ -50,11 +50,12 @@ MouseArea {
                     ? Appearance.barPrimary : Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.fontSize + Appearance.px(4)
             }
         }
 
-        Text {
+        AppText {
             visible: BatteryService.hasBattery
             text: BatteryService.percent + "%"
             color: BatteryService.low
@@ -72,7 +73,7 @@ MouseArea {
             radius: Appearance.fullRadius
             color: Appearance.barPrimaryContainer
 
-            Text {
+            AppText {
                 id: powerStatus
 
                 anchors.centerIn: parent

@@ -37,7 +37,7 @@ Item {
         });
     }
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: Appearance.barLayer1Text
         font {
             family: Appearance.fontFamily
@@ -126,12 +126,13 @@ Item {
                 radius: Appearance.px(10)
                 color: actionButton.destructive ? Appearance.withAlpha(Appearance.barError, 0.14) : Appearance.barPrimaryContainer
 
-                Text {
+                AppText {
                     anchors.centerIn: parent
                     text: actionButton.icon
                     color: actionButton.destructive ? Appearance.barError : Appearance.barPrimaryContainerText
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(17)
                     }
                 }
@@ -144,11 +145,12 @@ Item {
                 font.weight: Font.DemiBold
             }
 
-            Text {
+            AppText {
                 text: "󰅂"
                 color: Appearance.barSubtext
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(15)
                 }
             }
@@ -284,11 +286,12 @@ Item {
                     RowLayout {
                         spacing: Appearance.px(6)
 
-                        Text {
+                        AppText {
                             text: "󰥔"
                             color: Appearance.barPrimary
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: Appearance.px(14)
                             }
                         }

@@ -20,12 +20,13 @@ Item {
         radius: width / 2
         color: Appearance.primaryContainer
 
-        Text {
+        AppText {
             anchors.centerIn: parent
             text: "󰀄"
             color: Appearance.primaryContainerText
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: root.width * 0.48
             }
         }

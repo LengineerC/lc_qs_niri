@@ -55,7 +55,7 @@ Rectangle {
                 onClicked: forceActiveFocus()
             }
 
-            Text {
+            AppText {
                 anchors {
                     left: parent.left
                     leftMargin: Appearance.px(9)
@@ -65,11 +65,12 @@ Rectangle {
                 color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(14)
                 }
             }
 
-            TextInput {
+            AppTextInput {
                 id: taskInput
 
                 anchors {
@@ -92,7 +93,7 @@ Rectangle {
                 Keys.onReturnPressed: root.addCurrentTask()
                 Keys.onEnterPressed: root.addCurrentTask()
 
-                Text {
+                AppText {
                     anchors.fill: parent
                     visible: taskInput.text.length === 0
                         && !taskInput.activeFocus
@@ -125,7 +126,7 @@ Rectangle {
                         ? Appearance.barPrimaryContainer
                         : Appearance.withAlpha(Appearance.barPrimary, 0.1)
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
                         text: "+"
                         color: Appearance.barPrimary
@@ -182,7 +183,7 @@ Rectangle {
                     border.color: taskRow.modelData.completed
                         ? Appearance.barPrimary : Appearance.barOutline
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
                         visible: taskRow.modelData.completed
                         text: "✓"
@@ -195,7 +196,7 @@ Rectangle {
                     }
                 }
 
-                Text {
+                AppText {
                     anchors {
                         left: parent.left
                         leftMargin: Appearance.px(31)
@@ -232,13 +233,14 @@ Rectangle {
                         TodoService.deleteTask(taskRow.modelData.id);
                     }
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
                         text: "󰅖"
                         color: deleteButton.containsMouse
                             ? Appearance.barError : Appearance.barSubtext
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(13)
                         }
                     }
@@ -257,7 +259,7 @@ Rectangle {
                 }
             }
 
-            Text {
+            AppText {
                 anchors.centerIn: parent
                 visible: TodoService.initialized
                     && TodoService.tasks.length === 0

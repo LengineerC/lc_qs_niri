@@ -111,7 +111,7 @@ Rectangle {
                 radius: Appearance.px(9)
                 color: Appearance.barPrimaryContainer
 
-                Text {
+                AppText {
                     anchors.centerIn: parent
                     text: ">"
                     color: Appearance.barPrimaryContainerText
@@ -123,7 +123,7 @@ Rectangle {
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: "fastfetch"
                 color: Appearance.barLayer0Text
@@ -166,13 +166,14 @@ Rectangle {
                     border.color: Appearance.withAlpha(
                         Appearance.barPrimary, 0.14)
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
                         anchors.verticalCenterOffset: Appearance.px(1)
                         text: FastfetchService.systemIcon
                         color: Appearance.barPrimary
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Math.min(
                                 parent.width * 0.68,
                                 root.iconSize(58))
@@ -186,7 +187,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 spacing: root.rowSpacing + 5
 
-                Text {
+                AppText {
                     Layout.fillWidth: true
                     text: FastfetchService.title
                     color: Appearance.barPrimary
@@ -217,18 +218,19 @@ Rectangle {
                             Appearance.px(16), root.fontSize(11) + 2)
                         spacing: Appearance.px(4)
 
-                        Text {
+                        AppText {
                             Layout.preferredWidth: Appearance.px(16)
                             text: informationRow.modelData.icon
                             color: Appearance.barPrimary
                             horizontalAlignment: Text.AlignHCenter
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: root.fontSize(13)
                             }
                         }
 
-                        Text {
+                        AppText {
                             Layout.preferredWidth: Appearance.px(40)
                             text: informationRow.modelData.label + ":"
                             color: Appearance.barLayer1Text
@@ -239,7 +241,7 @@ Rectangle {
                             }
                         }
 
-                        Text {
+                        AppText {
                             Layout.fillWidth: true
                             text: informationRow.modelData.value
                             color: Appearance.barLayer0Text

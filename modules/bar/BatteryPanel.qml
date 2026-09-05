@@ -15,7 +15,7 @@ Item {
     implicitWidth: Appearance.px(420)
     implicitHeight: contentColumn.implicitHeight + Appearance.px(28)
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: Appearance.barLayer1Text
         font {
             family: Appearance.fontFamily
@@ -45,13 +45,14 @@ Item {
             anchors.centerIn: parent
             spacing: Appearance.px(2)
 
-            Text {
+            AppText {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: profileButton.icon
                 color: profileButton.active
                     ? Appearance.barPrimaryContainerText : Appearance.barLayer1Text
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(20)
                 }
             }
@@ -117,7 +118,7 @@ Item {
                     rightMargin: Appearance.px(33)
                 }
 
-                Text {
+                AppText {
                     id: mainBatteryIcon
 
                     anchors {
@@ -129,6 +130,7 @@ Item {
                         ? Appearance.barError : Appearance.barPrimary
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(42)
                     }
                 }

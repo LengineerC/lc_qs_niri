@@ -40,16 +40,17 @@ Rectangle {
             Layout.fillWidth: true
             spacing: Appearance.px(8)
 
-            Text {
+            AppText {
                 text: "󰂚"
                 color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(18)
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: root.unreadCount > 0
                     ? I18n.tr("newNotificationCount")
@@ -76,16 +77,17 @@ Rectangle {
                     anchors.centerIn: parent
                     spacing: Appearance.px(5)
 
-                    Text {
+                    AppText {
                         text: "󰌾"
                         color: Appearance.barPrimaryContainerText
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(12)
                         }
                     }
 
-                    Text {
+                    AppText {
                         text: I18n.tr("private")
                         color: Appearance.barPrimaryContainerText
                         font {
@@ -98,7 +100,7 @@ Rectangle {
             }
         }
 
-        Text {
+        AppText {
             Layout.fillWidth: true
             text: I18n.tr("notificationContentHidden")
             color: Appearance.barSubtext
@@ -118,17 +120,18 @@ Rectangle {
                 visible: root.privateEntries.length === 0
                 spacing: Appearance.px(8)
 
-                Text {
+                AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰂛"
                     color: Appearance.barSubtext
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(42)
                     }
                 }
 
-                Text {
+                AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: I18n.tr("noUnreadNotifications")
                     color: Appearance.barSubtext
@@ -171,12 +174,13 @@ Rectangle {
                             radius: Appearance.px(10)
                             color: Appearance.barPrimaryContainer
 
-                            Text {
+                            AppText {
                                 anchors.centerIn: parent
                                 text: "󰌾"
                                 color: Appearance.barPrimaryContainerText
                                 font {
                                     family: Appearance.iconFontFamily
+                                    weight: Font.Normal
                                     pixelSize: Appearance.px(16)
                                 }
                             }
@@ -186,7 +190,7 @@ Rectangle {
                             Layout.fillWidth: true
                             spacing: 1
 
-                            Text {
+                            AppText {
                                 Layout.fillWidth: true
                                 text: notificationDelegate.modelData
                                     ?.appName
@@ -200,7 +204,7 @@ Rectangle {
                                 }
                             }
 
-                            Text {
+                            AppText {
                                 text: I18n.tr("newNotification")
                                 color: Appearance.barSubtext
                                 font {
@@ -210,7 +214,7 @@ Rectangle {
                             }
                         }
 
-                        Text {
+                        AppText {
                             text: root.formatTime(
                                 notificationDelegate.modelData
                                     ?.timestamp)

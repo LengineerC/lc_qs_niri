@@ -100,7 +100,7 @@ Rectangle {
                     ? 0 : Appearance.px(2)
                 border.color: root.foreground
 
-                Text {
+                AppText {
                     anchors.centerIn: parent
                     text: root.partiallyChecked ? "−" : "✓"
                     visible: root.checked || root.partiallyChecked
@@ -140,7 +140,7 @@ Rectangle {
             }
         }
 
-        Text {
+        AppText {
             Layout.fillWidth: true
             text: root.menuEntry.text
             color: root.foreground
@@ -152,12 +152,13 @@ Rectangle {
             }
         }
 
-        Text {
+        AppText {
             visible: root.menuEntry.hasChildren
             text: "󰅂"
             color: root.foreground
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(15)
             }
         }

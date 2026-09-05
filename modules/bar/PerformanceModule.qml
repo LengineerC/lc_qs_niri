@@ -63,7 +63,7 @@ MouseArea {
             ? temperatureTextWidth : percentageTextWidth;
     }
 
-    Text {
+    AppText {
         id: percentageWidthMeasure
 
         visible: false
@@ -74,7 +74,7 @@ MouseArea {
         }
     }
 
-    Text {
+    AppText {
         id: temperatureWidthMeasure
 
         visible: false
@@ -109,12 +109,13 @@ MouseArea {
         anchors.centerIn: parent
         spacing: Appearance.px(7)
 
-        Text {
+        AppText {
             visible: root.shownResources.length === 0
             text: "󰍛"
             color: Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(18)
             }
         }
@@ -132,7 +133,7 @@ MouseArea {
                     warning: parent.modelData.warning
                 }
 
-                Text {
+                AppText {
                     readonly property int reservedWidth:
                         root.textWidthFor(parent.modelData.key)
 

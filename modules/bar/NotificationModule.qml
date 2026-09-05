@@ -34,7 +34,7 @@ MouseArea {
             : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
         scale: root.pressed ? 0.88 : 1
 
-        Text {
+        AppText {
             anchors.centerIn: parent
             text: NotificationService.doNotDisturb
                 ? "󰂛"
@@ -45,6 +45,7 @@ MouseArea {
                 ? Appearance.barPrimary : Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(17)
             }
         }
@@ -64,7 +65,7 @@ MouseArea {
             radius: Appearance.fullRadius
             color: Appearance.barTertiary
 
-            Text {
+            AppText {
                 id: unreadText
                 anchors.centerIn: parent
                 text: NotificationService.unreadCount > 99

@@ -430,7 +430,7 @@ ClippingRectangle {
                 Layout.fillWidth: true
                 spacing: -Appearance.px(2)
 
-                Text {
+                AppText {
                     text: I18n.locale.toString(
                         root.now, ShellSettings.timeFormat)
                     color: root.sceneText
@@ -441,7 +441,7 @@ ClippingRectangle {
                     }
                 }
 
-                Text {
+                AppText {
                     Layout.fillWidth: true
                     text: I18n.locale.toString(
                         root.now, ShellSettings.dateFormat)
@@ -473,16 +473,17 @@ ClippingRectangle {
                     anchors.centerIn: parent
                     spacing: Appearance.px(5)
 
-                    Text {
+                    AppText {
                         text: root.periodIcon
                         color: Appearance.barPrimary
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(13)
                         }
                     }
 
-                    Text {
+                    AppText {
                         text: root.periodLabel
                         color: Appearance.barLayer0Text
                         font {
@@ -544,7 +545,7 @@ ClippingRectangle {
             Layout.fillWidth: true
             spacing: Appearance.px(5)
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: progressStat.label
                 color: Appearance.barSubtext
@@ -556,7 +557,7 @@ ClippingRectangle {
                 }
             }
 
-            Text {
+            AppText {
                 text: root.percentText(progressStat.value)
                 color: Appearance.barLayer0Text
                 font {

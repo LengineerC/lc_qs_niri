@@ -189,12 +189,13 @@ ApplicationWindow {
                             radius: Appearance.px(13)
                             color: Appearance.primaryContainer
 
-                            Text {
+                            AppText {
                                 anchors.centerIn: parent
                                 text: "󰣇"
                                 color: Appearance.primaryContainerText
                                 font {
                                     family: Appearance.iconFontFamily
+                                    weight: Font.Normal
                                     pixelSize: Appearance.px(24)
                                 }
                             }
@@ -204,7 +205,7 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             spacing: 0
 
-                            Text {
+                            AppText {
                                 text: "QuickShell"
                                 color: Appearance.layer0Text
                                 font {
@@ -214,7 +215,7 @@ ApplicationWindow {
                                 }
                             }
 
-                            Text {
+                            AppText {
                                 text: I18n.tr("settings")
                                 color: Appearance.subtext
                                 font {
@@ -244,18 +245,19 @@ ApplicationWindow {
                             }
                             spacing: Appearance.px(10)
 
-                            Text {
+                            AppText {
                                 text: "󰒓"
                                 color: root.currentPage === 0
                                     ? Appearance.secondaryContainerText
                                     : Appearance.layer1Text
                                 font {
                                     family: Appearance.iconFontFamily
+                                    weight: Font.Normal
                                     pixelSize: Appearance.px(18)
                                 }
                             }
 
-                            Text {
+                            AppText {
                                 Layout.fillWidth: true
                                 text: I18n.tr("quickSettings")
                                 color: root.currentPage === 0
@@ -297,18 +299,19 @@ ApplicationWindow {
                             }
                             spacing: Appearance.px(10)
 
-                            Text {
+                            AppText {
                                 text: "󰛳"
                                 color: root.currentPage === 1
                                     ? Appearance.secondaryContainerText
                                     : Appearance.layer1Text
                                 font {
                                     family: Appearance.iconFontFamily
+                                    weight: Font.Normal
                                     pixelSize: Appearance.px(18)
                                 }
                             }
 
-                            Text {
+                            AppText {
                                 Layout.fillWidth: true
                                 text: I18n.tr("networkDevices")
                                 color: root.currentPage === 1
@@ -350,18 +353,19 @@ ApplicationWindow {
                             }
                             spacing: Appearance.px(10)
 
-                            Text {
+                            AppText {
                                 text: "󰍹"
                                 color: root.currentPage === 3
                                     ? Appearance.secondaryContainerText
                                     : Appearance.layer1Text
                                 font {
                                     family: Appearance.iconFontFamily
+                                    weight: Font.Normal
                                     pixelSize: Appearance.px(18)
                                 }
                             }
 
-                            Text {
+                            AppText {
                                 Layout.fillWidth: true
                                 text: I18n.tr("displays")
                                 color: root.currentPage === 3
@@ -403,18 +407,19 @@ ApplicationWindow {
                             }
                             spacing: Appearance.px(10)
 
-                            Text {
+                            AppText {
                                 text: "󰏘"
                                 color: root.currentPage === 2
                                     ? Appearance.secondaryContainerText
                                     : Appearance.layer1Text
                                 font {
                                     family: Appearance.iconFontFamily
+                                    weight: Font.Normal
                                     pixelSize: Appearance.px(18)
                                 }
                             }
 
-                            Text {
+                            AppText {
                                 Layout.fillWidth: true
                                 text: I18n.tr("style")
                                 color: root.currentPage === 2

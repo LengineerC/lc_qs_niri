@@ -51,7 +51,7 @@ Item {
             ? Appearance.barLayer1Active : Appearance.primaryContainer
         clip: true
 
-        Text {
+        AppText {
             anchors.centerIn: parent
             visible: avatarImage.status === Image.Error
                 || !root.hasProfileImage
@@ -61,6 +61,7 @@ Item {
                 ? Appearance.barPrimary : Appearance.primary
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Math.round(root.implicitSize * 0.48)
             }
         }

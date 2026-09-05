@@ -115,6 +115,7 @@ Singleton {
     readonly property string fontFamily: ShellSettings.barFontFamily
     readonly property string monospaceFontFamily:
         ShellSettings.monospaceFontFamily
+    readonly property int fontWeight: ShellSettings.fontWeight
     readonly property string iconFontFamily: "Symbols Nerd Font"
     readonly property int fontSize: Math.max(8,
         Math.round(ShellSettings.barFontSize * scale))

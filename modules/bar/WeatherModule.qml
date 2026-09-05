@@ -50,7 +50,7 @@ MouseArea {
             implicitWidth: Appearance.px(20)
             implicitHeight: Appearance.px(20)
 
-            Text {
+            AppText {
                 anchors.centerIn: parent
                 visible:
                     !(WeatherService.loading && !WeatherService.ready)
@@ -59,11 +59,12 @@ MouseArea {
                 color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(19)
                 }
             }
 
-            Text {
+            AppText {
                 id: loadingIcon
 
                 anchors.centerIn: parent
@@ -73,6 +74,7 @@ MouseArea {
                 color: Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(19)
                 }
 
@@ -87,7 +89,7 @@ MouseArea {
             }
         }
 
-        Text {
+        AppText {
             text: WeatherService.currentTemperature
             color: Appearance.barLayer0Text
             font {

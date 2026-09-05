@@ -119,7 +119,7 @@ Item {
         }
     }
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: Appearance.barLayer1Text
         font {
             family: Appearance.fontFamily
@@ -150,17 +150,18 @@ Item {
                 }
                 spacing: Appearance.px(8)
 
-                Text {
+                AppText {
                     text: "󰍉"
                     color: searchInput.activeFocus
                         ? Appearance.barPrimary : Appearance.barSubtext
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(17)
                     }
                 }
 
-                Controls.TextField {
+                AppTextField {
                     id: searchInput
 
                     Layout.fillWidth: true
@@ -209,12 +210,13 @@ Item {
                     color: clearArea.containsMouse
                         ? Appearance.barLayer1Active : "transparent"
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
                         text: "󰅖"
                         color: Appearance.barSubtext
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(13)
                         }
                     }
@@ -361,7 +363,7 @@ Item {
                             }
                         }
 
-                        Text {
+                        AppText {
                             text: "󰁔"
                             color: applicationEntry.ListView.isCurrentItem
                                 ? Appearance.barPrimary : Appearance.barSubtext
@@ -369,6 +371,7 @@ Item {
                                 || entryArea.containsMouse ? 1 : 0
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: Appearance.px(16)
                             }
 
@@ -393,12 +396,13 @@ Item {
                 visible: applicationList.count === 0
                 spacing: Appearance.px(8)
 
-                Text {
+                AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰍉"
                     color: Appearance.barPrimary
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(34)
                     }
                 }

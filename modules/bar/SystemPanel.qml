@@ -85,7 +85,7 @@ Item {
     implicitWidth: Appearance.px(650)
     implicitHeight: Appearance.px(680)
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: panelPalette.layer1Text
         font {
             family: Appearance.fontFamily
@@ -160,13 +160,14 @@ Item {
                     ? panelPalette.primaryContainer : panelPalette.layer1
             scale: iconArea.pressed ? 0.9 : 1
 
-            Text {
+            AppText {
                 anchors.centerIn: parent
                 text: card.icon
                 color: card.active
                     ? panelPalette.primaryContainerText : panelPalette.subtext
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(25)
                 }
             }
@@ -220,7 +221,7 @@ Item {
             }
         }
 
-        Text {
+        AppText {
             id: expandIcon
 
             visible: card.expandable
@@ -234,6 +235,7 @@ Item {
             color: panelPalette.subtext
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(15)
             }
 
@@ -297,11 +299,12 @@ Item {
                 Layout.fillWidth: true
                 spacing: Appearance.px(10)
 
-                Text {
+                AppText {
                     text: SystemService.volumeIcon()
                     color: panelPalette.layer1Text
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(20)
                     }
                     MouseArea {
@@ -322,11 +325,12 @@ Item {
                     color: panelPalette.subtext
                 }
 
-                Text {
+                AppText {
                     text: SystemService.microphoneIcon()
                     color: panelPalette.layer1Text
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(20)
                     }
                     MouseArea {
@@ -370,12 +374,13 @@ Item {
                         Layout.fillWidth: true
                         spacing: Appearance.px(10)
 
-                        Text {
+                        AppText {
                             text: "󰃠"
                             color: root.brightnessState.available
                                 ? panelPalette.primary : panelPalette.subtext
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: Appearance.px(21)
                             }
                         }
@@ -565,11 +570,12 @@ Item {
                                     fill: parent
                                     margins: Appearance.px(10)
                                 }
-                                Text {
+                                AppText {
                                     text: SystemService.wifiIcon(modelData.strength)
                                     color: panelPalette.primary
                                     font {
                                         family: Appearance.iconFontFamily
+                                        weight: Font.Normal
                                         pixelSize: Appearance.px(18)
                                     }
                                 }
@@ -606,7 +612,7 @@ Item {
                                             ? panelPalette.layer1Active
                                             : "transparent"
 
-                                    Text {
+                                    AppText {
                                         anchors.centerIn: parent
                                         text: "󰋼"
                                         color: SystemService.wifiDetailsSsid
@@ -615,6 +621,7 @@ Item {
                                             : panelPalette.subtext
                                         font {
                                             family: Appearance.iconFontFamily
+                                            weight: Font.Normal
                                             pixelSize: Appearance.px(17)
                                         }
                                     }
@@ -677,13 +684,14 @@ Item {
                                     radius: Appearance.fullRadius
                                     color: panelPalette.primaryContainer
 
-                                    Text {
+                                    AppText {
                                         anchors.centerIn: parent
                                         text: SystemService.wifiIcon(
                                             SystemService.wifiDetails.strength)
                                         color: panelPalette.primaryContainerText
                                         font {
                                             family: Appearance.iconFontFamily
+                                            weight: Font.Normal
                                             pixelSize: Appearance.px(19)
                                         }
                                     }
@@ -729,12 +737,13 @@ Item {
                                         ? panelPalette.layer1Active
                                         : "transparent"
 
-                                    Text {
+                                    AppText {
                                         anchors.centerIn: parent
                                         text: "󰅖"
                                         color: panelPalette.subtext
                                         font {
                                             family: Appearance.iconFontFamily
+                                            weight: Font.Normal
                                             pixelSize: Appearance.px(16)
                                         }
                                     }
@@ -826,11 +835,12 @@ Item {
                                 Layout.fillWidth: true
                                 spacing: Appearance.px(9)
 
-                                Text {
+                                AppText {
                                     text: "󰌾"
                                     color: panelPalette.primary
                                     font {
                                         family: Appearance.iconFontFamily
+                                        weight: Font.Normal
                                         pixelSize: Appearance.px(19)
                                     }
                                 }
@@ -864,12 +874,13 @@ Item {
                                         ? panelPalette.layer1Active
                                         : "transparent"
 
-                                    Text {
+                                    AppText {
                                         anchors.centerIn: parent
                                         text: "󰅖"
                                         color: panelPalette.subtext
                                         font {
                                             family: Appearance.iconFontFamily
+                                            weight: Font.Normal
                                             pixelSize: Appearance.px(16)
                                         }
                                     }
@@ -899,7 +910,7 @@ Item {
                                         ? 1 : 0
                                     border.color: panelPalette.primary
 
-                                    Controls.TextField {
+                                    AppTextField {
                                         id: wifiPassword
 
                                         anchors {
@@ -951,7 +962,7 @@ Item {
                                             ? panelPalette.layer1Active
                                             : "transparent"
 
-                                        Text {
+                                        AppText {
                                             anchors.centerIn: parent
                                             text: root.wifiPasswordVisible
                                                 ? "󰈈" : "󰈉"
@@ -959,6 +970,7 @@ Item {
                                             font {
                                                 family:
                                                     Appearance.iconFontFamily
+                                                weight: Font.Normal
                                                 pixelSize: Appearance.px(17)
                                             }
                                         }
@@ -1086,12 +1098,13 @@ Item {
                                     fill: parent
                                     margins: Appearance.px(10)
                                 }
-                                Text {
+                                AppText {
                                     text: "󰂯"
                                     color: modelData.connected
                                         ? panelPalette.primary : panelPalette.subtext
                                     font {
                                         family: Appearance.iconFontFamily
+                                        weight: Font.Normal
                                         pixelSize: Appearance.px(18)
                                     }
                                 }
@@ -1191,13 +1204,14 @@ Item {
                                 }
                                 spacing: Appearance.px(9)
 
-                                Text {
+                                AppText {
                                     text: "󰕾"
                                     color: parent.parent.selected
                                         ? panelPalette.primary
                                         : panelPalette.subtext
                                     font {
                                         family: Appearance.iconFontFamily
+                                        weight: Font.Normal
                                         pixelSize: Appearance.px(18)
                                     }
                                 }
@@ -1304,13 +1318,14 @@ Item {
                                 }
                                 spacing: Appearance.px(9)
 
-                                Text {
+                                AppText {
                                     text: "󰍬"
                                     color: parent.parent.selected
                                         ? panelPalette.primary
                                         : panelPalette.subtext
                                     font {
                                         family: Appearance.iconFontFamily
+                                        weight: Font.Normal
                                         pixelSize: Appearance.px(18)
                                     }
                                 }

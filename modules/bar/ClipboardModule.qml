@@ -24,12 +24,13 @@ MouseArea {
             : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
         scale: root.pressed ? 0.88 : 1
 
-        Text {
+        AppText {
             anchors.centerIn: parent
             text: "󰅇"
             color: Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(17)
             }
         }

@@ -105,7 +105,7 @@ Item {
         copyAndClose(filteredEntries[index].id);
     }
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: panelPalette.layer1Text
         font {
             family: Appearance.fontFamily
@@ -157,11 +157,12 @@ Item {
                     anchors.centerIn: parent
                     spacing: Appearance.px(5)
 
-                    Text {
+                    AppText {
                         text: "󰃢"
                         color: Appearance.barError
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(14)
                         }
                     }
@@ -208,17 +209,18 @@ Item {
                 }
                 spacing: Appearance.px(7)
 
-                Text {
+                AppText {
                     text: "󰍉"
                     color: searchInput.activeFocus
                         ? panelPalette.primary : panelPalette.subtext
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(16)
                     }
                 }
 
-                Controls.TextField {
+                AppTextField {
                     id: searchInput
 
                     Layout.fillWidth: true
@@ -258,12 +260,13 @@ Item {
                     color: searchClearMouse.containsMouse
                         ? panelPalette.layer1Active : "transparent"
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
                         text: "󰅖"
                         color: panelPalette.subtext
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(13)
                         }
                     }
@@ -391,7 +394,7 @@ Item {
                             ? panelPalette.errorContainer
                             : panelPalette.layer2
 
-                        Text {
+                        AppText {
                             anchors.centerIn: parent
                             text: "󰆴"
                             color: deleteMouse.containsMouse
@@ -399,6 +402,7 @@ Item {
                                 : panelPalette.subtext
                             font {
                                 family: Appearance.iconFontFamily
+                                weight: Font.Normal
                                 pixelSize: Appearance.px(14)
                             }
                         }
@@ -426,13 +430,14 @@ Item {
                 anchors.centerIn: parent
                 spacing: Appearance.px(8)
 
-                Text {
+                AppText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: searchInput.text
                         ? "󰍉" : "󰅇"
                     color: panelPalette.subtext
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(36)
                     }
                 }

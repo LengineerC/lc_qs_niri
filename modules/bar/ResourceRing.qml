@@ -75,13 +75,14 @@ Item {
         }
     }
 
-    Text {
+    AppText {
         anchors.centerIn: parent
         text: root.icon
         color: root.warning
             ? Appearance.barError : Appearance.barLayer0Text
         font {
             family: Appearance.iconFontFamily
+            weight: Font.Normal
             pixelSize: Appearance.px(root.iconSize)
         }
     }

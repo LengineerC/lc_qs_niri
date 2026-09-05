@@ -245,7 +245,7 @@ ClippingRectangle {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: FocusTimerService.reset()
 
-                Text {
+                AppText {
                     anchors.centerIn: parent
                     text: "󰑓"
                     color: resetButton.containsMouse
@@ -253,6 +253,7 @@ ClippingRectangle {
                     scale: resetButton.pressed ? 0.86 : 1
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(15)
                     }
 
@@ -346,7 +347,7 @@ ClippingRectangle {
                     anchors.verticalCenterOffset: -Appearance.px(1)
                     spacing: -Appearance.px(1)
 
-                    Text {
+                    AppText {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: root.timeText
                         color: Appearance.barLayer0Text
@@ -359,7 +360,7 @@ ClippingRectangle {
                         }
                     }
 
-                    Text {
+                    AppText {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: FocusTimerService.mode === "custom"
                             ? I18n.tr("customTime") : "5 min"
@@ -406,7 +407,7 @@ ClippingRectangle {
                     ? Appearance.barPrimary
                     : Appearance.withAlpha(Appearance.barOutline, 0.4)
 
-                TextInput {
+                AppTextInput {
                     id: hourInput
 
                     anchors.fill: parent
@@ -427,7 +428,7 @@ ClippingRectangle {
                 }
             }
 
-            Text {
+            AppText {
                 text: ":"
                 color: Appearance.barSubtext
                 font.family: Appearance.monospaceFontFamily
@@ -444,7 +445,7 @@ ClippingRectangle {
                     ? Appearance.barPrimary
                     : Appearance.withAlpha(Appearance.barOutline, 0.4)
 
-                TextInput {
+                AppTextInput {
                     id: minuteInput
 
                     anchors.fill: parent
@@ -465,7 +466,7 @@ ClippingRectangle {
                 }
             }
 
-            Text {
+            AppText {
                 text: ":"
                 color: Appearance.barSubtext
                 font.family: Appearance.monospaceFontFamily
@@ -482,7 +483,7 @@ ClippingRectangle {
                     ? Appearance.barPrimary
                     : Appearance.withAlpha(Appearance.barOutline, 0.4)
 
-                TextInput {
+                AppTextInput {
                     id: secondInput
 
                     anchors.fill: parent
@@ -519,12 +520,13 @@ ClippingRectangle {
                         ? Appearance.barPrimaryContainer
                         : Appearance.withAlpha(Appearance.barPrimary, 0.1)
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
                         text: "󰄬"
                         color: Appearance.barPrimary
                         font {
                             family: Appearance.iconFontFamily
+                            weight: Font.Normal
                             pixelSize: Appearance.px(14)
                         }
                     }

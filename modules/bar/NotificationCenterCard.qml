@@ -68,7 +68,7 @@ Rectangle {
                 Layout.fillWidth: true
                 spacing: Appearance.px(6)
 
-                Text {
+                AppText {
                     Layout.fillWidth: true
                     text: root.notificationEntry.appName
                         || I18n.tr("unknownApplication")
@@ -80,7 +80,7 @@ Rectangle {
                     }
                 }
 
-                Text {
+                AppText {
                     text: root.timeText()
                     color: Appearance.barSubtext
                     font {
@@ -90,7 +90,7 @@ Rectangle {
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: root.notificationEntry.summary
                     || I18n.tr("notification")
@@ -103,7 +103,7 @@ Rectangle {
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 visible: text.length > 0
                 text: root.notificationEntry.body
@@ -126,13 +126,14 @@ Rectangle {
             color: actionArea.containsMouse
                 ? Appearance.barLayer1Active : "transparent"
 
-            Text {
+            AppText {
                 anchors.centerIn: parent
                 text: root.historical ? "󰆴" : "󰄬"
                 color: root.historical
                     ? Appearance.barError : Appearance.barPrimary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(14)
                 }
             }

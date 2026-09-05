@@ -62,7 +62,7 @@ Item {
         return true;
     }
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: Appearance.barLayer1Text
         font {
             family: Appearance.fontFamily
@@ -103,13 +103,14 @@ Item {
                 visible: root.itemCount === 0
                 spacing: Appearance.px(7)
 
-                Text {
+                AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰀻"
                     color: Appearance.barSubtext
                     opacity: 0.7
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(32)
                     }
                 }

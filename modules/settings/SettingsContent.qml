@@ -22,6 +22,7 @@ Item {
     property string barFontFamilyDraft: ShellSettings.barFontFamily
     property string monospaceFontFamilyDraft:
         ShellSettings.monospaceFontFamily
+    property int fontWeightDraft: ShellSettings.fontWeight
     property int barFontSizeDraft: ShellSettings.barFontSize
     property real scaleDraft: ShellSettings.scale
     readonly property bool barAppearanceValid:
@@ -31,6 +32,7 @@ Item {
         barFontFamilyDraft.trim() !== ShellSettings.barFontFamily
             || monospaceFontFamilyDraft.trim()
                 !== ShellSettings.monospaceFontFamily
+            || fontWeightDraft !== ShellSettings.fontWeight
             || barFontSizeDraft !== ShellSettings.barFontSize
             || Math.abs(scaleDraft - ShellSettings.scale) > 0.001
     readonly property bool weatherCoordinatesValid: {
@@ -48,6 +50,12 @@ Item {
         { value: 1, label: I18n.tr("monday") },
         { value: 0, label: I18n.tr("sunday") },
         { value: 6, label: I18n.tr("saturday") }
+    ]
+    readonly property var fontWeightOptions: [
+        { value: Font.Normal, key: "fontWeightRegular" },
+        { value: Font.Medium, key: "fontWeightMedium" },
+        { value: Font.DemiBold, key: "fontWeightSemiBold" },
+        { value: Font.Bold, key: "fontWeightBold" }
     ]
 
     function filteredFontFamilies(families, query, showAll) {
@@ -74,6 +82,7 @@ Item {
         ShellSettings.barFontFamily = barFontFamilyDraft.trim();
         ShellSettings.monospaceFontFamily =
             monospaceFontFamilyDraft.trim();
+        ShellSettings.fontWeight = fontWeightDraft;
         ShellSettings.barFontSize = Math.round(barFontSizeDraft);
         // Apply scale last so the settings layout only moves once, after all
         // other draft values have already been committed.
@@ -122,7 +131,7 @@ Item {
         }
     }
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: Appearance.layer1Text
         font {
             family: Appearance.fontFamily
@@ -143,11 +152,12 @@ Item {
         Layout.topMargin: Appearance.px(4)
         spacing: Appearance.px(8)
 
-        Text {
+        AppText {
             text: parent.icon
             color: Appearance.primary
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(17)
             }
         }
@@ -287,7 +297,7 @@ Item {
             border.width: fontInput.activeFocus || fontPopup.opened ? 1 : 0
             border.color: Appearance.primary
 
-            Controls.TextField {
+            AppTextField {
                 id: fontInput
 
                 anchors {
@@ -352,7 +362,7 @@ Item {
                 }
             }
 
-            Text {
+            AppText {
                 anchors {
                     right: parent.right
                     rightMargin: Appearance.px(10)
@@ -362,6 +372,7 @@ Item {
                 color: Appearance.subtext
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(14)
                 }
             }
@@ -436,7 +447,7 @@ Item {
                     implicitHeight: Appearance.px(34)
                     highlighted: fontList.currentIndex === index
 
-                    contentItem: Text {
+                    contentItem: AppText {
                         text: fontDelegate.modelData
                         color: Appearance.layer0Text
                         verticalAlignment: Text.AlignVCenter
@@ -504,7 +515,7 @@ Item {
                     ? Appearance.primary
                     : Appearance.layer1Active
 
-                Text {
+                AppText {
                     anchors.centerIn: parent
                     text: metricChoice.icon
                     color: metricChoice.selected
@@ -512,6 +523,7 @@ Item {
                         : Appearance.primary
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(19)
                     }
                 }
@@ -540,12 +552,13 @@ Item {
                 }
             }
 
-            Text {
+            AppText {
                 visible: metricChoice.selected
                 text: "󰄬"
                 color: Appearance.primaryContainerText
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(15)
                 }
             }
@@ -575,6 +588,7 @@ Item {
 
         required property string label
         required property bool selected
+        property int textWeight: selected ? Font.DemiBold : Font.Normal
         signal chosen
 
         Layout.fillWidth: true
@@ -604,8 +618,7 @@ Item {
             elide: Text.ElideRight
             font {
                 pixelSize: Appearance.smallFontSize
-                weight: choiceChip.selected
-                    ? Font.DemiBold : Font.Normal
+                weight: choiceChip.textWeight
             }
         }
 
@@ -786,7 +799,7 @@ Item {
             border.width: formatInput.activeFocus ? 1 : 0
             border.color: Appearance.primary
 
-            Controls.TextField {
+            AppTextField {
                 id: formatInput
 
                 anchors {
@@ -927,12 +940,13 @@ Item {
                                 anchors.centerIn: parent
                                 spacing: Appearance.px(6)
 
-                                Text {
+                                AppText {
                                     text: "󰈔"
                                     color: Appearance.primary
                                     font {
                                         family:
                                             Appearance.iconFontFamily
+                                        weight: Font.Normal
                                         pixelSize: Appearance.px(15)
                                     }
                                 }
@@ -967,12 +981,13 @@ Item {
                                 anchors.centerIn: parent
                                 spacing: Appearance.px(6)
 
-                                Text {
+                                AppText {
                                     text: "󰑐"
                                     color: Appearance.primary
                                     font {
                                         family:
                                             Appearance.iconFontFamily
+                                        weight: Font.Normal
                                         pixelSize: Appearance.px(15)
                                     }
                                 }
@@ -1114,7 +1129,7 @@ Item {
                                         ? 1 : 0
                                 border.color: Appearance.primary
 
-                                Controls.TextField {
+                                AppTextField {
                                     id: weatherLocationInput
 
                                     anchors {
@@ -1204,7 +1219,7 @@ Item {
                                     implicitWidth: Appearance.px(16)
                                     implicitHeight: Appearance.px(16)
 
-                                    Text {
+                                    AppText {
                                         anchors.centerIn: parent
                                         visible: WeatherService
                                                 .locationSearchStatus
@@ -1221,7 +1236,7 @@ Item {
                                         }
                                     }
 
-                                    Text {
+                                    AppText {
                                         id: locationLoadingIcon
 
                                         anchors.centerIn: parent
@@ -1317,7 +1332,7 @@ Item {
                                         ? 1 : 0
                                 border.color: Appearance.primary
 
-                                Controls.TextField {
+                                AppTextField {
                                     id: weatherLatitudeInput
 
                                     anchors {
@@ -1387,7 +1402,7 @@ Item {
                                         ? 1 : 0
                                 border.color: Appearance.primary
 
-                                Controls.TextField {
+                                AppTextField {
                                     id: weatherLongitudeInput
 
                                     anchors {
@@ -1453,13 +1468,14 @@ Item {
                                 anchors.centerIn: parent
                                 spacing: Appearance.px(6)
 
-                                Text {
+                                AppText {
                                     text: "󰍎"
                                     color:
                                         Appearance.primaryContainerText
                                     font {
                                         family:
                                             Appearance.iconFontFamily
+                                        weight: Font.Normal
                                         pixelSize: Appearance.px(15)
                                     }
                                 }
@@ -1729,11 +1745,12 @@ Item {
                                     font.pixelSize: Appearance.smallFontSize
                                 }
 
-                                Text {
+                                AppText {
                                     text: "󰏘"
                                     color: Appearance.primary
                                     font {
                                         family: Appearance.iconFontFamily
+                                        weight: Font.Normal
                                         pixelSize: Appearance.px(15)
                                     }
                                 }
@@ -1904,6 +1921,37 @@ Item {
                         }
                     }
 
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Appearance.px(10)
+
+                        PanelText {
+                            Layout.preferredWidth: Appearance.px(
+                                I18n.language === "en_US" ? 150 : 118)
+                            text: I18n.tr("fontWeight")
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(6)
+
+                            Repeater {
+                                model: root.fontWeightOptions
+
+                                delegate: ChoiceChip {
+                                    required property var modelData
+
+                                    label: I18n.tr(modelData.key)
+                                    selected: root.fontWeightDraft
+                                        === modelData.value
+                                    textWeight: modelData.value
+                                    onChosen: root.fontWeightDraft =
+                                        modelData.value
+                                }
+                            }
+                        }
+                    }
+
                     SliderRow {
                         label: I18n.tr("fontSize")
                         currentValue: root.barFontSizeDraft
@@ -1949,11 +1997,12 @@ Item {
                             anchors.centerIn: parent
                             spacing: Appearance.px(6)
 
-                            Text {
+                            AppText {
                                 text: "󰄬"
                                 color: Appearance.primaryContainerText
                                 font {
                                     family: Appearance.iconFontFamily
+                                    weight: Font.Normal
                                     pixelSize: Appearance.px(14)
                                 }
                             }
@@ -2337,6 +2386,7 @@ Item {
                                 ShellSettings.barFontFamily;
                             root.monospaceFontFamilyDraft =
                                 ShellSettings.monospaceFontFamily;
+                            root.fontWeightDraft = ShellSettings.fontWeight;
                             root.barFontSizeDraft = ShellSettings.barFontSize;
                             root.scaleDraft = ShellSettings.scale;
                         }

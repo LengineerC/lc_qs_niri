@@ -60,7 +60,7 @@ Item {
         }
     }
 
-    component PanelText: Text {
+    component PanelText: AppText {
         color: Appearance.layer1Text
         font {
             family: Appearance.fontFamily
@@ -143,13 +143,14 @@ Item {
             anchors.centerIn: parent
             spacing: Appearance.px(6)
 
-            Text {
+            AppText {
                 text: button.icon
                 color: button.primary
                     ? Appearance.primaryContainerText
                     : Appearance.primary
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(15)
                 }
             }
@@ -193,7 +194,7 @@ Item {
             pixelSize: Appearance.smallFontSize
         }
 
-        contentItem: Text {
+        contentItem: AppText {
             text: control.displayText
             color: control.enabled
                 ? Appearance.layer0Text : Appearance.subtext
@@ -202,13 +203,14 @@ Item {
             font: control.font
         }
 
-        indicator: Text {
+        indicator: AppText {
             x: control.width - width - Appearance.px(10)
             anchors.verticalCenter: parent.verticalCenter
             text: "󰅀"
             color: Appearance.subtext
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(14)
             }
         }
@@ -227,7 +229,7 @@ Item {
             width: control.width
             implicitHeight: Appearance.px(34)
             highlighted: control.highlightedIndex === index
-            contentItem: Text {
+            contentItem: AppText {
                 text: control.textRole
                     ? modelData[control.textRole] : modelData
                 color: Appearance.layer0Text
@@ -269,7 +271,7 @@ Item {
         }
     }
 
-    component NumberField: Controls.TextField {
+    component NumberField: AppTextField {
         implicitWidth: Appearance.px(105)
         implicitHeight: Appearance.px(36)
         horizontalAlignment: TextInput.AlignHCenter
@@ -366,11 +368,12 @@ Item {
                 }
                 spacing: Appearance.px(8)
 
-                Text {
+                AppText {
                     text: "󰋼"
                     color: Appearance.primaryContainerText
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(17)
                     }
                 }
@@ -487,7 +490,7 @@ Item {
                                             ? Appearance.primaryContainer
                                             : Appearance.layer1Active
 
-                                        Text {
+                                        AppText {
                                             anchors.centerIn: parent
                                             text: "󰍹"
                                             color: outputCard.draftEnabled
@@ -495,6 +498,7 @@ Item {
                                                 : Appearance.subtext
                                             font {
                                                 family: Appearance.iconFontFamily
+                                                weight: Font.Normal
                                                 pixelSize: Appearance.px(24)
                                             }
                                         }
@@ -577,7 +581,7 @@ Item {
                                         Layout.fillWidth: true
                                         spacing: Appearance.px(10)
 
-                                        Text {
+                                        AppText {
                                             text: "󰃠"
                                             color: outputCard.brightnessState
                                                     .available
@@ -586,6 +590,7 @@ Item {
                                             font {
                                                 family:
                                                     Appearance.iconFontFamily
+                                                weight: Font.Normal
                                                 pixelSize: Appearance.px(19)
                                             }
                                         }
@@ -919,12 +924,13 @@ Item {
                     && OutputService.outputs.length === 0
                 spacing: Appearance.px(8)
 
-                Text {
+                AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰶐"
                     color: Appearance.primary
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(44)
                     }
                 }

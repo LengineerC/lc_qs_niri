@@ -42,7 +42,7 @@ Item {
             dividerSpacing: Appearance.px(9)
             onCloseClicked: root.closeRequested()
 
-            Text {
+            AppText {
                 text: MediaService.players.length
                     + " " + I18n.tr(
                         MediaService.players.length === 1
@@ -96,17 +96,18 @@ Item {
                 visible: MediaService.players.length === 0
                 spacing: Appearance.px(8)
 
-                Text {
+                AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰝛"
                     color: Appearance.barPrimary
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(46)
                     }
                 }
 
-                Text {
+                AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: I18n.tr("noMediaPlaying")
                     color: Appearance.barLayer0Text
@@ -117,7 +118,7 @@ Item {
                     }
                 }
 
-                Text {
+                AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: I18n.tr("mprisPlayerHint")
                     color: Appearance.barSubtext

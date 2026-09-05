@@ -96,7 +96,7 @@ Item {
             root.outputName,
             root.notificationPanelShown && root.hostWindowActive)
 
-    component BarText: Text {
+    component BarText: AppText {
         color: Appearance.barLayer1Text
         verticalAlignment: Text.AlignVCenter
         font {
@@ -105,11 +105,12 @@ Item {
         }
     }
 
-    component BarIcon: Text {
+    component BarIcon: AppText {
         color: Appearance.barSecondaryContainerText
         verticalAlignment: Text.AlignVCenter
         font {
             family: Appearance.iconFontFamily
+            weight: Font.Normal
             pixelSize: Appearance.fontSize + Appearance.px(3)
         }
     }
@@ -340,12 +341,13 @@ Item {
                         Appearance.barSecondaryContainer, 0)
                 scale: launcherControl.pressed ? 0.88 : 1
 
-                Text {
+                AppText {
                     anchors.centerIn: parent
                     text: "✦"
                     color: Appearance.barLayer0Text
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(21)
                     }
                 }
@@ -414,7 +416,7 @@ Item {
                 }
                 spacing: -Appearance.px(2)
 
-                Text {
+                AppText {
                     width: parent.width
                     text: NiriService.focusedWindow?.appId
                         ?? I18n.tr("desktop")
@@ -426,7 +428,7 @@ Item {
                     }
                 }
 
-                Text {
+                AppText {
                     width: parent.width
                     text: NiriService.focusedWindow?.title
                         ?? I18n.tr("noFocusedWindow")
@@ -620,12 +622,13 @@ Item {
                     : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
                 scale: settingsControl.pressed ? 0.88 : 1
 
-                Text {
+                AppText {
                     anchors.centerIn: parent
                     text: "󰒓"
                     color: Appearance.barLayer0Text
                     font {
                         family: Appearance.iconFontFamily
+                        weight: Font.Normal
                         pixelSize: Appearance.px(17)
                     }
                 }

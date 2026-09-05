@@ -86,13 +86,14 @@ ColumnLayout {
                 }
             }
 
-            Text {
+            AppText {
                 anchors.centerIn: parent
                 visible: String(root.iconSource).length === 0
                 text: root.icon
                 color: root.iconColor
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: root.iconSize
                 }
             }
@@ -104,7 +105,7 @@ ColumnLayout {
             Layout.alignment: Qt.AlignVCenter
             spacing: 0
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: root.title
                 color: root.titleColor
@@ -116,7 +117,7 @@ ColumnLayout {
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 visible: root.subtitle.length > 0
                 text: root.subtitle

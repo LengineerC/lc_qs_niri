@@ -23,7 +23,7 @@ Controls.ToolTip {
     topPadding: Appearance.px(5)
     bottomPadding: Appearance.px(5)
 
-    contentItem: Text {
+    contentItem: AppText {
         text: root.text
         color: Appearance.layer0Text
         font {

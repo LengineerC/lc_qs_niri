@@ -20,12 +20,13 @@ Rectangle {
     scale: closeMouse.pressed ? 0.88 : 1
     opacity: root.enabled ? 1 : 0.4
 
-    Text {
+    AppText {
         anchors.centerIn: parent
         text: "󰅖"
         color: root.iconColor
         font {
             family: Appearance.iconFontFamily
+            weight: Font.Normal
             pixelSize: Appearance.px(15)
         }
     }

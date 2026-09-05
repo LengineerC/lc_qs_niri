@@ -127,7 +127,7 @@ WlSessionLockSurface {
             shadowVerticalOffset: Appearance.px(8)
         }
 
-        Text {
+        AppText {
             id: lockIcon
 
             anchors.centerIn: parent
@@ -137,6 +137,7 @@ WlSessionLockSurface {
             color: Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: root.compactSize * 0.48
             }
         }

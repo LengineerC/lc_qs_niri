@@ -33,11 +33,12 @@ Rectangle {
         }
         spacing: Appearance.px(12)
 
-        Text {
+        AppText {
             text: "󰥔"
             color: Appearance.barPrimary
             font {
                 family: Appearance.iconFontFamily
+                weight: Font.Normal
                 pixelSize: Appearance.px(28)
             }
         }
@@ -46,7 +47,7 @@ Rectangle {
             Layout.fillWidth: true
             spacing: Appearance.px(1)
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: I18n.locale.toString(
                     root.now, ShellSettings.timeFormat)
@@ -58,7 +59,7 @@ Rectangle {
                 }
             }
 
-            Text {
+            AppText {
                 Layout.fillWidth: true
                 text: I18n.locale.toString(
                     root.now, ShellSettings.dateFormat)

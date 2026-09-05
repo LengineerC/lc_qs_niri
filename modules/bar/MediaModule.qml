@@ -106,18 +106,19 @@ MouseArea {
                 }
             }
 
-            Text {
+            AppText {
                 anchors.centerIn: parent
                 text: MediaService.isPlaying ? "󰏤" : "󰝚"
                 color: Appearance.barLayer0Text
                 font {
                     family: Appearance.iconFontFamily
+                    weight: Font.Normal
                     pixelSize: Appearance.px(13)
                 }
             }
         }
 
-        Text {
+        AppText {
             Layout.fillWidth: true
             Layout.maximumWidth: Appearance.px(root.compact ? 200 : 325)
             text: {

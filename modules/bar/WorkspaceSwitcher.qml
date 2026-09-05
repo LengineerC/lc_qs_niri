@@ -483,7 +483,7 @@ Item {
                         }
                     }
 
-                    Text {
+                    AppText {
                         anchors.centerIn: parent
                         visible: !root.dotIndicator
                         text: model.name || model.index

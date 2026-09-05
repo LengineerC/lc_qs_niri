@@ -424,16 +424,17 @@ PopupWindow {
                             }
                             spacing: Appearance.px(8)
 
-                            Text {
+                            AppText {
                                 text: "󰅁"
                                 color: Appearance.barPrimary
                                 font {
                                     family: Appearance.iconFontFamily
+                                    weight: Font.Normal
                                     pixelSize: Appearance.px(15)
                                 }
                             }
 
-                            Text {
+                            AppText {
                                 Layout.fillWidth: true
                                 text: submenu.submenuTitle
                                 color: Appearance.barLayer0Text
