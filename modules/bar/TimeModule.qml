@@ -19,7 +19,7 @@ MouseArea {
         Appearance.withAlpha(Appearance.barSubtext, 0.45)
     readonly property int clockFontSize:
         Appearance.fontSize + Appearance.px(3)
-    property real digitWeight: 2.5 * Appearance.scale
+    property real digitWeight: 3 * Appearance.scale
 
     readonly property int digitWidth: Appearance.px(13)
     readonly property int digitHeight: Appearance.px(17)
@@ -409,7 +409,7 @@ MouseArea {
             context.fillStyle = fillColor;
 
             const radius = Math.max(1.5, width * 0.3);
-            const centerX = width / 2;
+            const centerX = width / 2 - Appearance.px(1);
             for (const centerY of [height * 0.36, height * 0.67]) {
                 context.beginPath();
                 context.arc(centerX, centerY, radius,
