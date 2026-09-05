@@ -269,14 +269,25 @@ Item {
         onAccepted: WallpaperService.setDirectory(selectedFolder)
     }
 
-    ColumnLayout {
-        anchors {
-            fill: parent
-            margins: Appearance.px(18)
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: forceActiveFocus()
         }
-        spacing: Appearance.px(10)
 
         SettingsPageHeader {
+            id: stylePageHeader
+
+            height: implicitHeight
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+                margins: Appearance.px(18)
+            }
             icon: "󰏘"
             title: I18n.tr("style")
             onCloseClicked: root.closeRequested()
@@ -288,6 +299,34 @@ Item {
                 font.pixelSize: Appearance.smallFontSize
             }
         }
+
+        Flickable {
+            id: styleFlickable
+
+            anchors {
+                top: stylePageHeader.bottom
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+                topMargin: Appearance.px(5)
+                leftMargin: Appearance.px(18)
+                rightMargin: Appearance.px(10)
+                bottomMargin: Appearance.px(14)
+            }
+            contentWidth: width
+            contentHeight: styleColumn.implicitHeight
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+
+            Controls.ScrollBar.vertical: Controls.ScrollBar {
+                policy: Controls.ScrollBar.AsNeeded
+            }
+
+            ColumnLayout {
+                id: styleColumn
+
+                width: styleFlickable.width - Appearance.px(10)
+                spacing: Appearance.px(10)
 
         Rectangle {
             Layout.fillWidth: true
@@ -609,11 +648,23 @@ Item {
         GridView {
             id: wallpaperGrid
 
+            readonly property int columnCount:
+                width >= Appearance.px(660) ? 3 : 2
+
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.minimumHeight: Appearance.px(500)
+            Layout.preferredHeight: Math.min(
+                Appearance.px(680),
+                Math.max(
+                    Appearance.px(500),
+                    Math.ceil(WallpaperService.wallpapers.length
+                        / Math.max(1, columnCount))
+                        * cellHeight))
             clip: true
-            cellWidth: width / 4
-            cellHeight: Appearance.px(135)
+            cellWidth: Math.floor(width / columnCount)
+            cellHeight: Math.max(
+                Appearance.px(160),
+                Math.round(cellWidth * 0.62))
             model: WallpaperService.wallpapers
 
             delegate: Item {
@@ -637,8 +688,8 @@ Item {
                         source: WallpaperService.previewUrl(modelData)
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
-                        sourceSize.width: Appearance.px(240)
-                        sourceSize.height: Appearance.px(140)
+                        sourceSize.width: Math.ceil(width)
+                        sourceSize.height: Math.ceil(height)
                     }
 
                     MouseArea {
@@ -652,6 +703,8 @@ Item {
 
             Controls.ScrollBar.vertical: Controls.ScrollBar {
                 policy: Controls.ScrollBar.AsNeeded
+            }
+        }
             }
         }
     }
