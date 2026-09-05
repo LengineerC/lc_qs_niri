@@ -342,7 +342,7 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: "󰣇"
+                    text: "✦"
                     color: Appearance.barLayer0Text
                     font {
                         family: Appearance.iconFontFamily
