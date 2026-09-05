@@ -13,9 +13,12 @@ MouseArea {
     implicitHeight: Appearance.barHeight
 
     Rectangle {
-        color: root.containsMouse ? Appearance.barLayer1Hover : Appearance.barLayer1
+        color: ShellSettings.barBackgroundless
+            ? "transparent"
+            : root.containsMouse
+                ? Appearance.barLayer1Hover : Appearance.barLayer1
         radius: Appearance.smallRadius
-        border.width: 1
+        border.width: ShellSettings.barBackgroundless ? 0 : 1
         border.color: Appearance.barLayer0Border
 
         anchors {

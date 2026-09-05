@@ -40,9 +40,11 @@ MouseArea {
             bottomMargin: Appearance.px(4)
         }
         radius: Appearance.smallRadius
-        color: root.containsMouse
+        color: ShellSettings.barBackgroundless
+            ? "transparent"
+            : root.containsMouse
             ? Appearance.barLayer1Hover : Appearance.barLayer1
-        border.width: 1
+        border.width: ShellSettings.barBackgroundless ? 0 : 1
         border.color: Appearance.barLayer0Border
 
         Behavior on color {

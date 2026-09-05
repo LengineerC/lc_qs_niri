@@ -1646,6 +1646,32 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(1)
+
+                            PanelText {
+                                text: I18n.tr("barBackgroundless")
+                                color: Appearance.layer0Text
+                            }
+
+                            PanelText {
+                                text: I18n.tr("barBackgroundlessHint")
+                                color: Appearance.subtext
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        SettingSwitch {
+                            checked: ShellSettings.barBackgroundless
+                            onToggled: checked =>
+                                ShellSettings.barBackgroundless = checked
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
                         opacity: ShellSettings.barFrostedGlass ? 1 : 0.42
 
                         ColumnLayout {

@@ -269,8 +269,9 @@ Item {
             bottomMargin: Appearance.px(4)
         }
         radius: Appearance.smallRadius
-        color: Appearance.barLayer1
-        border.width: 1
+        color: ShellSettings.barBackgroundless
+            ? "transparent" : Appearance.barLayer1
+        border.width: ShellSettings.barBackgroundless ? 0 : 1
         border.color: Appearance.barLayer0Border
     }
 
@@ -336,7 +337,8 @@ Item {
             id: hoverIndicator
 
             z: 0.5
-            visible: root.draggedItem === null
+            visible: !ShellSettings.barBackgroundless
+                && root.draggedItem === null
                 && root.hoverItem !== null && root.hoverItem.visible
             x: root.hoverItem
                 ? workspaceRow.x + root.hoverItem.x

@@ -66,8 +66,13 @@ Scope {
             // their translated position is the overview's top edge.
             readonly property bool glassEffectActive:
                 ShellSettings.barFrostedGlass
+                    && !ShellSettings.barBackgroundless
                     && NiriService.barRetractionProgress < 0.999
             readonly property bool connectorGlassEffectActive:
+                ShellSettings.barFrostedGlass
+                    && !ShellSettings.barBackgroundless
+                    && NiriService.barRetractionProgress <= 0.001
+            readonly property bool popupGlassEffectActive:
                 ShellSettings.barFrostedGlass
                     && NiriService.barRetractionProgress <= 0.001
 
@@ -132,7 +137,7 @@ Scope {
                 Region {
                     // Panels close when overview starts; do not let their
                     // exit animation keep a blurred patch at the top edge.
-                    item: barWindow.connectorGlassEffectActive
+                    item: barWindow.popupGlassEffectActive
                         ? barContent.popupMask : null
                     radius: Appearance.normalRadius
                 }
@@ -268,6 +273,7 @@ Scope {
                     width: parent.width
                     height: Appearance.cornerSize
                     visible: !ShellSettings.barFrostedGlass
+                        && !ShellSettings.barBackgroundless
                         && NiriService.barRetractionProgress <= 0.001
 
                     BarConnectorCorner {
@@ -300,6 +306,7 @@ Scope {
                     width: parent.width
                     height: Appearance.cornerSize
                     visible: !ShellSettings.barFrostedGlass
+                        && !ShellSettings.barBackgroundless
                         && NiriService.barRetractionProgress <= 0.001
 
                     RoundCorner {
@@ -551,6 +558,7 @@ Scope {
                 y: ShellSettings.barFrostedGlass ? 0 : -1
                 visible: leftSidebar.surfaceVisible
                     && !ShellSettings.barFrostedGlass
+                    && !ShellSettings.barBackgroundless
                 implicitSize: Appearance.cornerSize
                 layerEnabled: !ShellSettings.barFrostedGlass
                 color: Appearance.barSurfaceColor

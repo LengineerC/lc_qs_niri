@@ -25,7 +25,9 @@ MouseArea {
         height: Appearance.px(30)
         anchors.centerIn: parent
         radius: Appearance.fullRadius
-        color: root.containsMouse || root.expanded
+        color: ShellSettings.barBackgroundless
+            ? "transparent"
+            : root.containsMouse || root.expanded
             ? Appearance.barLayer1Hover
             : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
         scale: root.pressed ? 0.88 : 1

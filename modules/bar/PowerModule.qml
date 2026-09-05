@@ -19,7 +19,9 @@ MouseArea {
         height: Appearance.px(30)
         anchors.verticalCenter: parent.verticalCenter
         radius: Appearance.fullRadius
-        color: root.containsMouse
+        color: ShellSettings.barBackgroundless
+            ? "transparent"
+            : root.containsMouse
             ? Appearance.barPrimaryContainer
             : Appearance.withAlpha(Appearance.barPrimaryContainer, 0)
         scale: root.pressed ? 0.88 : 1
@@ -28,6 +30,7 @@ MouseArea {
             anchors.centerIn: parent
             text: "󰐥"
             color: root.containsMouse
+                    && !ShellSettings.barBackgroundless
                 ? Appearance.barPrimaryContainerText : Appearance.barLayer0Text
             font {
                 family: Appearance.iconFontFamily

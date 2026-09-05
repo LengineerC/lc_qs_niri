@@ -168,6 +168,15 @@ Item {
         id: barHover
     }
 
+    // Keep blank parts of the Bar clickable even when the visual Blob is
+    // removed by backgroundless mode.
+    MouseArea {
+        z: -1
+        width: root.width
+        height: Appearance.barHeight
+        onClicked: root.closeOverlays()
+    }
+
     // 手动添加底色层，修复离屏纹理边缘采样导致bar未贴合屏幕
     Rectangle {
         id: solidBarBackground
@@ -182,7 +191,8 @@ Item {
         // The Blob surface below is sufficient in glass mode. Keeping this
         // fallback visible would stack two tints and make the bar opaque.
         color: Appearance.barBgColor
-        opacity: ShellSettings.barFrostedGlass ? 0 : 1
+        opacity: ShellSettings.barFrostedGlass
+                || ShellSettings.barBackgroundless ? 0 : 1
 
         Behavior on opacity {
             NumberAnimation { duration: Appearance.fastDuration }
@@ -207,6 +217,8 @@ Item {
         // combined outline instead of being drawn between the two surfaces.
         layer.enabled: ShellSettings.shadowEnabled
             && root.effectsOpacity > 0.001
+            && (!ShellSettings.barBackgroundless
+                || popupBackground.visible)
         layer.effect: MultiEffect {
             shadowEnabled: ShellSettings.shadowEnabled
             shadowBlur: 1
@@ -236,16 +248,12 @@ Item {
 
             x: 0
             y: 0
-            width: parent.width
+            width: ShellSettings.barBackgroundless ? 0 : parent.width
             height: Appearance.barHeight
             group: barBlobGroup
             radius: 0
             deformScale: 0
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: root.closeOverlays()
-            }
         }
 
         Blobs.BlobRect {
@@ -256,7 +264,8 @@ Item {
             // becomes a clearly brighter double layer with glass. A tiny
             // overlap is enough for BlobGroup to keep one continuous shape.
             readonly property real overlapHeight:
-                ShellSettings.barFrostedGlass
+                ShellSettings.barBackgroundless ? 0
+                : ShellSettings.barFrostedGlass
                     ? Appearance.px(2) : popup.height * 0.2
 
             visible: popup.revealProgress > 0
@@ -278,6 +287,7 @@ Item {
             x: 0
             y: root.connectorTop
             visible: ShellSettings.barFrostedGlass
+                && !ShellSettings.barBackgroundless
                 && root.effectsOpacity >= 0.999
             implicitSize: Appearance.cornerSize
             layerEnabled: false
@@ -289,6 +299,7 @@ Item {
             x: parent.width - width
             y: root.connectorTop
             visible: ShellSettings.barFrostedGlass
+                && !ShellSettings.barBackgroundless
                 && root.effectsOpacity >= 0.999
             implicitSize: Appearance.cornerSize
             layerEnabled: false
@@ -332,7 +343,9 @@ Item {
                 height: Appearance.px(30)
                 anchors.verticalCenter: parent.verticalCenter
                 radius: Appearance.fullRadius
-                color: launcherControl.containsMouse
+                color: ShellSettings.barBackgroundless
+                    ? "transparent"
+                    : launcherControl.containsMouse
                     || popup.shown && popup.anchorItem === launcherControl
                     || root.sidebarShown
                     ? Appearance.barSecondaryContainer
@@ -342,7 +355,7 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: "󰣇"
+                    text: "✦"
                     color: Appearance.barLayer0Text
                     font {
                         family: Appearance.iconFontFamily
@@ -615,7 +628,9 @@ Item {
                 height: Appearance.px(30)
                 anchors.verticalCenter: parent.verticalCenter
                 radius: Appearance.fullRadius
-                color: settingsControl.containsMouse
+                color: ShellSettings.barBackgroundless
+                    ? "transparent"
+                    : settingsControl.containsMouse
                     ? Appearance.barLayer1Hover
                     : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
                 scale: settingsControl.pressed ? 0.88 : 1
