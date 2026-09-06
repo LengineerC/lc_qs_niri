@@ -17,6 +17,8 @@ Item {
             && (dedicatedPanelLoader.item?.menuContainsMouse ?? false)
     readonly property int moveDuration: ShellSettings.animationDuration
     readonly property var moveCurve: ShellSettings.popupBezierCurve
+    readonly property bool geometryAnimationRunning:
+        popupWidthAnimation.running || popupHeightAnimation.running
     readonly property real targetX: {
         const screenWidth = parent?.width ?? popupWidth;
         const center = Number.isFinite(anchorCenterX)
@@ -293,7 +295,7 @@ Item {
         id: weatherPanelComponent
 
         WeatherPanel {
-            active: root.shown
+            active: root.shown && !root.geometryAnimationRunning
             onCloseRequested: root.close()
         }
     }
@@ -393,6 +395,8 @@ Item {
     Behavior on width {
         enabled: root.revealProgress > 0
         NumberAnimation {
+            id: popupWidthAnimation
+
             duration: root.moveDuration
             easing.type: Easing.BezierSpline
             easing.bezierCurve: root.moveCurve
@@ -413,6 +417,8 @@ Item {
         Behavior on height {
             enabled: root.revealProgress > 0
             NumberAnimation {
+                id: popupHeightAnimation
+
                 duration: root.moveDuration
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: root.moveCurve
@@ -509,9 +515,19 @@ Item {
             asynchronous: false
             sourceComponent: root.currentPanelComponent
             anchors {
-                fill: innerSurface
+                top: innerSurface.top
+                bottom: innerSurface.bottom
+                left: innerSurface.left
                 margins: 1
             }
+            // Weather is much wider than the other panels. Construct it at
+            // its final width and let the popup clip/reveal it while growing;
+            // otherwise every child is relaid out on every animation frame.
+            width: root.page === "weather"
+                ? Math.max(
+                    innerSurface.width - 2,
+                    Appearance.px(850) - 16)
+                : Math.max(0, innerSurface.width - 2)
         }
 
     }

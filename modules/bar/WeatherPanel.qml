@@ -30,6 +30,16 @@ Item {
         ShellSettings.barFrostedGlass
             ? Appearance.withAlpha(Appearance.barGlassBaseColor, 0.48)
             : Appearance.barLayer3
+    readonly property real finalContentWidth:
+        Math.max(1, Appearance.px(850) - 16)
+    readonly property real finalChartWidth:
+        Math.max(1, finalContentWidth
+            - Appearance.panelPadding * 2
+            - Appearance.spacingSmall * 2)
+    readonly property real finalBackdropWidth:
+        Math.max(1, finalContentWidth
+            - Appearance.panelPadding * 2
+            - Appearance.px(2))
 
     implicitWidth: Appearance.px(850)
     implicitHeight: contentColumn.implicitHeight
@@ -635,12 +645,19 @@ Item {
         property int mode: 0
         property int maximumPoints: 10
         property var sourceData: WeatherService.hourlyForecast
+        // Draw at the weather panel's final content width. While StyledPopup
+        // expands from a smaller panel, the parent clips this stable texture
+        // instead of reallocating and repainting it on every animation frame.
+        readonly property real renderWidth:
+            Math.max(width, root.finalChartWidth)
+
+        clip: true
 
         readonly property real plotLeft:
             leftPadding + Appearance.px(8)
 
         readonly property real plotRight:
-            width - rightPadding - Appearance.px(8)
+            renderWidth - rightPadding - Appearance.px(8)
 
         readonly property real plotTop:
             topPadding
@@ -677,7 +694,7 @@ Item {
 
         onModeChanged: repaint()
         onChartDataChanged: repaint()
-        onWidthChanged: repaint()
+        onRenderWidthChanged: repaint()
         onHeightChanged: repaint()
         onVisibleChanged: {
             if (visible)
@@ -715,7 +732,12 @@ Item {
         Canvas {
             id: chartCanvas
 
-            anchors.fill: parent
+            anchors {
+                left: parent.left
+                top: parent.top
+                bottom: parent.bottom
+            }
+            width: hourlyChart.renderWidth
             antialiasing: true
 
             function xFor(index, count) {
@@ -1132,10 +1154,10 @@ Item {
 
             anchors {
                 left: parent.left
-                right: parent.right
                 bottom: parent.bottom
             }
 
+            width: hourlyChart.renderWidth
             height: hourlyChart.bottomPadding
 
             Repeater {
@@ -1216,11 +1238,15 @@ Item {
 
         property int mode: 0
         property var sourceData: WeatherService.dailyForecast
+        readonly property real renderWidth:
+            Math.max(width, root.finalChartWidth)
+
+        clip: true
         readonly property real plotLeft:
             leftPadding + Appearance.px(8)
 
         readonly property real plotRight:
-            width - rightPadding - Appearance.px(8)
+            renderWidth - rightPadding - Appearance.px(8)
 
         readonly property real plotTop:
             topPadding
@@ -1257,7 +1283,7 @@ Item {
 
         onModeChanged: repaint()
         onChartDataChanged: repaint()
-        onWidthChanged: repaint()
+        onRenderWidthChanged: repaint()
         onHeightChanged: repaint()
         onVisibleChanged: {
             if (visible)
@@ -1295,7 +1321,12 @@ Item {
         Canvas {
             id: chartCanvas
 
-            anchors.fill: parent
+            anchors {
+                left: parent.left
+                top: parent.top
+                bottom: parent.bottom
+            }
+            width: dailyChart.renderWidth
             antialiasing: true
 
             function xFor(index, count) {
@@ -1635,10 +1666,10 @@ Item {
 
             anchors {
                 left: parent.left
-                right: parent.right
                 bottom: parent.bottom
             }
 
+            width: dailyChart.renderWidth
             height: dailyChart.bottomPadding
 
             Repeater {
@@ -1776,6 +1807,7 @@ Item {
 
             Layout.fillWidth: true
             implicitHeight: Appearance.px(190)
+            clip: true
 
             radius: Appearance.smallRadius
             color: Appearance.barLayer3
@@ -1783,10 +1815,12 @@ Item {
             border.color: Appearance.barOutline
 
             WeatherBackdrop {
-                anchors {
-                    fill: parent
-                    margins: 1
-                }
+                x: 1
+                y: 1
+                width: Math.max(
+                    parent.width - Appearance.px(2),
+                    root.finalBackdropWidth)
+                height: parent.height - Appearance.px(2)
 
                 visible: WeatherService.ready
                 weatherCode: Number(
