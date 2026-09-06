@@ -278,7 +278,8 @@ Item {
         RoundCorner {
             x: 0
             y: root.connectorTop
-            visible: ShellSettings.barFrostedGlass
+            visible: ShellSettings.screenCornersEnabled
+                && ShellSettings.barFrostedGlass
             implicitSize: Appearance.cornerSize
             layerEnabled: false
             color: Appearance.barSurfaceBaseColor
@@ -288,7 +289,8 @@ Item {
         RoundCorner {
             x: parent.width - width
             y: root.connectorTop
-            visible: ShellSettings.barFrostedGlass
+            visible: ShellSettings.screenCornersEnabled
+                && ShellSettings.barFrostedGlass
             implicitSize: Appearance.cornerSize
             layerEnabled: false
             color: Appearance.barSurfaceBaseColor

@@ -118,6 +118,10 @@ Singleton {
         colorMode: ["颜色模式", "Color mode"],
         light: ["亮色", "Light"],
         dark: ["暗色", "Dark"],
+        screenCornersEnabled: ["显示屏幕圆角", "Show screen corners"],
+        screenCornersEnabledHint: [
+            "同时控制 Bar 下方连接圆角和屏幕四周圆角",
+            "Controls the Bar connector corners and all four screen corners"],
         screenCornerColor: ["屏幕圆角颜色", "Screen corner color"],
         screenCornerColorHint: ["独立于主题，浅色模式下也保持此颜色",
             "Independent of the theme and retained in light mode"],

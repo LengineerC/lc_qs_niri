@@ -1523,7 +1523,34 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Appearance.px(1)
+
+                            PanelText {
+                                text: I18n.tr("screenCornersEnabled")
+                                color: Appearance.layer0Text
+                            }
+
+                            PanelText {
+                                text: I18n.tr("screenCornersEnabledHint")
+                                color: Appearance.subtext
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        SettingSwitch {
+                            checked: ShellSettings.screenCornersEnabled
+                            onToggled: checked =>
+                                ShellSettings.screenCornersEnabled = checked
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
                         spacing: Appearance.spacingMedium
+                        opacity: ShellSettings.screenCornersEnabled ? 1 : 0.42
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -1544,6 +1571,7 @@ Item {
                         Rectangle {
                             id: screenCornerColorButton
 
+                            enabled: ShellSettings.screenCornersEnabled
                             implicitWidth: Appearance.px(138)
                             implicitHeight: Appearance.controlHeight
                             radius: Appearance.controlRadius
@@ -1593,8 +1621,10 @@ Item {
                                 id: screenCornerColorMouse
 
                                 anchors.fill: parent
+                                enabled: screenCornerColorButton.enabled
                                 hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
+                                cursorShape: enabled
+                                    ? Qt.PointingHandCursor : Qt.ArrowCursor
                                 onClicked: {
                                     screenCornerColorDialog.selectedColor =
                                         ShellSettings.screenCornerColor;

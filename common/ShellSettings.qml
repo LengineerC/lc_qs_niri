@@ -21,6 +21,7 @@ Singleton {
     property int shadowBlurRadius: 18
     property real shadowOpacity: 0.45
     property int shadowOffsetY: 4
+    property bool screenCornersEnabled: true
     property string screenCornerColor: "#000000"
     property int animationDuration: 500
     property real popupBezierX1: 0.38
@@ -125,7 +126,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 25,
+            version: 26,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             workspaceIndicatorStyle: workspaceIndicatorStyle,
@@ -135,6 +136,7 @@ Singleton {
             shadowBlurRadius: shadowBlurRadius,
             shadowOpacity: shadowOpacity,
             shadowOffsetY: shadowOffsetY,
+            screenCornersEnabled: screenCornersEnabled,
             screenCornerColor: screenCornerColor,
             animationDuration: animationDuration,
             popupBezier: [
@@ -176,7 +178,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 25)
+            if (state.version !== 26)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -214,6 +216,10 @@ Singleton {
             if (state.shadowOffsetY !== undefined)
                 shadowOffsetY = Math.round(clamped(
                     state.shadowOffsetY, -12, 24));
+            else
+                needsMigration = true;
+            if (typeof state.screenCornersEnabled === "boolean")
+                screenCornersEnabled = state.screenCornersEnabled;
             else
                 needsMigration = true;
             if (typeof state.screenCornerColor === "string"
@@ -398,6 +404,7 @@ Singleton {
         shadowBlurRadius = 18;
         shadowOpacity = 0.45;
         shadowOffsetY = 4;
+        screenCornersEnabled = true;
         screenCornerColor = "#000000";
         animationDuration = 500;
         popupBezierX1 = 0.38;
@@ -447,6 +454,7 @@ Singleton {
     onShadowBlurRadiusChanged: scheduleSave()
     onShadowOpacityChanged: scheduleSave()
     onShadowOffsetYChanged: scheduleSave()
+    onScreenCornersEnabledChanged: scheduleSave()
     onScreenCornerColorChanged: scheduleSave()
     onAnimationDurationChanged: scheduleSave()
     onPopupBezierX1Changed: scheduleSave()
@@ -606,6 +614,10 @@ Singleton {
                 root.screenCornerColor = color;
         }
 
+        function setScreenCornersEnabled(enabled: bool): void {
+            root.screenCornersEnabled = enabled;
+        }
+
         function reset(): void {
             root.resetDefaults();
         }
@@ -621,6 +633,7 @@ Singleton {
                 shadowBlurRadius: root.shadowBlurRadius,
                 shadowOpacity: root.shadowOpacity,
                 shadowOffsetY: root.shadowOffsetY,
+                screenCornersEnabled: root.screenCornersEnabled,
                 screenCornerColor: root.screenCornerColor,
                 animationDuration: root.animationDuration,
                 popupBezier: root.popupBezierCurve,

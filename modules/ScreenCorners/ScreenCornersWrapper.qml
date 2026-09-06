@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import qs.common
 
 Variants {
     model: Quickshell.screens
@@ -11,6 +12,7 @@ Variants {
         required property ShellScreen modelData
 
         screen: modelData
+        visible: ShellSettings.screenCornersEnabled
         color: "transparent"
         exclusiveZone: -1
         WlrLayershell.layer: WlrLayer.Overlay

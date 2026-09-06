@@ -237,6 +237,8 @@ scheme-vibrant
 | `qs ipc call settings setLanguage en_US` | 切换为英语 |
 | `qs ipc call settings setTimeFormat "HH:mm:ss"` | 设置 Qt 时间格式 |
 | `qs ipc call settings setDateFormat "yyyy-MM-dd ddd"` | 设置 Qt 日期格式 |
+| `qs ipc call settings setScreenCornersEnabled true` | 显示 Bar 连接圆角和屏幕四周圆角 |
+| `qs ipc call settings setScreenCornersEnabled false` | 隐藏 Bar 连接圆角和屏幕四周圆角 |
 | `qs ipc call settings setWallpaperFillMode PreserveAspectCrop` | 设置壁纸显示形式 |
 | `qs ipc call settings setLaunchpadBackgroundMode window` | 设置启动台背景模式 |
 | `qs ipc call settings reset` | 将全部 Shell 设置恢复默认值 |

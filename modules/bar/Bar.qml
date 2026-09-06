@@ -64,7 +64,9 @@ Scope {
             // below the Bar, so moving only by barHeight would leave them
             // visible at the top edge after the animation finishes.
             readonly property real hiddenOffset:
-                -(Appearance.barHeight + Appearance.cornerSize)
+                -(Appearance.barHeight
+                    + (ShellSettings.screenCornersEnabled
+                        ? Appearance.cornerSize : 0))
             // Keep every part of the glass silhouette active while it slides.
             // The blur is disabled only after the complete shape is offscreen.
             readonly property bool glassEffectActive:
@@ -72,6 +74,7 @@ Scope {
                     && NiriService.barRetractionProgress < 0.999
             readonly property bool connectorGlassEffectActive:
                 ShellSettings.barFrostedGlass
+                    && ShellSettings.screenCornersEnabled
                     && NiriService.barRetractionProgress < 0.999
 
             screen: modelData
@@ -135,7 +138,7 @@ Scope {
                 Region {
                     // Panels close when overview starts; do not let their
                     // exit animation keep a blurred patch at the top edge.
-                    item: barWindow.connectorGlassEffectActive
+                    item: barWindow.glassEffectActive
                         ? barContent.popupMask : null
                     radius: Appearance.normalRadius
                 }
@@ -270,7 +273,8 @@ Scope {
                         - (ShellSettings.barFrostedGlass ? 0 : 1)
                     width: parent.width
                     height: Appearance.cornerSize
-                    visible: !ShellSettings.barFrostedGlass
+                    visible: ShellSettings.screenCornersEnabled
+                        && !ShellSettings.barFrostedGlass
 
                     BarConnectorCorner {
                         anchors {
@@ -301,7 +305,8 @@ Scope {
                         - (ShellSettings.barFrostedGlass ? 0 : 1)
                     width: parent.width
                     height: Appearance.cornerSize
-                    visible: !ShellSettings.barFrostedGlass
+                    visible: ShellSettings.screenCornersEnabled
+                        && !ShellSettings.barFrostedGlass
 
                     RoundCorner {
                         anchors {
@@ -551,6 +556,7 @@ Scope {
                 x: 0
                 y: ShellSettings.barFrostedGlass ? 0 : -1
                 visible: leftSidebar.surfaceVisible
+                    && ShellSettings.screenCornersEnabled
                     && !ShellSettings.barFrostedGlass
                 implicitSize: Appearance.cornerSize
                 layerEnabled: !ShellSettings.barFrostedGlass

@@ -16,7 +16,16 @@ Item {
     readonly property color chartBrightColor:
         ShellSettings.barFrostedGlass ? "#f5ffffff" : Appearance.barPrimary
     readonly property color chartDimColor:
-        ShellSettings.barFrostedGlass ? "#8affffff" : Appearance.barTertiary
+        ShellSettings.barFrostedGlass
+            ? "#a8c9d3dc"
+            : Appearance.mix(
+                Appearance.barTertiary,
+                Appearance.barLayer0Text,
+                0.24)
+    readonly property color chartGridColor:
+        Appearance.withAlpha(Appearance.barOutline, 0.3)
+    readonly property color chartGlowColor:
+        Appearance.withAlpha(chartBrightColor, 0.18)
     readonly property color chartSurfaceColor:
         ShellSettings.barFrostedGlass
             ? Appearance.withAlpha(Appearance.barGlassBaseColor, 0.48)
@@ -43,9 +52,9 @@ Item {
         signal clicked
 
         implicitWidth: label.implicitWidth + Appearance.px(18)
-        implicitHeight: Appearance.px(28)
+        implicitHeight: Appearance.iconButtonSize
 
-        radius: Appearance.px(8)
+        radius: Appearance.fieldRadius
 
         color: selected
             ? Appearance.barPrimaryContainer
@@ -97,15 +106,37 @@ Item {
 
         required property color markerColor
         required property string label
+        property bool dashed: false
 
-        spacing: Appearance.px(5)
+        spacing: Appearance.spacingTiny
 
-        Rectangle {
+        Item {
             Layout.preferredWidth: Appearance.px(14)
-            Layout.preferredHeight: Appearance.px(3)
+            Layout.preferredHeight: Appearance.px(4)
 
-            radius: height / 2
-            color: legend.markerColor
+            Rectangle {
+                anchors {
+                    left: parent.left
+                    verticalCenter: parent.verticalCenter
+                }
+                width: legend.dashed
+                    ? Appearance.px(5) : parent.width
+                height: Appearance.px(3)
+                radius: height / 2
+                color: legend.markerColor
+            }
+
+            Rectangle {
+                visible: legend.dashed
+                anchors {
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                }
+                width: Appearance.px(5)
+                height: Appearance.px(3)
+                radius: height / 2
+                color: legend.markerColor
+            }
         }
 
         PanelText {
@@ -661,6 +692,26 @@ Item {
             }
         }
 
+        Connections {
+            target: root
+
+            function onChartBrightColorChanged() {
+                hourlyChart.repaint();
+            }
+
+            function onChartDimColorChanged() {
+                hourlyChart.repaint();
+            }
+
+            function onChartGridColorChanged() {
+                hourlyChart.repaint();
+            }
+
+            function onChartSurfaceColorChanged() {
+                hourlyChart.repaint();
+            }
+        }
+
         Canvas {
             id: chartCanvas
 
@@ -722,8 +773,7 @@ Item {
                 const rowCount = 4;
 
                 context.lineWidth = 1;
-                context.strokeStyle = Appearance.withAlpha(
-                    Appearance.barOutline, 0.36);
+                context.strokeStyle = root.chartGridColor;
                 context.fillStyle = Appearance.barSubtext;
                 context.font =
                     Appearance.fontWeight + " "
@@ -755,18 +805,12 @@ Item {
             function drawLine(context, values, color,
                 minimum, maximum,
                 left, right, top, bottom,
-                suffix, labelOffset) {
+                suffix, labelOffset,
+                dashed=false, fillArea=false) {
                 if (!values || values.length === 0)
                     return;
 
-                context.lineWidth = Appearance.px(2);
-                context.lineJoin = "round";
-                context.lineCap = "round";
-                context.strokeStyle = color;
-
-                let pathStarted = false;
-
-                context.beginPath();
+                const points = [];
 
                 for (let index = 0; index < values.length; ++index) {
                     const value = Number(values[index]);
@@ -774,57 +818,97 @@ Item {
                     if (!Number.isFinite(value))
                         continue;
 
-                    const x = xFor(index, values.length);
-                    const y = yFor(
-                        value,
-                        minimum,
-                        maximum,
-                        top,
-                        bottom
-                    );
-
-                    if (!pathStarted) {
-                        context.moveTo(x, y);
-                        pathStarted = true;
-                    } else {
-                        context.lineTo(x, y);
-                    }
+                    points.push({
+                        index: index,
+                        value: value,
+                        x: xFor(index, values.length),
+                        y: yFor(value, minimum, maximum, top, bottom)
+                    });
                 }
 
-                if (pathStarted)
-                    context.stroke();
+                if (points.length === 0)
+                    return;
+
+                context.save();
+                context.lineJoin = "round";
+                context.lineCap = "round";
+
+                if (fillArea && points.length > 1) {
+                    const fillGradient = context.createLinearGradient(
+                        0, top, 0, bottom);
+                    fillGradient.addColorStop(
+                        0, Appearance.withAlpha(color, 0.2));
+                    fillGradient.addColorStop(
+                        1, Appearance.withAlpha(color, 0.015));
+
+                    context.beginPath();
+                    context.moveTo(points[0].x, bottom);
+                    context.lineTo(points[0].x, points[0].y);
+                    for (let index = 1; index < points.length; ++index)
+                        context.lineTo(points[index].x, points[index].y);
+                    context.lineTo(points[points.length - 1].x, bottom);
+                    context.closePath();
+                    context.fillStyle = fillGradient;
+                    context.fill();
+                }
+
+                context.beginPath();
+                context.moveTo(points[0].x, points[0].y);
+                for (let index = 1; index < points.length; ++index)
+                    context.lineTo(points[index].x, points[index].y);
+
+                context.lineWidth = Appearance.px(dashed ? 1.7 : 2.3);
+                context.strokeStyle = color;
+                context.setLineDash(dashed
+                    ? [Appearance.px(6), Appearance.px(4)] : []);
+                context.shadowColor = dashed
+                    ? "transparent" : root.chartGlowColor;
+                context.shadowBlur = dashed ? 0 : Appearance.px(5);
+                context.stroke();
+                context.setLineDash([]);
+                context.shadowBlur = 0;
 
                 const fontSize = Appearance.smallFontSize;
 
-                context.fillStyle = color;
                 context.font = Appearance.fontWeight + " " + fontSize
                     + "px \"" + Appearance.fontFamily + "\"";
                 context.textBaseline = "middle";
 
-                for (let index = 0; index < values.length; ++index) {
-                    const value = Number(values[index]);
+                for (let index = 0; index < points.length; ++index) {
+                    const point = points[index];
 
-                    if (!Number.isFinite(value))
-                        continue;
-
-                    const x = xFor(index, values.length);
-                    const y = yFor(
-                        value,
-                        minimum,
-                        maximum,
-                        top,
-                        bottom
-                    );
+                    if (point.index === 0) {
+                        context.beginPath();
+                        context.arc(
+                            point.x,
+                            point.y,
+                            Appearance.px(6.5),
+                            0,
+                            Math.PI * 2
+                        );
+                        context.fillStyle = Appearance.withAlpha(
+                            color, dashed ? 0.12 : 0.2);
+                        context.fill();
+                    }
 
                     context.beginPath();
                     context.arc(
-                        x,
-                        y,
-                        Appearance.px(3.2),
+                        point.x,
+                        point.y,
+                        Appearance.px(dashed ? 3.1 : 3.5),
                         0,
                         Math.PI * 2
                     );
-                    context.fill();
+                    if (dashed) {
+                        context.fillStyle = root.chartSurfaceColor;
+                        context.fill();
+                        context.lineWidth = Appearance.px(1.7);
+                        context.strokeStyle = color;
+                        context.stroke();
+                    } else {
+                        context.fillStyle = color;
+                        context.fill();
+                    }
 
                     /*
                     * 防止第一个和最后一个标签超出图表：
@@ -833,14 +917,14 @@ Item {
                     * 最后一个向左展开；
                     * 中间标签居中。
                     */
-                    if (index === 0)
+                    if (point.index === 0)
                         context.textAlign = "left";
-                    else if (index === values.length - 1)
+                    else if (point.index === values.length - 1)
                         context.textAlign = "right";
                     else
                         context.textAlign = "center";
 
-                    const rawLabelY = y + labelOffset;
+                    const rawLabelY = point.y + labelOffset;
                     const labelY = Math.max(
                         top + fontSize / 2,
                         Math.min(
@@ -849,13 +933,16 @@ Item {
                         )
                     );
 
+                    context.fillStyle = color;
                     context.fillText(
-                        String(Math.round(value))
+                        String(Math.round(point.value))
                             + String(suffix ?? ""),
-                        x,
+                        point.x,
                         labelY
                     );
                 }
+
+                context.restore();
             }
 
             onPaint: {
@@ -909,7 +996,9 @@ Item {
                         top,
                         bottom,
                         "°C",
-                        lowerLabelOffset
+                        upperLabelOffset,
+                        false,
+                        true
                     );
 
                     drawLine(
@@ -923,7 +1012,9 @@ Item {
                         top,
                         bottom,
                         "°C",
-                        lowerLabelOffset
+                        lowerLabelOffset,
+                        true,
+                        false
                     );
                 } else if (hourlyChart.mode === 1) {
                     const precipitation = data.map(item =>
@@ -971,7 +1062,9 @@ Item {
                         top,
                         bottom,
                         "%",
-                        lowerLabelOffset
+                        upperLabelOffset,
+                        false,
+                        true
                     );
 
                     // 湿度折线
@@ -986,7 +1079,9 @@ Item {
                         top,
                         bottom,
                         "%",
-                        lowerLabelOffset
+                        lowerLabelOffset,
+                        true,
+                        false
                     );
                 } else {
                     const wind = data.map(item =>
@@ -1022,7 +1117,9 @@ Item {
                         top,
                         bottom,
                         "km/h",
-                        lowerLabelOffset
+                        lowerLabelOffset,
+                        false,
+                        true
                     );
                 }
             }
@@ -1175,6 +1272,26 @@ Item {
             }
         }
 
+        Connections {
+            target: root
+
+            function onChartBrightColorChanged() {
+                dailyChart.repaint();
+            }
+
+            function onChartDimColorChanged() {
+                dailyChart.repaint();
+            }
+
+            function onChartGridColorChanged() {
+                dailyChart.repaint();
+            }
+
+            function onChartSurfaceColorChanged() {
+                dailyChart.repaint();
+            }
+        }
+
         Canvas {
             id: chartCanvas
 
@@ -1236,8 +1353,7 @@ Item {
                 const rowCount = 4;
 
                 context.lineWidth = 1;
-                context.strokeStyle = Appearance.withAlpha(
-                    Appearance.barOutline, 0.36);
+                context.strokeStyle = root.chartGridColor;
                 context.fillStyle = Appearance.barSubtext;
                 context.font =
                     Appearance.fontWeight + " "
@@ -1269,18 +1385,12 @@ Item {
             function drawLine(context, values, color,
                     minimum, maximum,
                     left, right, top, bottom,
-                    suffix, labelOffset) {
+                    suffix, labelOffset,
+                    dashed=false, fillArea=false) {
                 if (!values || values.length === 0)
                     return;
 
-                context.lineWidth = Appearance.px(2.2);
-                context.lineJoin = "round";
-                context.lineCap = "round";
-                context.strokeStyle = color;
-
-                let pathStarted = false;
-
-                context.beginPath();
+                const points = [];
 
                 for (let index = 0; index < values.length; ++index) {
                     const value = Number(values[index]);
@@ -1288,66 +1398,106 @@ Item {
                     if (!Number.isFinite(value))
                         continue;
 
-                    const x = xFor(index, values.length);
-                    const y = yFor(
-                        value,
-                        minimum,
-                        maximum,
-                        top,
-                        bottom
-                    );
-
-                    if (!pathStarted) {
-                        context.moveTo(x, y);
-                        pathStarted = true;
-                    } else {
-                        context.lineTo(x, y);
-                    }
+                    points.push({
+                        index: index,
+                        value: value,
+                        x: xFor(index, values.length),
+                        y: yFor(value, minimum, maximum, top, bottom)
+                    });
                 }
 
-                if (pathStarted)
-                    context.stroke();
+                if (points.length === 0)
+                    return;
+
+                context.save();
+                context.lineJoin = "round";
+                context.lineCap = "round";
+
+                if (fillArea && points.length > 1) {
+                    const fillGradient = context.createLinearGradient(
+                        0, top, 0, bottom);
+                    fillGradient.addColorStop(
+                        0, Appearance.withAlpha(color, 0.2));
+                    fillGradient.addColorStop(
+                        1, Appearance.withAlpha(color, 0.015));
+
+                    context.beginPath();
+                    context.moveTo(points[0].x, bottom);
+                    context.lineTo(points[0].x, points[0].y);
+                    for (let index = 1; index < points.length; ++index)
+                        context.lineTo(points[index].x, points[index].y);
+                    context.lineTo(points[points.length - 1].x, bottom);
+                    context.closePath();
+                    context.fillStyle = fillGradient;
+                    context.fill();
+                }
+
+                context.beginPath();
+                context.moveTo(points[0].x, points[0].y);
+                for (let index = 1; index < points.length; ++index)
+                    context.lineTo(points[index].x, points[index].y);
+
+                context.lineWidth = Appearance.px(dashed ? 1.7 : 2.3);
+                context.strokeStyle = color;
+                context.setLineDash(dashed
+                    ? [Appearance.px(6), Appearance.px(4)] : []);
+                context.shadowColor = dashed
+                    ? "transparent" : root.chartGlowColor;
+                context.shadowBlur = dashed ? 0 : Appearance.px(5);
+                context.stroke();
+                context.setLineDash([]);
+                context.shadowBlur = 0;
 
                 const fontSize = Appearance.smallFontSize;
 
-                context.fillStyle = color;
                 context.textBaseline = "middle";
                 context.font = Appearance.fontWeight + " " + fontSize
                     + "px \"" + Appearance.fontFamily + "\"";
 
-                for (let index = 0; index < values.length; ++index) {
-                    const value = Number(values[index]);
+                for (let index = 0; index < points.length; ++index) {
+                    const point = points[index];
 
-                    if (!Number.isFinite(value))
-                        continue;
-
-                    const x = xFor(index, values.length);
-                    const y = yFor(
-                        value,
-                        minimum,
-                        maximum,
-                        top,
-                        bottom
-                    );
+                    if (point.index === 0) {
+                        context.beginPath();
+                        context.arc(
+                            point.x,
+                            point.y,
+                            Appearance.px(6.5),
+                            0,
+                            Math.PI * 2
+                        );
+                        context.fillStyle = Appearance.withAlpha(
+                            color, dashed ? 0.12 : 0.2);
+                        context.fill();
+                    }
 
                     context.beginPath();
                     context.arc(
-                        x,
-                        y,
-                        Appearance.px(3.4),
+                        point.x,
+                        point.y,
+                        Appearance.px(dashed ? 3.1 : 3.5),
                         0,
                         Math.PI * 2
                     );
-                    context.fill();
+                    if (dashed) {
+                        context.fillStyle = root.chartSurfaceColor;
+                        context.fill();
+                        context.lineWidth = Appearance.px(1.7);
+                        context.strokeStyle = color;
+                        context.stroke();
+                    } else {
+                        context.fillStyle = color;
+                        context.fill();
+                    }
 
-                    if (index === 0)
+                    if (point.index === 0)
                         context.textAlign = "left";
-                    else if (index === values.length - 1)
+                    else if (point.index === values.length - 1)
                         context.textAlign = "right";
                     else
                         context.textAlign = "center";
 
-                    const rawLabelY = y + labelOffset;
+                    const rawLabelY = point.y + labelOffset;
                     const labelY = Math.max(
                         top + fontSize / 2,
                         Math.min(
@@ -1356,13 +1506,16 @@ Item {
                         )
                     );
 
+                    context.fillStyle = color;
                     context.fillText(
-                        String(Math.round(value))
+                        String(Math.round(point.value))
                             + String(suffix ?? ""),
-                        x,
+                        point.x,
                         labelY
                     );
                 }
+
+                context.restore();
             }
 
             onPaint: {
@@ -1378,6 +1531,8 @@ Item {
                 const right = dailyChart.plotRight - 3;
                 const top = dailyChart.plotTop;
                 const bottom = dailyChart.plotBottom;
+                const upperLabelOffset = -Appearance.px(12);
+                const lowerLabelOffset = Appearance.px(13);
 
                 if (dailyChart.mode === 0) {
                     const maximumValues = data.map(item =>
@@ -1410,7 +1565,9 @@ Item {
                         top,
                         bottom,
                         "°C",
-                        Appearance.px(13)
+                        upperLabelOffset,
+                        false,
+                        true
                     );
 
                     drawLine(
@@ -1424,7 +1581,9 @@ Item {
                         top,
                         bottom,
                         "°C",
-                        Appearance.px(13)
+                        lowerLabelOffset,
+                        true,
+                        false
                     );
                 } else {
                     const precipitation = data.map(item =>
@@ -1461,7 +1620,9 @@ Item {
                         top,
                         bottom,
                         "%",
-                        Appearance.px(13)
+                        lowerLabelOffset,
+                        false,
+                        true
                     );
                 }
             }
@@ -1859,6 +2020,7 @@ Item {
                     visible: hourlyChart.mode === 0
                     Layout.alignment: Qt.AlignVCenter
                     markerColor: root.chartDimColor
+                    dashed: true
                     label: I18n.tr("feelsLike")
                 }
 
@@ -1873,6 +2035,7 @@ Item {
                     visible: hourlyChart.mode === 1
                     markerColor: root.chartDimColor
                     Layout.alignment: Qt.AlignVCenter
+                    dashed: true
                     label: I18n.tr("humidity")
                 }
 
@@ -1900,19 +2063,20 @@ Item {
 
             Rectangle {
                 Layout.fillWidth: true
-                implicitHeight: Appearance.px(198)
+                implicitHeight: Appearance.px(210)
 
                 radius: Appearance.smallRadius
                 color: root.chartSurfaceColor
                 border.width: 1
-                border.color: Appearance.barOutline
+                border.color: Appearance.withAlpha(
+                    Appearance.barOutline, 0.88)
 
                 HourlyChart {
                     id: hourlyChart
 
                     anchors {
                         fill: parent
-                        margins: Appearance.px(7)
+                        margins: Appearance.spacingSmall
                     }
                 }
             }
@@ -1950,6 +2114,7 @@ Item {
                     visible: dailyChart.mode === 0
                     Layout.alignment: Qt.AlignVCenter
                     markerColor: root.chartDimColor
+                    dashed: true
                     label: I18n.tr("lowTemperature")
                 }
 
@@ -1975,14 +2140,15 @@ Item {
                 radius: Appearance.smallRadius
                 color: root.chartSurfaceColor
                 border.width: 1
-                border.color: Appearance.barOutline
+                border.color: Appearance.withAlpha(
+                    Appearance.barOutline, 0.88)
 
                 DailyChart {
                     id: dailyChart
 
                     anchors {
                         fill: parent
-                        margins: Appearance.px(7)
+                        margins: Appearance.spacingSmall
                     }
                 }
             }
