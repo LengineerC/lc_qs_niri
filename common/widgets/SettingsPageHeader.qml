@@ -6,12 +6,12 @@ import qs.common
 PopupHeader {
     showCloseButton: true
     showDivider: true
-    headerRowHeight: Appearance.px(34)
+    headerRowHeight: Appearance.controlHeight
     iconSize: Appearance.px(20)
     iconSlotSize: Appearance.px(20)
     titleFontSize: Appearance.largeFontSize
     titleFontWeight: Font.DemiBold
-    contentSpacing: Appearance.px(9)
-    dividerSpacing: Appearance.px(4)
+    contentSpacing: Appearance.spacingSmall
+    dividerSpacing: Appearance.spacingTiny
     dividerOpacity: 1
 }

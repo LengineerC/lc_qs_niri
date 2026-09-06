@@ -41,9 +41,9 @@ ColumnLayout {
     property int subtitleFontSize: Appearance.smallFontSize
     property real headerRowHeight: -1
 
-    property real contentSpacing: Appearance.px(8)
+    property real contentSpacing: Appearance.spacingSmall
     property real actionSpacing: Appearance.px(7)
-    property real dividerSpacing: Appearance.px(8)
+    property real dividerSpacing: Appearance.spacingSmall
     property real contentLeftMargin: 0
     property real contentRightMargin: 0
     property real dividerLeftMargin: 0

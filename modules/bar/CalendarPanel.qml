@@ -166,9 +166,9 @@ Item {
             top: parent.top
             left: parent.left
             right: parent.right
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
-        spacing: Appearance.px(8)
+        spacing: Appearance.spacingSmall
 
         PopupHeader {
             useBarPalette: true
@@ -351,7 +351,7 @@ Item {
                     Layout.fillHeight: true
                     implicitWidth: Appearance.px(42)
                     implicitHeight: Appearance.px(34)
-                    radius: Appearance.px(10)
+                    radius: Appearance.controlRadius
                     color: today
                         ? Appearance.barPrimary
                         : selected
@@ -408,7 +408,7 @@ Item {
         // Rectangle {
         //     Layout.alignment: Qt.AlignHCenter
         //     implicitWidth: todayLabel.implicitWidth + Appearance.px(24)
-        //     implicitHeight: Appearance.px(30)
+        //     implicitHeight: Appearance.compactControlHeight
         //     radius: Appearance.fullRadius
         //     color: todayMouse.containsMouse
         //         ? Appearance.barPrimaryContainer : Appearance.barLayer1

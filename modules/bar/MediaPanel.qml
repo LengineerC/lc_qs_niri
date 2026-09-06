@@ -29,7 +29,7 @@ Item {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
         spacing: Appearance.px(9)
 
@@ -94,7 +94,7 @@ Item {
             ColumnLayout {
                 anchors.centerIn: parent
                 visible: MediaService.players.length === 0
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 AppText {
                     Layout.alignment: Qt.AlignHCenter

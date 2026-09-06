@@ -134,7 +134,7 @@ Scope {
                     + toastWindow.verticalOffset
                 rightMargin: Appearance.px(5)
             }
-            spacing: Appearance.px(4)
+            spacing: Appearance.spacingTiny
 
             Repeater {
                 id: toastRepeater

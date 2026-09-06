@@ -72,7 +72,7 @@ ClippingRectangle {
 
     Layout.fillWidth: true
     implicitHeight: Appearance.px(184)
-    radius: Appearance.px(24)
+    radius: Appearance.featureRadius
     // Also use the current time while Canvas is preparing its first frame.
     color: decimalHour >= 6 && decimalHour < 18
         ? dayTopColor : nightTopColor
@@ -417,14 +417,14 @@ ClippingRectangle {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
         spacing: 0
 
         RowLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
-            spacing: Appearance.px(8)
+            spacing: Appearance.spacingSmall
 
             ColumnLayout {
                 Layout.fillWidth: true
@@ -539,7 +539,7 @@ ClippingRectangle {
         required property string label
         required property real value
 
-        spacing: Appearance.px(4)
+        spacing: Appearance.spacingTiny
 
         RowLayout {
             Layout.fillWidth: true

@@ -132,7 +132,7 @@ Item {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
         spacing: Appearance.px(10)
 
@@ -144,8 +144,8 @@ Item {
 
             Rectangle {
                 implicitWidth: clearRow.implicitWidth + Appearance.px(16)
-                implicitHeight: Appearance.px(30)
-                radius: Appearance.px(9)
+                implicitHeight: Appearance.compactControlHeight
+                radius: Appearance.fieldRadius
                 color: clearMouse.containsMouse
                     ? Appearance.barLayer1Active
                     : Appearance.barLayer1
@@ -292,7 +292,7 @@ Item {
 
                 anchors.fill: parent
                 clip: true
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
                 model: root.filteredEntries
                 currentIndex: -1
                 boundsBehavior: Flickable.StopAtBounds
@@ -336,7 +336,7 @@ Item {
                         visible: historyEntry.modelData.kind === "image"
                         anchors {
                             fill: parent
-                            margins: Appearance.px(8)
+                            margins: Appearance.spacingSmall
                         }
                         source: visible
                             ? "file://" + historyEntry.modelData.path : ""
@@ -356,7 +356,7 @@ Item {
                             margins: Appearance.px(11)
                             rightMargin: Appearance.px(42)
                         }
-                        spacing: Appearance.px(4)
+                        spacing: Appearance.spacingTiny
 
                         PanelText {
                             Layout.fillWidth: true
@@ -385,7 +385,7 @@ Item {
                         anchors {
                             top: parent.top
                             right: parent.right
-                            margins: Appearance.px(8)
+                            margins: Appearance.spacingSmall
                         }
                         implicitWidth: Appearance.px(28)
                         implicitHeight: Appearance.px(28)
@@ -428,7 +428,7 @@ Item {
                 visible: !ClipboardService.refreshing
                     && root.filteredEntries.length === 0
                 anchors.centerIn: parent
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 AppText {
                     anchors.horizontalCenter: parent.horizontalCenter

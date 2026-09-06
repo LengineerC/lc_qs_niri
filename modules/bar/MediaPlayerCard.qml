@@ -189,7 +189,7 @@ ClippingRectangle {
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 AppText {
                     text: MediaService.formatTime(

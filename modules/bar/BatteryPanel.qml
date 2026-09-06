@@ -89,9 +89,9 @@ Item {
             top: parent.top
             left: parent.left
             right: parent.right
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
-        spacing: Appearance.px(10)
+        spacing: Appearance.spacingMedium
 
         PopupHeader {
             useBarPalette: true
@@ -200,7 +200,7 @@ Item {
         RowLayout {
             visible: BatteryService.hasBattery
             Layout.fillWidth: true
-            spacing: Appearance.px(9)
+            spacing: Appearance.spacingSmall
 
             Rectangle {
                 Layout.fillWidth: true
@@ -270,7 +270,7 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.px(8)
+            spacing: Appearance.spacingSmall
 
             ProfileButton {
                 profile: PowerProfile.PowerSaver

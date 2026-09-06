@@ -370,7 +370,7 @@ Item {
                     Rectangle {
                         anchors {
                             fill: parent
-                            margins: Appearance.px(4)
+                            margins: Appearance.spacingTiny
                         }
                         radius: Appearance.normalRadius
                         color: applicationDelegate.GridView.isCurrentItem
@@ -397,7 +397,7 @@ Item {
 
                         anchors {
                             fill: parent
-                            margins: Appearance.px(4)
+                            margins: Appearance.spacingTiny
                         }
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
@@ -412,7 +412,7 @@ Item {
                         anchors.centerIn: parent
                         width: Math.max(0,
                             applicationDelegate.width - Appearance.px(14))
-                        spacing: Appearance.px(8)
+                        spacing: Appearance.spacingSmall
 
                         Rectangle {
                             anchors.horizontalCenter: parent.horizontalCenter

@@ -150,7 +150,7 @@ Item {
 
         Layout.fillWidth: true
         Layout.topMargin: Appearance.px(4)
-        spacing: Appearance.px(8)
+        spacing: Appearance.spacingSmall
 
         AppText {
             text: parent.icon
@@ -177,81 +177,8 @@ Item {
         }
     }
 
-    component SettingCard: Rectangle {
-        default property alias content: cardLayout.children
-        property real contentSpacing: Appearance.px(10)
-
-        Layout.fillWidth: true
-        implicitHeight: cardLayout.implicitHeight + Appearance.px(20)
-        radius: Appearance.smallRadius
-        color: Appearance.layer3
-        border.width: 1
-        border.color: Appearance.outline
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: forceActiveFocus()
-        }
-
-        ColumnLayout {
-            id: cardLayout
-            anchors {
-                fill: parent
-                margins: Appearance.px(10)
-            }
-            spacing: parent.contentSpacing
-        }
-    }
-
-    component SettingSwitch: Item {
-        id: control
-
-        required property bool checked
-        signal toggled(bool checked)
-
-        implicitWidth: Appearance.px(43)
-        implicitHeight: Appearance.px(25)
-
-        Rectangle {
-            anchors.fill: parent
-            radius: Appearance.fullRadius
-            color: control.checked
-                ? Appearance.primary : Appearance.layer1Active
-            border.width: control.checked ? 0 : 1
-            border.color: Appearance.subtext
-
-            Rectangle {
-                width: control.checked
-                    ? Appearance.px(19) : Appearance.px(15)
-                height: width
-                radius: Appearance.fullRadius
-                anchors.verticalCenter: parent.verticalCenter
-                x: control.checked
-                    ? parent.width - width - Appearance.px(3)
-                    : Appearance.px(5)
-                color: control.checked
-                    ? Theme.palette.m3onPrimary : Appearance.subtext
-
-                Behavior on x {
-                    NumberAnimation {
-                        duration: Appearance.fastDuration
-                        easing.type: Easing.OutCubic
-                    }
-                }
-                Behavior on width {
-                    NumberAnimation {
-                        duration: Appearance.fastDuration
-                        easing.type: Easing.OutCubic
-                    }
-                }
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: control.toggled(!control.checked)
-        }
+    component SettingCard: SurfaceCard {
+        onBackgroundClicked: root.forceActiveFocus()
     }
 
     component FontSelector: Item {
@@ -265,7 +192,7 @@ Item {
             root.filteredFontFamilies(fontFamilies, draftText, browseAll)
         signal valueEdited(string value)
 
-        implicitHeight: Appearance.px(36)
+        implicitHeight: Appearance.controlHeight
 
         function openSuggestions(showAll) {
             const wasOpened = fontPopup.opened;
@@ -292,7 +219,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            radius: Appearance.px(9)
+            radius: Appearance.fieldRadius
             color: Appearance.layer1
             border.width: fontInput.activeFocus || fontPopup.opened ? 1 : 0
             border.color: Appearance.primary
@@ -444,7 +371,7 @@ Item {
                     required property string modelData
                     required property int index
                     width: fontList.width
-                    implicitHeight: Appearance.px(34)
+                    implicitHeight: Appearance.controlHeight
                     highlighted: fontList.currentIndex === index
 
                     contentItem: AppText {
@@ -458,7 +385,7 @@ Item {
                         }
                     }
                     background: Rectangle {
-                        radius: Appearance.px(7)
+                        radius: Appearance.fieldRadius
                         color: fontDelegate.highlighted
                             ? Appearance.layer1Active : "transparent"
                     }
@@ -470,7 +397,7 @@ Item {
             }
 
             background: Rectangle {
-                radius: Appearance.px(10)
+                radius: Appearance.controlRadius
                 color: Appearance.layer2
                 border.width: 1
                 border.color: Appearance.outline
@@ -505,7 +432,7 @@ Item {
                 leftMargin: Appearance.px(12)
                 rightMargin: Appearance.px(12)
             }
-            spacing: Appearance.px(10)
+            spacing: Appearance.spacingMedium
 
             Rectangle {
                 implicitWidth: Appearance.px(38)
@@ -583,102 +510,8 @@ Item {
         }
     }
 
-    component ChoiceChip: Rectangle {
-        id: choiceChip
-
-        required property string label
-        required property bool selected
-        property int textWeight: selected ? Font.DemiBold : Font.Normal
-        signal chosen
-
+    component ValueSlider: SettingSlider {
         Layout.fillWidth: true
-        implicitHeight: Appearance.px(36)
-        radius: Appearance.px(9)
-        color: selected
-            ? Appearance.primaryContainer
-            : choiceMouse.containsMouse
-                ? Appearance.layer1Active : Appearance.layer1
-        border.width: 1
-        border.color: selected
-            ? Appearance.primary : Appearance.outline
-        scale: choiceMouse.pressed ? 0.97 : 1
-
-        PanelText {
-            anchors {
-                fill: parent
-                leftMargin: Appearance.px(7)
-                rightMargin: Appearance.px(7)
-            }
-            text: choiceChip.label
-            color: choiceChip.selected
-                ? Appearance.primaryContainerText
-                : Appearance.layer1Text
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            elide: Text.ElideRight
-            font {
-                pixelSize: Appearance.smallFontSize
-                weight: choiceChip.textWeight
-            }
-        }
-
-        MouseArea {
-            id: choiceMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: choiceChip.chosen()
-        }
-
-        Behavior on color {
-            ColorAnimation { duration: Appearance.fastDuration }
-        }
-
-        Behavior on scale {
-            NumberAnimation {
-                duration: Appearance.fastDuration
-                easing.type: Easing.OutCubic
-            }
-        }
-    }
-
-    component ValueSlider: Controls.Slider {
-        id: slider
-
-        Layout.fillWidth: true
-        implicitHeight: Appearance.px(28)
-
-        background: Rectangle {
-            x: slider.leftPadding
-            y: slider.topPadding + slider.availableHeight / 2
-                - height / 2
-            width: slider.availableWidth
-            height: Appearance.px(5)
-            radius: Appearance.fullRadius
-            color: Appearance.layer1Active
-
-            Rectangle {
-                width: slider.visualPosition * parent.width
-                height: parent.height
-                radius: parent.radius
-                color: Appearance.primary
-            }
-        }
-
-        handle: Rectangle {
-            x: slider.leftPadding + slider.visualPosition
-                * (slider.availableWidth - width)
-            y: slider.topPadding + slider.availableHeight / 2
-                - height / 2
-            implicitWidth: Appearance.px(slider.pressed ? 12 : 16)
-            implicitHeight: Appearance.px(22)
-            radius: Appearance.fullRadius
-            color: Appearance.primary
-
-            Behavior on implicitWidth {
-                NumberAnimation { duration: Appearance.fastDuration }
-            }
-        }
     }
 
     component SliderRow: RowLayout {
@@ -694,7 +527,7 @@ Item {
         signal moved(real value)
 
         Layout.fillWidth: true
-        spacing: Appearance.px(10)
+        spacing: Appearance.spacingMedium
 
         MouseArea {
             anchors.fill: parent
@@ -718,8 +551,8 @@ Item {
 
         Rectangle {
             Layout.preferredWidth: Appearance.px(72)
-            implicitHeight: Appearance.px(28)
-            radius: Appearance.px(8)
+            implicitHeight: Appearance.compactControlHeight
+            radius: Appearance.fieldRadius
             color: Appearance.layer1
 
             PanelText {
@@ -742,7 +575,7 @@ Item {
         signal accepted(string value)
 
         Layout.fillWidth: true
-        spacing: Appearance.px(10)
+        spacing: Appearance.spacingMedium
 
         function commit() {
             const format = draftValue.trim();
@@ -793,8 +626,8 @@ Item {
             Layout.fillWidth: true
             Layout.minimumWidth: Appearance.px(160)
             Layout.preferredWidth: Appearance.px(240)
-            implicitHeight: Appearance.px(36)
-            radius: Appearance.px(9)
+            implicitHeight: Appearance.controlHeight
+            radius: Appearance.fieldRadius
             color: Appearance.layer1
             border.width: formatInput.activeFocus ? 1 : 0
             border.color: Appearance.primary
@@ -843,7 +676,7 @@ Item {
                 top: parent.top
                 left: parent.left
                 right: parent.right
-                margins: Appearance.px(18)
+                margins: Appearance.pagePadding
             }
             icon: "󰒓"
             title: I18n.tr("quickSettings")
@@ -879,7 +712,7 @@ Item {
             ColumnLayout {
                 id: settingsColumn
                 width: flickable.width - Appearance.px(10)
-                spacing: Appearance.px(9)
+                spacing: Appearance.spacingSmall
 
                 SectionTitle {
                     icon: "󰀄"
@@ -924,13 +757,13 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(8)
+                        spacing: Appearance.spacingSmall
 
                         Rectangle {
                             implicitWidth: chooseAvatarRow.implicitWidth
                                 + Appearance.px(20)
-                            implicitHeight: Appearance.px(34)
-                            radius: Appearance.px(9)
+                            implicitHeight: Appearance.controlHeight
+                            radius: Appearance.fieldRadius
                             color: chooseAvatarArea.containsMouse
                                 ? Appearance.layer1Active
                                 : Appearance.layer1
@@ -938,7 +771,7 @@ Item {
                             RowLayout {
                                 id: chooseAvatarRow
                                 anchors.centerIn: parent
-                                spacing: Appearance.px(6)
+                                spacing: Appearance.spacingSmall
 
                                 AppText {
                                     text: "󰈔"
@@ -970,8 +803,8 @@ Item {
                         Rectangle {
                             implicitWidth: systemProfileRow.implicitWidth
                                 + Appearance.px(20)
-                            implicitHeight: Appearance.px(34)
-                            radius: Appearance.px(9)
+                            implicitHeight: Appearance.controlHeight
+                            radius: Appearance.fieldRadius
                             color: systemProfileArea.containsMouse
                                 ? Appearance.layer1Active
                                 : Appearance.layer1
@@ -979,7 +812,7 @@ Item {
                             RowLayout {
                                 id: systemProfileRow
                                 anchors.centerIn: parent
-                                spacing: Appearance.px(6)
+                                spacing: Appearance.spacingSmall
 
                                 AppText {
                                     text: "󰑐"
@@ -1023,7 +856,7 @@ Item {
                 SettingCard {
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(10)
+                        spacing: Appearance.spacingMedium
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -1069,7 +902,7 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(8)
+                        spacing: Appearance.spacingSmall
 
                         MetricChoice {
                             icon: "󰻠"
@@ -1113,7 +946,7 @@ Item {
                 SettingCard {
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(9)
+                        spacing: Appearance.spacingSmall
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -1121,8 +954,8 @@ Item {
 
                             Rectangle {
                                 Layout.fillWidth: true
-                                implicitHeight: Appearance.px(36)
-                                radius: Appearance.px(9)
+                                implicitHeight: Appearance.controlHeight
+                                radius: Appearance.fieldRadius
                                 color: Appearance.layer1
                                 border.width:
                                     weatherLocationInput.activeFocus
@@ -1202,8 +1035,8 @@ Item {
                         Rectangle {
                             implicitWidth: weatherSearchRow.implicitWidth
                                 + Appearance.px(20)
-                            implicitHeight: Appearance.px(36)
-                            radius: Appearance.px(9)
+                            implicitHeight: Appearance.controlHeight
+                            radius: Appearance.fieldRadius
                             color: weatherSearchArea.containsMouse
                                     && weatherSearchArea.enabled
                                 ? Appearance.layer1Active
@@ -1213,7 +1046,7 @@ Item {
                             RowLayout {
                                 id: weatherSearchRow
                                 anchors.centerIn: parent
-                                spacing: Appearance.px(6)
+                                spacing: Appearance.spacingSmall
 
                                 Item {
                                     implicitWidth: Appearance.px(16)
@@ -1309,7 +1142,7 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(9)
+                        spacing: Appearance.spacingSmall
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -1324,8 +1157,8 @@ Item {
 
                             Rectangle {
                                 Layout.fillWidth: true
-                                implicitHeight: Appearance.px(36)
-                                radius: Appearance.px(9)
+                                implicitHeight: Appearance.controlHeight
+                                radius: Appearance.fieldRadius
                                 color: Appearance.layer1
                                 border.width:
                                     weatherLatitudeInput.activeFocus
@@ -1394,8 +1227,8 @@ Item {
 
                             Rectangle {
                                 Layout.fillWidth: true
-                                implicitHeight: Appearance.px(36)
-                                radius: Appearance.px(9)
+                                implicitHeight: Appearance.controlHeight
+                                radius: Appearance.fieldRadius
                                 color: Appearance.layer1
                                 border.width:
                                     weatherLongitudeInput.activeFocus
@@ -1455,8 +1288,8 @@ Item {
                             Layout.alignment: Qt.AlignBottom
                             implicitWidth: coordinateApplyRow.implicitWidth
                                 + Appearance.px(20)
-                            implicitHeight: Appearance.px(36)
-                            radius: Appearance.px(9)
+                            implicitHeight: Appearance.controlHeight
+                            radius: Appearance.fieldRadius
                             color: coordinateApplyArea.containsMouse
                                     && coordinateApplyArea.enabled
                                 ? Appearance.layer1Active
@@ -1466,7 +1299,7 @@ Item {
                             RowLayout {
                                 id: coordinateApplyRow
                                 anchors.centerIn: parent
-                                spacing: Appearance.px(6)
+                                spacing: Appearance.spacingSmall
 
                                 AppText {
                                     text: "󰍎"
@@ -1523,7 +1356,7 @@ Item {
                 SettingCard {
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(8)
+                        spacing: Appearance.spacingSmall
 
                         PanelText {
                             Layout.fillWidth: true
@@ -1540,8 +1373,8 @@ Item {
                             delegate: Rectangle {
                                 required property var modelData
                                 implicitWidth: Appearance.px(94)
-                                implicitHeight: Appearance.px(32)
-                                radius: Appearance.px(9)
+                                implicitHeight: Appearance.compactControlHeight
+                                radius: Appearance.fieldRadius
                                 color: ShellSettings.language
                                         === modelData.language
                                     ? Appearance.primaryContainer
@@ -1585,7 +1418,7 @@ Item {
                 SettingCard {
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(8)
+                        spacing: Appearance.spacingSmall
 
                         PanelText {
                             Layout.fillWidth: true
@@ -1604,8 +1437,8 @@ Item {
                             delegate: Rectangle {
                                 required property var modelData
                                 implicitWidth: Appearance.px(88)
-                                implicitHeight: Appearance.px(32)
-                                radius: Appearance.px(9)
+                                implicitHeight: Appearance.compactControlHeight
+                                radius: Appearance.fieldRadius
                                 color: Theme.mode === modelData.mode
                                     ? Appearance.primaryContainer
                                     : modeArea.containsMouse
@@ -1690,7 +1523,7 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(10)
+                        spacing: Appearance.spacingMedium
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -1712,8 +1545,8 @@ Item {
                             id: screenCornerColorButton
 
                             implicitWidth: Appearance.px(138)
-                            implicitHeight: Appearance.px(36)
-                            radius: Appearance.px(10)
+                            implicitHeight: Appearance.controlHeight
+                            radius: Appearance.controlRadius
                             color: screenCornerColorMouse.containsMouse
                                 ? Appearance.layer1Active : Appearance.layer1
                             border.width: 1
@@ -1725,7 +1558,7 @@ Item {
                                     leftMargin: Appearance.px(8)
                                     rightMargin: Appearance.px(10)
                                 }
-                                spacing: Appearance.px(8)
+                                spacing: Appearance.spacingSmall
 
                                 Rectangle {
                                     Layout.preferredWidth: Appearance.px(22)
@@ -1805,7 +1638,7 @@ Item {
 
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(6)
+                        spacing: Appearance.spacingSmall
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -1825,7 +1658,7 @@ Item {
 
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: Appearance.px(6)
+                            spacing: Appearance.spacingSmall
 
                             Repeater {
                                 model: [
@@ -1885,7 +1718,7 @@ Item {
                 SettingCard {
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(10)
+                        spacing: Appearance.spacingMedium
 
                         PanelText {
                             Layout.preferredWidth: Appearance.px(
@@ -1904,7 +1737,7 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(10)
+                        spacing: Appearance.spacingMedium
 
                         PanelText {
                             Layout.preferredWidth: Appearance.px(
@@ -1923,7 +1756,7 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(10)
+                        spacing: Appearance.spacingMedium
 
                         PanelText {
                             Layout.preferredWidth: Appearance.px(
@@ -1933,7 +1766,7 @@ Item {
 
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: Appearance.px(6)
+                            spacing: Appearance.spacingSmall
 
                             Repeater {
                                 model: root.fontWeightOptions
@@ -1982,8 +1815,8 @@ Item {
                         Layout.alignment: Qt.AlignRight
                         implicitWidth: confirmBarAppearanceRow.implicitWidth
                             + Appearance.px(22)
-                        implicitHeight: Appearance.px(34)
-                        radius: Appearance.px(10)
+                        implicitHeight: Appearance.controlHeight
+                        radius: Appearance.controlRadius
                         enabled: root.barAppearanceValid
                             && root.barAppearanceDirty
                         opacity: enabled ? 1 : 0.45
@@ -1995,7 +1828,7 @@ Item {
                         RowLayout {
                             id: confirmBarAppearanceRow
                             anchors.centerIn: parent
-                            spacing: Appearance.px(6)
+                            spacing: Appearance.spacingSmall
 
                             AppText {
                                 text: "󰄬"
@@ -2160,7 +1993,7 @@ Item {
                 SettingCard {
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(10)
+                        spacing: Appearance.spacingMedium
 
                         ColumnLayout {
                             readonly property int targetWidth: Appearance.px(
@@ -2189,7 +2022,7 @@ Item {
 
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: Appearance.px(6)
+                            spacing: Appearance.spacingSmall
 
                             Repeater {
                                 model: ["group", "clock"]
@@ -2235,7 +2068,7 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(10)
+                        spacing: Appearance.spacingMedium
 
                         ColumnLayout {
                             readonly property int targetWidth: Appearance.px(
@@ -2264,7 +2097,7 @@ Item {
 
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: Appearance.px(6)
+                            spacing: Appearance.spacingSmall
 
                             Repeater {
                                 model: root.weekStartOptions
@@ -2360,8 +2193,8 @@ Item {
                     Layout.alignment: Qt.AlignRight
                     Layout.topMargin: Appearance.px(4)
                     implicitWidth: resetText.implicitWidth + Appearance.px(24)
-                    implicitHeight: Appearance.px(34)
-                    radius: Appearance.px(10)
+                    implicitHeight: Appearance.controlHeight
+                    radius: Appearance.controlRadius
                     color: resetArea.containsMouse
                         ? Appearance.layer1Active : Appearance.layer1
                     border.width: 1

@@ -432,7 +432,7 @@ Item {
                         Rectangle {
                             anchors.fill: parent
                             visible: root.editMode
-                            radius: Appearance.px(24)
+                            radius: Appearance.featureRadius
                             color: moduleDelegate.dragging
                                 ? Appearance.withAlpha(
                                     Appearance.barPrimary, 0.08)
@@ -549,7 +549,7 @@ Item {
             anchors {
                 top: parent.top
                 right: parent.right
-                margins: Appearance.px(14)
+                margins: Appearance.panelPadding
             }
             width: Appearance.px(32)
             height: width

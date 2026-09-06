@@ -171,7 +171,7 @@ Item {
     component Metric: RowLayout {
         required property string icon
         required property string label
-        spacing: Appearance.px(4)
+        spacing: Appearance.spacingTiny
 
         AppText {
             text: parent.icon
@@ -199,7 +199,7 @@ Item {
 
         implicitWidth: scopeLabel.implicitWidth + Appearance.px(20)
         implicitHeight: Appearance.px(32)
-        radius: Appearance.px(9)
+        radius: Appearance.fieldRadius
         color: selected
             ? panelPalette.primaryContainer
             : scopeArea.containsMouse
@@ -232,8 +232,8 @@ Item {
         signal clicked
 
         implicitWidth: Appearance.px(30)
-        implicitHeight: Appearance.px(30)
-        radius: Appearance.px(9)
+        implicitHeight: Appearance.compactControlHeight
+        radius: Appearance.fieldRadius
         color: diskSwitchArea.containsMouse && enabled
             ? panelPalette.layer1Active : panelPalette.layer1
         opacity: enabled ? 1 : 0.38
@@ -269,7 +269,7 @@ Item {
 
         Layout.preferredWidth: Appearance.px(220)
         implicitHeight: Appearance.px(60)
-        radius: Appearance.px(12)
+        radius: Appearance.cardRadius
         color: panelPalette.layer1
         border.width: 1
         border.color: panelPalette.layer0Border
@@ -284,7 +284,7 @@ Item {
 
             Rectangle {
                 implicitWidth: Appearance.px(30)
-                implicitHeight: Appearance.px(30)
+                implicitHeight: Appearance.compactControlHeight
                 radius: Appearance.fullRadius
                 color: panelPalette.primaryContainer
 
@@ -379,7 +379,7 @@ Item {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
         spacing: Appearance.px(10)
 
@@ -413,7 +413,7 @@ Item {
                         fill: parent
                         margins: Appearance.px(13)
                     }
-                    spacing: Appearance.px(12)
+                    spacing: Appearance.spacingMedium
 
                     ResourceRing {
                         implicitSize: Appearance.px(46)
@@ -437,7 +437,7 @@ Item {
                         }
 
                         RowLayout {
-                            spacing: Appearance.px(12)
+                            spacing: Appearance.spacingMedium
 
                             Metric {
                                 icon: "󰓅"
@@ -477,7 +477,7 @@ Item {
                         fill: parent
                         margins: Appearance.px(13)
                     }
-                    spacing: Appearance.px(12)
+                    spacing: Appearance.spacingMedium
 
                     ResourceRing {
                         implicitSize: Appearance.px(46)
@@ -498,7 +498,7 @@ Item {
                         }
 
                         RowLayout {
-                            spacing: Appearance.px(12)
+                            spacing: Appearance.spacingMedium
 
                             Metric {
                                 icon: "󰋊"
@@ -657,7 +657,7 @@ Item {
                     leftMargin: Appearance.px(14)
                     rightMargin: Appearance.px(14)
                 }
-                spacing: Appearance.px(12)
+                spacing: Appearance.spacingMedium
 
                 Rectangle {
                     implicitWidth: Appearance.px(46)
@@ -732,8 +732,8 @@ Item {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        implicitHeight: Appearance.px(36)
-                        radius: Appearance.px(10)
+                        implicitHeight: Appearance.controlHeight
+                        radius: Appearance.controlRadius
                         color: panelPalette.layer1
                         border.width: searchInput.activeFocus ? 1 : 0
                         border.color: panelPalette.primary
@@ -825,7 +825,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.leftMargin: Appearance.px(9)
                     Layout.rightMargin: Appearance.px(12)
-                    spacing: Appearance.px(8)
+                    spacing: Appearance.spacingSmall
 
                     PanelText {
                         Layout.fillWidth: true
@@ -986,13 +986,13 @@ Item {
                             ColumnLayout {
                                 anchors {
                                     fill: parent
-                                    margins: Appearance.px(8)
+                                    margins: Appearance.spacingSmall
                                 }
                                 spacing: Appearance.px(6)
 
                                 RowLayout {
                                     Layout.fillWidth: true
-                                    spacing: Appearance.px(8)
+                                    spacing: Appearance.spacingSmall
 
                                     Item {
                                         implicitWidth: Appearance.px(28)
@@ -1052,7 +1052,7 @@ Item {
                                     Rectangle {
                                         Layout.preferredWidth:
                                             Appearance.px(86)
-                                        implicitHeight: Appearance.px(30)
+                                        implicitHeight: Appearance.compactControlHeight
                                         radius: Appearance.fullRadius
                                         color: panelPalette.layer1Active
 
@@ -1068,7 +1068,7 @@ Item {
                                     Rectangle {
                                         Layout.preferredWidth:
                                             Appearance.px(112)
-                                        implicitHeight: Appearance.px(30)
+                                        implicitHeight: Appearance.compactControlHeight
                                         radius: Appearance.fullRadius
                                         color: processEntry.modelData.pssKb
                                                 >= 1024 * 1024
@@ -1124,7 +1124,7 @@ Item {
                                     ColumnLayout {
                                         anchors {
                                             fill: parent
-                                            margins: Appearance.px(8)
+                                            margins: Appearance.spacingSmall
                                         }
                                         spacing: Appearance.px(3)
 
@@ -1263,7 +1263,7 @@ Item {
         width: Appearance.px(230)
         implicitHeight: contextColumn.implicitHeight
             + Appearance.px(12)
-        radius: Appearance.px(12)
+        radius: Appearance.cardRadius
         color: panelPalette.layer2
         border.width: 1
         border.color: panelPalette.outline
@@ -1359,7 +1359,7 @@ Item {
                     left: parent.left
                     right: parent.right
                     top: parent.top
-                    margins: Appearance.px(14)
+                    margins: Appearance.panelPadding
                 }
                 spacing: Appearance.px(10)
 
@@ -1405,7 +1405,7 @@ Item {
                         implicitWidth: forceLabel.implicitWidth
                             + Appearance.px(22)
                         implicitHeight: Appearance.px(34)
-                        radius: Appearance.px(9)
+                        radius: Appearance.fieldRadius
                         color: forceArea.containsMouse
                             ? panelPalette.error
                             : panelPalette.errorContainer

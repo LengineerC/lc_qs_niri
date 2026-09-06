@@ -240,7 +240,7 @@ PopupWindow {
                     right: parent.right
                     margins: Appearance.px(6)
                 }
-                spacing: Appearance.px(4)
+                spacing: Appearance.spacingTiny
 
                 PopupHeader {
                     useBarPalette: true
@@ -410,7 +410,7 @@ PopupWindow {
                         Layout.fillWidth: true
                         implicitHeight: visible
                             ? Appearance.px(40) : 0
-                        radius: Appearance.px(10)
+                        radius: Appearance.controlRadius
                         color: backMouse.containsMouse
                             ? Appearance.barLayer1Hover
                             : Appearance.withAlpha(
@@ -422,7 +422,7 @@ PopupWindow {
                                 leftMargin: Appearance.px(10)
                                 rightMargin: Appearance.px(10)
                             }
-                            spacing: Appearance.px(8)
+                            spacing: Appearance.spacingSmall
 
                             AppText {
                                 text: "󰅁"

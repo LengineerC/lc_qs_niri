@@ -21,130 +21,9 @@ Item {
         }
     }
 
-    component ActionButton: Rectangle {
-        id: button
-
-        required property string icon
-        required property string label
-        property bool selected: false
+    component ModeButton: ChoiceChip {
         signal clicked
-
-        implicitWidth: buttonRow.implicitWidth + Appearance.px(20)
-        implicitHeight: Appearance.px(34)
-        radius: Appearance.px(10)
-        color: selected ? Appearance.primaryContainer : buttonArea.containsMouse ? Appearance.layer1Active : Appearance.layer1
-        border.width: selected ? 1 : 0
-        border.color: Appearance.primary
-
-        RowLayout {
-            id: buttonRow
-            anchors.centerIn: parent
-            spacing: Appearance.px(6)
-
-            AppText {
-                text: button.icon
-                color: button.selected ? Appearance.primaryContainerText : Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    weight: Font.Normal
-                    pixelSize: Appearance.px(15)
-                }
-            }
-
-            PanelText {
-                text: button.label
-                color: button.selected ? Appearance.primaryContainerText : Appearance.layer1Text
-                font.pixelSize: Appearance.smallFontSize
-            }
-        }
-
-        MouseArea {
-            id: buttonArea
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: button.clicked()
-        }
-    }
-
-    component ModeButton: Rectangle {
-        id: button
-
-        required property string label
-        property bool selected: false
-        signal clicked
-
-        implicitWidth: modeLabel.implicitWidth + Appearance.px(20)
-        implicitHeight: Appearance.px(34)
-        radius: Appearance.px(9)
-        color: selected ? Appearance.primaryContainer : modeButtonArea.containsMouse ? Appearance.layer1Active : Appearance.layer1
-
-        PanelText {
-            id: modeLabel
-
-            anchors.centerIn: parent
-            text: button.label
-            color: button.selected ? Appearance.primaryContainerText : Appearance.layer1Text
-            font {
-                pixelSize: Appearance.smallFontSize
-                weight: button.selected ? Font.DemiBold : Font.Normal
-            }
-        }
-
-        MouseArea {
-            id: modeButtonArea
-
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: button.clicked()
-        }
-
-        Behavior on color {
-            ColorAnimation {
-                duration: Appearance.fastDuration
-            }
-        }
-    }
-
-    component SettingSwitch: Item {
-        id: control
-
-        required property bool checked
-        signal toggled(bool checked)
-
-        implicitWidth: Appearance.px(43)
-        implicitHeight: Appearance.px(25)
-
-        Rectangle {
-            anchors.fill: parent
-            radius: Appearance.fullRadius
-            color: control.checked ? Appearance.primary : Appearance.layer1Active
-            border.width: control.checked ? 0 : 1
-            border.color: Appearance.subtext
-
-            Rectangle {
-                width: control.checked ? Appearance.px(19) : Appearance.px(15)
-                height: width
-                radius: Appearance.fullRadius
-                anchors.verticalCenter: parent.verticalCenter
-                x: control.checked ? parent.width - width - Appearance.px(3) : Appearance.px(5)
-                color: control.checked ? Theme.palette.m3onPrimary : Appearance.subtext
-
-                Behavior on x {
-                    NumberAnimation {
-                        duration: Appearance.fastDuration
-                        easing.type: Easing.OutCubic
-                    }
-                }
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: control.toggled(!control.checked)
-        }
+        onChosen: clicked()
     }
 
     readonly property var schemes: [
@@ -287,7 +166,7 @@ Item {
                 top: parent.top
                 left: parent.left
                 right: parent.right
-                margins: Appearance.px(18)
+                margins: Appearance.pagePadding
             }
             icon: "󰏘"
             title: I18n.tr("style")
@@ -327,7 +206,7 @@ Item {
                 id: styleColumn
 
                 width: styleFlickable.width - Appearance.px(10)
-                spacing: Appearance.px(10)
+                spacing: Appearance.spacingMedium
 
         Rectangle {
             Layout.fillWidth: true
@@ -364,7 +243,7 @@ Item {
                         leftMargin: Appearance.px(12)
                         rightMargin: Appearance.px(12)
                     }
-                    spacing: Appearance.px(8)
+                    spacing: Appearance.spacingSmall
 
                     PanelText {
                         Layout.fillWidth: true
@@ -385,7 +264,7 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.px(7)
+            spacing: Appearance.spacingSmall
 
             ActionButton {
                 icon: "󰒮"
@@ -424,7 +303,7 @@ Item {
 
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: Appearance.px(6)
+            spacing: Appearance.spacingSmall
 
             PanelText {
                 text: I18n.tr("wallpaperDisplayMode")
@@ -434,7 +313,7 @@ Item {
 
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
-                spacing: Appearance.px(6)
+                spacing: Appearance.spacingSmall
 
                 Repeater {
                     model: root.wallpaperModes
@@ -452,7 +331,7 @@ Item {
 
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: Appearance.px(6)
+            spacing: Appearance.spacingSmall
 
             PanelText {
                 text: I18n.tr("wallpaperTransition")
@@ -462,7 +341,7 @@ Item {
 
             Flow {
                 Layout.fillWidth: true
-                spacing: Appearance.px(6)
+                spacing: Appearance.spacingSmall
 
                 Repeater {
                     model: root.wallpaperTransitions
@@ -494,9 +373,9 @@ Item {
                     left: parent.left
                     right: parent.right
                     top: parent.top
-                    margins: Appearance.px(10)
+                    margins: Appearance.spacingMedium
                 }
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 ColumnLayout {
                     Layout.fillWidth: true
@@ -546,9 +425,9 @@ Item {
                     left: parent.left
                     right: parent.right
                     top: parent.top
-                    margins: Appearance.px(10)
+                    margins: Appearance.spacingMedium
                 }
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -577,7 +456,7 @@ Item {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: Appearance.px(7)
+                    spacing: Appearance.spacingSmall
 
                     PanelText {
                         Layout.fillWidth: true
@@ -676,7 +555,7 @@ Item {
                 Rectangle {
                     anchors {
                         fill: parent
-                        margins: Appearance.px(4)
+                        margins: Appearance.spacingTiny
                     }
                     radius: Appearance.smallRadius
                     color: Appearance.layer1

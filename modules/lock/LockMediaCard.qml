@@ -55,7 +55,7 @@ ClippingRectangle {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
         spacing: Appearance.px(15)
 
@@ -188,7 +188,7 @@ ClippingRectangle {
 
         implicitWidth: primary
             ? Appearance.px(48) : Appearance.px(40)
-        implicitHeight: Appearance.px(36)
+        implicitHeight: Appearance.controlHeight
         radius: Appearance.fullRadius
         color: primary
             ? Appearance.barPrimaryContainer

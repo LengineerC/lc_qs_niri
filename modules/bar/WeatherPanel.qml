@@ -125,7 +125,7 @@ Item {
         implicitWidth: Appearance.px(180)
         implicitHeight: Appearance.px(48)
 
-        radius: Appearance.px(9)
+        radius: Appearance.fieldRadius
         color: ShellSettings.barFrostedGlass
             ? Appearance.withAlpha(Appearance.barGlassBaseColor, 0.66)
             : Appearance.withAlpha(Appearance.barLayer2, 0.86)
@@ -1551,7 +1551,7 @@ Item {
             top: parent.top
             left: parent.left
             right: parent.right
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
 
         spacing: Appearance.px(10)
@@ -1566,7 +1566,7 @@ Item {
 
             Rectangle {
                 implicitWidth: Appearance.px(30)
-                implicitHeight: Appearance.px(30)
+                implicitHeight: Appearance.compactControlHeight
                 radius: Appearance.fullRadius
                 color: refreshArea.containsMouse
                     ? Appearance.barLayer1Active : "transparent"
@@ -1638,7 +1638,7 @@ Item {
             RowLayout {
                 anchors {
                     fill: parent
-                    margins: Appearance.px(14)
+                    margins: Appearance.panelPadding
                 }
 
                 visible: WeatherService.ready
@@ -1804,7 +1804,7 @@ Item {
             ColumnLayout {
                 anchors.centerIn: parent
                 visible: !WeatherService.ready
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 AppText {
                     Layout.alignment: Qt.AlignHCenter

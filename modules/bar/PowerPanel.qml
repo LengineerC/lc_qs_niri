@@ -118,12 +118,12 @@ Item {
                 leftMargin: Appearance.px(15)
                 rightMargin: Appearance.px(15)
             }
-            spacing: Appearance.px(12)
+            spacing: Appearance.spacingMedium
 
             Rectangle {
-                implicitWidth: Appearance.px(34)
-                implicitHeight: Appearance.px(34)
-                radius: Appearance.px(10)
+                implicitWidth: Appearance.controlHeight
+                implicitHeight: Appearance.controlHeight
+                radius: Appearance.controlRadius
                 color: actionButton.destructive ? Appearance.withAlpha(Appearance.barError, 0.14) : Appearance.barPrimaryContainer
 
                 AppText {
@@ -232,9 +232,9 @@ Item {
             top: parent.top
             left: parent.left
             right: parent.right
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
-        spacing: Appearance.px(9)
+        spacing: Appearance.spacingSmall
 
         PopupHeader {
             useBarPalette: true
@@ -253,7 +253,7 @@ Item {
             RowLayout {
                 anchors {
                     fill: parent
-                    margins: Appearance.px(14)
+                    margins: Appearance.panelPadding
                 }
                 spacing: Appearance.px(14)
 
@@ -284,7 +284,7 @@ Item {
                     }
 
                     RowLayout {
-                        spacing: Appearance.px(6)
+                        spacing: Appearance.spacingSmall
 
                         AppText {
                             text: "󰥔"

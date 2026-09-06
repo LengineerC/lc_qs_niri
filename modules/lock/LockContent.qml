@@ -47,7 +47,7 @@ Item {
                 ColumnLayout {
                     anchors {
                         fill: parent
-                        margins: Appearance.px(14)
+                        margins: Appearance.panelPadding
                     }
                     spacing: Appearance.px(6)
 
@@ -600,7 +600,7 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(8)
+                        spacing: Appearance.spacingSmall
 
                         NetworkRate {
                             Layout.fillWidth: true
@@ -677,7 +677,7 @@ Item {
         required property string label
         required property string value
 
-        spacing: Appearance.px(8)
+        spacing: Appearance.spacingSmall
 
         AppText {
             text: icon
@@ -788,7 +788,7 @@ Item {
         required property string value
 
         implicitHeight: Appearance.px(40)
-        radius: Appearance.px(10)
+        radius: Appearance.controlRadius
         color: Appearance.barLayer3
         border.width: 1
         border.color: Appearance.barLayer0Border

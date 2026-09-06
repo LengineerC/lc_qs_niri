@@ -445,7 +445,7 @@ Item {
             x: Appearance.px(21)
             y: Appearance.px(18)
             width: parent.width - Appearance.px(42)
-            spacing: Appearance.px(8)
+            spacing: Appearance.spacingSmall
 
             PopupHeader {
                 useBarPalette: true

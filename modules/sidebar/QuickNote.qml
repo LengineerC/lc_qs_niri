@@ -103,7 +103,7 @@ Rectangle {
     implicitHeight:
         content.implicitHeight + Appearance.px(24)
 
-    radius: Appearance.px(24)
+    radius: Appearance.featureRadius
     color: Appearance.barLayer3
 
     border.width: 1
@@ -1143,7 +1143,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.leftMargin: Appearance.px(3)
             Layout.rightMargin: Appearance.px(1)
-            spacing: Appearance.px(4)
+            spacing: Appearance.spacingTiny
 
             Rectangle {
                 implicitWidth: Appearance.px(7)
@@ -1247,7 +1247,7 @@ Rectangle {
 
             Rectangle {
                 Layout.fillWidth: true
-                implicitHeight: Appearance.px(42)
+                implicitHeight: Appearance.largeControlHeight
 
                 radius: Appearance.px(14)
                 color: Appearance.barLayer1
@@ -1317,7 +1317,7 @@ Rectangle {
             Layout.fillWidth: true
             implicitHeight: Appearance.px(54)
 
-            radius: Appearance.px(17)
+            radius: Appearance.panelRadius
             color: Appearance.barLayer1
 
             border.width: 1
@@ -1332,7 +1332,7 @@ Rectangle {
                     rightMargin: Appearance.px(10)
                 }
 
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 Rectangle {
                     implicitWidth: Appearance.px(34)
@@ -1359,7 +1359,7 @@ Rectangle {
                     Layout.preferredHeight:
                         Appearance.px(40)
 
-                    radius: Appearance.px(12)
+                    radius: Appearance.cardRadius
 
                     color: selectorMouse.containsMouse
                         || noteSelectorPopup.opened
@@ -1509,7 +1509,7 @@ Rectangle {
                     )
 
                     model: noteFolderModel
-                    spacing: Appearance.px(4)
+                    spacing: Appearance.spacingTiny
 
                     clip: true
                     boundsBehavior:
@@ -1534,7 +1534,7 @@ Rectangle {
                         /*
                         * 不用 fullRadius，避免变成胶囊形。
                         */
-                        radius: Appearance.px(12)
+                        radius: Appearance.cardRadius
 
                         color: noteOption.selected
                             ? Appearance.barPrimaryContainer

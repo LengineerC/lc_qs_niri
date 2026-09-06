@@ -37,7 +37,7 @@ MouseArea {
     RowLayout {
         id: contentLayout
 
-        spacing: Appearance.px(4)
+        spacing: Appearance.spacingTiny
 
         anchors {
             fill: parent

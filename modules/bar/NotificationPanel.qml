@@ -39,74 +39,26 @@ Item {
         }
     }
 
-    component HeaderButton: Rectangle {
-        id: button
-
-        required property string icon
-        property string label: ""
-        property bool destructive: false
-        signal clicked
-
-        implicitWidth: buttonRow.implicitWidth + Appearance.px(16)
-        implicitHeight: Appearance.px(30)
-        radius: Appearance.px(9)
-        color: buttonArea.containsMouse
-            ? Appearance.barLayer1Active : Appearance.barLayer1
-        border.width: 1
-        border.color: Appearance.barOutline
-
-        RowLayout {
-            id: buttonRow
-            anchors.centerIn: parent
-            spacing: Appearance.px(5)
-
-            AppText {
-                text: button.icon
-                color: button.destructive
-                    ? Appearance.barError : Appearance.barPrimary
-                font {
-                    family: Appearance.iconFontFamily
-                    weight: Font.Normal
-                    pixelSize: Appearance.px(14)
-                }
-            }
-
-            PanelText {
-                visible: button.label.length > 0
-                text: button.label
-                color: button.destructive
-                    ? Appearance.barError : Appearance.barLayer1Text
-                font.pixelSize: Appearance.smallFontSize
-            }
-        }
-
-        MouseArea {
-            id: buttonArea
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: button.clicked()
-        }
-
-        Behavior on color {
-            ColorAnimation { duration: Appearance.fastDuration }
-        }
+    component HeaderButton: ActionButton {
+        useBarPalette: true
+        compact: true
+        outlined: true
     }
 
     ColumnLayout {
         anchors {
             fill: parent
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
-        spacing: Appearance.px(9)
+        spacing: Appearance.spacingSmall
 
         PopupHeader {
             useBarPalette: true
             icon: NotificationService.doNotDisturb ? "󰂛" : "󰂚"
             iconSize: Appearance.px(19)
             title: I18n.tr("notifications")
-            contentSpacing: Appearance.px(7)
-            dividerSpacing: Appearance.px(9)
+            contentSpacing: Appearance.spacingSmall
+            dividerSpacing: Appearance.spacingSmall
             dividerOpacity: 1
             onCloseClicked: root.closeRequested()
 
@@ -134,7 +86,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            spacing: Appearance.px(8)
+            spacing: Appearance.spacingSmall
             boundsBehavior: Flickable.StopAtBounds
             cacheBuffer: 0
             reuseItems: true
@@ -151,7 +103,7 @@ Item {
 
             header: ColumnLayout {
                 width: notificationList.width - Appearance.px(8)
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 PanelText {
                     Layout.fillWidth: true
@@ -189,7 +141,7 @@ Item {
                 }
 
                 width: notificationList.width - Appearance.px(8)
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 Rectangle {
                     visible: notificationDelegate.firstHistory
@@ -245,7 +197,7 @@ Item {
                 ColumnLayout {
                     id: emptyHistory
                     width: parent.width
-                    spacing: Appearance.px(8)
+                    spacing: Appearance.spacingSmall
 
                     Rectangle {
                         visible: NotificationService.unreadCount > 0

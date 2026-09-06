@@ -70,7 +70,7 @@ Rectangle {
 
     Layout.fillWidth: true
     implicitHeight: content.implicitHeight + Appearance.px(28)
-    radius: Appearance.px(24)
+    radius: Appearance.featureRadius
     color: cardPalette.layer3
     border.width: 1
     border.color: Appearance.withAlpha(cardPalette.outline, 0.58)
@@ -178,7 +178,7 @@ Rectangle {
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
-                spacing: Appearance.px(4)
+                spacing: Appearance.spacingTiny
 
                 AppText {
                     Layout.fillWidth: true

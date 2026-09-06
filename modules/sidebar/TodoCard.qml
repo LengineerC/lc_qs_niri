@@ -21,7 +21,7 @@ Rectangle {
 
     Layout.fillWidth: true
     implicitHeight: Appearance.px(175)
-    radius: Appearance.px(24)
+    radius: Appearance.featureRadius
     color: Appearance.barLayer3
     border.width: 1
     border.color: Appearance.withAlpha(
@@ -121,7 +121,7 @@ Rectangle {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: Appearance.px(9)
+                    radius: Appearance.fieldRadius
                     color: addButton.containsMouse
                         ? Appearance.barPrimaryContainer
                         : Appearance.withAlpha(Appearance.barPrimary, 0.1)
@@ -146,7 +146,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            spacing: Appearance.px(4)
+            spacing: Appearance.spacingTiny
             model: TodoService.tasks
             boundsBehavior: Flickable.StopAtBounds
 
@@ -163,7 +163,7 @@ Rectangle {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: Appearance.px(10)
+                    radius: Appearance.controlRadius
                     color: taskRow.containsMouse
                         ? Appearance.barLayer1Hover : "transparent"
                 }

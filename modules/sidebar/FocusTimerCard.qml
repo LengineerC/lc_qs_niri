@@ -66,7 +66,7 @@ ClippingRectangle {
 
     Layout.fillWidth: true
     implicitHeight: Appearance.px(175)
-    radius: Appearance.px(24)
+    radius: Appearance.featureRadius
     color: Appearance.barLayer3
     border.width: 1
     border.color: Appearance.withAlpha(
@@ -224,7 +224,7 @@ ClippingRectangle {
             fill: parent
             margins: Appearance.px(9)
         }
-        spacing: Appearance.px(4)
+        spacing: Appearance.spacingTiny
 
         Item {
             Layout.fillWidth: true
@@ -515,7 +515,7 @@ ClippingRectangle {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: Appearance.px(9)
+                    radius: Appearance.fieldRadius
                     color: applyButton.containsMouse
                         ? Appearance.barPrimaryContainer
                         : Appearance.withAlpha(Appearance.barPrimary, 0.1)

@@ -158,9 +158,9 @@ ApplicationWindow {
         RowLayout {
             anchors {
                 fill: parent
-                margins: Appearance.px(10)
+                margins: Appearance.spacingMedium
             }
-            spacing: Appearance.px(10)
+            spacing: Appearance.spacingMedium
 
             Rectangle {
                 Layout.fillHeight: true
@@ -174,19 +174,19 @@ ApplicationWindow {
                 ColumnLayout {
                     anchors {
                         fill: parent
-                        margins: Appearance.px(14)
+                        margins: Appearance.panelPadding
                     }
-                    spacing: Appearance.px(10)
+                    spacing: Appearance.spacingMedium
 
                     RowLayout {
                         Layout.fillWidth: true
                         Layout.bottomMargin: Appearance.px(12)
-                        spacing: Appearance.px(10)
+                        spacing: Appearance.spacingMedium
 
                         Rectangle {
                             implicitWidth: Appearance.px(42)
-                            implicitHeight: Appearance.px(42)
-                            radius: Appearance.px(13)
+                            implicitHeight: Appearance.largeControlHeight
+                            radius: Appearance.cardRadius
                             color: Appearance.primaryContainer
 
                             AppText {
@@ -230,8 +230,8 @@ ApplicationWindow {
                         id: quickSettingsTab
 
                         Layout.fillWidth: true
-                        implicitHeight: Appearance.px(42)
-                        radius: Appearance.px(12)
+                        implicitHeight: Appearance.largeControlHeight
+                        radius: Appearance.cardRadius
                         color: root.currentPage === 0
                             ? Appearance.secondaryContainer
                             : quickSettingsMouse.containsMouse
@@ -243,7 +243,7 @@ ApplicationWindow {
                                 leftMargin: Appearance.px(12)
                                 rightMargin: Appearance.px(12)
                             }
-                            spacing: Appearance.px(10)
+                            spacing: Appearance.spacingMedium
 
                             AppText {
                                 text: "󰒓"
@@ -284,8 +284,8 @@ ApplicationWindow {
                         id: networkTab
 
                         Layout.fillWidth: true
-                        implicitHeight: Appearance.px(42)
-                        radius: Appearance.px(12)
+                        implicitHeight: Appearance.largeControlHeight
+                        radius: Appearance.cardRadius
                         color: root.currentPage === 1
                             ? Appearance.secondaryContainer
                             : networkMouse.containsMouse
@@ -297,7 +297,7 @@ ApplicationWindow {
                                 leftMargin: Appearance.px(12)
                                 rightMargin: Appearance.px(12)
                             }
-                            spacing: Appearance.px(10)
+                            spacing: Appearance.spacingMedium
 
                             AppText {
                                 text: "󰛳"
@@ -338,8 +338,8 @@ ApplicationWindow {
                         id: displaysTab
 
                         Layout.fillWidth: true
-                        implicitHeight: Appearance.px(42)
-                        radius: Appearance.px(12)
+                        implicitHeight: Appearance.largeControlHeight
+                        radius: Appearance.cardRadius
                         color: root.currentPage === 3
                             ? Appearance.secondaryContainer
                             : displaysMouse.containsMouse
@@ -351,7 +351,7 @@ ApplicationWindow {
                                 leftMargin: Appearance.px(12)
                                 rightMargin: Appearance.px(12)
                             }
-                            spacing: Appearance.px(10)
+                            spacing: Appearance.spacingMedium
 
                             AppText {
                                 text: "󰍹"
@@ -392,8 +392,8 @@ ApplicationWindow {
                         id: styleTab
 
                         Layout.fillWidth: true
-                        implicitHeight: Appearance.px(42)
-                        radius: Appearance.px(12)
+                        implicitHeight: Appearance.largeControlHeight
+                        radius: Appearance.cardRadius
                         color: root.currentPage === 2
                             ? Appearance.secondaryContainer
                             : styleMouse.containsMouse
@@ -405,7 +405,7 @@ ApplicationWindow {
                                 leftMargin: Appearance.px(12)
                                 rightMargin: Appearance.px(12)
                             }
-                            spacing: Appearance.px(10)
+                            spacing: Appearance.spacingMedium
 
                             AppText {
                                 text: "󰏘"

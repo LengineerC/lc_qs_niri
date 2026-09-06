@@ -12,8 +12,8 @@ Rectangle {
     property color iconColor: Appearance.subtext
     property color hoverColor: Appearance.layer1Active
 
-    implicitWidth: Appearance.px(28)
-    implicitHeight: Appearance.px(28)
+    implicitWidth: Appearance.iconButtonSize
+    implicitHeight: Appearance.iconButtonSize
     radius: Appearance.fullRadius
     color: closeMouse.containsMouse && root.enabled
         ? root.hoverColor : Appearance.withAlpha(root.hoverColor, 0)

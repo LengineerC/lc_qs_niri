@@ -103,12 +103,12 @@ Rectangle {
         RowLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: Appearance.px(30)
-            spacing: Appearance.px(8)
+            spacing: Appearance.spacingSmall
 
             Rectangle {
                 Layout.preferredWidth: Appearance.px(30)
                 Layout.preferredHeight: width
-                radius: Appearance.px(9)
+                radius: Appearance.fieldRadius
                 color: Appearance.barPrimaryContainer
 
                 AppText {
@@ -216,7 +216,7 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: Math.max(
                             Appearance.px(16), root.fontSize(11) + 2)
-                        spacing: Appearance.px(4)
+                        spacing: Appearance.spacingTiny
 
                         AppText {
                             Layout.preferredWidth: Appearance.px(16)
@@ -257,7 +257,7 @@ Rectangle {
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.topMargin: Appearance.px(1)
-                    spacing: Appearance.px(4)
+                    spacing: Appearance.spacingTiny
 
                     Repeater {
                         model: root.paletteColors

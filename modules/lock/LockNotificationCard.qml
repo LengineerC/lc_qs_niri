@@ -38,7 +38,7 @@ Rectangle {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.px(8)
+            spacing: Appearance.spacingSmall
 
             AppText {
                 text: "󰂚"
@@ -118,7 +118,7 @@ Rectangle {
             ColumnLayout {
                 anchors.centerIn: parent
                 visible: root.privateEntries.length === 0
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 AppText {
                     Layout.alignment: Qt.AlignHCenter
@@ -170,8 +170,8 @@ Rectangle {
 
                         Rectangle {
                             implicitWidth: Appearance.px(36)
-                            implicitHeight: Appearance.px(36)
-                            radius: Appearance.px(10)
+                            implicitHeight: Appearance.controlHeight
+                            radius: Appearance.controlRadius
                             color: Appearance.barPrimaryContainer
 
                             AppText {

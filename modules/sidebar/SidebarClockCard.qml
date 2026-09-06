@@ -29,9 +29,9 @@ Rectangle {
 
         anchors {
             fill: parent
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
-        spacing: Appearance.px(12)
+        spacing: Appearance.spacingMedium
 
         AppText {
             text: "󰥔"

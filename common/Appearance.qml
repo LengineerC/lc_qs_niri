@@ -122,10 +122,34 @@ Singleton {
     readonly property int smallFontSize: Math.max(7, fontSize - px(2))
     readonly property int largeFontSize: fontSize + px(3)
 
+    // Shared layout scale. Components should use these semantic values so
+    // spacing and density stay consistent across panels and settings pages.
+    readonly property int spacingTiny: px(4)
+    readonly property int spacingSmall: px(8)
+    readonly property int spacingMedium: px(12)
+    readonly property int spacingLarge: px(16)
+    readonly property int spacingXLarge: px(24)
+    readonly property int panelPadding: px(14)
+    readonly property int pagePadding: spacingLarge
+
+    readonly property int compactControlHeight: px(30)
+    readonly property int controlHeight: px(36)
+    readonly property int largeControlHeight: px(42)
+    readonly property int iconButtonSize: px(28)
+    readonly property int switchWidth: px(43)
+    readonly property int switchHeight: px(25)
+
+    readonly property int detailRadius: px(4)
+    readonly property int fieldRadius: px(9)
+    readonly property int controlRadius: px(10)
+    readonly property int cardRadius: px(12)
+    readonly property int panelRadius: px(17)
+    readonly property int featureRadius: px(24)
+
     readonly property int barHeight: px(40)
     readonly property int cornerSize: px(23)
-    readonly property int smallRadius: px(12)
-    readonly property int normalRadius: px(17)
+    readonly property int smallRadius: cardRadius
+    readonly property int normalRadius: panelRadius
     readonly property int fullRadius: 9999
     readonly property int elevationMargin: px(10)
 

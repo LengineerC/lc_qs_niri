@@ -68,125 +68,10 @@ Item {
         }
     }
 
-    component SettingSwitch: Item {
-        id: control
-
-        required property bool checked
-        signal toggled(bool checked)
-
-        implicitWidth: Appearance.px(43)
-        implicitHeight: Appearance.px(25)
-        opacity: enabled ? 1 : 0.4
-
-        Rectangle {
-            anchors.fill: parent
-            radius: Appearance.fullRadius
-            color: control.checked
-                ? Appearance.primary : Appearance.layer1Active
-            border.width: control.checked ? 0 : 1
-            border.color: Appearance.subtext
-
-            Rectangle {
-                width: control.checked
-                    ? Appearance.px(19) : Appearance.px(15)
-                height: width
-                radius: Appearance.fullRadius
-                anchors.verticalCenter: parent.verticalCenter
-                x: control.checked
-                    ? parent.width - width - Appearance.px(3)
-                    : Appearance.px(5)
-                color: control.checked
-                    ? Theme.palette.m3onPrimary : Appearance.subtext
-
-                Behavior on x {
-                    NumberAnimation {
-                        duration: Appearance.fastDuration
-                        easing.type: Easing.OutCubic
-                    }
-                }
-
-                Behavior on width {
-                    NumberAnimation { duration: Appearance.fastDuration }
-                }
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            enabled: control.enabled
-            cursorShape: enabled
-                ? Qt.PointingHandCursor : Qt.ArrowCursor
-            onClicked: control.toggled(!control.checked)
-        }
-    }
-
-    component ActionButton: Rectangle {
-        id: button
-
-        required property string icon
-        required property string label
-        property bool primary: false
-        signal clicked
-
-        implicitWidth: buttonRow.implicitWidth + Appearance.px(20)
-        implicitHeight: Appearance.px(34)
-        radius: Appearance.px(10)
-        color: primary
-            ? Appearance.primaryContainer
-            : buttonArea.containsMouse
-                ? Appearance.layer1Active : Appearance.layer1
-        opacity: enabled ? 1 : 0.4
-        scale: buttonArea.pressed ? 0.96 : 1
-
-        RowLayout {
-            id: buttonRow
-            anchors.centerIn: parent
-            spacing: Appearance.px(6)
-
-            AppText {
-                text: button.icon
-                color: button.primary
-                    ? Appearance.primaryContainerText
-                    : Appearance.primary
-                font {
-                    family: Appearance.iconFontFamily
-                    weight: Font.Normal
-                    pixelSize: Appearance.px(15)
-                }
-            }
-
-            PanelText {
-                text: button.label
-                color: button.primary
-                    ? Appearance.primaryContainerText
-                    : Appearance.layer1Text
-                font.pixelSize: Appearance.smallFontSize
-            }
-        }
-
-        MouseArea {
-            id: buttonArea
-            anchors.fill: parent
-            enabled: button.enabled
-            hoverEnabled: true
-            cursorShape: enabled
-                ? Qt.PointingHandCursor : Qt.ArrowCursor
-            onClicked: button.clicked()
-        }
-
-        Behavior on color {
-            ColorAnimation { duration: Appearance.fastDuration }
-        }
-
-        Behavior on scale {
-            NumberAnimation { duration: Appearance.fastDuration }
-        }
-    }
-
     component SettingCombo: Controls.ComboBox {
         id: control
 
-        implicitHeight: Appearance.px(36)
+        implicitHeight: Appearance.controlHeight
         leftPadding: Appearance.px(10)
         rightPadding: Appearance.px(30)
         font {
@@ -216,7 +101,7 @@ Item {
         }
 
         background: Rectangle {
-            radius: Appearance.px(9)
+            radius: Appearance.fieldRadius
             color: control.down
                 ? Appearance.layer1Active : Appearance.layer1
             border.width: control.activeFocus ? 1 : 0
@@ -227,7 +112,7 @@ Item {
             required property var modelData
 
             width: control.width
-            implicitHeight: Appearance.px(34)
+            implicitHeight: Appearance.controlHeight
             highlighted: control.highlightedIndex === index
             contentItem: AppText {
                 text: control.textRole
@@ -238,7 +123,7 @@ Item {
                 font: control.font
             }
             background: Rectangle {
-                radius: Appearance.px(7)
+                radius: Appearance.fieldRadius
                 color: parent.highlighted
                     ? Appearance.layer1Active : "transparent"
             }
@@ -263,7 +148,7 @@ Item {
             }
 
             background: Rectangle {
-                radius: Appearance.px(10)
+                radius: Appearance.controlRadius
                 color: Appearance.layer2
                 border.width: 1
                 border.color: Appearance.outline
@@ -273,7 +158,7 @@ Item {
 
     component NumberField: AppTextField {
         implicitWidth: Appearance.px(105)
-        implicitHeight: Appearance.px(36)
+        implicitHeight: Appearance.controlHeight
         horizontalAlignment: TextInput.AlignHCenter
         color: Appearance.layer0Text
         selectionColor: Appearance.primaryContainer
@@ -288,57 +173,25 @@ Item {
             pixelSize: Appearance.smallFontSize
         }
         background: Rectangle {
-            radius: Appearance.px(9)
+            radius: Appearance.fieldRadius
             color: Appearance.layer1
             border.width: parent.activeFocus ? 1 : 0
             border.color: Appearance.primary
         }
     }
 
-    component BrightnessSlider: Controls.Slider {
-        id: slider
-
+    component BrightnessSlider: SettingSlider {
         from: 1
         to: 100
         stepSize: 1
-        implicitHeight: Appearance.px(30)
-
-        background: Rectangle {
-            x: slider.leftPadding
-            y: slider.topPadding + slider.availableHeight / 2 - height / 2
-            width: slider.availableWidth
-            height: Appearance.px(8)
-            radius: Appearance.fullRadius
-            color: Appearance.layer1Active
-            border.width: 1
-            border.color: Appearance.outline
-
-            Rectangle {
-                width: slider.visualPosition * parent.width
-                height: parent.height
-                radius: parent.radius
-                color: Appearance.primary
-            }
-        }
-
-        handle: Rectangle {
-            x: slider.leftPadding + slider.visualPosition
-                * (slider.availableWidth - width)
-            y: slider.topPadding + slider.availableHeight / 2 - height / 2
-            implicitWidth: Appearance.px(6)
-            implicitHeight: Appearance.px(24)
-            radius: Appearance.fullRadius
-            color: slider.enabled
-                ? Appearance.primary : Appearance.subtext
-        }
     }
 
     ColumnLayout {
         anchors {
             fill: parent
-            margins: Appearance.px(18)
+            margins: Appearance.pagePadding
         }
-        spacing: Appearance.px(10)
+        spacing: Appearance.spacingMedium
 
         SettingsPageHeader {
             icon: "󰍹"
@@ -364,9 +217,9 @@ Item {
             RowLayout {
                 anchors {
                     fill: parent
-                    margins: Appearance.px(10)
+                    margins: Appearance.spacingMedium
                 }
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 AppText {
                     text: "󰋼"
@@ -401,7 +254,7 @@ Item {
                 id: errorText
                 anchors {
                     fill: parent
-                    margins: Appearance.px(10)
+                    margins: Appearance.spacingMedium
                 }
                 text: OutputService.errorMessage
                 color: Theme.palette.m3onErrorContainer
@@ -425,7 +278,7 @@ Item {
                     id: outputColumn
 
                     width: parent.width
-                    spacing: Appearance.px(10)
+                    spacing: Appearance.spacingMedium
 
                     Repeater {
                         model: OutputService.outputs
@@ -474,18 +327,18 @@ Item {
                                     left: parent.left
                                     right: parent.right
                                     top: parent.top
-                                    margins: Appearance.px(12)
+                                    margins: Appearance.spacingMedium
                                 }
                                 spacing: Appearance.px(11)
 
                                 RowLayout {
                                     Layout.fillWidth: true
-                                    spacing: Appearance.px(10)
+                                    spacing: Appearance.spacingMedium
 
                                     Rectangle {
                                         implicitWidth: Appearance.px(44)
                                         implicitHeight: Appearance.px(44)
-                                        radius: Appearance.px(12)
+                                        radius: Appearance.cardRadius
                                         color: outputCard.draftEnabled
                                             ? Appearance.primaryContainer
                                             : Appearance.layer1Active
@@ -579,7 +432,7 @@ Item {
 
                                     RowLayout {
                                         Layout.fillWidth: true
-                                        spacing: Appearance.px(10)
+                                        spacing: Appearance.spacingMedium
 
                                         AppText {
                                             text: "󰃠"
@@ -653,13 +506,13 @@ Item {
 
                                 RowLayout {
                                     Layout.fillWidth: true
-                                    spacing: Appearance.px(10)
+                                    spacing: Appearance.spacingMedium
                                     enabled: outputCard.draftEnabled
                                     opacity: enabled ? 1 : 0.45
 
                                     ColumnLayout {
                                         Layout.fillWidth: true
-                                        spacing: Appearance.px(4)
+                                        spacing: Appearance.spacingTiny
 
                                         PanelText {
                                             text: I18n.tr(
@@ -687,7 +540,7 @@ Item {
                                     ColumnLayout {
                                         Layout.preferredWidth:
                                             Appearance.px(115)
-                                        spacing: Appearance.px(4)
+                                        spacing: Appearance.spacingTiny
 
                                         PanelText {
                                             text: I18n.tr("displayScale")
@@ -714,7 +567,7 @@ Item {
                                     ColumnLayout {
                                         Layout.preferredWidth:
                                             Appearance.px(175)
-                                        spacing: Appearance.px(4)
+                                        spacing: Appearance.spacingTiny
 
                                         PanelText {
                                             text: I18n.tr("orientation")
@@ -741,12 +594,12 @@ Item {
 
                                 RowLayout {
                                     Layout.fillWidth: true
-                                    spacing: Appearance.px(10)
+                                    spacing: Appearance.spacingMedium
                                     enabled: outputCard.draftEnabled
                                     opacity: enabled ? 1 : 0.45
 
                                     ColumnLayout {
-                                        spacing: Appearance.px(4)
+                                        spacing: Appearance.spacingTiny
 
                                         PanelText {
                                             text: I18n.tr("positionX")
@@ -767,7 +620,7 @@ Item {
                                     }
 
                                     ColumnLayout {
-                                        spacing: Appearance.px(4)
+                                        spacing: Appearance.spacingTiny
 
                                         PanelText {
                                             text: I18n.tr("positionY")
@@ -790,7 +643,7 @@ Item {
                                     ColumnLayout {
                                         Layout.preferredWidth:
                                             Appearance.px(105)
-                                        spacing: Appearance.px(5)
+                                        spacing: Appearance.spacingSmall
 
                                         PanelText {
                                             text: I18n.tr(
@@ -815,7 +668,7 @@ Item {
                                             .vrrSupported
                                         Layout.preferredWidth:
                                             Appearance.px(120)
-                                        spacing: Appearance.px(5)
+                                        spacing: Appearance.spacingSmall
 
                                         PanelText {
                                             text: I18n.tr(
@@ -836,7 +689,7 @@ Item {
 
                                     ColumnLayout {
                                         Layout.fillWidth: true
-                                        spacing: Appearance.px(4)
+                                        spacing: Appearance.spacingTiny
 
                                         PanelText {
                                             text: I18n.tr("colorDepth")
@@ -922,7 +775,7 @@ Item {
                 anchors.centerIn: parent
                 visible: !OutputService.refreshing
                     && OutputService.outputs.length === 0
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 AppText {
                     Layout.alignment: Qt.AlignHCenter

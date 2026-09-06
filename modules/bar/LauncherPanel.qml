@@ -130,14 +130,14 @@ Item {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: Appearance.px(14)
+            margins: Appearance.panelPadding
         }
         spacing: Appearance.px(10)
 
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: Appearance.px(42)
-            radius: Appearance.px(12)
+            implicitHeight: Appearance.largeControlHeight
+            radius: Appearance.cardRadius
             color: Appearance.barLayer1
             border.width: searchInput.activeFocus ? 1 : 0
             border.color: Appearance.barPrimary
@@ -148,7 +148,7 @@ Item {
                     leftMargin: Appearance.px(12)
                     rightMargin: Appearance.px(8)
                 }
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 AppText {
                     text: "󰍉"
@@ -281,7 +281,7 @@ Item {
 
                     width: ListView.view.width
                     height: Appearance.px(58)
-                    radius: Appearance.px(12)
+                    radius: Appearance.cardRadius
                     color: applicationEntry.ListView.isCurrentItem
                             || entryArea.containsMouse
                         ? Appearance.barLayer1Hover
@@ -394,7 +394,7 @@ Item {
             ColumnLayout {
                 anchors.centerIn: parent
                 visible: applicationList.count === 0
-                spacing: Appearance.px(8)
+                spacing: Appearance.spacingSmall
 
                 AppText {
                     Layout.alignment: Qt.AlignHCenter

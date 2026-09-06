@@ -76,7 +76,7 @@ Item {
             left: parent.left
             right: parent.right
             top: parent.top
-            margins: Appearance.px(8)
+            margins: Appearance.spacingSmall
         }
         implicitHeight: toastContent.implicitHeight + Appearance.px(22)
         radius: Appearance.normalRadius

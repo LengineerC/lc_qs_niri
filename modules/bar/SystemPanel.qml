@@ -93,35 +93,9 @@ Item {
         }
     }
 
-    component ControlSlider: Controls.Slider {
-        id: slider
+    component ControlSlider: SegmentedSlider {
         Layout.fillWidth: true
-        implicitHeight: Appearance.px(30)
-        background: Rectangle {
-            x: slider.leftPadding
-            y: slider.topPadding + slider.availableHeight / 2 - height / 2
-            width: slider.availableWidth
-            height: Appearance.px(8)
-            radius: Appearance.fullRadius
-            color: panelPalette.layer1Active
-            border.width: 1
-            border.color: panelPalette.outline
-            Rectangle {
-                width: slider.visualPosition * parent.width
-                height: parent.height
-                radius: parent.radius
-                color: panelPalette.primary
-            }
-        }
-        handle: Rectangle {
-            x: slider.leftPadding + slider.visualPosition
-                * (slider.availableWidth - width)
-            y: slider.topPadding + slider.availableHeight / 2 - height / 2
-            implicitWidth: Appearance.px(5)
-            implicitHeight: Appearance.px(24)
-            radius: Appearance.fullRadius
-            color: panelPalette.primary
-        }
+        useBarPalette: root.useBarPalette
     }
 
     component SummaryCard: Rectangle {
@@ -153,7 +127,7 @@ Item {
             }
             width: Appearance.px(52)
             height: Appearance.px(58)
-            radius: Appearance.px(12)
+            radius: Appearance.cardRadius
             color: iconArea.containsMouse
                 ? panelPalette.layer1Active
                 : card.active
@@ -278,7 +252,7 @@ Item {
             x: Appearance.px(root.embedded ? 18 : 16)
             y: Appearance.px(root.embedded ? 18 : 12)
             width: scroll.width - Appearance.px(root.embedded ? 36 : 32)
-            spacing: Appearance.px(10)
+            spacing: Appearance.spacingMedium
 
             SettingsPageHeader {
                 useBarPalette: root.useBarPalette
@@ -297,70 +271,46 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Appearance.px(10)
+                spacing: Appearance.spacingMedium
 
-                AppText {
-                    text: SystemService.volumeIcon()
-                    color: panelPalette.layer1Text
-                    font {
-                        family: Appearance.iconFontFamily
-                        weight: Font.Normal
-                        pixelSize: Appearance.px(20)
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: SystemService.toggleMute()
-                    }
-                }
                 ControlSlider {
                     from: 0
                     to: 1
                     value: SystemService.volume
+                    valueText: Math.round(value * 100) + "%"
+                    iconText: SystemService.volumeIcon()
+                    iconColor: SystemService.muted
+                        ? panelPalette.subtext : panelPalette.layer1Text
                     onMoved: SystemService.setVolume(value)
-                }
-                PanelText {
-                    Layout.preferredWidth: Appearance.px(44)
-                    text: Math.round(SystemService.volume * 100) + "%"
-                    color: panelPalette.subtext
+                    onIconActivated: SystemService.toggleMute()
                 }
 
-                AppText {
-                    text: SystemService.microphoneIcon()
-                    color: panelPalette.layer1Text
-                    font {
-                        family: Appearance.iconFontFamily
-                        weight: Font.Normal
-                        pixelSize: Appearance.px(20)
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: SystemService.toggleMicrophoneMute()
-                    }
-                }
                 ControlSlider {
                     from: 0
                     to: 1
                     value: SystemService.microphoneVolume
+                    valueText: Math.round(value * 100) + "%"
+                    iconText: SystemService.microphoneIcon()
+                    iconColor: SystemService.microphoneMuted
+                        ? panelPalette.subtext : panelPalette.layer1Text
                     onMoved: SystemService.setMicrophoneVolume(value)
-                }
-                PanelText {
-                    Layout.preferredWidth: Appearance.px(44)
-                    text: Math.round(SystemService.microphoneVolume * 100) + "%"
-                    color: panelPalette.subtext
+                    onIconActivated:
+                        SystemService.toggleMicrophoneMute()
                 }
             }
 
             Rectangle {
                 Layout.fillWidth: true
-                implicitHeight: Appearance.px(82)
-                radius: Appearance.px(12)
+                implicitHeight: brightnessContent.implicitHeight
+                    + Appearance.px(15)
+                radius: Appearance.cardRadius
                 color: panelPalette.layer3
                 border.width: 1
                 border.color: panelPalette.outline
 
                 ColumnLayout {
+                    id: brightnessContent
+
                     anchors {
                         fill: parent
                         leftMargin: Appearance.px(12)
@@ -372,18 +322,7 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Appearance.px(10)
-
-                        AppText {
-                            text: "󰃠"
-                            color: root.brightnessState.available
-                                ? panelPalette.primary : panelPalette.subtext
-                            font {
-                                family: Appearance.iconFontFamily
-                                weight: Font.Normal
-                                pixelSize: Appearance.px(21)
-                            }
-                        }
+                        spacing: Appearance.spacingMedium
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -410,14 +349,6 @@ Item {
                             }
                         }
 
-                        PanelText {
-                            Layout.preferredWidth: Appearance.px(44)
-                            horizontalAlignment: Text.AlignRight
-                            text: root.brightnessState.available
-                                ? Math.round(root.brightnessState.percent) + "%"
-                                : "—"
-                            color: panelPalette.subtext
-                        }
                     }
 
                     ControlSlider {
@@ -428,6 +359,11 @@ Item {
                         enabled: root.brightnessState.available
                         value: root.brightnessState.available
                             ? root.brightnessState.percent : 1
+                        valueText: root.brightnessState.available
+                            ? Math.round(value) + "%" : "—"
+                        iconText: "󰃠"
+                        iconColor: root.brightnessState.available
+                            ? panelPalette.layer1Text : panelPalette.subtext
                         onMoved: BrightnessService.setBrightness(
                             root.outputName, value)
                     }
@@ -529,9 +465,9 @@ Item {
                         left: parent.left
                         right: parent.right
                         top: parent.top
-                        margins: Appearance.px(10)
+                        margins: Appearance.spacingMedium
                     }
-                    spacing: Appearance.px(7)
+                    spacing: Appearance.spacingSmall
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -558,7 +494,7 @@ Item {
                             required property var modelData
                             Layout.fillWidth: true
                             implicitHeight: Appearance.px(54)
-                            radius: Appearance.px(10)
+                            radius: Appearance.controlRadius
                             color: wifiMouse.containsMouse
                                 ? panelPalette.layer1Hover : panelPalette.layer2
                             border.width: modelData.active ? 2
@@ -568,7 +504,7 @@ Item {
                             RowLayout {
                                 anchors {
                                     fill: parent
-                                    margins: Appearance.px(10)
+                                    margins: Appearance.spacingMedium
                                 }
                                 AppText {
                                     text: SystemService.wifiIcon(modelData.strength)
@@ -658,7 +594,7 @@ Item {
                         Layout.fillWidth: true
                         implicitHeight: wifiDetailsColumn.implicitHeight
                             + Appearance.px(20)
-                        radius: Appearance.px(12)
+                        radius: Appearance.cardRadius
                         color: panelPalette.layer2
                         border.width: 1
                         border.color: panelPalette.outline
@@ -670,13 +606,13 @@ Item {
                                 top: parent.top
                                 left: parent.left
                                 right: parent.right
-                                margins: Appearance.px(10)
+                                margins: Appearance.spacingMedium
                             }
-                            spacing: Appearance.px(9)
+                            spacing: Appearance.spacingSmall
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                spacing: Appearance.px(9)
+                                spacing: Appearance.spacingSmall
 
                                 Rectangle {
                                     Layout.preferredWidth: Appearance.px(38)
@@ -814,7 +750,7 @@ Item {
                         Layout.fillWidth: true
                         implicitHeight: wifiPasswordColumn.implicitHeight
                             + Appearance.px(20)
-                        radius: Appearance.px(12)
+                        radius: Appearance.cardRadius
                         color: panelPalette.layer2
                         border.width: 1
                         border.color: wifiPassword.activeFocus
@@ -827,13 +763,13 @@ Item {
                                 top: parent.top
                                 left: parent.left
                                 right: parent.right
-                                margins: Appearance.px(10)
+                                margins: Appearance.spacingMedium
                             }
-                            spacing: Appearance.px(9)
+                            spacing: Appearance.spacingSmall
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                spacing: Appearance.px(9)
+                                spacing: Appearance.spacingSmall
 
                                 AppText {
                                     text: "󰌾"
@@ -899,12 +835,12 @@ Item {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                spacing: Appearance.px(8)
+                                spacing: Appearance.spacingSmall
 
                                 Rectangle {
                                     Layout.fillWidth: true
-                                    implicitHeight: Appearance.px(40)
-                                    radius: Appearance.px(10)
+                                    implicitHeight: Appearance.largeControlHeight
+                                    radius: Appearance.controlRadius
                                     color: panelPalette.layer1
                                     border.width: wifiPassword.activeFocus
                                         ? 1 : 0
@@ -1005,8 +941,8 @@ Item {
                                             && !SystemService.wifiConnecting
 
                                     Layout.preferredWidth: Appearance.px(88)
-                                    implicitHeight: Appearance.px(40)
-                                    radius: Appearance.px(10)
+                                    implicitHeight: Appearance.largeControlHeight
+                                    radius: Appearance.controlRadius
                                     color: canConnect
                                         ? panelPalette.primaryContainer
                                         : panelPalette.layer1Active
@@ -1061,9 +997,9 @@ Item {
                         left: parent.left
                         right: parent.right
                         top: parent.top
-                        margins: Appearance.px(10)
+                        margins: Appearance.spacingMedium
                     }
-                    spacing: Appearance.px(7)
+                    spacing: Appearance.spacingSmall
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -1090,13 +1026,13 @@ Item {
                             required property var modelData
                             Layout.fillWidth: true
                             implicitHeight: Appearance.px(52)
-                            radius: Appearance.px(10)
+                            radius: Appearance.controlRadius
                             color: bluetoothMouse.containsMouse
                                 ? panelPalette.layer1Hover : panelPalette.layer2
                             RowLayout {
                                 anchors {
                                     fill: parent
-                                    margins: Appearance.px(10)
+                                    margins: Appearance.spacingMedium
                                 }
                                 AppText {
                                     text: "󰂯"
@@ -1162,9 +1098,9 @@ Item {
                         left: parent.left
                         right: parent.right
                         top: parent.top
-                        margins: Appearance.px(10)
+                        margins: Appearance.spacingMedium
                     }
-                    spacing: Appearance.px(7)
+                    spacing: Appearance.spacingSmall
 
                     PanelText {
                         Layout.fillWidth: true
@@ -1191,7 +1127,7 @@ Item {
 
                             Layout.fillWidth: true
                             implicitHeight: Appearance.px(52)
-                            radius: Appearance.px(10)
+                            radius: Appearance.controlRadius
                             color: outputMouse.containsMouse
                                 ? panelPalette.layer1Hover : panelPalette.layer2
                             border.width: selected ? 2 : 0
@@ -1200,9 +1136,9 @@ Item {
                             RowLayout {
                                 anchors {
                                     fill: parent
-                                    margins: Appearance.px(10)
+                                    margins: Appearance.spacingMedium
                                 }
-                                spacing: Appearance.px(9)
+                                spacing: Appearance.spacingSmall
 
                                 AppText {
                                     text: "󰕾"
@@ -1276,9 +1212,9 @@ Item {
                         left: parent.left
                         right: parent.right
                         top: parent.top
-                        margins: Appearance.px(10)
+                        margins: Appearance.spacingMedium
                     }
-                    spacing: Appearance.px(7)
+                    spacing: Appearance.spacingSmall
 
                     PanelText {
                         Layout.fillWidth: true
@@ -1305,7 +1241,7 @@ Item {
 
                             Layout.fillWidth: true
                             implicitHeight: Appearance.px(52)
-                            radius: Appearance.px(10)
+                            radius: Appearance.controlRadius
                             color: inputMouse.containsMouse
                                 ? panelPalette.layer1Hover : panelPalette.layer2
                             border.width: selected ? 2 : 0
@@ -1314,9 +1250,9 @@ Item {
                             RowLayout {
                                 anchors {
                                     fill: parent
-                                    margins: Appearance.px(10)
+                                    margins: Appearance.spacingMedium
                                 }
-                                spacing: Appearance.px(9)
+                                spacing: Appearance.spacingSmall
 
                                 AppText {
                                     text: "󰍬"

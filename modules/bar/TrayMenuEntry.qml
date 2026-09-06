@@ -32,7 +32,7 @@ Rectangle {
     Layout.topMargin: separator ? Appearance.px(4) : 0
     Layout.bottomMargin: separator ? Appearance.px(4) : 0
     implicitHeight: separator ? Appearance.px(1) : Appearance.px(40)
-    radius: Appearance.px(10)
+    radius: Appearance.controlRadius
     color: separator ? Appearance.barOutline
         : entryMouse.containsMouse && root.enabled
             ? Appearance.barPrimaryContainer
@@ -50,7 +50,7 @@ Rectangle {
             leftMargin: Appearance.px(11)
             rightMargin: Appearance.px(9)
         }
-        spacing: Appearance.px(8)
+        spacing: Appearance.spacingSmall
 
         Item {
             visible: root.forceControlColumn || root.hasControl

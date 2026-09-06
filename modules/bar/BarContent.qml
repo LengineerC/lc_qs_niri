@@ -372,7 +372,7 @@ Item {
 
             visible: width >= Appearance.px(110)
             height: parent.height
-            spacing: Appearance.px(8)
+            spacing: Appearance.spacingSmall
             anchors {
                 left: launcherControl.right
                 leftMargin: Appearance.px(10)
@@ -461,7 +461,7 @@ Item {
             top: parent.top
         }
         height: Appearance.barHeight
-        spacing: Appearance.px(4)
+        spacing: Appearance.spacingTiny
 
         WorkspaceSwitcher {
             id: workspaceSwitcher
