@@ -47,8 +47,8 @@ Item {
             })
             .map(result => result.entry);
     }
-    readonly property int gridColumns: Math.max(3, Math.min(12,
-        Math.floor(applicationGrid.width / Appearance.px(118))))
+    readonly property int gridColumns: Math.max(1, Math.min(9,
+        Math.floor(applicationGrid.width / Appearance.px(144))))
 
     function searchableText(entry) {
         return [
@@ -128,8 +128,8 @@ Item {
 
     transform: Scale {
         origin.x: root.width / 2
-        origin.y: root.height / 2
-        xScale: 0.94 + root.revealProgress * 0.06
+        origin.y: root.height * 0.35
+        xScale: 0.97 + root.revealProgress * 0.03
         yScale: xScale
     }
     opacity: revealProgress
@@ -142,7 +142,7 @@ Item {
             leftMargin: Math.max(Appearance.px(28), parent.width * 0.035)
             rightMargin: Math.max(Appearance.px(28), parent.width * 0.035)
         }
-        spacing: Appearance.px(20)
+        spacing: Appearance.spacingXLarge
 
         ColumnLayout {
             Layout.alignment: Qt.AlignHCenter
@@ -152,22 +152,11 @@ Item {
                 root.width - Appearance.px(72))
             spacing: Appearance.px(11)
 
-            AppText {
-                Layout.alignment: Qt.AlignHCenter
-                text: I18n.tr("launcher")
-                color: Appearance.barLayer0Text
-                font {
-                    family: Appearance.fontFamily
-                    pixelSize: Appearance.px(24)
-                    weight: Font.DemiBold
-                }
-            }
-
             Item {
                 Layout.fillWidth: true
                 implicitHeight: Appearance.px(48)
 
-                Rectangle {
+                LauncherSearchSurface {
                     id: searchField
 
                     readonly property bool expanded:
@@ -176,16 +165,11 @@ Item {
                     anchors.centerIn: parent
                     width: expanded
                         ? parent.width
-                        : Math.min(parent.width, Appearance.px(280))
+                        : Math.min(parent.width, Appearance.px(250))
                     height: expanded
                         ? Appearance.px(48) : Appearance.px(40)
-                    radius: Appearance.smallRadius
                     clip: true
-                    // Match the search field in the launcher panel opened by
-                    // a left click on the Bar's system icon.
-                    color: Appearance.barLayer1
-                    border.width: searchInput.activeFocus ? 1 : 0
-                    border.color: Appearance.barPrimary
+                    highlighted: expanded && searchInput.activeFocus
 
                     Behavior on width {
                         NumberAnimation {
@@ -324,8 +308,7 @@ Item {
 
             AppText {
                 Layout.alignment: Qt.AlignHCenter
-                text: root.filteredApplications.length
-                    + " / " + root.applications.length
+                text: I18n.tr("launcherAppCount").arg(root.filteredApplications.length)
                 color: Appearance.withAlpha(Appearance.barLayer0Text, 0.66)
                 font {
                     family: Appearance.fontFamily
@@ -337,7 +320,10 @@ Item {
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.maximumWidth: Appearance.px(1500)
+            Layout.maximumWidth: searchInput.text.trim().length > 0
+                    && root.filteredApplications.length > 0
+                ? Appearance.px(160) * Math.min(9, root.filteredApplications.length)
+                : Appearance.px(1440)
             Layout.alignment: Qt.AlignHCenter
 
             GridView {
@@ -349,10 +335,12 @@ Item {
                 model: root.filteredApplications
                 currentIndex: count > 0 ? 0 : -1
                 cellWidth: width / Math.max(1, root.gridColumns)
-                cellHeight: Appearance.px(116)
+                cellHeight: Appearance.px(144)
                 boundsBehavior: Flickable.StopAtBounds
                 keyNavigationEnabled: false
                 flickDeceleration: 2400
+                cacheBuffer: cellHeight
+                reuseItems: true
 
                 Controls.ScrollBar.vertical: Controls.ScrollBar {
                     policy: Controls.ScrollBar.AsNeeded
@@ -366,31 +354,6 @@ Item {
 
                     width: applicationGrid.cellWidth
                     height: applicationGrid.cellHeight
-
-                    Rectangle {
-                        anchors {
-                            fill: parent
-                            margins: Appearance.spacingTiny
-                        }
-                        radius: Appearance.normalRadius
-                        color: applicationDelegate.GridView.isCurrentItem
-                                || appArea.containsMouse
-                            ? (ShellSettings.barFrostedGlass
-                                ? Appearance.barLayer2
-                                : Appearance.withAlpha(
-                                    Appearance.barLayer2, 0.62))
-                            : Appearance.withAlpha(Appearance.barLayer2, 0)
-                        border.width:
-                            applicationDelegate.GridView.isCurrentItem ? 1 : 0
-                        border.color: Appearance.withAlpha(
-                            Appearance.barPrimary, 0.82)
-
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: Appearance.fastDuration
-                            }
-                        }
-                    }
 
                     MouseArea {
                         id: appArea
@@ -414,37 +377,34 @@ Item {
                             applicationDelegate.width - Appearance.px(14))
                         spacing: Appearance.spacingSmall
 
-                        Rectangle {
+                        Item {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            width: Appearance.px(70)
+                            width: Appearance.px(96)
                             height: width
-                            radius: Appearance.px(18)
-                            color: ShellSettings.barFrostedGlass
-                                ? Appearance.barPrimaryContainer
-                                : Appearance.withAlpha(
-                                    Appearance.barPrimaryContainer, 0.72)
-                            border.width: 1
-                            border.color: Appearance.withAlpha(
-                                Appearance.barLayer0Text, 0.1)
 
-                            IconImage {
-                                anchors {
-                                    fill: parent
-                                    margins: Appearance.px(9)
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: Appearance.px(24)
+                                color: Appearance.withAlpha(
+                                    Appearance.barLayer0Text,
+                                    appArea.pressed ? 0.18
+                                        : applicationDelegate.GridView.isCurrentItem
+                                            ? 0.10 : 0)
+                                border.width: 1
+                                border.color: Appearance.withAlpha(
+                                    Appearance.barLayer0Text,
+                                    applicationDelegate.GridView.isCurrentItem ? 0.18 : 0)
+                                Behavior on color {
+                                    ColorAnimation { duration: Appearance.fastDuration }
                                 }
-                                asynchronous: true
-                                source: Quickshell.iconPath(
-                                    applicationDelegate.modelData.icon,
-                                    "application-x-executable")
-                                opacity: ShellSettings.monochromeAppIconsActive
-                                    ? Appearance.monochromeAppIconOpacity : 1
-                                layer.enabled:
-                                    ShellSettings.monochromeAppIconsActive
-                                layer.effect: MultiEffect {
-                                    saturation: -1
-                                    brightness: 0.12
-                                    contrast: 0.08
-                                }
+                            }
+
+                            LauncherIcon {
+                                anchors.centerIn: parent
+                                iconSize: Appearance.px(76)
+                                iconName: applicationDelegate.modelData.icon
+                                hovered: appArea.containsMouse
+                                pressed: appArea.pressed
                             }
                         }
 
@@ -455,6 +415,9 @@ Item {
                             color: Appearance.barLayer0Text
                             elide: Text.ElideRight
                             maximumLineCount: 1
+                            style: ShellSettings.barFrostedGlass
+                                || Theme.darkMode ? Text.Raised : Text.Normal
+                            styleColor: "#80000000"
                             font {
                                 family: Appearance.fontFamily
                                 pixelSize: Appearance.fontSize
@@ -492,5 +455,26 @@ Item {
                 }
             }
         }
+        RowLayout {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: Appearance.spacingLarge
+
+            AppText {
+                text: I18n.tr("launcherNavigateHint")
+                color: Appearance.barSubtext
+                font.pixelSize: Appearance.smallFontSize
+            }
+            AppText {
+                text: I18n.tr("launcherOpenHint")
+                color: Appearance.barSubtext
+                font.pixelSize: Appearance.smallFontSize
+            }
+            AppText {
+                text: I18n.tr("launcherCloseHint")
+                color: Appearance.barSubtext
+                font.pixelSize: Appearance.smallFontSize
+            }
+        }
+
     }
 }

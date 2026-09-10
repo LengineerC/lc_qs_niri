@@ -250,14 +250,33 @@ Scope {
             }
 
             Rectangle {
+                id: launchpadTint
+
                 anchors.fill: parent
                 opacity: launchpadWindow.revealProgress
-                color: ShellSettings.barFrostedGlass
-                    ? Appearance.withAlpha(
-                        Appearance.barGlassBaseColor, 0.56)
-                    : Appearance.withAlpha(
-                        Theme.palette.m3background,
-                        Theme.darkMode ? 0.48 : 0.34)
+                // A quiet center keeps icons clear; stronger edge tint gives
+                // the search and footer contrast without another opaque panel.
+                readonly property color tint: ShellSettings.barFrostedGlass
+                    ? Appearance.barGlassBaseColor : Theme.palette.m3background
+                readonly property bool dark: ShellSettings.barFrostedGlass
+                    || Theme.darkMode
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0
+                        color: Appearance.withAlpha(launchpadTint.tint,
+                            launchpadTint.dark ? 0.64 : 0.56)
+                    }
+                    GradientStop {
+                        position: 0.42
+                        color: Appearance.withAlpha(launchpadTint.tint,
+                            launchpadTint.dark ? 0.46 : 0.38)
+                    }
+                    GradientStop {
+                        position: 1
+                        color: Appearance.withAlpha(launchpadTint.tint,
+                            launchpadTint.dark ? 0.7 : 0.6)
+                    }
+                }
             }
 
             MouseArea {

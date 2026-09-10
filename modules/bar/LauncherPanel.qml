@@ -132,15 +132,12 @@ Item {
             fill: parent
             margins: Appearance.panelPadding
         }
-        spacing: Appearance.px(10)
+        spacing: Appearance.spacingMedium
 
-        Rectangle {
+        LauncherSearchSurface {
             Layout.fillWidth: true
-            implicitHeight: Appearance.largeControlHeight
-            radius: Appearance.cardRadius
-            color: Appearance.barLayer1
-            border.width: searchInput.activeFocus ? 1 : 0
-            border.color: Appearance.barPrimary
+            implicitHeight: Appearance.px(45)
+            highlighted: searchInput.activeFocus
 
             RowLayout {
                 anchors {
@@ -246,8 +243,7 @@ Item {
             }
 
             PanelText {
-                text: root.filteredApplications.length
-                    + " / " + root.applications.length
+                text: I18n.tr("launcherAppCount").arg(root.filteredApplications.length)
                 color: Appearance.barSubtext
                 font.pixelSize: Appearance.smallFontSize
             }
@@ -263,7 +259,7 @@ Item {
                 anchors.fill: parent
                 visible: count > 0
                 clip: true
-                spacing: Appearance.px(5)
+                spacing: Appearance.spacingTiny
                 model: root.filteredApplications
                 currentIndex: count > 0 ? 0 : -1
                 boundsBehavior: Flickable.StopAtBounds
@@ -280,16 +276,13 @@ Item {
                     required property int index
 
                     width: ListView.view.width
-                    height: Appearance.px(58)
+                    height: Appearance.px(64)
                     radius: Appearance.cardRadius
                     color: applicationEntry.ListView.isCurrentItem
-                            || entryArea.containsMouse
-                        ? Appearance.barLayer1Hover
-                        : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
-                    border.width:
-                        applicationEntry.ListView.isCurrentItem ? 1 : 0
-                    border.color: Appearance.barPrimary
-                    scale: 0.99
+                        ? Appearance.barPrimaryContainer
+                        : entryArea.containsMouse
+                            ? Appearance.barLayer1Hover
+                            : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
 
                     MouseArea {
                         id: entryArea
@@ -312,31 +305,11 @@ Item {
                         }
                         spacing: Appearance.px(11)
 
-                        Rectangle {
-                            implicitWidth: Appearance.px(40)
-                            implicitHeight: Appearance.px(40)
-                            radius: Appearance.px(11)
-                            color: Appearance.barPrimaryContainer
-
-                            IconImage {
-                                anchors {
-                                    fill: parent
-                                    margins: Appearance.px(6)
-                                }
-                                asynchronous: true
-                                source: Quickshell.iconPath(
-                                    applicationEntry.modelData.icon,
-                                    "application-x-executable")
-                                opacity: ShellSettings.monochromeAppIconsActive
-                                    ? Appearance.monochromeAppIconOpacity : 1
-                                layer.enabled:
-                                    ShellSettings.monochromeAppIconsActive
-                                layer.effect: MultiEffect {
-                                    saturation: -1
-                                    brightness: 0.12
-                                    contrast: 0.08
-                                }
-                            }
+                        LauncherIcon {
+                            iconSize: Appearance.px(42)
+                            iconName: applicationEntry.modelData.icon
+                            hovered: entryArea.containsMouse
+                            pressed: entryArea.pressed
                         }
 
                         ColumnLayout {
@@ -363,24 +336,24 @@ Item {
                             }
                         }
 
-                        AppText {
-                            text: "󰁔"
-                            color: applicationEntry.ListView.isCurrentItem
-                                ? Appearance.barPrimary : Appearance.barSubtext
-                            opacity: applicationEntry.ListView.isCurrentItem
-                                || entryArea.containsMouse ? 1 : 0
-                            font {
-                                family: Appearance.iconFontFamily
-                                weight: Font.Normal
-                                pixelSize: Appearance.px(16)
-                            }
+                        // AppText {
+                        //     text: "↵"
+                        //     color: applicationEntry.ListView.isCurrentItem
+                        //         ? Appearance.barPrimary : Appearance.barSubtext
+                        //     opacity: applicationEntry.ListView.isCurrentItem
+                        //         || entryArea.containsMouse ? 1 : 0
+                        //     font {
+                        //         family: Appearance.fontFamily
+                        //         weight: Font.Normal
+                        //         pixelSize: Appearance.px(18)
+                        //     }
 
-                            Behavior on opacity {
-                                NumberAnimation {
-                                    duration: Appearance.fastDuration
-                                }
-                            }
-                        }
+                        //     Behavior on opacity {
+                        //         NumberAnimation {
+                        //             duration: Appearance.fastDuration
+                        //         }
+                        //     }
+                        // }
                     }
 
                     Behavior on color {
@@ -414,5 +387,33 @@ Item {
                 }
             }
         }
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 1
+            color: Appearance.withAlpha(Appearance.barOutline, 0.45)
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Appearance.spacingSmall
+
+            PanelText {
+                Layout.fillWidth: true
+                text: I18n.tr("launcherNavigateHint")
+                color: Appearance.barSubtext
+                font.pixelSize: Appearance.smallFontSize
+            }
+            PanelText {
+                text: I18n.tr("launcherOpenHint")
+                color: Appearance.barSubtext
+                font.pixelSize: Appearance.smallFontSize
+            }
+            PanelText {
+                text: I18n.tr("launcherCloseHint")
+                color: Appearance.barSubtext
+                font.pixelSize: Appearance.smallFontSize
+            }
+        }
+
     }
 }
