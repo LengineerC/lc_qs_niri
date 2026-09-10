@@ -24,6 +24,31 @@ Item {
     property real contextX: 0
     property real contextY: 0
     property bool viewerRegistered: false
+    property var downloadHistory: []
+    property var uploadHistory: []
+    readonly property real networkHistoryMaximum:
+        Math.max(1024, ...downloadHistory, ...uploadHistory)
+
+    // Collect a short, shared-scale trend only while this viewer is open.
+    Timer {
+        interval: 1000
+        running: root.active
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            root.downloadHistory = root.downloadHistory.slice(-29).concat(
+                Math.max(0, ResourceService.downloadBytesPerSecond));
+            root.uploadHistory = root.uploadHistory.slice(-29).concat(
+                Math.max(0, ResourceService.uploadBytesPerSecond));
+        }
+    }
+    Connections {
+        target: ResourceService
+        function onNetworkInterfaceChanged() {
+            root.downloadHistory = [];
+            root.uploadHistory = [];
+        }
+    }
 
     signal closeRequested
 
@@ -152,6 +177,8 @@ Item {
     onActiveChanged: {
         setViewerActive(active);
         if (!active) {
+            downloadHistory = [];
+            uploadHistory = [];
             closeTransientUi();
             searchInput.clear();
             expandedPid = -1;
@@ -188,6 +215,18 @@ Item {
             color: panelPalette.subtext
             font.pixelSize: Appearance.smallFontSize
         }
+    }
+
+    component ProcessValue: PanelText {
+        required property real fraction
+        required property string label
+        Layout.preferredHeight: Appearance.compactControlHeight
+        text: label
+        color: fraction >= 0.5 ? panelPalette.error
+            : fraction >= 0.2 ? panelPalette.tertiary : panelPalette.layer0Text
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        font.weight: Font.DemiBold
     }
 
     component ScopeButton: Rectangle {
@@ -260,64 +299,49 @@ Item {
         }
     }
 
-    component NetworkRateCard: Rectangle {
+    component NetworkRateCard: SurfaceCard {
         id: networkRateCard
-
         required property string icon
         required property string label
         required property real bytesPerSecond
-
-        Layout.preferredWidth: Appearance.px(220)
-        implicitHeight: Appearance.px(60)
-        radius: Appearance.cardRadius
-        color: panelPalette.layer1
-        border.width: 1
-        border.color: panelPalette.layer0Border
+        required property var samples
+        useBarPalette: root.useBarPalette
+        Layout.minimumWidth: 0
+        Layout.preferredWidth: 1
 
         RowLayout {
-            anchors {
-                fill: parent
-                leftMargin: Appearance.px(9)
-                rightMargin: Appearance.px(11)
-            }
-            spacing: Appearance.px(10)
-
-            Rectangle {
-                implicitWidth: Appearance.px(30)
-                implicitHeight: Appearance.compactControlHeight
-                radius: Appearance.fullRadius
-                color: panelPalette.primaryContainer
-
-                AppText {
-                    anchors.centerIn: parent
-                    text: networkRateCard.icon
-                    color: panelPalette.primaryContainerText
-                    font {
-                        family: Appearance.iconFontFamily
-                        weight: Font.Normal
-                        pixelSize: Appearance.px(15)
-                    }
-                }
-            }
-
-            ColumnLayout {
+            Layout.fillWidth: true
+            Metric { icon: networkRateCard.icon; label: networkRateCard.label }
+            PanelText {
                 Layout.fillWidth: true
-                spacing: Appearance.px(1)
-
-                PanelText {
-                    text: networkRateCard.label
-                    color: panelPalette.subtext
-                    font.pixelSize: Appearance.smallFontSize
-                }
-
-                PanelText {
-                    Layout.fillWidth: true
-                    text: ResourceService.formatRate(
-                        networkRateCard.bytesPerSecond)
-                    color: panelPalette.layer0Text
-                    elide: Text.ElideRight
-                    font.weight: Font.DemiBold
-                }
+                text: ResourceService.networkInterface || I18n.tr("unknown")
+                horizontalAlignment: Text.AlignRight
+                elide: Text.ElideRight
+                color: panelPalette.subtext
+                font.pixelSize: Appearance.smallFontSize
+            }
+        }
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Appearance.spacingMedium
+            PanelText {
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                text: ResourceService.formatRate(networkRateCard.bytesPerSecond)
+                Layout.preferredWidth: Appearance.px(120)
+                color: panelPalette.layer0Text
+                elide: Text.ElideRight
+                font.pixelSize: Appearance.largeFontSize
+                font.weight: Font.DemiBold
+            }
+            ResourceSparkline {
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: Appearance.px(180)
+                Layout.preferredHeight: Appearance.compactControlHeight
+                samples: networkRateCard.samples
+                maximum: root.networkHistoryMaximum
+                lineColor: panelPalette.primary
             }
         }
     }
@@ -398,316 +422,172 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Appearance.px(10)
+            spacing: Appearance.spacingMedium
 
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: Appearance.px(104)
-                radius: Appearance.smallRadius
-                color: panelPalette.layer3
-                border.width: 1
-                border.color: panelPalette.outline
+            SurfaceCard {
+                useBarPalette: root.useBarPalette
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: 1
 
+                PanelText {
+                    Layout.fillWidth: true
+                    text: ResourceService.cpuModel || "CPU"
+                    color: panelPalette.layer0Text
+                    elide: Text.ElideRight
+                    font.weight: Font.DemiBold
+                }
+                ResourceMeter {
+                    Layout.fillWidth: true
+                    useBarPalette: root.useBarPalette
+                    animate: root.active
+                    icon: "󰻠"
+                    value: ResourceService.cpuUsage
+                    warning: value >= 0.9
+                }
                 RowLayout {
-                    anchors {
-                        fill: parent
-                        margins: Appearance.px(13)
+                    Layout.fillWidth: true
+                    spacing: Appearance.spacingSmall
+                    Metric {
+                        icon: "󰓅"
+                        label: ResourceService.cpuFrequencyGhz > 0
+                            ? ResourceService.cpuFrequencyGhz.toFixed(2) + " GHz" : "— GHz"
                     }
-                    spacing: Appearance.spacingMedium
-
-                    ResourceRing {
-                        implicitSize: Appearance.px(46)
-                        icon: "󰻠"
-                        iconSize: 24
-                        value: ResourceService.cpuUsage
-                        warning: ResourceService.cpuUsage >= 0.9
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Layout.minimumWidth: 0
-                        spacing: Appearance.px(5)
-
-                        PanelText {
-                            Layout.fillWidth: true
-                            text: ResourceService.cpuModel
-                            color: panelPalette.layer0Text
-                            elide: Text.ElideRight
-                            font.weight: Font.DemiBold
-                        }
-
-                        RowLayout {
-                            spacing: Appearance.spacingMedium
-
-                            Metric {
-                                icon: "󰓅"
-                                label: ResourceService.cpuFrequencyGhz > 0
-                                    ? ResourceService.cpuFrequencyGhz
-                                        .toFixed(2) + " GHz" : "-- GHz"
-                            }
-
-                            Metric {
-                                icon: "󰔏"
-                                label: ResourceService.temperatureAvailable
-                                    ? Math.round(
-                                        ResourceService.cpuTemperature)
-                                        + "°C" : "--°C"
-                            }
-
-                            Metric {
-                                icon: "󰇄"
-                                label: Math.round(
-                                    ResourceService.cpuUsage * 100) + "%"
-                            }
-                        }
+                    Item { Layout.fillWidth: true }
+                    Metric {
+                        icon: "󰔏"
+                        label: ResourceService.temperatureAvailable
+                            ? Math.round(ResourceService.cpuTemperature) + "°C" : "—°C"
                     }
                 }
             }
+            SurfaceCard {
+                useBarPalette: root.useBarPalette
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: 1
 
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: Appearance.px(104)
-                radius: Appearance.smallRadius
-                color: panelPalette.layer3
-                border.width: 1
-                border.color: panelPalette.outline
-
-                RowLayout {
-                    anchors {
-                        fill: parent
-                        margins: Appearance.px(13)
-                    }
-                    spacing: Appearance.spacingMedium
-
-                    ResourceRing {
-                        implicitSize: Appearance.px(46)
-                        icon: "󰍛"
-                        iconSize: 24
-                        value: ResourceService.memoryUsage
-                        warning: ResourceService.memoryUsage >= 0.9
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: Appearance.px(5)
-
-                        PanelText {
-                            text: I18n.tr("memory")
-                            color: panelPalette.layer0Text
-                            font.weight: Font.DemiBold
-                        }
-
-                        RowLayout {
-                            spacing: Appearance.spacingMedium
-
-                            Metric {
-                                icon: "󰋊"
-                                label: I18n.tr("total") + " "
-                                    + root.memoryText(
-                                        ResourceService.memoryTotalKb)
-                            }
-
-                            Metric {
-                                icon: "󰆼"
-                                label: I18n.tr("used") + " "
-                                    + root.memoryText(
-                                        ResourceService.memoryUsedKb)
-                            }
-                        }
-                    }
+                PanelText {
+                    Layout.fillWidth: true
+                    text: I18n.tr("memory")
+                    color: panelPalette.layer0Text
+                    font.weight: Font.DemiBold
+                }
+                ResourceMeter {
+                    Layout.fillWidth: true
+                    useBarPalette: root.useBarPalette
+                    animate: root.active
+                    available: ResourceService.memoryTotalKb > 0
+                    icon: "󰍛"
+                    value: ResourceService.memoryUsage
+                    warning: value >= 0.9
+                }
+                PanelText {
+                    Layout.fillWidth: true
+                    text: I18n.tr("used") + "  "
+                        + root.memoryText(ResourceService.memoryUsedKb) + " / "
+                        + root.memoryText(ResourceService.memoryTotalKb)
+                    color: panelPalette.subtext
+                    elide: Text.ElideRight
+                    font.pixelSize: Appearance.smallFontSize
                 }
             }
         }
 
-        Rectangle {
+        SurfaceCard {
             id: filesystemCard
+            readonly property var filesystem: ResourceService.selectedFilesystem
+            useBarPalette: root.useBarPalette
 
-            readonly property var filesystem:
-                ResourceService.selectedFilesystem
-
-            Layout.fillWidth: true
-            implicitHeight: Appearance.px(82)
-            radius: Appearance.smallRadius
-            color: panelPalette.layer3
-            border.width: 1
-            border.color: panelPalette.outline
-
-            WheelHandler {
+            property WheelHandler filesystemWheel: WheelHandler {
+                parent: filesystemCard
                 enabled: ResourceService.filesystems.length > 1
-                acceptedDevices: PointerDevice.Mouse
-                    | PointerDevice.TouchPad
+                acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
                 onWheel: event => {
-                    ResourceService.selectFilesystemRelative(
-                        event.angleDelta.y < 0 ? 1 : -1);
+                    ResourceService.selectFilesystemRelative(event.angleDelta.y < 0 ? 1 : -1);
                     event.accepted = true;
                 }
             }
-
             RowLayout {
-                anchors {
-                    fill: parent
-                    leftMargin: Appearance.px(14)
-                    rightMargin: Appearance.px(14)
-                }
-                spacing: Appearance.px(10)
-
-                ResourceRing {
-                    implicitSize: Appearance.px(46)
-                    icon: "󰋊"
-                    iconSize: 22
-                    value: filesystemCard.filesystem?.usage ?? 0
-                    warning: (filesystemCard.filesystem?.usage ?? 0) >= 0.9
-                }
-
-                ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacingSmall
+                PanelText {
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
-                    spacing: Appearance.px(2)
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: Appearance.px(10)
-
-                        PanelText {
-                            text: filesystemCard.filesystem
-                                ? I18n.tr("disk") + "  "
-                                    + filesystemCard.filesystem.target
-                                : I18n.tr("noFilesystems")
-                            color: panelPalette.layer0Text
-                            elide: Text.ElideMiddle
-                            font.weight: Font.DemiBold
-                        }
-
-                        PanelText {
-                            Layout.fillWidth: true
-                            text: (
-                                filesystemCard.filesystem.totalBytes > 0
-                                    ? filesystemCard.filesystem.usedBytes
-                                        / filesystemCard.filesystem.totalBytes
-                                        * 100
-                                    : 0
-                            ).toFixed(1) + "%"
-                            color: panelPalette.subtext
-                        }
-                    }
-
-                    PanelText {
-                        Layout.fillWidth: true
-                        text: filesystemCard.filesystem
-                            ? filesystemCard.filesystem.filesystemType
-                                .toLocaleUpperCase()
-                                + "  ·  "
-                                + filesystemCard.filesystem.source
-                            : ResourceService.filesystemError
-                        color: panelPalette.subtext
-                        elide: Text.ElideMiddle
-                        font.pixelSize: Appearance.smallFontSize
-                    }
+                    text: filesystemCard.filesystem
+                        ? I18n.tr("disk") + "  " + filesystemCard.filesystem.target
+                        : I18n.tr("noFilesystems")
+                    color: panelPalette.layer0Text
+                    elide: Text.ElideMiddle
+                    font.weight: Font.DemiBold
                 }
-
-                Metric {
-                    visible: filesystemCard.filesystem !== null
-                    icon: "󰆼"
-                    label: I18n.tr("used") + " "
-                        + root.diskText(
-                            filesystemCard.filesystem?.usedBytes ?? 0)
-                        + "  /  "
-                        + root.diskText(
-                            filesystemCard.filesystem?.totalBytes ?? 0)
-                }
-
                 DiskSwitchButton {
                     icon: "󰅁"
                     enabled: ResourceService.filesystems.length > 1
-                    onClicked:
-                        ResourceService.selectFilesystemRelative(-1)
+                    onClicked: ResourceService.selectFilesystemRelative(-1)
                 }
-
                 PanelText {
                     Layout.preferredWidth: Appearance.px(42)
                     text: ResourceService.filesystems.length > 0
-                        ? (ResourceService.selectedFilesystemIndex + 1)
-                            + "/" + ResourceService.filesystems.length
+                        ? (ResourceService.selectedFilesystemIndex + 1) + "/" + ResourceService.filesystems.length
                         : "0/0"
                     color: panelPalette.subtext
                     horizontalAlignment: Text.AlignHCenter
                     font.pixelSize: Appearance.smallFontSize
                 }
-
                 DiskSwitchButton {
                     icon: "󰅂"
                     enabled: ResourceService.filesystems.length > 1
-                    onClicked:
-                        ResourceService.selectFilesystemRelative(1)
+                    onClicked: ResourceService.selectFilesystemRelative(1)
+                }
+            }
+            ResourceMeter {
+                Layout.fillWidth: true
+                useBarPalette: root.useBarPalette
+                animate: root.active
+                available: (filesystemCard.filesystem?.totalBytes ?? 0) > 0
+                icon: "󰋊"
+                value: filesystemCard.filesystem?.usage ?? 0
+                valueText: (value * 100).toFixed(1) + "%"
+                warning: value >= 0.9
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacingMedium
+                PanelText {
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    text: filesystemCard.filesystem
+                        ? filesystemCard.filesystem.filesystemType.toLocaleUpperCase()
+                            + " · " + filesystemCard.filesystem.source
+                        : ResourceService.filesystemError
+                    color: panelPalette.subtext
+                    elide: Text.ElideMiddle
+                    font.pixelSize: Appearance.smallFontSize
+                }
+                PanelText {
+                    visible: filesystemCard.filesystem !== null
+                    text: I18n.tr("used") + "  "
+                        + root.diskText(filesystemCard.filesystem?.usedBytes ?? 0) + " / "
+                        + root.diskText(filesystemCard.filesystem?.totalBytes ?? 0)
+                    color: panelPalette.subtext
+                    font.pixelSize: Appearance.smallFontSize
                 }
             }
         }
 
-        Rectangle {
+        RowLayout {
             Layout.fillWidth: true
-            implicitHeight: Appearance.px(82)
-            radius: Appearance.smallRadius
-            color: panelPalette.layer3
-            border.width: 1
-            border.color: panelPalette.outline
-
-            RowLayout {
-                anchors {
-                    fill: parent
-                    leftMargin: Appearance.px(14)
-                    rightMargin: Appearance.px(14)
-                }
-                spacing: Appearance.spacingMedium
-
-                Rectangle {
-                    implicitWidth: Appearance.px(46)
-                    implicitHeight: Appearance.px(46)
-                    radius: Appearance.fullRadius
-                    color: panelPalette.primaryContainer
-
-                    AppText {
-                        anchors.centerIn: parent
-                        text: "󰛳"
-                        color: panelPalette.primaryContainerText
-                        font {
-                            family: Appearance.iconFontFamily
-                            weight: Font.Normal
-                            pixelSize: Appearance.px(21)
-                        }
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
-
-                    PanelText {
-                        text: I18n.tr("networkSpeed")
-                        color: panelPalette.layer0Text
-                        font.weight: Font.DemiBold
-                    }
-
-                    PanelText {
-                        text: ResourceService.networkInterface
-                            || I18n.tr("unknown")
-                        color: panelPalette.subtext
-                        font.pixelSize: Appearance.smallFontSize
-                    }
-                }
-
-                NetworkRateCard {
-                    icon: "󰁅"
-                    label: I18n.tr("download")
-                    bytesPerSecond:
-                        ResourceService.downloadBytesPerSecond
-                }
-
-                NetworkRateCard {
-                    icon: "󰁝"
-                    label: I18n.tr("upload")
-                    bytesPerSecond:
-                        ResourceService.uploadBytesPerSecond
-                }
+            spacing: Appearance.spacingMedium
+            NetworkRateCard {
+                icon: "󰁅"
+                label: I18n.tr("download")
+                bytesPerSecond: ResourceService.downloadBytesPerSecond
+                samples: root.downloadHistory
+            }
+            NetworkRateCard {
+                icon: "󰁝"
+                label: I18n.tr("upload")
+                bytesPerSecond: ResourceService.uploadBytesPerSecond
+                samples: root.uploadHistory
             }
         }
 
@@ -1049,45 +929,19 @@ Item {
                                         font.weight: Font.DemiBold
                                     }
 
-                                    Rectangle {
+                                    ProcessValue {
                                         Layout.preferredWidth:
                                             Appearance.px(86)
-                                        implicitHeight: Appearance.compactControlHeight
-                                        radius: Appearance.fullRadius
-                                        color: panelPalette.layer1Active
-
-                                        PanelText {
-                                            anchors.centerIn: parent
-                                            text: processEntry.modelData.cpu
-                                                .toFixed(1) + "%"
-                                            color: panelPalette.layer0Text
-                                            font.weight: Font.DemiBold
-                                        }
+                                        fraction: processEntry.modelData.cpu / 100
+                                        label: processEntry.modelData.cpu.toFixed(1) + "%"
                                     }
 
-                                    Rectangle {
+                                    ProcessValue {
                                         Layout.preferredWidth:
                                             Appearance.px(112)
-                                        implicitHeight: Appearance.compactControlHeight
-                                        radius: Appearance.fullRadius
-                                        color: processEntry.modelData.pssKb
-                                                >= 1024 * 1024
-                                            ? Theme.palette
-                                                .m3tertiaryContainer
-                                            : panelPalette.layer1Active
-
-                                        PanelText {
-                                            anchors.centerIn: parent
-                                            text: root.memoryText(
-                                                processEntry
-                                                    .modelData.pssKb)
-                                            color: processEntry.modelData
-                                                    .pssKb >= 1024 * 1024
-                                                ? Theme.palette
-                                                    .m3onTertiaryContainer
-                                                : panelPalette.layer0Text
-                                            font.weight: Font.DemiBold
-                                        }
+                                        fraction: ResourceService.memoryTotalKb > 0
+                                            ? processEntry.modelData.pssKb / ResourceService.memoryTotalKb : 0
+                                        label: root.memoryText(processEntry.modelData.pssKb)
                                     }
 
                                     PanelText {
