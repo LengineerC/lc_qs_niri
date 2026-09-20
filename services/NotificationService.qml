@@ -27,6 +27,7 @@ Singleton {
         property bool pendingPopup: false
         property bool closing: false
         property bool toastPresented: false
+        property var toastPresentedScreens: []
         property bool disposalQueued: false
         property int popupTimeoutMs: 7000
         property Timer popupTimer: null

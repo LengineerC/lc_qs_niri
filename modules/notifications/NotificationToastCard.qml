@@ -13,6 +13,7 @@ Item {
     id: root
 
     required property var notificationEntry
+    required property string presentationScreen
 
     implicitWidth: Appearance.px(400)
     implicitHeight: toastSurface.implicitHeight + Appearance.px(20)
@@ -36,7 +37,7 @@ Item {
         const entry = notificationEntry;
         animateTransitions = false;
 
-        if (entry.toastPresented) {
+        if (entry.toastPresentedScreens.includes(presentationScreen)) {
             // Repeater can recreate or recycle delegates when its array
             // changes. An existing notification must not enter again.
             entered = true;
@@ -48,6 +49,9 @@ Item {
             return;
         }
 
+        // Track entry animations per output; the shared flag still tells the
+        // service whether this notification needs its dismissal animation.
+        entry.toastPresentedScreens = entry.toastPresentedScreens.concat(presentationScreen);
         entry.toastPresented = true;
         entered = false;
         Qt.callLater(() => {

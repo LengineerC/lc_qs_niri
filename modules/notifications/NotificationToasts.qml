@@ -6,16 +6,18 @@ import Quickshell.Wayland
 import qs.common
 import qs.services
 
-Scope {
+Variants {
+    model: Quickshell.screens
+
     PanelWindow {
         id: toastWindow
+        required property ShellScreen modelData
 
         // Negative values move the notification stack upward; positive
         // values move it downward.
         readonly property int verticalOffset: -Appearance.px(40)
 
-        screen: Quickshell.screens.length > 0
-            ? Quickshell.screens[0] : null
+        screen: modelData
         visible: NotificationService.popupEntries.length > 0
             && !NotificationService.doNotDisturb
         color: "transparent"
@@ -151,6 +153,7 @@ Scope {
                     required property var modelData
                     width: toastColumn.width
                     notificationEntry: modelData
+                    presentationScreen: toastWindow.modelData.name
                 }
             }
         }
