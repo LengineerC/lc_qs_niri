@@ -171,10 +171,6 @@ Item {
             }
         }
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: forceActiveFocus()
-        }
     }
 
     component SettingCard: SurfaceCard {
@@ -533,11 +529,6 @@ Item {
         Layout.fillWidth: true
         spacing: Appearance.spacingMedium
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: forceActiveFocus()
-        }
-
         PanelText {
             Layout.preferredWidth: Appearance.px(
                 I18n.language === "en_US" ? 150 : 118)
@@ -594,11 +585,6 @@ Item {
         onCurrentValueChanged: {
             if (!formatInput.activeFocus)
                 draftValue = currentValue;
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: forceActiveFocus()
         }
 
         ColumnLayout {

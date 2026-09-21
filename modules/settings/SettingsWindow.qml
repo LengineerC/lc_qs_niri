@@ -156,10 +156,6 @@ ApplicationWindow {
         anchors.fill: parent
         color: SettingsPalette.window
 
-        Behavior on color {
-            ColorAnimation { duration: Appearance.spatialDuration }
-        }
-
         Rectangle {
             anchors.fill: parent
             visible: SettingsPalette.glassMode
@@ -195,10 +191,6 @@ ApplicationWindow {
                 color: SettingsPalette.layer1
                 border.width: 1
                 border.color: SettingsPalette.layer0Border
-
-                Behavior on color {
-                    ColorAnimation { duration: Appearance.spatialDuration }
-                }
 
                 ColumnLayout {
                     anchors {
@@ -502,10 +494,6 @@ ApplicationWindow {
                 border.width: 1
                 border.color: SettingsPalette.layer0Border
                 clip: true
-
-                Behavior on color {
-                    ColorAnimation { duration: Appearance.spatialDuration }
-                }
 
                 Loader {
                     anchors.fill: parent
