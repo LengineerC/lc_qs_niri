@@ -14,6 +14,9 @@ Item {
     property date displayedDate: new Date(
         currentDate.getFullYear(), currentDate.getMonth(), 1)
     property date selectedDate: currentDate
+    property date pendingDisplayedDate: displayedDate
+    property int monthTransitionDirection: 1
+    readonly property bool monthTransitionRunning: monthTransition.running
 
     readonly property int displayedMonth: displayedDate.getMonth()
     readonly property int displayedYear: displayedDate.getFullYear()
@@ -43,20 +46,37 @@ Item {
     implicitHeight: contentColumn.implicitHeight + Appearance.px(28)
 
     function showPreviousMonth() {
-        displayedDate = new Date(
-            displayedYear, displayedMonth - 1, 1);
+        showMonth(new Date(displayedYear, displayedMonth - 1, 1));
     }
 
     function showNextMonth() {
-        displayedDate = new Date(
-            displayedYear, displayedMonth + 1, 1);
+        showMonth(new Date(displayedYear, displayedMonth + 1, 1));
     }
 
-    function showToday() {
+    function showMonth(date, animated = true) {
+        const target = new Date(date.getFullYear(), date.getMonth(), 1);
+        const currentKey = displayedYear * 12 + displayedMonth;
+        const targetKey = target.getFullYear() * 12 + target.getMonth();
+        if (targetKey === currentKey || monthTransition.running)
+            return;
+        if (!animated) {
+            displayedDate = target;
+            return;
+        }
+        pendingDisplayedDate = target;
+        monthTransitionDirection = targetKey > currentKey ? 1 : -1;
+        monthTransition.start();
+    }
+
+    function showToday(animated = true) {
         currentDate = new Date();
         selectedDate = currentDate;
-        displayedDate = new Date(
+        const todayMonth = new Date(
             currentDate.getFullYear(), currentDate.getMonth(), 1);
+        if (animated)
+            showMonth(todayMonth);
+        else
+            displayedDate = todayMonth;
     }
 
     function sameDate(first, second) {
@@ -133,8 +153,83 @@ Item {
     }
 
     onVisibleChanged: {
+        monthTransition.stop();
+        monthTitleTranslate.x = 0;
+        monthTitle.opacity = 1;
+        dateGridTranslate.x = 0;
+        dateGrid.opacity = 1;
         if (visible)
-            showToday();
+            showToday(false);
+    }
+
+    SequentialAnimation {
+        id: monthTransition
+
+        ParallelAnimation {
+            NumberAnimation {
+                target: monthTitleTranslate
+                property: "x"
+                to: -root.monthTransitionDirection * Appearance.px(24)
+                duration: Appearance.fastDuration
+                easing.type: Easing.InCubic
+            }
+            NumberAnimation {
+                target: monthTitle
+                property: "opacity"
+                to: 0
+                duration: Appearance.fastDuration
+            }
+            NumberAnimation {
+                target: dateGridTranslate
+                property: "x"
+                to: -root.monthTransitionDirection * Appearance.px(34)
+                duration: Appearance.fastDuration
+                easing.type: Easing.InCubic
+            }
+            NumberAnimation {
+                target: dateGrid
+                property: "opacity"
+                to: 0
+                duration: Appearance.fastDuration
+            }
+        }
+        ScriptAction {
+            script: {
+                root.displayedDate = root.pendingDisplayedDate;
+                monthTitleTranslate.x = root.monthTransitionDirection
+                    * Appearance.px(24);
+                dateGridTranslate.x = root.monthTransitionDirection
+                    * Appearance.px(34);
+            }
+        }
+        ParallelAnimation {
+            NumberAnimation {
+                target: monthTitleTranslate
+                property: "x"
+                to: 0
+                duration: Appearance.fastDuration
+                easing.type: Easing.OutCubic
+            }
+            NumberAnimation {
+                target: monthTitle
+                property: "opacity"
+                to: 1
+                duration: Appearance.fastDuration
+            }
+            NumberAnimation {
+                target: dateGridTranslate
+                property: "x"
+                to: 0
+                duration: Appearance.fastDuration
+                easing.type: Easing.OutCubic
+            }
+            NumberAnimation {
+                target: dateGrid
+                property: "opacity"
+                to: 1
+                duration: Appearance.fastDuration
+            }
+        }
     }
 
     Timer {
@@ -260,12 +355,15 @@ Item {
                     : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
 
                 PanelText {
+                    id: monthTitle
+
                     anchors.centerIn: parent
                     text: I18n.locale.toString(
                         root.displayedDate, "MMMM yyyy")
                     color: root.displayingCurrentMonth
                         ? Appearance.barPrimary : Appearance.barLayer0Text
                     font.weight: Font.DemiBold
+                    transform: Translate { id: monthTitleTranslate }
                 }
 
                 MouseArea {
@@ -318,17 +416,24 @@ Item {
             }
         }
 
-        GridLayout {
+        Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Appearance.px(222)
-            columns: 7
-            columnSpacing: Appearance.px(2)
-            rowSpacing: Appearance.px(2)
-            uniformCellWidths: true
-            uniformCellHeights: true
+            clip: true
 
-            Repeater {
-                model: 42
+            GridLayout {
+                id: dateGrid
+
+                anchors.fill: parent
+                columns: 7
+                columnSpacing: Appearance.px(2)
+                rowSpacing: Appearance.px(2)
+                uniformCellWidths: true
+                uniformCellHeights: true
+                transform: Translate { id: dateGridTranslate }
+
+                Repeater {
+                    model: 42
 
                 delegate: Rectangle {
                     id: dayCell
@@ -387,11 +492,8 @@ Item {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             root.selectedDate = dayCell.cellDate;
-                            if (!dayCell.inDisplayedMonth) {
-                                root.displayedDate = new Date(
-                                    dayCell.cellDate.getFullYear(),
-                                    dayCell.cellDate.getMonth(), 1);
-                            }
+                            if (!dayCell.inDisplayedMonth)
+                                root.showMonth(dayCell.cellDate);
                         }
                     }
 
@@ -400,6 +502,7 @@ Item {
                             duration: Appearance.fastDuration
                         }
                     }
+                }
                 }
             }
         }
