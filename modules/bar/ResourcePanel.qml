@@ -733,7 +733,7 @@ Item {
 
                     PanelText {
                         Layout.preferredWidth: Appearance.px(112)
-                        text: "PSS" + root.sortArrow("memory")
+                        text: I18n.tr("memoryShort") + root.sortArrow("memory")
                         color: root.sortKey === "memory"
                             ? panelPalette.primary : panelPalette.subtext
                         horizontalAlignment: Text.AlignHCenter
@@ -1034,7 +1034,7 @@ Item {
                                         PanelText {
                                             text: "PPID: "
                                                 + processEntry.modelData.ppid
-                                                + "    PSS: "
+                                                + "    " + I18n.tr("memoryShort") + ": "
                                                 + root.memoryText(
                                                     processEntry.modelData
                                                         .pssKb)

@@ -1,6 +1,46 @@
 # 自用Quickshell配置
 ~~vide coding产物~~
 
+## 一键安装
+
+目前安装器支持 Arch Linux 及其衍生版的 x86-64 环境。它会完整升级系统、
+安装本配置使用的 Qt/Quickshell、Niri、字体及外部命令，随后从官方标签源码
+构建并安装固定版本
+[qml-niri v0.2.1](https://github.com/imiric/qml-niri/releases/tag/v0.2.1)。
+
+从 GitHub 一行安装：
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/LengineerC/lc_qs_niri/main/install.sh)
+```
+
+已经克隆仓库时：
+
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+配置会安装到 `~/.config/quickshell/lc_qs_niri`。如果目标目录已存在，安装器
+会先将它移动到同级的带时间戳备份；Shell 的设置和主题状态保存在 XDG state
+目录，不会因替换配置源码而被清除。若 Niri 已有 `config.kdl`，安装器只会在
+`niri/lc_qs_niri/` 中新建自动启动片段，并在主配置末尾增加一条 `include`，
+不会写入其他 Niri 配置内容。已有自动启动项时不会重复添加。
+
+可选参数：
+
+```text
+--no-packages    跳过 pacman 安装和系统升级
+--no-qml-niri    跳过 qml-niri v0.2.1 构建安装
+--no-autostart   不配置 Niri 自动启动
+--no-start       安装完成后不立即启动
+--source DIR     使用指定的本地配置源码目录
+```
+
+脚本不会擅自启用系统服务。如果 NetworkManager、Bluetooth 或
+power-profiles-daemon 未运行，它会给出提示，可按当前系统环境自行启用，避免
+与已有网络或电源管理方案冲突。
+
 ## 1. 运行环境
 
 ### 必需组件

@@ -14,7 +14,6 @@ Singleton {
     readonly property var strings: ({
         settings: ["设置", "Settings"],
         launcher: ["启动台", "Launcher"],
-        // sidebarModuleCount: ["%1 个模块", "%1 modules"],
         applications: ["应用程序", "Applications"],
         launcherAppCount: ["应用 · %1", "Applications · %1"],
         launcherNavigateHint: ["方向键  选择", "Arrow keys  Select"],
@@ -51,6 +50,7 @@ Singleton {
         searchProcesses: ["搜索进程…", "Search processes…"],
         allProcesses: ["全部进程", "All processes"],
         userProcesses: ["用户进程", "User processes"],
+        memoryShort: ["内存", "Mem"],
         name: ["名称", "Name"],
         fullCommand: ["完整命令", "Full command"],
         noProcesses: ["没有可显示的进程", "No processes to show"],
