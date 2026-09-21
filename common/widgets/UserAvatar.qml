@@ -11,19 +11,25 @@ Item {
     property real implicitSize: Appearance.px(64)
     property url source: UserService.avatarUrl
     property real imageInset: 1
+    property bool useBarPalette: false
 
     implicitWidth: implicitSize
     implicitHeight: implicitSize
 
+    BarPalette {
+        id: palette
+        enabled: root.useBarPalette
+    }
+
     Rectangle {
         anchors.fill: parent
         radius: width / 2
-        color: Appearance.primaryContainer
+        color: palette.primaryContainer
 
         AppText {
             anchors.centerIn: parent
             text: "󰀄"
-            color: Appearance.primaryContainerText
+            color: palette.primaryContainerText
             font {
                 family: Appearance.iconFontFamily
                 weight: Font.Normal
@@ -68,6 +74,6 @@ Item {
         radius: width / 2
         color: "transparent"
         border.width: 1
-        border.color: Appearance.outline
+        border.color: palette.outline
     }
 }

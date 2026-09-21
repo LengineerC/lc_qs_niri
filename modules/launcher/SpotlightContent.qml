@@ -17,8 +17,8 @@ Item {
 
     // Glass mode follows the shell's fixed dark glass palette. Without it,
     // Spotlight follows the regular light/dark theme.
-    readonly property bool dark: ShellSettings.barFrostedGlass
-        || Theme.darkMode
+    readonly property bool glassMode: ShellSettings.barFrostedGlass
+    readonly property bool dark: glassMode || Theme.darkMode
     readonly property color primaryText: dark ? "#f5f5f7" : "#1d1d1f"
     readonly property color secondaryText: dark ? "#a9abb2" : "#6e6e73"
     readonly property color glassBase: dark ? "#1c1d21" : "#f7f8fa"
@@ -28,7 +28,22 @@ Item {
         glassBase, dark ? 0.68 : 0.72)
     readonly property color glassBorder: Appearance.withAlpha(
         white, dark ? 0.12 : 0.42)
-    readonly property color selectionColor: "#0a84ff"
+    readonly property color accentColor: glassMode
+        ? Appearance.barPrimary : Appearance.primary
+    readonly property color textSelectionColor: glassMode
+        ? Appearance.barPrimaryContainer : Appearance.primary
+    readonly property color textSelectionTextColor: glassMode
+        ? Appearance.barPrimaryContainerText : Theme.palette.m3onPrimary
+    readonly property color selectedColor: glassMode
+        ? Appearance.barLayer1Active : Appearance.primaryContainer
+    readonly property color hoveredColor: glassMode
+        ? Appearance.barLayer1Hover
+        : Appearance.mix(Appearance.layer1,
+            Appearance.primaryContainer, 0.58)
+    readonly property color selectedTextColor: glassMode
+        ? Appearance.barLayer0Text : Appearance.primaryContainerText
+    readonly property color selectedSecondaryTextColor:
+        Appearance.withAlpha(selectedTextColor, 0.72)
     readonly property var applications: {
         const seen = new Set();
         return Array.from(DesktopEntries.applications.values)
@@ -196,8 +211,8 @@ Item {
             right: parent.right
             margins: Appearance.px(14)
         }
-        height: Appearance.px(60)
-        radius: Appearance.px(20)
+        height: Appearance.px(56)
+        radius: Appearance.px(18)
 
         RowLayout {
             anchors {
@@ -205,16 +220,20 @@ Item {
                 leftMargin: Appearance.px(18)
                 rightMargin: Appearance.px(15)
             }
-            spacing: Appearance.px(13)
+            spacing: Appearance.px(12)
 
             AppText {
                 text: "󰍉"
                 color: searchInput.activeFocus
-                    ? root.selectionColor : root.secondaryText
+                    ? root.accentColor : root.secondaryText
                 font {
                     family: Appearance.iconFontFamily
                     weight: Font.Normal
-                    pixelSize: Appearance.px(23)
+                    pixelSize: Appearance.px(21)
+                }
+
+                Behavior on color {
+                    ColorAnimation { duration: Appearance.fastDuration }
                 }
             }
 
@@ -226,13 +245,13 @@ Item {
                 placeholderText: I18n.tr("searchApplications")
                 color: root.primaryText
                 placeholderTextColor: root.secondaryText
-                selectionColor: root.selectionColor
-                selectedTextColor: "#ffffff"
+                selectionColor: root.textSelectionColor
+                selectedTextColor: root.textSelectionTextColor
                 selectByMouse: true
                 background: null
                 font {
                     family: Appearance.fontFamily
-                    pixelSize: Appearance.px(19)
+                    pixelSize: Appearance.px(18)
                     weight: Font.Medium
                 }
                 Keys.priority: Keys.BeforeItem
@@ -304,7 +323,7 @@ Item {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            topMargin: Appearance.px(10)
+            topMargin: Appearance.px(9)
             leftMargin: Appearance.px(14)
             rightMargin: Appearance.px(14)
             bottomMargin: Appearance.px(14)
@@ -316,9 +335,9 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
-                Layout.preferredHeight: Appearance.px(46)
-                Layout.leftMargin: Appearance.px(24)
-                Layout.rightMargin: Appearance.px(24)
+                Layout.preferredHeight: Appearance.px(42)
+                Layout.leftMargin: Appearance.px(20)
+                Layout.rightMargin: Appearance.px(20)
 
                 AppText {
                     text: I18n.tr("spotlightResults")
@@ -381,10 +400,17 @@ Item {
                         width: resultList.width
                             - (resultList.contentHeight > resultList.height
                                 ? Appearance.px(8) : 0)
-                        height: Appearance.px(58)
-                        radius: Appearance.px(14)
-                        color: highlighted
-                            ? root.selectionColor : "transparent"
+                        height: Appearance.px(54)
+                        radius: Appearance.px(13)
+                        color: selected ? root.selectedColor
+                            : resultArea.containsMouse
+                                ? root.hoveredColor : "transparent"
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Appearance.fastDuration
+                            }
+                        }
 
                         RowLayout {
                             anchors {
@@ -392,10 +418,10 @@ Item {
                                 leftMargin: Appearance.px(12)
                                 rightMargin: Appearance.px(13)
                             }
-                            spacing: Appearance.px(13)
+                            spacing: Appearance.px(12)
 
                             LauncherIcon {
-                                iconSize: Appearance.px(40)
+                                iconSize: Appearance.px(38)
                                 iconName: resultDelegate.modelData.icon
                                 hovered: resultArea.containsMouse
                                 pressed: resultArea.pressed
@@ -410,7 +436,8 @@ Item {
                                     Layout.fillWidth: true
                                     text: resultDelegate.modelData.name
                                     color: resultDelegate.highlighted
-                                        ? "#ffffff" : root.primaryText
+                                        ? root.selectedTextColor
+                                        : root.primaryText
                                     elide: Text.ElideRight
                                     font {
                                         family: Appearance.fontFamily
@@ -425,7 +452,7 @@ Item {
                                     text: resultDelegate.modelData.genericName
                                         || resultDelegate.modelData.comment || ""
                                     color: resultDelegate.highlighted
-                                        ? Appearance.withAlpha(root.white, 0.72)
+                                        ? root.selectedSecondaryTextColor
                                         : root.secondaryText
                                     elide: Text.ElideRight
                                     font {
@@ -437,8 +464,9 @@ Item {
 
                             AppText {
                                 visible: resultDelegate.highlighted
-                                text: "↵"
-                                color: Appearance.withAlpha(root.white, 0.78)
+                                // text: "↵←"
+                                color: Appearance.withAlpha(
+                                    root.selectedTextColor, 0.78)
                                 font {
                                     family: Appearance.fontFamily
                                     pixelSize: Appearance.px(18)
@@ -466,7 +494,7 @@ Item {
                     AppText {
                         Layout.alignment: Qt.AlignHCenter
                         text: "󰍉"
-                        color: root.secondaryText
+                        color: Appearance.withAlpha(root.accentColor, 0.72)
                         font {
                             family: Appearance.iconFontFamily
                             weight: Font.Normal
@@ -488,17 +516,17 @@ Item {
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.leftMargin: Appearance.px(18)
-                Layout.rightMargin: Appearance.px(18)
+                Layout.leftMargin: Appearance.px(16)
+                Layout.rightMargin: Appearance.px(16)
                 implicitHeight: 1
                 color: Appearance.withAlpha(root.primaryText, 0.10)
             }
 
             RowLayout {
                 Layout.fillWidth: true
-                Layout.preferredHeight: Appearance.px(38)
-                Layout.leftMargin: Appearance.px(24)
-                Layout.rightMargin: Appearance.px(24)
+                Layout.preferredHeight: Appearance.px(36)
+                Layout.leftMargin: Appearance.px(20)
+                Layout.rightMargin: Appearance.px(20)
 
                 AppText {
                     text: I18n.tr("spotlight")

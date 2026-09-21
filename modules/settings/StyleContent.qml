@@ -14,7 +14,7 @@ Item {
     signal closeRequested
 
     component PanelText: AppText {
-        color: Appearance.layer1Text
+        color: SettingsPalette.layer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -22,6 +22,8 @@ Item {
     }
 
     component ModeButton: ChoiceChip {
+
+        useBarPalette: SettingsPalette.glassMode
         signal clicked
         onChosen: clicked()
     }
@@ -159,6 +161,8 @@ Item {
         }
 
         SettingsPageHeader {
+
+            useBarPalette: SettingsPalette.glassMode
             id: stylePageHeader
 
             height: implicitHeight
@@ -175,7 +179,7 @@ Item {
             PanelText {
                 visible: Theme.generating
                 text: I18n.tr("generating")
-                color: Appearance.primary
+                color: SettingsPalette.primary
                 font.pixelSize: Appearance.smallFontSize
             }
         }
@@ -212,9 +216,9 @@ Item {
             Layout.fillWidth: true
             implicitHeight: Appearance.px(205)
             radius: Appearance.normalRadius
-            color: Appearance.layer1
+            color: SettingsPalette.layer1
             border.width: 1
-            border.color: Appearance.outline
+            border.color: SettingsPalette.outline
             clip: true
 
             Image {
@@ -235,7 +239,7 @@ Item {
                     bottom: parent.bottom
                 }
                 height: Appearance.px(48)
-                color: Appearance.withAlpha(Theme.palette.m3scrim, 0.62)
+                color: Appearance.withAlpha(SettingsPalette.scrim, 0.62)
 
                 RowLayout {
                     anchors {
@@ -254,6 +258,8 @@ Item {
                     }
 
                     ActionButton {
+
+                        useBarPalette: SettingsPalette.glassMode
                         icon: "󰈔"
                         label: I18n.tr("chooseFile")
                         onClicked: wallpaperFileDialog.open()
@@ -267,6 +273,8 @@ Item {
             spacing: Appearance.spacingSmall
 
             ActionButton {
+
+                useBarPalette: SettingsPalette.glassMode
                 icon: "󰒮"
                 label: I18n.tr("previous")
                 enabled: WallpaperService.wallpapers.length > 0
@@ -275,6 +283,8 @@ Item {
             }
 
             ActionButton {
+
+                useBarPalette: SettingsPalette.glassMode
                 icon: "󰒝"
                 label: I18n.tr("random")
                 enabled: WallpaperService.wallpapers.length > 0
@@ -283,6 +293,8 @@ Item {
             }
 
             ActionButton {
+
+                useBarPalette: SettingsPalette.glassMode
                 icon: "󰒭"
                 label: I18n.tr("next")
                 enabled: WallpaperService.wallpapers.length > 0
@@ -295,6 +307,8 @@ Item {
             }
 
             ActionButton {
+
+                useBarPalette: SettingsPalette.glassMode
                 icon: "󰉋"
                 label: I18n.tr("wallpaperDirectory")
                 onClicked: wallpaperFolderDialog.open()
@@ -307,7 +321,7 @@ Item {
 
             PanelText {
                 text: I18n.tr("wallpaperDisplayMode")
-                color: Appearance.layer0Text
+                color: SettingsPalette.layer0Text
                 font.weight: Font.DemiBold
             }
 
@@ -335,7 +349,7 @@ Item {
 
             PanelText {
                 text: I18n.tr("wallpaperTransition")
-                color: Appearance.layer0Text
+                color: SettingsPalette.layer0Text
                 font.weight: Font.DemiBold
             }
 
@@ -362,9 +376,9 @@ Item {
             implicitHeight: spotlightLauncherRow.implicitHeight
                 + Appearance.px(20)
             radius: Appearance.smallRadius
-            color: Appearance.layer3
+            color: SettingsPalette.layer3
             border.width: 1
-            border.color: Appearance.outline
+            border.color: SettingsPalette.outline
 
             RowLayout {
                 id: spotlightLauncherRow
@@ -383,19 +397,21 @@ Item {
 
                     PanelText {
                         text: I18n.tr("spotlightLauncher")
-                        color: Appearance.layer0Text
+                        color: SettingsPalette.layer0Text
                     }
 
                     PanelText {
                         Layout.fillWidth: true
                         text: I18n.tr("spotlightLauncherHint")
-                        color: Appearance.subtext
+                        color: SettingsPalette.subtext
                         wrapMode: Text.WordWrap
                         font.pixelSize: Appearance.smallFontSize
                     }
                 }
 
                 SettingSwitch {
+
+                    useBarPalette: SettingsPalette.glassMode
                     checked: ShellSettings.launcherUseSpotlight
                     onToggled: checked =>
                         ShellSettings.launcherUseSpotlight = checked
@@ -408,9 +424,9 @@ Item {
             implicitHeight: launchpadBackgroundRow.implicitHeight
                 + Appearance.px(20)
             radius: Appearance.smallRadius
-            color: Appearance.layer3
+            color: SettingsPalette.layer3
             border.width: 1
-            border.color: Appearance.outline
+            border.color: SettingsPalette.outline
 
             RowLayout {
                 id: launchpadBackgroundRow
@@ -429,12 +445,12 @@ Item {
 
                     PanelText {
                         text: I18n.tr("launchpadBackground")
-                        color: Appearance.layer0Text
+                        color: SettingsPalette.layer0Text
                     }
 
                     PanelText {
                         text: I18n.tr("launchpadBackgroundHint")
-                        color: Appearance.subtext
+                        color: SettingsPalette.subtext
                         font.pixelSize: Appearance.smallFontSize
                     }
                 }
@@ -461,9 +477,9 @@ Item {
             Layout.fillWidth: true
             implicitHeight: themeOptions.implicitHeight + Appearance.px(20)
             radius: Appearance.smallRadius
-            color: Appearance.layer3
+            color: SettingsPalette.layer3
             border.width: 1
-            border.color: Appearance.outline
+            border.color: SettingsPalette.outline
 
             ColumnLayout {
                 id: themeOptions
@@ -484,17 +500,19 @@ Item {
 
                         PanelText {
                             text: I18n.tr("wallpaperAutoTheme")
-                            color: Appearance.layer0Text
+                            color: SettingsPalette.layer0Text
                         }
 
                         PanelText {
                             text: I18n.tr("wallpaperAutoThemeHint")
-                            color: Appearance.subtext
+                            color: SettingsPalette.subtext
                             font.pixelSize: Appearance.smallFontSize
                         }
                     }
 
                     SettingSwitch {
+
+                        useBarPalette: SettingsPalette.glassMode
                         checked: ShellSettings.wallpaperAutoTheme
                         onToggled: checked => ShellSettings.wallpaperAutoTheme = checked
                     }
@@ -507,10 +525,12 @@ Item {
                     PanelText {
                         Layout.fillWidth: true
                         text: I18n.tr("colorMode")
-                        color: Appearance.layer0Text
+                        color: SettingsPalette.layer0Text
                     }
 
                     ActionButton {
+
+                        useBarPalette: SettingsPalette.glassMode
                         icon: "󰖔"
                         label: I18n.tr("light")
                         selected: Theme.mode === "light"
@@ -518,6 +538,8 @@ Item {
                     }
 
                     ActionButton {
+
+                        useBarPalette: SettingsPalette.glassMode
                         icon: "󰖙"
                         label: I18n.tr("dark")
                         selected: Theme.mode === "dark"
@@ -527,7 +549,7 @@ Item {
 
                 PanelText {
                     text: I18n.tr("matugenScheme")
-                    color: Appearance.layer0Text
+                    color: SettingsPalette.layer0Text
                     font.weight: Font.DemiBold
                 }
 
@@ -541,6 +563,8 @@ Item {
                         model: root.schemes
 
                         delegate: ActionButton {
+
+                            useBarPalette: SettingsPalette.glassMode
                             required property var modelData
                             Layout.fillWidth: true
                             icon: "󰏘"
@@ -559,13 +583,13 @@ Item {
             PanelText {
                 Layout.fillWidth: true
                 text: I18n.tr("wallpapers") + "  " + WallpaperService.wallpapers.length
-                color: Appearance.layer0Text
+                color: SettingsPalette.layer0Text
                 font.weight: Font.DemiBold
             }
 
             PanelText {
                 text: WallpaperService.directory
-                color: Appearance.subtext
+                color: SettingsPalette.subtext
                 elide: Text.ElideMiddle
                 font.pixelSize: Appearance.smallFontSize
             }
@@ -604,9 +628,9 @@ Item {
                         margins: Appearance.spacingTiny
                     }
                     radius: Appearance.smallRadius
-                    color: Appearance.layer1
+                    color: SettingsPalette.layer1
                     border.width: modelData === WallpaperService.currentPath ? 3 : 1
-                    border.color: modelData === WallpaperService.currentPath ? Appearance.primary : Appearance.outline
+                    border.color: modelData === WallpaperService.currentPath ? SettingsPalette.primary : SettingsPalette.outline
                     clip: true
 
                     Image {

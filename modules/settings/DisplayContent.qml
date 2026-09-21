@@ -61,7 +61,7 @@ Item {
     }
 
     component PanelText: AppText {
-        color: Appearance.layer1Text
+        color: SettingsPalette.layer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -82,7 +82,7 @@ Item {
         contentItem: AppText {
             text: control.displayText
             color: control.enabled
-                ? Appearance.layer0Text : Appearance.subtext
+                ? SettingsPalette.layer0Text : SettingsPalette.subtext
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
             font: control.font
@@ -92,7 +92,7 @@ Item {
             x: control.width - width - Appearance.px(10)
             anchors.verticalCenter: parent.verticalCenter
             text: "󰅀"
-            color: Appearance.subtext
+            color: SettingsPalette.subtext
             font {
                 family: Appearance.iconFontFamily
                 weight: Font.Normal
@@ -103,9 +103,9 @@ Item {
         background: Rectangle {
             radius: Appearance.fieldRadius
             color: control.down
-                ? Appearance.layer1Active : Appearance.layer1
+                ? SettingsPalette.layer1Active : SettingsPalette.layer1
             border.width: control.activeFocus ? 1 : 0
-            border.color: Appearance.primary
+            border.color: SettingsPalette.primary
         }
 
         delegate: Controls.ItemDelegate {
@@ -117,7 +117,7 @@ Item {
             contentItem: AppText {
                 text: control.textRole
                     ? modelData[control.textRole] : modelData
-                color: Appearance.layer0Text
+                color: SettingsPalette.layer0Text
                 verticalAlignment: Text.AlignVCenter
                 elide: Text.ElideRight
                 font: control.font
@@ -125,7 +125,7 @@ Item {
             background: Rectangle {
                 radius: Appearance.fieldRadius
                 color: parent.highlighted
-                    ? Appearance.layer1Active : "transparent"
+                    ? SettingsPalette.layer1Active : "transparent"
             }
         }
 
@@ -149,9 +149,9 @@ Item {
 
             background: Rectangle {
                 radius: Appearance.controlRadius
-                color: Appearance.layer2
+                color: SettingsPalette.layer2
                 border.width: 1
-                border.color: Appearance.outline
+                border.color: SettingsPalette.outline
             }
         }
     }
@@ -160,9 +160,9 @@ Item {
         implicitWidth: Appearance.px(105)
         implicitHeight: Appearance.controlHeight
         horizontalAlignment: TextInput.AlignHCenter
-        color: Appearance.layer0Text
-        selectionColor: Appearance.primaryContainer
-        selectedTextColor: Appearance.primaryContainerText
+        color: SettingsPalette.layer0Text
+        selectionColor: SettingsPalette.primaryContainer
+        selectedTextColor: SettingsPalette.primaryContainerText
         selectByMouse: true
         validator: IntValidator {
             bottom: -32768
@@ -174,13 +174,15 @@ Item {
         }
         background: Rectangle {
             radius: Appearance.fieldRadius
-            color: Appearance.layer1
+            color: SettingsPalette.layer1
             border.width: parent.activeFocus ? 1 : 0
-            border.color: Appearance.primary
+            border.color: SettingsPalette.primary
         }
     }
 
     component BrightnessSlider: SettingSlider {
+
+        useBarPalette: SettingsPalette.glassMode
         from: 1
         to: 100
         stepSize: 1
@@ -194,11 +196,15 @@ Item {
         spacing: Appearance.spacingMedium
 
         SettingsPageHeader {
+
+            useBarPalette: SettingsPalette.glassMode
             icon: "󰍹"
             title: I18n.tr("displaySettings")
             onCloseClicked: root.closeRequested()
 
             ActionButton {
+
+                useBarPalette: SettingsPalette.glassMode
                 icon: "󰑐"
                 label: I18n.tr("refresh")
                 enabled: !OutputService.refreshing
@@ -212,7 +218,7 @@ Item {
             implicitHeight: sessionHint.implicitHeight
                 + Appearance.px(20)
             radius: Appearance.smallRadius
-            color: Appearance.primaryContainer
+            color: SettingsPalette.primaryContainer
 
             RowLayout {
                 anchors {
@@ -223,7 +229,7 @@ Item {
 
                 AppText {
                     text: "󰋼"
-                    color: Appearance.primaryContainerText
+                    color: SettingsPalette.primaryContainerText
                     font {
                         family: Appearance.iconFontFamily
                         weight: Font.Normal
@@ -235,7 +241,7 @@ Item {
                     id: sessionHint
                     Layout.fillWidth: true
                     text: I18n.tr("displaySessionHint")
-                    color: Appearance.primaryContainerText
+                    color: SettingsPalette.primaryContainerText
                     wrapMode: Text.WordWrap
                     font.pixelSize: Appearance.smallFontSize
                 }
@@ -248,7 +254,7 @@ Item {
             implicitHeight: errorText.implicitHeight + Appearance.px(20)
             radius: Appearance.smallRadius
             color: Appearance.withAlpha(
-                Theme.palette.m3errorContainer, 0.85)
+                SettingsPalette.errorContainer, 0.85)
 
             PanelText {
                 id: errorText
@@ -257,7 +263,7 @@ Item {
                     margins: Appearance.spacingMedium
                 }
                 text: OutputService.errorMessage
-                color: Theme.palette.m3onErrorContainer
+                color: SettingsPalette.onErrorContainer
                 wrapMode: Text.WordWrap
             }
         }
@@ -315,11 +321,11 @@ Item {
                             implicitHeight: cardContent.implicitHeight
                                 + Appearance.px(24)
                             radius: Appearance.normalRadius
-                            color: Appearance.layer3
+                            color: SettingsPalette.layer3
                             border.width: 1
                             border.color: draftEnabled
-                                ? Appearance.outline
-                                : Appearance.layer0Border
+                                ? SettingsPalette.outline
+                                : SettingsPalette.layer0Border
 
                             ColumnLayout {
                                 id: cardContent
@@ -340,15 +346,15 @@ Item {
                                         implicitHeight: Appearance.px(44)
                                         radius: Appearance.cardRadius
                                         color: outputCard.draftEnabled
-                                            ? Appearance.primaryContainer
-                                            : Appearance.layer1Active
+                                            ? SettingsPalette.primaryContainer
+                                            : SettingsPalette.layer1Active
 
                                         AppText {
                                             anchors.centerIn: parent
                                             text: "󰍹"
                                             color: outputCard.draftEnabled
-                                                ? Appearance.primaryContainerText
-                                                : Appearance.subtext
+                                                ? SettingsPalette.primaryContainerText
+                                                : SettingsPalette.subtext
                                             font {
                                                 family: Appearance.iconFontFamily
                                                 weight: Font.Normal
@@ -364,7 +370,7 @@ Item {
                                         PanelText {
                                             Layout.fillWidth: true
                                             text: outputCard.modelData.name
-                                            color: Appearance.layer0Text
+                                            color: SettingsPalette.layer0Text
                                             elide: Text.ElideRight
                                             font {
                                                 pixelSize:
@@ -379,7 +385,7 @@ Item {
                                                 + " "
                                                 + outputCard.modelData.model)
                                                 .trim()
-                                            color: Appearance.subtext
+                                            color: SettingsPalette.subtext
                                             elide: Text.ElideRight
                                             font.pixelSize:
                                                 Appearance.smallFontSize
@@ -392,8 +398,8 @@ Item {
                                         implicitHeight: Appearance.px(26)
                                         radius: Appearance.fullRadius
                                         color: outputCard.draftEnabled
-                                            ? Appearance.primaryContainer
-                                            : Appearance.layer1
+                                            ? SettingsPalette.primaryContainer
+                                            : SettingsPalette.layer1
 
                                         PanelText {
                                             id: statusText
@@ -402,14 +408,16 @@ Item {
                                                 ? I18n.tr("displayConnected")
                                                 : I18n.tr("displayDisabled")
                                             color: outputCard.draftEnabled
-                                                ? Appearance.primaryContainerText
-                                                : Appearance.subtext
+                                                ? SettingsPalette.primaryContainerText
+                                                : SettingsPalette.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
                                         }
                                     }
 
                                     SettingSwitch {
+
+                                        useBarPalette: SettingsPalette.glassMode
                                         checked: outputCard.draftEnabled
                                         enabled: !OutputService.applying
                                         onToggled: checked =>
@@ -420,7 +428,7 @@ Item {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     implicitHeight: 1
-                                    color: Appearance.outline
+                                    color: SettingsPalette.outline
                                     opacity: 0.55
                                 }
 
@@ -438,8 +446,8 @@ Item {
                                             text: "󰃠"
                                             color: outputCard.brightnessState
                                                     .available
-                                                ? Appearance.primary
-                                                : Appearance.subtext
+                                                ? SettingsPalette.primary
+                                                : SettingsPalette.subtext
                                             font {
                                                 family:
                                                     Appearance.iconFontFamily
@@ -455,7 +463,7 @@ Item {
                                             PanelText {
                                                 Layout.fillWidth: true
                                                 text: I18n.tr("brightness")
-                                                color: Appearance.layer0Text
+                                                color: SettingsPalette.layer0Text
                                             }
 
                                             PanelText {
@@ -467,8 +475,8 @@ Item {
                                                         .brightnessState.reason
                                                 color: outputCard
                                                         .brightnessState.error
-                                                    ? Theme.palette.m3error
-                                                    : Appearance.subtext
+                                                    ? SettingsPalette.error
+                                                    : SettingsPalette.subtext
                                                 elide: Text.ElideRight
                                                 font.pixelSize:
                                                     Appearance.smallFontSize
@@ -485,7 +493,7 @@ Item {
                                                     .brightnessState.percent)
                                                     + "%"
                                                 : "—"
-                                            color: Appearance.subtext
+                                            color: SettingsPalette.subtext
                                         }
                                     }
 
@@ -517,7 +525,7 @@ Item {
                                         PanelText {
                                             text: I18n.tr(
                                                 "resolutionRefresh")
-                                            color: Appearance.subtext
+                                            color: SettingsPalette.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
                                         }
@@ -544,7 +552,7 @@ Item {
 
                                         PanelText {
                                             text: I18n.tr("displayScale")
-                                            color: Appearance.subtext
+                                            color: SettingsPalette.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
                                         }
@@ -571,7 +579,7 @@ Item {
 
                                         PanelText {
                                             text: I18n.tr("orientation")
-                                            color: Appearance.subtext
+                                            color: SettingsPalette.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
                                         }
@@ -603,7 +611,7 @@ Item {
 
                                         PanelText {
                                             text: I18n.tr("positionX")
-                                            color: Appearance.subtext
+                                            color: SettingsPalette.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
                                         }
@@ -624,7 +632,7 @@ Item {
 
                                         PanelText {
                                             text: I18n.tr("positionY")
-                                            color: Appearance.subtext
+                                            color: SettingsPalette.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
                                         }
@@ -648,12 +656,14 @@ Item {
                                         PanelText {
                                             text: I18n.tr(
                                                 "automaticPosition")
-                                            color: Appearance.subtext
+                                            color: SettingsPalette.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
                                         }
 
                                         SettingSwitch {
+
+                                            useBarPalette: SettingsPalette.glassMode
                                             checked: outputCard
                                                 .automaticPosition
                                             onToggled: checked =>
@@ -673,12 +683,14 @@ Item {
                                         PanelText {
                                             text: I18n.tr(
                                                 "variableRefreshRate")
-                                            color: Appearance.subtext
+                                            color: SettingsPalette.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
                                         }
 
                                         SettingSwitch {
+
+                                            useBarPalette: SettingsPalette.glassMode
                                             checked:
                                                 outputCard.draftVrr
                                             onToggled: checked =>
@@ -693,7 +705,7 @@ Item {
 
                                         PanelText {
                                             text: I18n.tr("colorDepth")
-                                            color: Appearance.subtext
+                                            color: SettingsPalette.subtext
                                             font.pixelSize:
                                                 Appearance.smallFontSize
                                         }
@@ -730,12 +742,14 @@ Item {
                                                 + ", "
                                                 + outputCard.modelData.y
                                             : I18n.tr("displayDisabled")
-                                        color: Appearance.subtext
+                                        color: SettingsPalette.subtext
                                         font.pixelSize:
                                             Appearance.smallFontSize
                                     }
 
                                     ActionButton {
+
+                                        useBarPalette: SettingsPalette.glassMode
                                         primary: true
                                         icon: OutputService.applying
                                             ? "󰦖" : "󰄬"
@@ -780,7 +794,7 @@ Item {
                 AppText {
                     Layout.alignment: Qt.AlignHCenter
                     text: "󰶐"
-                    color: Appearance.primary
+                    color: SettingsPalette.primary
                     font {
                         family: Appearance.iconFontFamily
                         weight: Font.Normal
@@ -791,7 +805,7 @@ Item {
                 PanelText {
                     Layout.alignment: Qt.AlignHCenter
                     text: I18n.tr("noOutputs")
-                    color: Appearance.subtext
+                    color: SettingsPalette.subtext
                 }
             }
 

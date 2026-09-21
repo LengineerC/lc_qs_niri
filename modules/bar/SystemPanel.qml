@@ -13,6 +13,7 @@ Item {
 
     property bool embedded: false
     property bool useBarPalette: !embedded
+        || ShellSettings.barFrostedGlass
     property bool active: visible
     property string outputName: ""
     property string expandedSection: embedded ? "wifi" : ""

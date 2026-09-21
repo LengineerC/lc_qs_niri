@@ -14,7 +14,8 @@ ApplicationWindow {
     property int currentPage: 0
     visible: false
     title: "QuickShell " + I18n.tr("settings")
-    color: Appearance.layer0
+    color: SettingsPalette.glassMode
+        ? "transparent" : SettingsPalette.layer0
     width: Math.min(screen?.width * 0.86 ?? Appearance.px(980),
         Appearance.px(980))
     height: Math.min(screen?.height * 0.92 ?? Appearance.px(920),
@@ -153,7 +154,31 @@ ApplicationWindow {
 
     Rectangle {
         anchors.fill: parent
-        color: Appearance.layer0
+        color: SettingsPalette.window
+
+        Behavior on color {
+            ColorAnimation { duration: Appearance.spatialDuration }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            visible: SettingsPalette.glassMode
+            color: "transparent"
+            gradient: Gradient {
+                GradientStop {
+                    position: 0
+                    color: SettingsPalette.windowSheen
+                }
+                GradientStop {
+                    position: 0.32
+                    color: Appearance.withAlpha("#ffffff", 0.018)
+                }
+                GradientStop {
+                    position: 1
+                    color: "transparent"
+                }
+            }
+        }
 
         RowLayout {
             anchors {
@@ -167,9 +192,13 @@ ApplicationWindow {
                 Layout.preferredWidth: Appearance.px(
                     I18n.language === "en_US" ? 210 : 190)
                 radius: Appearance.normalRadius
-                color: Appearance.layer1
+                color: SettingsPalette.layer1
                 border.width: 1
-                border.color: Appearance.layer0Border
+                border.color: SettingsPalette.layer0Border
+
+                Behavior on color {
+                    ColorAnimation { duration: Appearance.spatialDuration }
+                }
 
                 ColumnLayout {
                     anchors {
@@ -187,12 +216,12 @@ ApplicationWindow {
                             implicitWidth: Appearance.px(42)
                             implicitHeight: Appearance.largeControlHeight
                             radius: Appearance.cardRadius
-                            color: Appearance.primaryContainer
+                            color: SettingsPalette.primaryContainer
 
                             AppText {
                                 anchors.centerIn: parent
                                 text: "󰣇"
-                                color: Appearance.primaryContainerText
+                                color: SettingsPalette.primaryContainerText
                                 font {
                                     family: Appearance.iconFontFamily
                                     weight: Font.Normal
@@ -207,7 +236,7 @@ ApplicationWindow {
 
                             AppText {
                                 text: "QuickShell"
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                                 font {
                                     family: Appearance.fontFamily
                                     pixelSize: Appearance.largeFontSize
@@ -217,7 +246,7 @@ ApplicationWindow {
 
                             AppText {
                                 text: I18n.tr("settings")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 font {
                                     family: Appearance.fontFamily
                                     pixelSize: Appearance.smallFontSize
@@ -233,9 +262,13 @@ ApplicationWindow {
                         implicitHeight: Appearance.largeControlHeight
                         radius: Appearance.cardRadius
                         color: root.currentPage === 0
-                            ? Appearance.secondaryContainer
+                            ? SettingsPalette.secondaryContainer
                             : quickSettingsMouse.containsMouse
-                                ? Appearance.layer1Hover : "transparent"
+                                ? SettingsPalette.layer1Hover : "transparent"
+
+                        Behavior on color {
+                            ColorAnimation { duration: Appearance.fastDuration }
+                        }
 
                         RowLayout {
                             anchors {
@@ -248,8 +281,8 @@ ApplicationWindow {
                             AppText {
                                 text: "󰒓"
                                 color: root.currentPage === 0
-                                    ? Appearance.secondaryContainerText
-                                    : Appearance.layer1Text
+                                    ? SettingsPalette.secondaryContainerText
+                                    : SettingsPalette.layer1Text
                                 font {
                                     family: Appearance.iconFontFamily
                                     weight: Font.Normal
@@ -261,8 +294,8 @@ ApplicationWindow {
                                 Layout.fillWidth: true
                                 text: I18n.tr("quickSettings")
                                 color: root.currentPage === 0
-                                    ? Appearance.secondaryContainerText
-                                    : Appearance.layer1Text
+                                    ? SettingsPalette.secondaryContainerText
+                                    : SettingsPalette.layer1Text
                                 font {
                                     family: Appearance.fontFamily
                                     pixelSize: Appearance.fontSize
@@ -287,9 +320,13 @@ ApplicationWindow {
                         implicitHeight: Appearance.largeControlHeight
                         radius: Appearance.cardRadius
                         color: root.currentPage === 1
-                            ? Appearance.secondaryContainer
+                            ? SettingsPalette.secondaryContainer
                             : networkMouse.containsMouse
-                                ? Appearance.layer1Hover : "transparent"
+                                ? SettingsPalette.layer1Hover : "transparent"
+
+                        Behavior on color {
+                            ColorAnimation { duration: Appearance.fastDuration }
+                        }
 
                         RowLayout {
                             anchors {
@@ -302,8 +339,8 @@ ApplicationWindow {
                             AppText {
                                 text: "󰛳"
                                 color: root.currentPage === 1
-                                    ? Appearance.secondaryContainerText
-                                    : Appearance.layer1Text
+                                    ? SettingsPalette.secondaryContainerText
+                                    : SettingsPalette.layer1Text
                                 font {
                                     family: Appearance.iconFontFamily
                                     weight: Font.Normal
@@ -315,8 +352,8 @@ ApplicationWindow {
                                 Layout.fillWidth: true
                                 text: I18n.tr("networkDevices")
                                 color: root.currentPage === 1
-                                    ? Appearance.secondaryContainerText
-                                    : Appearance.layer1Text
+                                    ? SettingsPalette.secondaryContainerText
+                                    : SettingsPalette.layer1Text
                                 font {
                                     family: Appearance.fontFamily
                                     pixelSize: Appearance.fontSize
@@ -341,9 +378,13 @@ ApplicationWindow {
                         implicitHeight: Appearance.largeControlHeight
                         radius: Appearance.cardRadius
                         color: root.currentPage === 3
-                            ? Appearance.secondaryContainer
+                            ? SettingsPalette.secondaryContainer
                             : displaysMouse.containsMouse
-                                ? Appearance.layer1Hover : "transparent"
+                                ? SettingsPalette.layer1Hover : "transparent"
+
+                        Behavior on color {
+                            ColorAnimation { duration: Appearance.fastDuration }
+                        }
 
                         RowLayout {
                             anchors {
@@ -356,8 +397,8 @@ ApplicationWindow {
                             AppText {
                                 text: "󰍹"
                                 color: root.currentPage === 3
-                                    ? Appearance.secondaryContainerText
-                                    : Appearance.layer1Text
+                                    ? SettingsPalette.secondaryContainerText
+                                    : SettingsPalette.layer1Text
                                 font {
                                     family: Appearance.iconFontFamily
                                     weight: Font.Normal
@@ -369,8 +410,8 @@ ApplicationWindow {
                                 Layout.fillWidth: true
                                 text: I18n.tr("displays")
                                 color: root.currentPage === 3
-                                    ? Appearance.secondaryContainerText
-                                    : Appearance.layer1Text
+                                    ? SettingsPalette.secondaryContainerText
+                                    : SettingsPalette.layer1Text
                                 font {
                                     family: Appearance.fontFamily
                                     pixelSize: Appearance.fontSize
@@ -395,9 +436,13 @@ ApplicationWindow {
                         implicitHeight: Appearance.largeControlHeight
                         radius: Appearance.cardRadius
                         color: root.currentPage === 2
-                            ? Appearance.secondaryContainer
+                            ? SettingsPalette.secondaryContainer
                             : styleMouse.containsMouse
-                                ? Appearance.layer1Hover : "transparent"
+                                ? SettingsPalette.layer1Hover : "transparent"
+
+                        Behavior on color {
+                            ColorAnimation { duration: Appearance.fastDuration }
+                        }
 
                         RowLayout {
                             anchors {
@@ -410,8 +455,8 @@ ApplicationWindow {
                             AppText {
                                 text: "󰏘"
                                 color: root.currentPage === 2
-                                    ? Appearance.secondaryContainerText
-                                    : Appearance.layer1Text
+                                    ? SettingsPalette.secondaryContainerText
+                                    : SettingsPalette.layer1Text
                                 font {
                                     family: Appearance.iconFontFamily
                                     weight: Font.Normal
@@ -423,8 +468,8 @@ ApplicationWindow {
                                 Layout.fillWidth: true
                                 text: I18n.tr("style")
                                 color: root.currentPage === 2
-                                    ? Appearance.secondaryContainerText
-                                    : Appearance.layer1Text
+                                    ? SettingsPalette.secondaryContainerText
+                                    : SettingsPalette.layer1Text
                                 font {
                                     family: Appearance.fontFamily
                                     pixelSize: Appearance.fontSize
@@ -453,10 +498,14 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 radius: Appearance.normalRadius
-                color: Appearance.layer2
+                color: SettingsPalette.layer2
                 border.width: 1
-                border.color: Appearance.layer0Border
+                border.color: SettingsPalette.layer0Border
                 clip: true
+
+                Behavior on color {
+                    ColorAnimation { duration: Appearance.spatialDuration }
+                }
 
                 Loader {
                     anchors.fill: parent

@@ -11,6 +11,12 @@ Controls.ToolTip {
 
     property bool showBelow: true
     property int gap: Appearance.px(5)
+    property bool useBarPalette: false
+
+    BarPalette {
+        id: palette
+        enabled: root.useBarPalette
+    }
 
     x: Math.round((parent.width - width) / 2)
     y: root.showBelow ? parent.height + root.gap
@@ -25,7 +31,7 @@ Controls.ToolTip {
 
     contentItem: AppText {
         text: root.text
-        color: Appearance.layer0Text
+        color: palette.layer0Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.smallFontSize
@@ -35,9 +41,9 @@ Controls.ToolTip {
 
     background: Rectangle {
         radius: Appearance.px(8)
-        color: Appearance.layer3
+        color: palette.layer3
         border.width: 1
-        border.color: Appearance.outline
+        border.color: palette.outline
     }
 
     enter: Transition {

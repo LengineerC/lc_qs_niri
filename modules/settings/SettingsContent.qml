@@ -132,7 +132,7 @@ Item {
     }
 
     component PanelText: AppText {
-        color: Appearance.layer1Text
+        color: SettingsPalette.layer1Text
         font {
             family: Appearance.fontFamily
             pixelSize: Appearance.fontSize
@@ -154,7 +154,7 @@ Item {
 
         AppText {
             text: parent.icon
-            color: Appearance.primary
+            color: SettingsPalette.primary
             font {
                 family: Appearance.iconFontFamily
                 weight: Font.Normal
@@ -164,7 +164,7 @@ Item {
 
         PanelText {
             text: parent.title
-            color: Appearance.layer0Text
+            color: SettingsPalette.layer0Text
             font {
                 pixelSize: Appearance.fontSize + Appearance.px(1)
                 weight: Font.DemiBold
@@ -178,6 +178,8 @@ Item {
     }
 
     component SettingCard: SurfaceCard {
+
+        useBarPalette: SettingsPalette.glassMode
         onBackgroundClicked: root.forceActiveFocus()
     }
 
@@ -220,9 +222,9 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: Appearance.fieldRadius
-            color: Appearance.layer1
+            color: SettingsPalette.layer1
             border.width: fontInput.activeFocus || fontPopup.opened ? 1 : 0
-            border.color: Appearance.primary
+            border.color: SettingsPalette.primary
 
             AppTextField {
                 id: fontInput
@@ -234,9 +236,9 @@ Item {
                 }
                 padding: 0
                 verticalAlignment: TextInput.AlignVCenter
-                color: Appearance.layer0Text
-                selectionColor: Appearance.primaryContainer
-                selectedTextColor: Appearance.primaryContainerText
+                color: SettingsPalette.layer0Text
+                selectionColor: SettingsPalette.primaryContainer
+                selectedTextColor: SettingsPalette.primaryContainerText
                 selectByMouse: true
                 text: selector.draftText
                 background: null
@@ -296,7 +298,7 @@ Item {
                     verticalCenter: parent.verticalCenter
                 }
                 text: fontPopup.opened ? "󰅃" : "󰅀"
-                color: Appearance.subtext
+                color: SettingsPalette.subtext
                 font {
                     family: Appearance.iconFontFamily
                     weight: Font.Normal
@@ -376,7 +378,7 @@ Item {
 
                     contentItem: AppText {
                         text: fontDelegate.modelData
-                        color: Appearance.layer0Text
+                        color: SettingsPalette.layer0Text
                         verticalAlignment: Text.AlignVCenter
                         elide: Text.ElideRight
                         font {
@@ -387,7 +389,7 @@ Item {
                     background: Rectangle {
                         radius: Appearance.fieldRadius
                         color: fontDelegate.highlighted
-                            ? Appearance.layer1Active : "transparent"
+                            ? SettingsPalette.layer1Active : "transparent"
                     }
                     onClicked: selector.choose(modelData)
                 }
@@ -398,9 +400,9 @@ Item {
 
             background: Rectangle {
                 radius: Appearance.controlRadius
-                color: Appearance.layer2
+                color: SettingsPalette.layer2
                 border.width: 1
-                border.color: Appearance.outline
+                border.color: SettingsPalette.outline
             }
         }
     }
@@ -418,12 +420,12 @@ Item {
         implicitHeight: Appearance.px(68)
         radius: Appearance.smallRadius
         color: selected
-            ? Appearance.primaryContainer
+            ? SettingsPalette.primaryContainer
             : metricChoiceArea.containsMouse
-                ? Appearance.layer1Active : Appearance.layer1
+                ? SettingsPalette.layer1Active : SettingsPalette.layer1
         border.width: 1
         border.color: selected
-            ? Appearance.primary : Appearance.outline
+            ? SettingsPalette.primary : SettingsPalette.outline
         scale: metricChoiceArea.pressed ? 0.98 : 1
 
         RowLayout {
@@ -439,15 +441,15 @@ Item {
                 implicitHeight: Appearance.px(38)
                 radius: Appearance.fullRadius
                 color: metricChoice.selected
-                    ? Appearance.primary
-                    : Appearance.layer1Active
+                    ? SettingsPalette.primary
+                    : SettingsPalette.layer1Active
 
                 AppText {
                     anchors.centerIn: parent
                     text: metricChoice.icon
                     color: metricChoice.selected
-                        ? Theme.palette.m3onPrimary
-                        : Appearance.primary
+                        ? SettingsPalette.onPrimary
+                        : SettingsPalette.primary
                     font {
                         family: Appearance.iconFontFamily
                         weight: Font.Normal
@@ -464,8 +466,8 @@ Item {
                     Layout.fillWidth: true
                     text: metricChoice.label
                     color: metricChoice.selected
-                        ? Appearance.primaryContainerText
-                        : Appearance.layer0Text
+                        ? SettingsPalette.primaryContainerText
+                        : SettingsPalette.layer0Text
                     elide: Text.ElideRight
                     font.weight: Font.DemiBold
                 }
@@ -473,8 +475,8 @@ Item {
                 PanelText {
                     text: metricChoice.value
                     color: metricChoice.selected
-                        ? Appearance.primaryContainerText
-                        : Appearance.subtext
+                        ? SettingsPalette.primaryContainerText
+                        : SettingsPalette.subtext
                     font.pixelSize: Appearance.smallFontSize
                 }
             }
@@ -482,7 +484,7 @@ Item {
             AppText {
                 visible: metricChoice.selected
                 text: "󰄬"
-                color: Appearance.primaryContainerText
+                color: SettingsPalette.primaryContainerText
                 font {
                     family: Appearance.iconFontFamily
                     weight: Font.Normal
@@ -511,6 +513,8 @@ Item {
     }
 
     component ValueSlider: SettingSlider {
+
+        useBarPalette: SettingsPalette.glassMode
         Layout.fillWidth: true
     }
 
@@ -538,7 +542,7 @@ Item {
             Layout.preferredWidth: Appearance.px(
                 I18n.language === "en_US" ? 150 : 118)
             text: row.label
-            color: Appearance.layer1Text
+            color: SettingsPalette.layer1Text
         }
 
         ValueSlider {
@@ -553,13 +557,13 @@ Item {
             Layout.preferredWidth: Appearance.px(72)
             implicitHeight: Appearance.compactControlHeight
             radius: Appearance.fieldRadius
-            color: Appearance.layer1
+            color: SettingsPalette.layer1
 
             PanelText {
                 anchors.centerIn: parent
                 text: Number(row.currentValue).toFixed(row.decimals)
                     + row.suffix
-                color: Appearance.subtext
+                color: SettingsPalette.subtext
                 font.pixelSize: Appearance.smallFontSize
             }
         }
@@ -609,14 +613,14 @@ Item {
             PanelText {
                 Layout.fillWidth: true
                 text: formatRow.label
-                color: Appearance.layer0Text
+                color: SettingsPalette.layer0Text
             }
 
             PanelText {
                 Layout.fillWidth: true
                 Layout.maximumWidth: parent.width
                 text: formatRow.hint
-                color: Appearance.subtext
+                color: SettingsPalette.subtext
                 wrapMode: Text.WordWrap
                 font.pixelSize: Appearance.smallFontSize
             }
@@ -628,9 +632,9 @@ Item {
             Layout.preferredWidth: Appearance.px(240)
             implicitHeight: Appearance.controlHeight
             radius: Appearance.fieldRadius
-            color: Appearance.layer1
+            color: SettingsPalette.layer1
             border.width: formatInput.activeFocus ? 1 : 0
-            border.color: Appearance.primary
+            border.color: SettingsPalette.primary
 
             AppTextField {
                 id: formatInput
@@ -642,9 +646,9 @@ Item {
                 }
                 padding: 0
                 verticalAlignment: TextInput.AlignVCenter
-                color: Appearance.layer0Text
-                selectionColor: Appearance.primaryContainer
-                selectedTextColor: Appearance.primaryContainerText
+                color: SettingsPalette.layer0Text
+                selectionColor: SettingsPalette.primaryContainer
+                selectedTextColor: SettingsPalette.primaryContainerText
                 selectByMouse: true
                 persistentSelection: true
                 text: formatRow.draftValue
@@ -670,6 +674,8 @@ Item {
         }
 
         SettingsPageHeader {
+
+            useBarPalette: SettingsPalette.glassMode
             id: pageHeader
             height: implicitHeight
             anchors {
@@ -725,6 +731,8 @@ Item {
                         spacing: Appearance.px(14)
 
                         UserAvatar {
+
+                            useBarPalette: SettingsPalette.glassMode
                             implicitSize: Appearance.px(70)
                         }
 
@@ -735,7 +743,7 @@ Item {
                             PanelText {
                                 Layout.fillWidth: true
                                 text: UserService.displayName
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                                 elide: Text.ElideRight
                                 font {
                                     pixelSize: Appearance.largeFontSize
@@ -748,7 +756,7 @@ Item {
                                 text: UserService.loginName
                                     ? "@" + UserService.loginName
                                     : I18n.tr("user")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 elide: Text.ElideRight
                                 font.pixelSize: Appearance.smallFontSize
                             }
@@ -765,8 +773,8 @@ Item {
                             implicitHeight: Appearance.controlHeight
                             radius: Appearance.fieldRadius
                             color: chooseAvatarArea.containsMouse
-                                ? Appearance.layer1Active
-                                : Appearance.layer1
+                                ? SettingsPalette.layer1Active
+                                : SettingsPalette.layer1
 
                             RowLayout {
                                 id: chooseAvatarRow
@@ -775,7 +783,7 @@ Item {
 
                                 AppText {
                                     text: "󰈔"
-                                    color: Appearance.primary
+                                    color: SettingsPalette.primary
                                     font {
                                         family:
                                             Appearance.iconFontFamily
@@ -806,8 +814,8 @@ Item {
                             implicitHeight: Appearance.controlHeight
                             radius: Appearance.fieldRadius
                             color: systemProfileArea.containsMouse
-                                ? Appearance.layer1Active
-                                : Appearance.layer1
+                                ? SettingsPalette.layer1Active
+                                : SettingsPalette.layer1
 
                             RowLayout {
                                 id: systemProfileRow
@@ -816,7 +824,7 @@ Item {
 
                                 AppText {
                                     text: "󰑐"
-                                    color: Appearance.primary
+                                    color: SettingsPalette.primary
                                     font {
                                         family:
                                             Appearance.iconFontFamily
@@ -865,19 +873,21 @@ Item {
                             PanelText {
                                 Layout.fillWidth: true
                                 text: I18n.tr("lockOnStartup")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
 
                             PanelText {
                                 Layout.fillWidth: true
                                 text: I18n.tr("lockOnStartupHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 wrapMode: Text.WordWrap
                                 font.pixelSize: Appearance.smallFontSize
                             }
                         }
 
                         SettingSwitch {
+
+                            useBarPalette: SettingsPalette.glassMode
                             checked: ShellSettings.lockOnStartup
                             onToggled: checked => {
                                 ShellSettings.lockOnStartup = checked;
@@ -895,7 +905,7 @@ Item {
                     PanelText {
                         Layout.fillWidth: true
                         text: I18n.tr("performanceMonitorHint")
-                        color: Appearance.subtext
+                        color: SettingsPalette.subtext
                         wrapMode: Text.WordWrap
                         font.pixelSize: Appearance.smallFontSize
                     }
@@ -956,11 +966,11 @@ Item {
                                 Layout.fillWidth: true
                                 implicitHeight: Appearance.controlHeight
                                 radius: Appearance.fieldRadius
-                                color: Appearance.layer1
+                                color: SettingsPalette.layer1
                                 border.width:
                                     weatherLocationInput.activeFocus
                                         ? 1 : 0
-                                border.color: Appearance.primary
+                                border.color: SettingsPalette.primary
 
                                 AppTextField {
                                     id: weatherLocationInput
@@ -973,18 +983,18 @@ Item {
                                     padding: 0
                                     verticalAlignment:
                                         TextInput.AlignVCenter
-                                    color: Appearance.layer0Text
+                                    color: SettingsPalette.layer0Text
                                     selectionColor:
-                                        Appearance.primaryContainer
+                                        SettingsPalette.primaryContainer
                                     selectedTextColor:
-                                        Appearance.primaryContainerText
+                                        SettingsPalette.primaryContainerText
                                     selectByMouse: true
                                     persistentSelection: true
                                     text: root.weatherLocationDraft
                                     placeholderText:
                                         I18n.tr("weatherLocationHint")
                                     placeholderTextColor:
-                                        Appearance.subtext
+                                        SettingsPalette.subtext
                                     background: null
                                     font {
                                         family: Appearance.fontFamily
@@ -1024,8 +1034,8 @@ Item {
                                         || WeatherService
                                             .locationSearchStatus
                                             === "notFound"
-                                    ? Theme.palette.m3error
-                                    : Appearance.subtext
+                                    ? SettingsPalette.error
+                                    : SettingsPalette.subtext
                                 elide: Text.ElideRight
                                 font.pixelSize:
                                     Appearance.smallFontSize
@@ -1039,8 +1049,8 @@ Item {
                             radius: Appearance.fieldRadius
                             color: weatherSearchArea.containsMouse
                                     && weatherSearchArea.enabled
-                                ? Appearance.layer1Active
-                                : Appearance.primaryContainer
+                                ? SettingsPalette.layer1Active
+                                : SettingsPalette.primaryContainer
                             opacity: weatherSearchArea.enabled ? 1 : 0.5
 
                             RowLayout {
@@ -1102,7 +1112,7 @@ Item {
                                 PanelText {
                                     text: I18n.tr("searchLocation")
                                     color:
-                                        Appearance.primaryContainerText
+                                        SettingsPalette.primaryContainerText
                                     font.pixelSize:
                                         Appearance.smallFontSize
                                 }
@@ -1130,13 +1140,13 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         implicitHeight: 1
-                        color: Appearance.outline
+                        color: SettingsPalette.outline
                         opacity: 0.65
                     }
 
                     PanelText {
                         text: I18n.tr("directCoordinates")
-                        color: Appearance.layer0Text
+                        color: SettingsPalette.layer0Text
                         font.weight: Font.DemiBold
                     }
 
@@ -1150,7 +1160,7 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("latitude")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 font.pixelSize:
                                     Appearance.smallFontSize
                             }
@@ -1159,11 +1169,11 @@ Item {
                                 Layout.fillWidth: true
                                 implicitHeight: Appearance.controlHeight
                                 radius: Appearance.fieldRadius
-                                color: Appearance.layer1
+                                color: SettingsPalette.layer1
                                 border.width:
                                     weatherLatitudeInput.activeFocus
                                         ? 1 : 0
-                                border.color: Appearance.primary
+                                border.color: SettingsPalette.primary
 
                                 AppTextField {
                                     id: weatherLatitudeInput
@@ -1176,11 +1186,11 @@ Item {
                                     padding: 0
                                     verticalAlignment:
                                         TextInput.AlignVCenter
-                                    color: Appearance.layer0Text
+                                    color: SettingsPalette.layer0Text
                                     selectionColor:
-                                        Appearance.primaryContainer
+                                        SettingsPalette.primaryContainer
                                     selectedTextColor:
-                                        Appearance.primaryContainerText
+                                        SettingsPalette.primaryContainerText
                                     selectByMouse: true
                                     persistentSelection: true
                                     inputMethodHints:
@@ -1188,7 +1198,7 @@ Item {
                                     text: root.weatherLatitudeDraft
                                     placeholderText: "31.23040"
                                     placeholderTextColor:
-                                        Appearance.subtext
+                                        SettingsPalette.subtext
                                     background: null
                                     validator: DoubleValidator {
                                         bottom: -90
@@ -1220,7 +1230,7 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("longitude")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 font.pixelSize:
                                     Appearance.smallFontSize
                             }
@@ -1229,11 +1239,11 @@ Item {
                                 Layout.fillWidth: true
                                 implicitHeight: Appearance.controlHeight
                                 radius: Appearance.fieldRadius
-                                color: Appearance.layer1
+                                color: SettingsPalette.layer1
                                 border.width:
                                     weatherLongitudeInput.activeFocus
                                         ? 1 : 0
-                                border.color: Appearance.primary
+                                border.color: SettingsPalette.primary
 
                                 AppTextField {
                                     id: weatherLongitudeInput
@@ -1246,11 +1256,11 @@ Item {
                                     padding: 0
                                     verticalAlignment:
                                         TextInput.AlignVCenter
-                                    color: Appearance.layer0Text
+                                    color: SettingsPalette.layer0Text
                                     selectionColor:
-                                        Appearance.primaryContainer
+                                        SettingsPalette.primaryContainer
                                     selectedTextColor:
-                                        Appearance.primaryContainerText
+                                        SettingsPalette.primaryContainerText
                                     selectByMouse: true
                                     persistentSelection: true
                                     inputMethodHints:
@@ -1258,7 +1268,7 @@ Item {
                                     text: root.weatherLongitudeDraft
                                     placeholderText: "121.47370"
                                     placeholderTextColor:
-                                        Appearance.subtext
+                                        SettingsPalette.subtext
                                     background: null
                                     validator: DoubleValidator {
                                         bottom: -180
@@ -1292,8 +1302,8 @@ Item {
                             radius: Appearance.fieldRadius
                             color: coordinateApplyArea.containsMouse
                                     && coordinateApplyArea.enabled
-                                ? Appearance.layer1Active
-                                : Appearance.primaryContainer
+                                ? SettingsPalette.layer1Active
+                                : SettingsPalette.primaryContainer
                             opacity: coordinateApplyArea.enabled ? 1 : 0.5
 
                             RowLayout {
@@ -1304,7 +1314,7 @@ Item {
                                 AppText {
                                     text: "󰍎"
                                     color:
-                                        Appearance.primaryContainerText
+                                        SettingsPalette.primaryContainerText
                                     font {
                                         family:
                                             Appearance.iconFontFamily
@@ -1316,7 +1326,7 @@ Item {
                                 PanelText {
                                     text: I18n.tr("applyCoordinates")
                                     color:
-                                        Appearance.primaryContainerText
+                                        SettingsPalette.primaryContainerText
                                     font.pixelSize:
                                         Appearance.smallFontSize
                                 }
@@ -1342,8 +1352,8 @@ Item {
                         Layout.fillWidth: true
                         text: I18n.tr("coordinateRangeHint")
                         color: root.weatherCoordinatesValid
-                            ? Appearance.subtext
-                            : Theme.palette.m3error
+                            ? SettingsPalette.subtext
+                            : SettingsPalette.error
                         font.pixelSize: Appearance.smallFontSize
                     }
                 }
@@ -1361,7 +1371,7 @@ Item {
                         PanelText {
                             Layout.fillWidth: true
                             text: I18n.tr("interfaceLanguage")
-                            color: Appearance.layer0Text
+                            color: SettingsPalette.layer0Text
                         }
 
                         Repeater {
@@ -1377,21 +1387,21 @@ Item {
                                 radius: Appearance.fieldRadius
                                 color: ShellSettings.language
                                         === modelData.language
-                                    ? Appearance.primaryContainer
+                                    ? SettingsPalette.primaryContainer
                                     : languageArea.containsMouse
-                                        ? Appearance.layer1Active
-                                        : Appearance.layer1
+                                        ? SettingsPalette.layer1Active
+                                        : SettingsPalette.layer1
                                 border.width: ShellSettings.language
                                         === modelData.language ? 1 : 0
-                                border.color: Appearance.primary
+                                border.color: SettingsPalette.primary
 
                                 PanelText {
                                     anchors.centerIn: parent
                                     text: modelData.label
                                     color: ShellSettings.language
                                             === modelData.language
-                                        ? Appearance.primaryContainerText
-                                        : Appearance.layer1Text
+                                        ? SettingsPalette.primaryContainerText
+                                        : SettingsPalette.layer1Text
                                     font.pixelSize: Appearance.smallFontSize
                                 }
 
@@ -1423,7 +1433,7 @@ Item {
                         PanelText {
                             Layout.fillWidth: true
                             text: I18n.tr("colorMode")
-                            color: Appearance.layer0Text
+                            color: SettingsPalette.layer0Text
                         }
 
                         Repeater {
@@ -1440,19 +1450,19 @@ Item {
                                 implicitHeight: Appearance.compactControlHeight
                                 radius: Appearance.fieldRadius
                                 color: Theme.mode === modelData.mode
-                                    ? Appearance.primaryContainer
+                                    ? SettingsPalette.primaryContainer
                                     : modeArea.containsMouse
-                                        ? Appearance.layer1Active
-                                        : Appearance.layer1
+                                        ? SettingsPalette.layer1Active
+                                        : SettingsPalette.layer1
                                 border.width: Theme.mode === modelData.mode ? 1 : 0
-                                border.color: Appearance.primary
+                                border.color: SettingsPalette.primary
 
                                 PanelText {
                                     anchors.centerIn: parent
                                     text: modelData.label
                                     color: Theme.mode === modelData.mode
-                                        ? Appearance.primaryContainerText
-                                        : Appearance.layer1Text
+                                        ? SettingsPalette.primaryContainerText
+                                        : SettingsPalette.layer1Text
                                     font.pixelSize: Appearance.smallFontSize
                                 }
 
@@ -1476,17 +1486,19 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("barFrostedGlass")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
 
                             PanelText {
                                 text: I18n.tr("barFrostedGlassHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 font.pixelSize: Appearance.smallFontSize
                             }
                         }
 
                         SettingSwitch {
+
+                            useBarPalette: SettingsPalette.glassMode
                             checked: ShellSettings.barFrostedGlass
                             onToggled: checked =>
                                 ShellSettings.barFrostedGlass = checked
@@ -1503,17 +1515,19 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("monochromeAppIcons")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
 
                             PanelText {
                                 text: I18n.tr("monochromeAppIconsHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 font.pixelSize: Appearance.smallFontSize
                             }
                         }
 
                         SettingSwitch {
+
+                            useBarPalette: SettingsPalette.glassMode
                             enabled: ShellSettings.barFrostedGlass
                             checked: ShellSettings.monochromeAppIcons
                             onToggled: checked =>
@@ -1530,17 +1544,19 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("screenCornersEnabled")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
 
                             PanelText {
                                 text: I18n.tr("screenCornersEnabledHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 font.pixelSize: Appearance.smallFontSize
                             }
                         }
 
                         SettingSwitch {
+
+                            useBarPalette: SettingsPalette.glassMode
                             checked: ShellSettings.screenCornersEnabled
                             onToggled: checked =>
                                 ShellSettings.screenCornersEnabled = checked
@@ -1558,12 +1574,12 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("screenCornerColor")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
 
                             PanelText {
                                 text: I18n.tr("screenCornerColorHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 font.pixelSize: Appearance.smallFontSize
                             }
                         }
@@ -1576,9 +1592,9 @@ Item {
                             implicitHeight: Appearance.controlHeight
                             radius: Appearance.controlRadius
                             color: screenCornerColorMouse.containsMouse
-                                ? Appearance.layer1Active : Appearance.layer1
+                                ? SettingsPalette.layer1Active : SettingsPalette.layer1
                             border.width: 1
-                            border.color: Appearance.outline
+                            border.color: SettingsPalette.outline
 
                             RowLayout {
                                 anchors {
@@ -1594,21 +1610,21 @@ Item {
                                     radius: Appearance.px(6)
                                     color: ShellSettings.screenCornerColor
                                     border.width: 1
-                                    border.color: Appearance.outline
+                                    border.color: SettingsPalette.outline
                                 }
 
                                 PanelText {
                                     Layout.fillWidth: true
                                     text: ShellSettings.screenCornerColor
                                         .toUpperCase()
-                                    color: Appearance.layer1Text
+                                    color: SettingsPalette.layer1Text
                                     horizontalAlignment: Text.AlignHCenter
                                     font.pixelSize: Appearance.smallFontSize
                                 }
 
                                 AppText {
                                     text: "󰏘"
-                                    color: Appearance.primary
+                                    color: SettingsPalette.primary
                                     font {
                                         family: Appearance.iconFontFamily
                                         weight: Font.Normal
@@ -1633,6 +1649,8 @@ Item {
                             }
 
                             StyledToolTip {
+
+                                useBarPalette: SettingsPalette.glassMode
                                 visible:
                                     screenCornerColorMouse.containsMouse
                                 text: I18n.tr("chooseColor")
@@ -1649,16 +1667,18 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("showActiveWindowIcon")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
                             PanelText {
                                 text: I18n.tr("activeWindowHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 font.pixelSize: Appearance.smallFontSize
                             }
                         }
 
                         SettingSwitch {
+
+                            useBarPalette: SettingsPalette.glassMode
                             checked: ShellSettings.showActiveWindowIcon
                             onToggled: checked => {
                                 ShellSettings.showActiveWindowIcon = checked;
@@ -1676,12 +1696,12 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("workspaceIndicatorStyle")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
 
                             PanelText {
                                 text: I18n.tr("workspaceIndicatorStyleHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 font.pixelSize: Appearance.smallFontSize
                             }
                         }
@@ -1699,6 +1719,8 @@ Item {
                                 ]
 
                                 delegate: ChoiceChip {
+
+                                    useBarPalette: SettingsPalette.glassMode
                                     required property var modelData
 
                                     label: I18n.tr(modelData.key)
@@ -1722,16 +1744,18 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("showEmptyWorkspaces")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
                             PanelText {
                                 text: I18n.tr("activeWorkspaceHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 font.pixelSize: Appearance.smallFontSize
                             }
                         }
 
                         SettingSwitch {
+
+                            useBarPalette: SettingsPalette.glassMode
                             checked: ShellSettings.showEmptyWorkspaces
                             onToggled: checked => {
                                 ShellSettings.showEmptyWorkspaces = checked;
@@ -1802,6 +1826,8 @@ Item {
                                 model: root.fontWeightOptions
 
                                 delegate: ChoiceChip {
+
+                                    useBarPalette: SettingsPalette.glassMode
                                     required property var modelData
 
                                     label: I18n.tr(modelData.key)
@@ -1852,8 +1878,8 @@ Item {
                         opacity: enabled ? 1 : 0.45
                         color: confirmBarAppearanceArea.containsMouse
                                 && enabled
-                            ? Appearance.primary
-                            : Appearance.primaryContainer
+                            ? SettingsPalette.primary
+                            : SettingsPalette.primaryContainer
 
                         RowLayout {
                             id: confirmBarAppearanceRow
@@ -1862,7 +1888,7 @@ Item {
 
                             AppText {
                                 text: "󰄬"
-                                color: Appearance.primaryContainerText
+                                color: SettingsPalette.primaryContainerText
                                 font {
                                     family: Appearance.iconFontFamily
                                     weight: Font.Normal
@@ -1872,7 +1898,7 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("confirm")
-                                color: Appearance.primaryContainerText
+                                color: SettingsPalette.primaryContainerText
                                 font.pixelSize: Appearance.smallFontSize
                             }
                         }
@@ -1904,16 +1930,18 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("barPopupShadow")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
                             PanelText {
                                 text: I18n.tr("shadowHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 font.pixelSize: Appearance.smallFontSize
                             }
                         }
 
                         SettingSwitch {
+
+                            useBarPalette: SettingsPalette.glassMode
                             checked: ShellSettings.shadowEnabled
                             onToggled: checked => {
                                 ShellSettings.shadowEnabled = checked;
@@ -1985,7 +2013,7 @@ Item {
 
                     PanelText {
                         text: I18n.tr("bezierCurve")
-                        color: Appearance.subtext
+                        color: SettingsPalette.subtext
                         font.pixelSize: Appearance.smallFontSize
                     }
 
@@ -2037,14 +2065,14 @@ Item {
                             PanelText {
                                 Layout.fillWidth: true
                                 text: I18n.tr("barCenterAlignment")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
 
                             PanelText {
                                 Layout.fillWidth: true
                                 Layout.maximumWidth: parent.width
                                 text: I18n.tr("barCenterAlignmentHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 wrapMode: Text.WordWrap
                                 font.pixelSize: Appearance.smallFontSize
                             }
@@ -2058,6 +2086,8 @@ Item {
                                 model: ["group", "clock"]
 
                                 delegate: ChoiceChip {
+
+                                    useBarPalette: SettingsPalette.glassMode
                                     required property string modelData
 
                                     // Keep translation lookup in the delegate
@@ -2112,14 +2142,14 @@ Item {
                             PanelText {
                                 Layout.fillWidth: true
                                 text: I18n.tr("weekStartsOn")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
 
                             PanelText {
                                 Layout.fillWidth: true
                                 Layout.maximumWidth: parent.width
                                 text: I18n.tr("weekStartsOnHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 wrapMode: Text.WordWrap
                                 font.pixelSize: Appearance.smallFontSize
                             }
@@ -2133,6 +2163,8 @@ Item {
                                 model: root.weekStartOptions
 
                                 delegate: ChoiceChip {
+
+                                    useBarPalette: SettingsPalette.glassMode
                                     required property var modelData
 
                                     label: modelData.label
@@ -2198,19 +2230,21 @@ Item {
 
                             PanelText {
                                 text: I18n.tr("doNotDisturb")
-                                color: Appearance.layer0Text
+                                color: SettingsPalette.layer0Text
                             }
 
                             PanelText {
                                 Layout.fillWidth: true
                                 text: I18n.tr("notificationSettingsHint")
-                                color: Appearance.subtext
+                                color: SettingsPalette.subtext
                                 wrapMode: Text.WordWrap
                                 font.pixelSize: Appearance.smallFontSize
                             }
                         }
 
                         SettingSwitch {
+
+                            useBarPalette: SettingsPalette.glassMode
                             checked: ShellSettings.doNotDisturb
                             onToggled: checked => {
                                 ShellSettings.doNotDisturb = checked;
@@ -2226,15 +2260,15 @@ Item {
                     implicitHeight: Appearance.controlHeight
                     radius: Appearance.controlRadius
                     color: resetArea.containsMouse
-                        ? Appearance.layer1Active : Appearance.layer1
+                        ? SettingsPalette.layer1Active : SettingsPalette.layer1
                     border.width: 1
-                    border.color: Appearance.outline
+                    border.color: SettingsPalette.outline
 
                     PanelText {
                         id: resetText
                         anchors.centerIn: parent
                         text: "󰑓  " + I18n.tr("restoreDefaults")
-                        color: Appearance.layer1Text
+                        color: SettingsPalette.layer1Text
                         font.pixelSize: Appearance.smallFontSize
                     }
 

@@ -312,6 +312,11 @@ Scope {
 
             required property ShellScreen modelData
             property real revealProgress: 0
+            readonly property int surfaceMargin: Appearance.px(14)
+            readonly property int searchHeight: Appearance.px(56)
+            readonly property int surfaceGap: Appearance.px(9)
+            readonly property int resultsTop: surfaceMargin
+                + searchHeight + surfaceGap
             readonly property bool targetShown: root.shown
                 && root.targetOutputName === modelData.name
                 && ShellSettings.launcherUseSpotlight
@@ -319,9 +324,9 @@ Scope {
             screen: modelData
             visible: targetShown || revealProgress > 0.001
             color: "transparent"
-            implicitWidth: Math.min(Appearance.px(720),
+            implicitWidth: Math.min(Appearance.px(640),
                 modelData.width - Appearance.px(48))
-            implicitHeight: Math.min(Appearance.px(570),
+            implicitHeight: Math.min(Appearance.px(480),
                 modelData.height - Appearance.px(100))
             exclusiveZone: -1
             exclusionMode: ExclusionMode.Ignore
@@ -333,38 +338,47 @@ Scope {
 
             BackgroundEffect.blurRegion: Region {
                 Region {
-                    x: Appearance.px(14)
-                    y: Appearance.px(14)
+                    x: spotlightWindow.surfaceMargin
+                    y: spotlightWindow.surfaceMargin
                     width: spotlightWindow.visible
-                        ? spotlightWindow.width - Appearance.px(28) : 0
-                    height: width > 0 ? Appearance.px(60) : 0
-                    radius: Appearance.px(20)
+                        ? spotlightWindow.width
+                            - spotlightWindow.surfaceMargin * 2 : 0
+                    height: width > 0
+                        ? spotlightWindow.searchHeight : 0
+                    radius: Appearance.px(18)
                 }
                 Region {
-                    x: Appearance.px(14)
-                    y: Appearance.px(84)
+                    x: spotlightWindow.surfaceMargin
+                    y: spotlightWindow.resultsTop
                     width: spotlightWindow.visible
-                        ? spotlightWindow.width - Appearance.px(28) : 0
+                        ? spotlightWindow.width
+                            - spotlightWindow.surfaceMargin * 2 : 0
                     height: width > 0
-                        ? spotlightWindow.height - Appearance.px(98) : 0
-                    radius: Appearance.px(24)
+                        ? spotlightWindow.height
+                            - spotlightWindow.resultsTop
+                            - spotlightWindow.surfaceMargin : 0
+                    radius: Appearance.px(22)
                 }
             }
 
             mask: Region {
                 Region {
-                    x: Appearance.px(14)
-                    y: Appearance.px(14)
-                    width: spotlightWindow.width - Appearance.px(28)
-                    height: Appearance.px(60)
-                    radius: Appearance.px(20)
+                    x: spotlightWindow.surfaceMargin
+                    y: spotlightWindow.surfaceMargin
+                    width: spotlightWindow.width
+                        - spotlightWindow.surfaceMargin * 2
+                    height: spotlightWindow.searchHeight
+                    radius: Appearance.px(18)
                 }
                 Region {
-                    x: Appearance.px(14)
-                    y: Appearance.px(84)
-                    width: spotlightWindow.width - Appearance.px(28)
-                    height: spotlightWindow.height - Appearance.px(98)
-                    radius: Appearance.px(24)
+                    x: spotlightWindow.surfaceMargin
+                    y: spotlightWindow.resultsTop
+                    width: spotlightWindow.width
+                        - spotlightWindow.surfaceMargin * 2
+                    height: spotlightWindow.height
+                        - spotlightWindow.resultsTop
+                        - spotlightWindow.surfaceMargin
+                    radius: Appearance.px(22)
                 }
             }
 
