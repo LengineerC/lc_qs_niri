@@ -169,6 +169,7 @@ Scope {
             property real revealProgress: 0
             readonly property bool targetShown: root.shown
                 && root.targetOutputName === modelData.name
+                && !ShellSettings.launcherUseSpotlight
 
             screen: modelData
             visible: targetShown || revealProgress > 0.001
@@ -293,6 +294,107 @@ Scope {
                     LaunchpadContent {
                         active: launchpadWindow.targetShown
                         revealProgress: launchpadWindow.revealProgress
+                        onCloseRequested: root.close()
+                    }
+                }
+            }
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        // A centered layer-shell surface behaves like a frameless utility
+        // window: Niri cannot tile or drag it, and no client-side title bar is
+        // introduced. Its geometry remains local to the focused output.
+        PanelWindow {
+            id: spotlightWindow
+
+            required property ShellScreen modelData
+            property real revealProgress: 0
+            readonly property bool targetShown: root.shown
+                && root.targetOutputName === modelData.name
+                && ShellSettings.launcherUseSpotlight
+
+            screen: modelData
+            visible: targetShown || revealProgress > 0.001
+            color: "transparent"
+            implicitWidth: Math.min(Appearance.px(720),
+                modelData.width - Appearance.px(48))
+            implicitHeight: Math.min(Appearance.px(570),
+                modelData.height - Appearance.px(100))
+            exclusiveZone: -1
+            exclusionMode: ExclusionMode.Ignore
+
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.namespace: "quickshell:spotlight"
+            WlrLayershell.keyboardFocus: targetShown
+                ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+            BackgroundEffect.blurRegion: Region {
+                Region {
+                    x: Appearance.px(14)
+                    y: Appearance.px(14)
+                    width: spotlightWindow.visible
+                        ? spotlightWindow.width - Appearance.px(28) : 0
+                    height: width > 0 ? Appearance.px(60) : 0
+                    radius: Appearance.px(20)
+                }
+                Region {
+                    x: Appearance.px(14)
+                    y: Appearance.px(84)
+                    width: spotlightWindow.visible
+                        ? spotlightWindow.width - Appearance.px(28) : 0
+                    height: width > 0
+                        ? spotlightWindow.height - Appearance.px(98) : 0
+                    radius: Appearance.px(24)
+                }
+            }
+
+            mask: Region {
+                Region {
+                    x: Appearance.px(14)
+                    y: Appearance.px(14)
+                    width: spotlightWindow.width - Appearance.px(28)
+                    height: Appearance.px(60)
+                    radius: Appearance.px(20)
+                }
+                Region {
+                    x: Appearance.px(14)
+                    y: Appearance.px(84)
+                    width: spotlightWindow.width - Appearance.px(28)
+                    height: spotlightWindow.height - Appearance.px(98)
+                    radius: Appearance.px(24)
+                }
+            }
+
+            onTargetShownChanged: {
+                revealAnimation.stop();
+                revealAnimation.from = revealProgress;
+                revealAnimation.to = targetShown ? 1 : 0;
+                revealAnimation.duration = targetShown
+                    ? Math.max(150, Appearance.fastDuration)
+                    : Math.max(110, Appearance.fastDuration);
+                revealAnimation.easing.type = targetShown
+                    ? Easing.OutCubic : Easing.InCubic;
+                revealAnimation.start();
+            }
+
+            NumberAnimation {
+                id: revealAnimation
+                target: spotlightWindow
+                property: "revealProgress"
+            }
+
+            Loader {
+                id: spotlightLoader
+                anchors.fill: parent
+                active: spotlightWindow.visible
+
+                sourceComponent: Component {
+                    SpotlightContent {
+                        active: spotlightWindow.targetShown
+                        revealProgress: spotlightWindow.revealProgress
                         onCloseRequested: root.close()
                     }
                 }

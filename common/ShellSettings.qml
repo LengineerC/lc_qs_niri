@@ -52,6 +52,9 @@ Singleton {
     // "window" uses Niri's regular compositor blur; "wallpaper" renders a
     // blurred copy of the current wallpaper inside Launchpad.
     property string launchpadBackgroundMode: "window"
+    // Keep the full-screen Launchpad available while allowing the launcher
+    // IPC to use a compact, centered Spotlight surface instead.
+    property bool launcherUseSpotlight: false
     property bool showCpuUsage: true
     property bool showMemoryUsage: true
     property bool showCpuTemperature: false
@@ -162,6 +165,7 @@ Singleton {
             wallpaperFillMode: wallpaperFillMode,
             wallpaperTransition: wallpaperTransition,
             launchpadBackgroundMode: launchpadBackgroundMode,
+            launcherUseSpotlight: launcherUseSpotlight,
             showCpuUsage: showCpuUsage,
             showMemoryUsage: showMemoryUsage,
             showCpuTemperature: showCpuTemperature,
@@ -342,6 +346,10 @@ Singleton {
             } else {
                 needsMigration = true;
             }
+            if (typeof state.launcherUseSpotlight === "boolean")
+                launcherUseSpotlight = state.launcherUseSpotlight;
+            else
+                needsMigration = true;
             if (typeof state.showCpuUsage === "boolean")
                 showCpuUsage = state.showCpuUsage;
             else
@@ -430,6 +438,7 @@ Singleton {
         wallpaperFillMode = "PreserveAspectCrop";
         wallpaperTransition = "random";
         launchpadBackgroundMode = "window";
+        launcherUseSpotlight = false;
         showCpuUsage = true;
         showMemoryUsage = true;
         showCpuTemperature = false;
@@ -480,6 +489,7 @@ Singleton {
     onWallpaperFillModeChanged: scheduleSave()
     onWallpaperTransitionChanged: scheduleSave()
     onLaunchpadBackgroundModeChanged: scheduleSave()
+    onLauncherUseSpotlightChanged: scheduleSave()
     onShowCpuUsageChanged: scheduleSave()
     onShowMemoryUsageChanged: scheduleSave()
     onShowCpuTemperatureChanged: scheduleSave()
@@ -609,6 +619,10 @@ Singleton {
                 root.launchpadBackgroundMode = mode;
         }
 
+        function setLauncherUseSpotlight(enabled: bool): void {
+            root.launcherUseSpotlight = enabled;
+        }
+
         function setScreenCornerColor(color: string): void {
             if (/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(color))
                 root.screenCornerColor = color;
@@ -656,6 +670,7 @@ Singleton {
                 wallpaperFillMode: root.wallpaperFillMode,
                 wallpaperTransition: root.wallpaperTransition,
                 launchpadBackgroundMode: root.launchpadBackgroundMode,
+                launcherUseSpotlight: root.launcherUseSpotlight,
                 showCpuUsage: root.showCpuUsage,
                 showMemoryUsage: root.showMemoryUsage,
                 showCpuTemperature: root.showCpuTemperature,

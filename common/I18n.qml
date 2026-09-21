@@ -23,6 +23,13 @@ Singleton {
         searchApplications: ["搜索应用程序…", "Search applications…"],
         noApplicationsFound: ["没有找到匹配的应用",
             "No matching applications"],
+        spotlight: ["Spotlight", "Spotlight"],
+        spotlightLauncher: ["Spotlight 启动器", "Spotlight launcher"],
+        spotlightLauncherHint: [
+            "以居中的无边框窗口搜索并启动应用，关闭后保留全屏启动台",
+            "Search and launch apps in a centered borderless window; turn off to keep the full-screen Launchpad"],
+        spotlightResults: ["应用程序", "Applications"],
+        spotlightResultCount: ["%1 个结果", "%1 results"],
         performanceMonitor: ["性能监控", "Performance monitor"],
         performanceMonitorHint: [
             "选择 Bar 中显示的指标；全部关闭时显示默认图标",

@@ -359,6 +359,52 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
+            implicitHeight: spotlightLauncherRow.implicitHeight
+                + Appearance.px(20)
+            radius: Appearance.smallRadius
+            color: Appearance.layer3
+            border.width: 1
+            border.color: Appearance.outline
+
+            RowLayout {
+                id: spotlightLauncherRow
+
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                    margins: Appearance.spacingMedium
+                }
+                spacing: Appearance.spacingMedium
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    PanelText {
+                        text: I18n.tr("spotlightLauncher")
+                        color: Appearance.layer0Text
+                    }
+
+                    PanelText {
+                        Layout.fillWidth: true
+                        text: I18n.tr("spotlightLauncherHint")
+                        color: Appearance.subtext
+                        wrapMode: Text.WordWrap
+                        font.pixelSize: Appearance.smallFontSize
+                    }
+                }
+
+                SettingSwitch {
+                    checked: ShellSettings.launcherUseSpotlight
+                    onToggled: checked =>
+                        ShellSettings.launcherUseSpotlight = checked
+                }
+            }
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
             implicitHeight: launchpadBackgroundRow.implicitHeight
                 + Appearance.px(20)
             radius: Appearance.smallRadius

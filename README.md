@@ -92,17 +92,18 @@ cmake、ninja、C++20 编译器、Qt 6 Core/Qml/Quick/ShaderTools
 
 ## 2. 独立界面
 
-Launcher IPC 会在当前显示器打开全屏 layer-shell 启动台，支持模糊壁纸、
-应用网格、搜索和键盘选择；Bar 左侧系统图标仍打开原来的小型面板。
+Launcher IPC 会按“Spotlight 启动器”设置，在当前显示器打开全屏
+Launchpad 或居中的无边框 Spotlight。两者都支持应用搜索和键盘选择；
+Bar 左侧系统图标仍打开原来的小型面板。
 剪切板和系统监视器仍是由 Niri 管理的普通独立窗口。
 
 ### `launcher`
 
 | 命令 | 说明 |
 | --- | --- |
-| `qs ipc call launcher open` | 在当前显示器打开全屏启动台 |
-| `qs ipc call launcher close` | 关闭全屏启动台 |
-| `qs ipc call launcher toggle` | 切换全屏启动台显示状态 |
+| `qs ipc call launcher open` | 在当前显示器打开所选应用启动器 |
+| `qs ipc call launcher close` | 关闭应用启动器 |
+| `qs ipc call launcher toggle` | 切换应用启动器显示状态 |
 | `qs ipc call launcher visible` | 返回当前是否显示 |
 
 ### `clipboard`
@@ -241,6 +242,7 @@ scheme-vibrant
 | `qs ipc call settings setScreenCornersEnabled false` | 隐藏 Bar 连接圆角和屏幕四周圆角 |
 | `qs ipc call settings setWallpaperFillMode PreserveAspectCrop` | 设置壁纸显示形式 |
 | `qs ipc call settings setLaunchpadBackgroundMode window` | 设置启动台背景模式 |
+| `qs ipc call settings setLauncherUseSpotlight true` | 使用 Spotlight（false 恢复 Launchpad） |
 | `qs ipc call settings reset` | 将全部 Shell 设置恢复默认值 |
 
 `setWallpaperFillMode` 支持：
