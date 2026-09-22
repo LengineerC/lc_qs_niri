@@ -4,7 +4,7 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
-import Caelestia.Blobs as Blobs
+import "file:///home/lengineerc/.config/quickshell/lc_qs_niri/Caelestia/Blobs" as Blobs
 import qs.common
 import qs.common.widgets
 import qs.services
@@ -19,24 +19,17 @@ Item {
     readonly property Item rightCornerBlurBounds: rightConnectorBlurBounds
     readonly property Item rightCornerBlurCutout: rightConnectorBlurCutout
     readonly property Item popupMask: popup.popupMaskItem
-    readonly property bool barContainsMouse: barHover.hovered
-        && barHover.point.position.y >= 0
-        && barHover.point.position.y < Appearance.barHeight
+    readonly property bool barContainsMouse: barHover.hovered && barHover.point.position.y >= 0 && barHover.point.position.y < Appearance.barHeight
     readonly property bool popupShown: popup.shown
     readonly property bool popupContainsMouse: popup.pointerInside
-    readonly property bool notificationPanelShown:
-        popup.shown && popup.page === "notifications"
-    readonly property bool sidebarShown:
-        LeftSidebarService.shown
-        && LeftSidebarService.targetOutputName === root.outputName
+    readonly property bool notificationPanelShown: popup.shown && popup.page === "notifications"
+    readonly property bool sidebarShown: LeftSidebarService.shown && LeftSidebarService.targetOutputName === root.outputName
     readonly property bool hostWindowActive: Window.active
     readonly property int edgeMargin: Appearance.cornerSize
-    readonly property int connectorTop:
-        Appearance.barHeight - Appearance.px(1)
+    readonly property int connectorTop: Appearance.barHeight - Appearance.px(1)
 
     property real effectsOpacity: 1
-    readonly property real compactLevel: width <= Appearance.px(1000) ? 2
-        : width <= Appearance.px(1200) ? 1 : 0
+    readonly property real compactLevel: width <= Appearance.px(1000) ? 2 : width <= Appearance.px(1200) ? 1 : 0
     property string outputName: ""
 
     function closePopup() {
@@ -69,16 +62,14 @@ Item {
         if (action === "toggle" && root.notificationPanelShown) {
             popup.close();
         } else {
-            NotificationService.requestPanelFocusProxy(
-                root.outputName, root.hostWindowActive);
+            NotificationService.requestPanelFocusProxy(root.outputName, root.hostWindowActive);
             if (!root.notificationPanelShown)
                 root.showPopup(notificationModule, "notifications");
         }
     }
 
     function syncNotificationPanelVisibility() {
-        NotificationService.updatePanelVisibility(
-            root.outputName, root.notificationPanelShown);
+        NotificationService.updatePanelVisibility(root.outputName, root.notificationPanelShown);
     }
 
     function requestHostWindowFocus() {
@@ -86,15 +77,9 @@ Item {
         Window.window?.requestActivate();
     }
 
-    onHostWindowActiveChanged:
-        NotificationService.updatePanelHostFocus(
-            root.outputName,
-            root.notificationPanelShown && root.hostWindowActive)
+    onHostWindowActiveChanged: NotificationService.updatePanelHostFocus(root.outputName, root.notificationPanelShown && root.hostWindowActive)
 
-    onNotificationPanelShownChanged:
-        NotificationService.updatePanelHostFocus(
-            root.outputName,
-            root.notificationPanelShown && root.hostWindowActive)
+    onNotificationPanelShownChanged: NotificationService.updatePanelHostFocus(root.outputName, root.notificationPanelShown && root.hostWindowActive)
 
     component BarText: AppText {
         color: Appearance.barLayer1Text
@@ -186,7 +171,9 @@ Item {
         opacity: ShellSettings.barFrostedGlass ? 0 : 1
 
         Behavior on opacity {
-            NumberAnimation { duration: Appearance.fastDuration }
+            NumberAnimation {
+                duration: Appearance.fastDuration
+            }
         }
     }
 
@@ -195,30 +182,19 @@ Item {
 
         z: -2
         width: root.width
-        height: Math.max(Appearance.barHeight,
-            popup.y + popup.height)
-            + Math.ceil((ShellSettings.shadowBlurRadius
-                + Math.abs(ShellSettings.shadowOffsetY) + 4)
-                * Appearance.scale)
+        height: Math.max(Appearance.barHeight, popup.y + popup.height) + Math.ceil((ShellSettings.shadowBlurRadius + Math.abs(ShellSettings.shadowOffsetY) + 4) * Appearance.scale)
         // Apply opacity to the rendered Blob layer itself. The native Blob
         // material does not otherwise give us a separate tint-opacity stage.
-        opacity: ShellSettings.barFrostedGlass
-            ? Appearance.barGlassTintOpacity : 1
+        opacity: ShellSettings.barFrostedGlass ? Appearance.barGlassTintOpacity : 1
         // The Bar and popup share one Blob layer, so the shadow follows their
         // combined outline instead of being drawn between the two surfaces.
-        layer.enabled: ShellSettings.shadowEnabled
-            && root.effectsOpacity > 0.001
+        layer.enabled: ShellSettings.shadowEnabled && root.effectsOpacity > 0.001
         layer.effect: MultiEffect {
             shadowEnabled: ShellSettings.shadowEnabled
             shadowBlur: 1
-            blurMax: Math.max(1, Math.round(
-                ShellSettings.shadowBlurRadius * Appearance.scale))
-            shadowColor: Appearance.withAlpha(
-                Appearance.barShadow,
-                ShellSettings.shadowOpacity
-                    * Math.max(0, Math.min(1, root.effectsOpacity)))
-            shadowVerticalOffset: Math.round(
-                ShellSettings.shadowOffsetY * Appearance.scale)
+            blurMax: Math.max(1, Math.round(ShellSettings.shadowBlurRadius * Appearance.scale))
+            shadowColor: Appearance.withAlpha(Appearance.barShadow, ShellSettings.shadowOpacity * Math.max(0, Math.min(1, root.effectsOpacity)))
+            shadowVerticalOffset: Math.round(ShellSettings.shadowOffsetY * Appearance.scale)
         }
 
         Blobs.BlobGroup {
@@ -229,7 +205,9 @@ Item {
         }
 
         Behavior on opacity {
-            NumberAnimation { duration: Appearance.fastDuration }
+            NumberAnimation {
+                duration: Appearance.fastDuration
+            }
         }
 
         Blobs.BlobRect {
@@ -256,17 +234,14 @@ Item {
             // for tall panels. That is invisible with an opaque fill but
             // becomes a clearly brighter double layer with glass. A tiny
             // overlap is enough for BlobGroup to keep one continuous shape.
-            readonly property real overlapHeight:
-                ShellSettings.barFrostedGlass
-                    ? Appearance.px(2) : popup.height * 0.2
+            readonly property real overlapHeight: ShellSettings.barFrostedGlass ? Appearance.px(2) : popup.height * 0.2
 
             visible: popup.revealProgress > 0
             group: barBlobGroup
             x: popup.x
             y: Appearance.barHeight - overlapHeight
             width: visible ? popup.width : 0
-            height: visible
-                ? popup.height + overlapHeight : 0
+            height: visible ? popup.height + overlapHeight : 0
             radius: Appearance.normalRadius
             deformScale: 0.000002
         }
@@ -278,8 +253,7 @@ Item {
         RoundCorner {
             x: 0
             y: root.connectorTop
-            visible: ShellSettings.screenCornersEnabled
-                && ShellSettings.barFrostedGlass
+            visible: ShellSettings.screenCornersEnabled && ShellSettings.barFrostedGlass
             implicitSize: Appearance.cornerSize
             layerEnabled: false
             color: Appearance.barSurfaceBaseColor
@@ -289,8 +263,7 @@ Item {
         RoundCorner {
             x: parent.width - width
             y: root.connectorTop
-            visible: ShellSettings.screenCornersEnabled
-                && ShellSettings.barFrostedGlass
+            visible: ShellSettings.screenCornersEnabled && ShellSettings.barFrostedGlass
             implicitSize: Appearance.cornerSize
             layerEnabled: false
             color: Appearance.barSurfaceBaseColor
@@ -333,12 +306,7 @@ Item {
                 height: Appearance.px(30)
                 anchors.verticalCenter: parent.verticalCenter
                 radius: Appearance.fullRadius
-                color: launcherControl.containsMouse
-                    || popup.shown && popup.anchorItem === launcherControl
-                    || root.sidebarShown
-                    ? Appearance.barSecondaryContainer
-                    : Appearance.withAlpha(
-                        Appearance.barSecondaryContainer, 0)
+                color: launcherControl.containsMouse || popup.shown && popup.anchorItem === launcherControl || root.sidebarShown ? Appearance.barSecondaryContainer : Appearance.withAlpha(Appearance.barSecondaryContainer, 0)
                 scale: launcherControl.pressed ? 0.88 : 1
 
                 AppText {
@@ -366,7 +334,6 @@ Item {
                     }
                 }
             }
-
         }
 
         Row {
@@ -388,14 +355,12 @@ Item {
                 width: visible ? Appearance.px(20) : 0
                 height: Appearance.px(20)
                 anchors.verticalCenter: parent.verticalCenter
-                source: NiriService.focusedWindow?.iconPath
-                    ? "file://" + NiriService.focusedWindow.iconPath : ""
+                source: NiriService.focusedWindow?.iconPath ? "file://" + NiriService.focusedWindow.iconPath : ""
                 sourceSize.width: Appearance.px(20)
                 sourceSize.height: Appearance.px(20)
                 smooth: true
                 visible: ShellSettings.showActiveWindowIcon && source !== ""
-                opacity: ShellSettings.monochromeAppIconsActive
-                    ? Appearance.monochromeAppIconOpacity : 1
+                opacity: ShellSettings.monochromeAppIconsActive ? Appearance.monochromeAppIconOpacity : 1
                 layer.enabled: ShellSettings.monochromeAppIconsActive
                 layer.effect: MultiEffect {
                     saturation: -1
@@ -405,12 +370,7 @@ Item {
             }
 
             Column {
-                width: Math.min(
-                    400,
-                    Math.max(0, focusedWindowInfo.width
-                    - (focusedWindowIcon.visible
-                        ? focusedWindowIcon.width + focusedWindowInfo.spacing : 0))
-                )
+                width: Math.min(400, Math.max(0, focusedWindowInfo.width - (focusedWindowIcon.visible ? focusedWindowIcon.width + focusedWindowInfo.spacing : 0)))
                 anchors {
                     verticalCenter: parent.verticalCenter
                 }
@@ -418,8 +378,7 @@ Item {
 
                 AppText {
                     width: parent.width
-                    text: NiriService.focusedWindow?.appId
-                        ?? I18n.tr("desktop")
+                    text: NiriService.focusedWindow?.appId ?? I18n.tr("desktop")
                     color: Appearance.barSubtext
                     elide: Text.ElideRight
                     font {
@@ -430,8 +389,7 @@ Item {
 
                 AppText {
                     width: parent.width
-                    text: NiriService.focusedWindow?.title
-                        ?? I18n.tr("noFocusedWindow")
+                    text: NiriService.focusedWindow?.title ?? I18n.tr("noFocusedWindow")
                     color: Appearance.barLayer0Text
                     elide: Text.ElideRight
                     font {
@@ -446,10 +404,7 @@ Item {
     Row {
         id: middleSection
 
-        readonly property real clockCenterInRow:
-            workspaceSwitcher.width + spacing
-                + weatherModule.width + spacing
-                + timeModule.width / 2
+        readonly property real clockCenterInRow: workspaceSwitcher.width + spacing + weatherModule.width + spacing + timeModule.width / 2
 
         x: {
             const barCenter = parent.width / 2;
@@ -525,8 +480,7 @@ Item {
                 rightMargin: Appearance.px(4)
                 verticalCenter: parent.verticalCenter
             }
-            onActivated:
-                root.showPopup(performanceModule, "resources")
+            onActivated: root.showPopup(performanceModule, "resources")
         }
 
         SystemModule {
@@ -537,7 +491,7 @@ Item {
                 right: powerModule.left
                 rightMargin: Appearance.px(4)
             }
-            
+
             onActivated: root.showPopup(systemModule, "system")
         }
 
@@ -571,8 +525,7 @@ Item {
                 rightMargin: Appearance.px(3)
                 verticalCenter: parent.verticalCenter
             }
-            onActivated:
-                root.showPopup(notificationModule, "notifications")
+            onActivated: root.showPopup(notificationModule, "notifications")
         }
 
         Connections {
@@ -586,16 +539,13 @@ Item {
         TrayModule {
             id: trayModule
 
-            expanded: popup.shown
-                && popup.anchorItem === trayModule
-                && popup.page === "tray"
+            expanded: popup.shown && popup.anchorItem === trayModule && popup.page === "tray"
             anchors {
                 right: notificationModule.left
                 rightMargin: Appearance.px(3)
                 verticalCenter: parent.verticalCenter
             }
-            onActivated:
-                root.showPopup(trayModule, "tray")
+            onActivated: root.showPopup(trayModule, "tray")
         }
 
         MouseArea {
@@ -617,9 +567,7 @@ Item {
                 height: Appearance.px(30)
                 anchors.verticalCenter: parent.verticalCenter
                 radius: Appearance.fullRadius
-                color: settingsControl.containsMouse
-                    ? Appearance.barLayer1Hover
-                    : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
+                color: settingsControl.containsMouse ? Appearance.barLayer1Hover : Appearance.withAlpha(Appearance.barLayer1Hover, 0)
                 scale: settingsControl.pressed ? 0.88 : 1
 
                 AppText {
@@ -668,5 +616,4 @@ Item {
             root.syncNotificationPanelVisibility();
         }
     }
-
 }
