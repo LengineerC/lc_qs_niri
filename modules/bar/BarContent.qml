@@ -25,6 +25,8 @@ Item {
     readonly property bool notificationPanelShown: popup.shown && popup.page === "notifications"
     readonly property bool sidebarShown: LeftSidebarService.shown && LeftSidebarService.targetOutputName === root.outputName
     readonly property bool hostWindowActive: Window.active
+    readonly property var outputActiveWindow:
+        NiriService.activeWindowForOutput(outputName)
     readonly property int edgeMargin: Appearance.cornerSize
     readonly property int connectorTop: Appearance.barHeight - Appearance.px(1)
 
@@ -355,7 +357,7 @@ Item {
                 width: visible ? Appearance.px(20) : 0
                 height: Appearance.px(20)
                 anchors.verticalCenter: parent.verticalCenter
-                source: NiriService.focusedWindow?.iconPath ? "file://" + NiriService.focusedWindow.iconPath : ""
+                source: root.outputActiveWindow?.iconSource ?? ""
                 sourceSize.width: Appearance.px(20)
                 sourceSize.height: Appearance.px(20)
                 smooth: true
@@ -378,7 +380,8 @@ Item {
 
                 AppText {
                     width: parent.width
-                    text: NiriService.focusedWindow?.appId ?? I18n.tr("desktop")
+                    text: root.outputActiveWindow?.appId
+                        || I18n.tr("desktop")
                     color: Appearance.barSubtext
                     elide: Text.ElideRight
                     font {
@@ -389,7 +392,8 @@ Item {
 
                 AppText {
                     width: parent.width
-                    text: NiriService.focusedWindow?.title ?? I18n.tr("noFocusedWindow")
+                    text: root.outputActiveWindow?.title
+                        || I18n.tr("noFocusedWindow")
                     color: Appearance.barLayer0Text
                     elide: Text.ElideRight
                     font {

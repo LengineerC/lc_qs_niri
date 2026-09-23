@@ -166,6 +166,59 @@ Singleton {
         publishWorkspaceStates(states);
     }
 
+    function applicationIconSource(appId) {
+        const query = String(appId ?? "").trim();
+        if (!query)
+            return "";
+
+        const desktop = DesktopEntries.byId(query)
+            ?? DesktopEntries.heuristicLookup(query);
+        return desktop?.icon ? Quickshell.iconPath(desktop.icon) : "";
+    }
+
+    function activeWindowForOutput(outputName) {
+        // Keep QML bindings reactive while reading the JavaScript state maps.
+        const revision = stateRevision;
+        if (!outputName)
+            return null;
+
+        let activeWorkspace = null;
+        for (const workspace of Object.values(workspaceStates)) {
+            if (workspace.output === outputName && workspace.is_active) {
+                activeWorkspace = workspace;
+                break;
+            }
+        }
+        if (!activeWorkspace)
+            return null;
+
+        const activeWindowId = Number(activeWorkspace.active_window_id);
+        if (!activeWindowId)
+            return null;
+
+        const window = windowStates[String(activeWindowId)];
+        if (!window
+                || Number(window.workspace_id)
+                    !== Number(activeWorkspace.id)) {
+            return null;
+        }
+
+        const appId = String(window.app_id ?? "");
+        const globalWindow = focusedWindow;
+        const globalIconPath = Number(globalWindow?.id) === activeWindowId
+            ? String(globalWindow.iconPath ?? "") : "";
+
+        return {
+            id: activeWindowId,
+            workspaceId: Number(activeWorkspace.id),
+            appId: appId,
+            title: String(window.title ?? ""),
+            iconSource: globalIconPath
+                ? "file://" + globalIconPath
+                : applicationIconSource(appId)
+        };
+    }
+
     function outputActiveWindowIsFullscreen(outputName, outputWidth,
             outputHeight) {
         // Makes this function binding-reactive even though the state is read
