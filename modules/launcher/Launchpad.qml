@@ -340,7 +340,8 @@ Scope {
                 Region {
                     x: spotlightWindow.surfaceMargin
                     y: spotlightWindow.surfaceMargin
-                    width: spotlightWindow.visible
+                    width: ShellSettings.barFrostedGlass
+                            && spotlightWindow.visible
                         ? spotlightWindow.width
                             - spotlightWindow.surfaceMargin * 2 : 0
                     height: width > 0
@@ -350,7 +351,8 @@ Scope {
                 Region {
                     x: spotlightWindow.surfaceMargin
                     y: spotlightWindow.resultsTop
-                    width: spotlightWindow.visible
+                    width: ShellSettings.barFrostedGlass
+                            && spotlightWindow.visible
                         ? spotlightWindow.width
                             - spotlightWindow.surfaceMargin * 2 : 0
                     height: width > 0

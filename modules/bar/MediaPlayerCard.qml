@@ -76,12 +76,11 @@ ClippingRectangle {
         }
         spacing: Appearance.px(14)
 
-        Rectangle {
+        ClippingRectangle {
             Layout.fillHeight: true
             implicitWidth: height
             radius: Appearance.smallRadius
             color: Appearance.barLayer3
-            clip: true
 
             Image {
                 id: coverArt

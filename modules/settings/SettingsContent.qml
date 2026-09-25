@@ -1672,6 +1672,39 @@ Item {
                         }
                     }
 
+                    RowLayout {
+                        id: spotlightLauncherRow
+
+                        Layout.fillWidth: true
+                        spacing: Appearance.spacingMedium
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 0
+
+                            PanelText {
+                                text: I18n.tr("spotlightLauncher")
+                                color: SettingsPalette.layer0Text
+                            }
+
+                            PanelText {
+                                Layout.fillWidth: true
+                                text: I18n.tr("spotlightLauncherHint")
+                                color: SettingsPalette.subtext
+                                wrapMode: Text.WordWrap
+                                font.pixelSize: Appearance.smallFontSize
+                            }
+                        }
+
+                        SettingSwitch {
+
+                            useBarPalette: SettingsPalette.glassMode
+                            checked: ShellSettings.launcherUseSpotlight
+                            onToggled: checked =>
+                                ShellSettings.launcherUseSpotlight = checked
+                        }
+                    }
+
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: Appearance.spacingSmall

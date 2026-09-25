@@ -12,6 +12,8 @@ ApplicationWindow {
     id: root
 
     property int currentPage: 0
+    readonly property color idleTabColor:
+        Appearance.withAlpha(SettingsPalette.layer1Hover, 0)
     visible: false
     title: "QuickShell " + I18n.tr("settings")
     color: SettingsPalette.glassMode
@@ -256,9 +258,11 @@ ApplicationWindow {
                         color: root.currentPage === 0
                             ? SettingsPalette.secondaryContainer
                             : quickSettingsMouse.containsMouse
-                                ? SettingsPalette.layer1Hover : "transparent"
+                                ? SettingsPalette.layer1Hover
+                                : root.idleTabColor
 
                         Behavior on color {
+                            enabled: !Theme.paletteTransitionRunning
                             ColorAnimation { duration: Appearance.fastDuration }
                         }
 
@@ -314,9 +318,11 @@ ApplicationWindow {
                         color: root.currentPage === 1
                             ? SettingsPalette.secondaryContainer
                             : networkMouse.containsMouse
-                                ? SettingsPalette.layer1Hover : "transparent"
+                                ? SettingsPalette.layer1Hover
+                                : root.idleTabColor
 
                         Behavior on color {
+                            enabled: !Theme.paletteTransitionRunning
                             ColorAnimation { duration: Appearance.fastDuration }
                         }
 
@@ -372,9 +378,11 @@ ApplicationWindow {
                         color: root.currentPage === 3
                             ? SettingsPalette.secondaryContainer
                             : displaysMouse.containsMouse
-                                ? SettingsPalette.layer1Hover : "transparent"
+                                ? SettingsPalette.layer1Hover
+                                : root.idleTabColor
 
                         Behavior on color {
+                            enabled: !Theme.paletteTransitionRunning
                             ColorAnimation { duration: Appearance.fastDuration }
                         }
 
@@ -430,9 +438,11 @@ ApplicationWindow {
                         color: root.currentPage === 2
                             ? SettingsPalette.secondaryContainer
                             : styleMouse.containsMouse
-                                ? SettingsPalette.layer1Hover : "transparent"
+                                ? SettingsPalette.layer1Hover
+                                : root.idleTabColor
 
                         Behavior on color {
+                            enabled: !Theme.paletteTransitionRunning
                             ColorAnimation { duration: Appearance.fastDuration }
                         }
 

@@ -19,15 +19,17 @@ Item {
     // Spotlight follows the regular light/dark theme.
     readonly property bool glassMode: ShellSettings.barFrostedGlass
     readonly property bool dark: glassMode || Theme.darkMode
-    readonly property color primaryText: dark ? "#f5f5f7" : "#1d1d1f"
-    readonly property color secondaryText: dark ? "#a9abb2" : "#6e6e73"
+    readonly property color primaryText: glassMode
+        ? "#f5f5f7" : Appearance.layer1Text
+    readonly property color secondaryText: glassMode
+        ? "#a9abb2" : Appearance.subtext
     readonly property color glassBase: dark ? "#1c1d21" : "#f7f8fa"
     readonly property color white: "#ffffff"
     readonly property color black: "#000000"
-    readonly property color glassColor: Appearance.withAlpha(
-        glassBase, dark ? 0.68 : 0.72)
-    readonly property color glassBorder: Appearance.withAlpha(
-        white, dark ? 0.12 : 0.42)
+    readonly property color surfaceColor: glassMode
+        ? Appearance.withAlpha(glassBase, 0.68) : Appearance.layer1
+    readonly property color surfaceBorder: glassMode
+        ? Appearance.withAlpha(white, 0.12) : Appearance.layer0Border
     readonly property color accentColor: glassMode
         ? Appearance.barPrimary : Appearance.primary
     readonly property color textSelectionColor: glassMode
@@ -40,6 +42,8 @@ Item {
         ? Appearance.barLayer1Hover
         : Appearance.mix(Appearance.layer1,
             Appearance.primaryContainer, 0.58)
+    readonly property color idleResultColor:
+        Appearance.withAlpha(hoveredColor, 0)
     readonly property color selectedTextColor: glassMode
         ? Appearance.barLayer0Text : Appearance.primaryContainerText
     readonly property color selectedSecondaryTextColor:
@@ -150,9 +154,9 @@ Item {
 
     component GlassSurface: Rectangle {
         radius: Appearance.px(24)
-        color: root.glassColor
+        color: root.surfaceColor
         border.width: 1
-        border.color: root.glassBorder
+        border.color: root.surfaceBorder
         clip: true
         layer.enabled: ShellSettings.shadowEnabled
             && root.revealProgress > 0.001
@@ -171,15 +175,18 @@ Item {
         }
 
         Behavior on color {
+            enabled: !Theme.paletteTransitionRunning
             ColorAnimation { duration: Appearance.spatialDuration }
         }
         Behavior on border.color {
+            enabled: !Theme.paletteTransitionRunning
             ColorAnimation { duration: Appearance.spatialDuration }
         }
 
         Rectangle {
             anchors.fill: parent
             radius: parent.radius
+            visible: root.glassMode
             color: "transparent"
             gradient: Gradient {
                 GradientStop {
@@ -404,9 +411,11 @@ Item {
                         radius: Appearance.px(13)
                         color: selected ? root.selectedColor
                             : resultArea.containsMouse
-                                ? root.hoveredColor : "transparent"
+                                ? root.hoveredColor
+                                : root.idleResultColor
 
                         Behavior on color {
+                            enabled: !Theme.paletteTransitionRunning
                             ColorAnimation {
                                 duration: Appearance.fastDuration
                             }

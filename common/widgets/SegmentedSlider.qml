@@ -67,8 +67,9 @@ Controls.Slider {
                 verticalCenter: parent.verticalCenter
             }
             text: root.valueText
-            color: root.enabled && root.visualPosition >= 0.2
-                ? palette.onPrimary : palette.layer1Text
+            color: root.enabled && root.visualPosition >= 0.1
+                ? SettingsPalette.glassMode ? palette.onPrimary : palette.layer1Active 
+                : palette.layer1Text
             font {
                 family: Appearance.fontFamily
                 pixelSize: Appearance.smallFontSize
@@ -87,8 +88,9 @@ Controls.Slider {
             AppText {
                 anchors.centerIn: parent
                 text: root.iconText
-                color: root.enabled && root.visualPosition >= 0.88
-                    ? palette.onPrimary : root.iconColor
+                color: root.enabled && root.visualPosition >= 0.95
+                    ? SettingsPalette.glassMode ? palette.onPrimary : palette.layer1Active 
+                    : root.iconColor
                 font {
                     family: Appearance.iconFontFamily
                     weight: Font.Normal

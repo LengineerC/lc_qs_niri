@@ -34,7 +34,9 @@ Item {
             x: root.checked
                 ? parent.width - width - Appearance.px(3)
                 : Appearance.px(5)
-            color: root.checked ? palette.onPrimary : palette.subtext
+            color: root.checked ? 
+                SettingsPalette.glassMode ? palette.onPrimary : palette.layer1Active 
+                : palette.subtext
 
             Behavior on x {
                 NumberAnimation {
