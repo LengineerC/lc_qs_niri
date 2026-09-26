@@ -14,18 +14,23 @@ Item {
     property bool warning: false
     property bool available: true
     property bool animate: visible
-    property real displayedValue: available && Number.isFinite(value)
-        ? Math.max(0, Math.min(1, value)) : 0
+    property real displayedValue: available && Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0
     readonly property real boundary: width * displayedValue
     readonly property color fillColor: warning ? palette.error : palette.primary
 
     implicitHeight: Appearance.compactControlHeight
     implicitWidth: Appearance.px(160)
-    BarPalette { id: palette; enabled: root.useBarPalette }
+    BarPalette {
+        id: palette
+        enabled: root.useBarPalette
+    }
 
     Behavior on displayedValue {
         enabled: root.animate
-        NumberAnimation { duration: 240; easing.type: Easing.OutCubic }
+        NumberAnimation {
+            duration: 240
+            easing.type: Easing.OutCubic
+        }
     }
 
     Rectangle {
@@ -74,7 +79,7 @@ Item {
         MeterLabel {
             width: root.width
             height: root.height
-            ink: root.warning ? palette.onError : palette.onPrimary
+            ink: root.warning ? palette.onError : SettingsPalette.glassMode ? palette.onPrimary : palette.layer1Active
         }
     }
 }
