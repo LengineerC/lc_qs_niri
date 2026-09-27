@@ -149,6 +149,8 @@ Item {
                             id: trayDelegate
 
                             required property SystemTrayItem modelData
+                            readonly property bool pinned:
+                                ShellSettings.trayItemPinned(modelData.id)
 
                             width:
                                 (trayGrid.width
@@ -166,6 +168,7 @@ Item {
                             border.width: 1
                             border.color: modelData.status
                                     === Status.NeedsAttention
+                                    || pinned
                                 ? Appearance.barPrimary
                                 : Appearance.barOutline
                             scale: trayMouse.pressed ? 0.8 : 0.85
@@ -241,6 +244,64 @@ Item {
                                 }
                             }
 
+                            Rectangle {
+                                id: pinBadge
+
+                                z: 2
+                                visible: trayDelegate.pinned
+                                    || trayMouse.containsMouse
+                                    || pinMouse.containsMouse
+                                anchors {
+                                    top: parent.top
+                                    right: parent.right
+                                    topMargin: Appearance.px(3)
+                                    rightMargin: Appearance.px(3)
+                                }
+                                width: Appearance.px(19)
+                                height: width
+                                radius: Appearance.fullRadius
+                                color: trayDelegate.pinned
+                                    ? Appearance.barPrimaryContainer
+                                    : Appearance.barLayer1Hover
+                                border.width: 1
+                                border.color: trayDelegate.pinned
+                                    ? Appearance.barPrimary
+                                    : Appearance.barOutline
+
+                                AppText {
+                                    anchors.centerIn: parent
+                                    text: "󰐃"
+                                    color: trayDelegate.pinned
+                                        ? Appearance.barPrimaryContainerText
+                                        : Appearance.barLayer1Text
+                                    font {
+                                        family: Appearance.iconFontFamily
+                                        weight: Font.Normal
+                                        pixelSize: Appearance.px(11)
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: pinMouse
+
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: ShellSettings
+                                        .toggleTrayItemPinned(
+                                            trayDelegate.modelData.id)
+                                }
+
+                                StyledToolTip {
+                                    visible: pinMouse.containsMouse
+                                        && !root.menuOpen
+                                    text: trayDelegate.pinned
+                                        ? I18n.tr("unpinFromBar")
+                                        : I18n.tr("pinToBar")
+                                    delay: 350
+                                }
+                            }
+
                             StyledToolTip {
                                 visible: trayMouse.containsMouse
                                     && !root.menuOpen
@@ -270,6 +331,31 @@ Item {
                     Controls.ScrollBar {
                         policy: Controls.ScrollBar.AsNeeded
                     }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.leftMargin: Appearance.px(8)
+            Layout.rightMargin: Appearance.px(8)
+            visible: root.itemCount > 0
+            spacing: Appearance.px(7)
+
+            AppText {
+                text: "󰐃"
+                color: Appearance.barPrimary
+                font {
+                    family: Appearance.iconFontFamily
+                    weight: Font.Normal
+                    pixelSize: Appearance.px(13)
+                }
+            }
+
+            PanelText {
+                Layout.fillWidth: true
+                text: I18n.tr("trayPinHint")
+                color: Appearance.barSubtext
+                font.pixelSize: Appearance.smallFontSize
             }
         }
     }

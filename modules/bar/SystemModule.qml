@@ -82,5 +82,17 @@ MouseArea {
                 pixelSize: Appearance.fontSize + Appearance.px(3)
             }
         }
+
+        AppText {
+            visible: SystemService.sourceReady
+                && !SystemService.microphoneMuted
+            text: SystemService.microphoneIcon()
+            color: Appearance.barLayer0Text
+            font {
+                family: Appearance.iconFontFamily
+                weight: Font.Normal
+                pixelSize: Appearance.fontSize + Appearance.px(3)
+            }
+        }
     }
 }

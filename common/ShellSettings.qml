@@ -58,6 +58,7 @@ Singleton {
     property bool showCpuUsage: true
     property bool showMemoryUsage: true
     property bool showCpuTemperature: false
+    property var pinnedTrayItemIds: []
     property string userAvatarPath: ""
     property string weatherLocationName: "上海"
     property real weatherLatitude: 31.2304
@@ -119,6 +120,46 @@ Singleton {
         return result;
     }
 
+    function sanitizedTrayItemIds(value) {
+        const result = [];
+        if (!Array.isArray(value))
+            return result;
+
+        for (const entry of value) {
+            const itemId = String(entry ?? "").trim().slice(0, 512);
+            if (itemId && result.indexOf(itemId) < 0)
+                result.push(itemId);
+            if (result.length >= 64)
+                break;
+        }
+        return result;
+    }
+
+    function trayItemPinned(itemId) {
+        const key = String(itemId ?? "").trim();
+        return key !== "" && pinnedTrayItemIds.indexOf(key) >= 0;
+    }
+
+    function setTrayItemPinned(itemId, pinned) {
+        const key = String(itemId ?? "").trim();
+        if (!key)
+            return;
+
+        const next = pinnedTrayItemIds.slice();
+        const index = next.indexOf(key);
+        if (pinned && index < 0)
+            next.push(key);
+        else if (!pinned && index >= 0)
+            next.splice(index, 1);
+        else
+            return;
+        pinnedTrayItemIds = sanitizedTrayItemIds(next);
+    }
+
+    function toggleTrayItemPinned(itemId) {
+        setTrayItemPinned(itemId, !trayItemPinned(itemId));
+    }
+
     function scheduleSave() {
         if (ready && storageReady && !applyingState)
             saveTimer.restart();
@@ -129,7 +170,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 26,
+            version: 27,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             workspaceIndicatorStyle: workspaceIndicatorStyle,
@@ -169,6 +210,7 @@ Singleton {
             showCpuUsage: showCpuUsage,
             showMemoryUsage: showMemoryUsage,
             showCpuTemperature: showCpuTemperature,
+            pinnedTrayItemIds: pinnedTrayItemIds,
             userAvatarPath: userAvatarPath,
             weatherLocationName: weatherLocationName,
             weatherLatitude: weatherLatitude,
@@ -182,7 +224,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 26)
+            if (state.version !== 27)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -362,6 +404,18 @@ Singleton {
                 showCpuTemperature = state.showCpuTemperature;
             else
                 needsMigration = true;
+            if (Array.isArray(state.pinnedTrayItemIds)) {
+                const sanitizedIds = sanitizedTrayItemIds(
+                    state.pinnedTrayItemIds);
+                pinnedTrayItemIds = sanitizedIds;
+                if (JSON.stringify(state.pinnedTrayItemIds)
+                        !== JSON.stringify(sanitizedIds)) {
+                    needsMigration = true;
+                }
+            } else {
+                pinnedTrayItemIds = [];
+                needsMigration = true;
+            }
             if (typeof state.userAvatarPath === "string")
                 userAvatarPath = stripFileProtocol(state.userAvatarPath);
             else
@@ -442,6 +496,7 @@ Singleton {
         showCpuUsage = true;
         showMemoryUsage = true;
         showCpuTemperature = false;
+        pinnedTrayItemIds = [];
         userAvatarPath = "";
         weatherLocationName = "上海";
         weatherLatitude = 31.2304;
@@ -493,6 +548,7 @@ Singleton {
     onShowCpuUsageChanged: scheduleSave()
     onShowMemoryUsageChanged: scheduleSave()
     onShowCpuTemperatureChanged: scheduleSave()
+    onPinnedTrayItemIdsChanged: scheduleSave()
     onUserAvatarPathChanged: scheduleSave()
     onWeatherLocationNameChanged: scheduleSave()
     onWeatherLatitudeChanged: scheduleSave()
@@ -571,6 +627,10 @@ Singleton {
 
         function setMonochromeAppIcons(enabled: bool): void {
             root.monochromeAppIcons = enabled;
+        }
+
+        function setTrayItemPinned(itemId: string, pinned: bool): void {
+            root.setTrayItemPinned(itemId, pinned);
         }
 
         function setFontWeight(weight: int): void {
@@ -674,6 +734,7 @@ Singleton {
                 showCpuUsage: root.showCpuUsage,
                 showMemoryUsage: root.showMemoryUsage,
                 showCpuTemperature: root.showCpuTemperature,
+                pinnedTrayItemIds: root.pinnedTrayItemIds,
                 userAvatarPath: root.userAvatarPath,
                 weatherLocationName: root.weatherLocationName,
                 weatherLatitude: root.weatherLatitude,

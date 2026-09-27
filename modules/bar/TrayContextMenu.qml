@@ -18,9 +18,13 @@ PopupWindow {
     property bool presented: false
     property bool openedOnce: false
     property bool switchingMenu: false
+    property bool pointerGraceActive: false
     property int switchGeneration: 0
     property real stableMenuHeight: 0
     readonly property bool pointerInside: menuHover.hovered
+    readonly property bool navigationInProgress:
+        switchingMenu || menuStack.busy
+        || menuResizeTimer.running || positionTimer.running
 
     signal menuOpened(var menu)
     signal menuDismissed
@@ -49,6 +53,11 @@ PopupWindow {
         menuStack.clear(Controls.StackView.Immediate);
     }
 
+    function beginPointerGrace() {
+        pointerGraceActive = true;
+        pointerGraceTimer.restart();
+    }
+
     function rebuildRootMenu() {
         clearMenuPages();
         menuStack.push(
@@ -63,6 +72,7 @@ PopupWindow {
     function switchToMenu(handle, newAnchor, title, icon) {
         const generation = ++switchGeneration;
         closeTimer.stop();
+        beginPointerGrace();
         switchingMenu = true;
         presented = false;
 
@@ -119,6 +129,16 @@ PopupWindow {
 
         interval: Math.max(80, Appearance.fastDuration)
         onTriggered: root.visible = false
+    }
+
+    Timer {
+        id: pointerGraceTimer
+
+        // StackView and the delayed DBus-menu height commit can briefly move
+        // the popup out from under the pointer. Do not treat that transient
+        // leave as an outside click.
+        interval: Math.max(320, Appearance.fastDuration + 180)
+        onTriggered: root.pointerGraceActive = false
     }
 
     Timer {
@@ -265,7 +285,10 @@ PopupWindow {
 
                     Layout.fillWidth: true
                     implicitHeight: root.stableMenuHeight
-                    onCurrentItemChanged: menuResizeTimer.restart()
+                    onCurrentItemChanged: {
+                        root.beginPointerGrace();
+                        menuResizeTimer.restart();
+                    }
                     pushEnter: Transition {
                         ParallelAnimation {
                             NumberAnimation {
@@ -321,6 +344,7 @@ PopupWindow {
                         target: menuStack.currentItem
                         ignoreUnknownSignals: true
                         function onImplicitHeightChanged() {
+                            root.beginPointerGrace();
                             menuResizeTimer.restart();
                         }
                     }

@@ -44,10 +44,12 @@ Item {
 
     function closeOverlays() {
         popup.close();
+        trayModule.closeContextMenu();
         LeftSidebarService.close();
     }
 
     function showPopup(target, pageName) {
+        trayModule.closeContextMenu();
         LeftSidebarService.close();
         popup.showFor(target, pageName);
     }
@@ -550,6 +552,7 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
             onActivated: root.showPopup(trayModule, "tray")
+            onCloseRequested: popup.close()
         }
 
         MouseArea {
@@ -564,7 +567,10 @@ Item {
             height: parent.height
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: SettingsLauncher.open()
+            onClicked: {
+                trayModule.closeContextMenu();
+                SettingsLauncher.open();
+            }
 
             Rectangle {
                 width: Appearance.px(30)
