@@ -19,6 +19,8 @@ Item {
     property Item draggedDelegate: null
     property int dragSourceIndex: -1
     property int dragTargetIndex: -1
+    property real dragOffsetX: 0
+    property real dragOffsetY: 0
     readonly property var trayItems:
         ShellSettings.orderedTrayItems(SystemTray.items.values)
     readonly property bool menuOpen:
@@ -94,24 +96,68 @@ Item {
         draggedDelegate = delegate;
         dragSourceIndex = index;
         dragTargetIndex = index;
+        dragOffsetX = 0;
+        dragOffsetY = 0;
     }
 
     function updateTrayDrag(delegate, translationX, translationY) {
         if (draggedDelegate !== delegate || itemCount < 1)
             return;
-        const point = delegate.mapToItem(
-            trayGrid,
-            delegate.width / 2 + translationX,
-            delegate.height / 2 + translationY);
-        const columnWidth = delegate.width + trayGrid.columnSpacing;
-        const rowHeight = delegate.height + trayGrid.rowSpacing;
-        const column = Math.max(0, Math.min(
-            columnCount - 1,
-            Math.floor(point.x / Math.max(1, columnWidth))));
-        const row = Math.max(0, Math.floor(
-            point.y / Math.max(1, rowHeight)));
-        dragTargetIndex = Math.max(0, Math.min(
-            itemCount - 1, row * columnCount + column));
+        dragOffsetX = Math.max(-delegate.x, Math.min(
+            trayGrid.width - delegate.width - delegate.x,
+            Number(translationX)));
+        dragOffsetY = Math.max(-delegate.y, Math.min(
+            Math.max(delegate.height, trayGrid.implicitHeight)
+                - delegate.height - delegate.y,
+            Number(translationY)));
+
+        const draggedCenterX = delegate.x + delegate.width / 2
+            + dragOffsetX;
+        const draggedCenterY = delegate.y + delegate.height / 2
+            + dragOffsetY;
+        let closestIndex = dragSourceIndex;
+        let closestDistance = Number.POSITIVE_INFINITY;
+        for (let index = 0; index < trayRepeater.count; ++index) {
+            const candidate = trayRepeater.itemAt(index);
+            if (!candidate)
+                continue;
+            const deltaX = draggedCenterX
+                - (candidate.x + candidate.width / 2);
+            const deltaY = draggedCenterY
+                - (candidate.y + candidate.height / 2);
+            const distance = deltaX * deltaX + deltaY * deltaY;
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestIndex = index;
+            }
+        }
+        dragTargetIndex = closestIndex;
+    }
+
+    function trayDragShiftIndex(index) {
+        if (!draggedDelegate || index === dragSourceIndex)
+            return index;
+        if (dragTargetIndex > dragSourceIndex
+                && index > dragSourceIndex
+                && index <= dragTargetIndex) {
+            return index - 1;
+        }
+        if (dragTargetIndex < dragSourceIndex
+                && index >= dragTargetIndex
+                && index < dragSourceIndex) {
+            return index + 1;
+        }
+        return index;
+    }
+
+    function trayDragShiftX(delegate, index) {
+        const target = trayRepeater.itemAt(trayDragShiftIndex(index));
+        return target ? target.x - delegate.x : 0;
+    }
+
+    function trayDragShiftY(delegate, index) {
+        const target = trayRepeater.itemAt(trayDragShiftIndex(index));
+        return target ? target.y - delegate.y : 0;
     }
 
     function finishTrayDrag(commit) {
@@ -119,13 +165,15 @@ Item {
             return;
         const sourceIndex = dragSourceIndex;
         const targetIndex = dragTargetIndex;
-        draggedDelegate = null;
-        dragSourceIndex = -1;
-        dragTargetIndex = -1;
         if (commit && sourceIndex !== targetIndex) {
             ShellSettings.moveTrayItem(
                 trayItems, sourceIndex, targetIndex);
         }
+        draggedDelegate = null;
+        dragSourceIndex = -1;
+        dragTargetIndex = -1;
+        dragOffsetX = 0;
+        dragOffsetY = 0;
     }
 
     component PanelText: AppText {
@@ -208,6 +256,8 @@ Item {
                     rowSpacing: Appearance.px(5)
 
                     Repeater {
+                        id: trayRepeater
+
                         model: ScriptModel {
                             values: root.trayItems
                             objectProp: "id"
@@ -222,10 +272,6 @@ Item {
                                 ShellSettings.trayItemPinned(modelData)
                             readonly property bool beingDragged:
                                 root.draggedDelegate === trayDelegate
-                            readonly property bool dropTarget:
-                                root.draggedDelegate
-                                && root.dragTargetIndex === index
-                                && root.dragSourceIndex !== index
 
                             width:
                                 (trayGrid.width
@@ -234,18 +280,14 @@ Item {
                                 / root.columnCount
                             height: Appearance.px(56)
                             radius: Appearance.smallRadius
-                            color: dropTarget
-                                ? Appearance.barPrimaryContainer
-                                : trayMouse.containsMouse
+                            color: trayMouse.containsMouse
                                 ? Appearance.barLayer1Hover
                                 : modelData.status
                                     === Status.NeedsAttention
                                     ? Appearance.barPrimaryContainer
                                     : Appearance.barLayer1
-                            border.width: dropTarget ? 2 : 1
-                            border.color: dropTarget
-                                ? Appearance.barPrimary
-                                : modelData.status
+                            border.width: 1
+                            border.color: modelData.status
                                     === Status.NeedsAttention
                                     || pinned
                                 ? Appearance.barPrimary
@@ -257,9 +299,31 @@ Item {
 
                             transform: Translate {
                                 x: trayDelegate.beingDragged
-                                    ? trayDrag.activeTranslation.x : 0
+                                    ? root.dragOffsetX
+                                    : root.trayDragShiftX(
+                                        trayDelegate,
+                                        trayDelegate.index)
                                 y: trayDelegate.beingDragged
-                                    ? trayDrag.activeTranslation.y : 0
+                                    ? root.dragOffsetY
+                                    : root.trayDragShiftY(
+                                        trayDelegate,
+                                        trayDelegate.index)
+
+                                Behavior on x {
+                                    enabled: !trayDelegate.beingDragged
+                                    NumberAnimation {
+                                        duration: Appearance.fastDuration
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+
+                                Behavior on y {
+                                    enabled: !trayDelegate.beingDragged
+                                    NumberAnimation {
+                                        duration: Appearance.fastDuration
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
                             }
 
                             function openMenu() {
@@ -311,8 +375,9 @@ Item {
                                     Qt.LeftButton
                                     | Qt.RightButton
                                 hoverEnabled: true
-                                cursorShape:
-                                    Qt.PointingHandCursor
+                                cursorShape: trayDelegate.beingDragged
+                                    ? Qt.ClosedHandCursor
+                                    : Qt.PointingHandCursor
 
                                 onClicked: event => {
                                     if (event.button
@@ -447,21 +512,6 @@ Item {
                                 }
                             }
 
-                            Behavior on x {
-                                enabled: !trayDelegate.beingDragged
-                                NumberAnimation {
-                                    duration: Appearance.fastDuration
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-
-                            Behavior on y {
-                                enabled: !trayDelegate.beingDragged
-                                NumberAnimation {
-                                    duration: Appearance.fastDuration
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
                         }
                     }
                 }
