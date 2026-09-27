@@ -17,15 +17,37 @@ Item {
     readonly property bool hostWindowActive: Window.active
     readonly property bool menuOpen: contextMenu.visible
     readonly property bool menuContainsMouse: contextMenu.pointerInside
+    readonly property var trayItems:
+        ShellSettings.orderedTrayItems(SystemTray.items.values)
     readonly property var pinnedItems:
-        SystemTray.items.values.filter(item =>
-            ShellSettings.trayItemPinned(item?.id))
+        trayItems.filter(item => ShellSettings.trayItemPinned(item))
     readonly property bool needsAttention:
         SystemTray.items.values.some(item =>
             item?.status === Status.NeedsAttention)
 
     implicitWidth: trayRow.implicitWidth
     implicitHeight: Appearance.barHeight
+
+    onTrayItemsChanged: reconcileTimer.restart()
+
+    Component.onCompleted: reconcileTimer.restart()
+
+    Timer {
+        id: reconcileTimer
+
+        interval: 0
+        onTriggered: ShellSettings.reconcileTrayItems(
+            SystemTray.items.values)
+    }
+
+    Connections {
+        target: ShellSettings
+
+        function onReadyChanged() {
+            if (ShellSettings.ready)
+                reconcileTimer.restart();
+        }
+    }
 
     function itemTitle(item) {
         return String(item?.tooltipTitle

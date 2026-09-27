@@ -16,12 +16,16 @@ Item {
 
     property bool active: true
     property var activeMenu: null
+    property Item draggedDelegate: null
+    property int dragSourceIndex: -1
+    property int dragTargetIndex: -1
+    readonly property var trayItems:
+        ShellSettings.orderedTrayItems(SystemTray.items.values)
     readonly property bool menuOpen:
         contextMenu.visible
     readonly property bool menuContainsMouse:
         contextMenu.pointerInside
-    readonly property int itemCount:
-        SystemTray.items.values.length
+    readonly property int itemCount: trayItems.length
     readonly property int columnCount: 5
     readonly property int rowCount:
         Math.ceil(itemCount / columnCount)
@@ -36,9 +40,32 @@ Item {
 
     implicitHeight: baseImplicitHeight
 
+    onTrayItemsChanged: reconcileTimer.restart()
+
     onActiveChanged: {
-        if (!active)
+        if (!active) {
             contextMenu.closeImmediately();
+            finishTrayDrag(false);
+        }
+    }
+
+    Component.onCompleted: reconcileTimer.restart()
+
+    Timer {
+        id: reconcileTimer
+
+        interval: 0
+        onTriggered: ShellSettings.reconcileTrayItems(
+            SystemTray.items.values)
+    }
+
+    Connections {
+        target: ShellSettings
+
+        function onReadyChanged() {
+            if (ShellSettings.ready)
+                reconcileTimer.restart();
+        }
     }
 
     function itemTitle(item) {
@@ -60,6 +87,45 @@ Item {
             itemTitle(item),
             item.icon);
         return true;
+    }
+
+    function startTrayDrag(delegate, index) {
+        closeActiveMenu();
+        draggedDelegate = delegate;
+        dragSourceIndex = index;
+        dragTargetIndex = index;
+    }
+
+    function updateTrayDrag(delegate, translationX, translationY) {
+        if (draggedDelegate !== delegate || itemCount < 1)
+            return;
+        const point = delegate.mapToItem(
+            trayGrid,
+            delegate.width / 2 + translationX,
+            delegate.height / 2 + translationY);
+        const columnWidth = delegate.width + trayGrid.columnSpacing;
+        const rowHeight = delegate.height + trayGrid.rowSpacing;
+        const column = Math.max(0, Math.min(
+            columnCount - 1,
+            Math.floor(point.x / Math.max(1, columnWidth))));
+        const row = Math.max(0, Math.floor(
+            point.y / Math.max(1, rowHeight)));
+        dragTargetIndex = Math.max(0, Math.min(
+            itemCount - 1, row * columnCount + column));
+    }
+
+    function finishTrayDrag(commit) {
+        if (!draggedDelegate)
+            return;
+        const sourceIndex = dragSourceIndex;
+        const targetIndex = dragTargetIndex;
+        draggedDelegate = null;
+        dragSourceIndex = -1;
+        dragTargetIndex = -1;
+        if (commit && sourceIndex !== targetIndex) {
+            ShellSettings.moveTrayItem(
+                trayItems, sourceIndex, targetIndex);
+        }
     }
 
     component PanelText: AppText {
@@ -130,6 +196,7 @@ Item {
                 contentWidth: width
                 contentHeight: trayGrid.implicitHeight
                 clip: true
+                interactive: root.draggedDelegate === null
                 boundsBehavior: Flickable.StopAtBounds
 
                 Grid {
@@ -141,16 +208,24 @@ Item {
                     rowSpacing: Appearance.px(5)
 
                     Repeater {
-                        // UntypedObjectModel keeps delegates stable while
-                        // applications update or blink their tray icon.
-                        model: SystemTray.items
+                        model: ScriptModel {
+                            values: root.trayItems
+                            objectProp: "id"
+                        }
 
                         delegate: Rectangle {
                             id: trayDelegate
 
+                            required property int index
                             required property SystemTrayItem modelData
                             readonly property bool pinned:
-                                ShellSettings.trayItemPinned(modelData.id)
+                                ShellSettings.trayItemPinned(modelData)
+                            readonly property bool beingDragged:
+                                root.draggedDelegate === trayDelegate
+                            readonly property bool dropTarget:
+                                root.draggedDelegate
+                                && root.dragTargetIndex === index
+                                && root.dragSourceIndex !== index
 
                             width:
                                 (trayGrid.width
@@ -159,19 +234,33 @@ Item {
                                 / root.columnCount
                             height: Appearance.px(56)
                             radius: Appearance.smallRadius
-                            color: trayMouse.containsMouse
+                            color: dropTarget
+                                ? Appearance.barPrimaryContainer
+                                : trayMouse.containsMouse
                                 ? Appearance.barLayer1Hover
                                 : modelData.status
                                     === Status.NeedsAttention
                                     ? Appearance.barPrimaryContainer
                                     : Appearance.barLayer1
-                            border.width: 1
-                            border.color: modelData.status
+                            border.width: dropTarget ? 2 : 1
+                            border.color: dropTarget
+                                ? Appearance.barPrimary
+                                : modelData.status
                                     === Status.NeedsAttention
                                     || pinned
                                 ? Appearance.barPrimary
                                 : Appearance.barOutline
-                            scale: trayMouse.pressed ? 0.8 : 0.85
+                            scale: beingDragged ? 0.94
+                                : trayMouse.pressed ? 0.8 : 0.85
+                            opacity: beingDragged ? 0.88 : 1
+                            z: beingDragged ? 4 : 0
+
+                            transform: Translate {
+                                x: trayDelegate.beingDragged
+                                    ? trayDrag.activeTranslation.x : 0
+                                y: trayDelegate.beingDragged
+                                    ? trayDrag.activeTranslation.y : 0
+                            }
 
                             function openMenu() {
                                 return root.openContextMenu(
@@ -244,6 +333,34 @@ Item {
                                 }
                             }
 
+                            DragHandler {
+                                id: trayDrag
+
+                                target: null
+                                acceptedButtons: Qt.LeftButton
+                                dragThreshold: Appearance.px(5)
+
+                                onActiveChanged: {
+                                    if (active) {
+                                        root.startTrayDrag(
+                                            trayDelegate,
+                                            trayDelegate.index);
+                                        root.updateTrayDrag(
+                                            trayDelegate,
+                                            activeTranslation.x,
+                                            activeTranslation.y);
+                                    } else if (trayDelegate.beingDragged) {
+                                        root.finishTrayDrag(true);
+                                    }
+                                }
+
+                                onActiveTranslationChanged:
+                                    root.updateTrayDrag(
+                                        trayDelegate,
+                                        activeTranslation.x,
+                                        activeTranslation.y)
+                            }
+
                             Rectangle {
                                 id: pinBadge
 
@@ -289,7 +406,7 @@ Item {
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: ShellSettings
                                         .toggleTrayItemPinned(
-                                            trayDelegate.modelData.id)
+                                            trayDelegate.modelData)
                                 }
 
                                 StyledToolTip {
@@ -323,6 +440,28 @@ Item {
                                     easing.type: Easing.OutCubic
                                 }
                             }
+
+                            Behavior on opacity {
+                                NumberAnimation {
+                                    duration: Appearance.fastDuration
+                                }
+                            }
+
+                            Behavior on x {
+                                enabled: !trayDelegate.beingDragged
+                                NumberAnimation {
+                                    duration: Appearance.fastDuration
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+
+                            Behavior on y {
+                                enabled: !trayDelegate.beingDragged
+                                NumberAnimation {
+                                    duration: Appearance.fastDuration
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
                         }
                     }
                 }
@@ -334,30 +473,30 @@ Item {
             }
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.leftMargin: Appearance.px(8)
-            Layout.rightMargin: Appearance.px(8)
-            visible: root.itemCount > 0
-            spacing: Appearance.px(7)
+        // RowLayout {
+        //     Layout.fillWidth: true
+        //     Layout.leftMargin: Appearance.px(8)
+        //     Layout.rightMargin: Appearance.px(8)
+        //     visible: root.itemCount > 0
+        //     spacing: Appearance.px(7)
 
-            AppText {
-                text: "󰐃"
-                color: Appearance.barPrimary
-                font {
-                    family: Appearance.iconFontFamily
-                    weight: Font.Normal
-                    pixelSize: Appearance.px(13)
-                }
-            }
+        //     AppText {
+        //         text: "󰐃"
+        //         color: Appearance.barPrimary
+        //         font {
+        //             family: Appearance.iconFontFamily
+        //             weight: Font.Normal
+        //             pixelSize: Appearance.px(13)
+        //         }
+        //     }
 
-            PanelText {
-                Layout.fillWidth: true
-                text: I18n.tr("trayPinHint")
-                color: Appearance.barSubtext
-                font.pixelSize: Appearance.smallFontSize
-            }
-        }
+        //     PanelText {
+        //         Layout.fillWidth: true
+        //         text: I18n.tr("trayPinHint")
+        //         color: Appearance.barSubtext
+        //         font.pixelSize: Appearance.smallFontSize
+        //     }
+        // }
     }
 
     TrayContextMenu {

@@ -59,6 +59,7 @@ Singleton {
     property bool showMemoryUsage: true
     property bool showCpuTemperature: false
     property var pinnedTrayItemIds: []
+    property var trayItemOrderKeys: []
     property string userAvatarPath: ""
     property string weatherLocationName: "上海"
     property real weatherLatitude: 31.2304
@@ -135,29 +136,174 @@ Singleton {
         return result;
     }
 
-    function trayItemPinned(itemId) {
-        const key = String(itemId ?? "").trim();
-        return key !== "" && pinnedTrayItemIds.indexOf(key) >= 0;
+    function trayItemId(item) {
+        if (typeof item === "string")
+            return String(item).trim().slice(0, 512);
+        return String(item?.id ?? "").trim().slice(0, 512);
     }
 
-    function setTrayItemPinned(itemId, pinned) {
-        const key = String(itemId ?? "").trim();
+    function trayItemTitle(item) {
+        if (typeof item === "string")
+            return "";
+        return String(item?.title || item?.tooltipTitle || "")
+            .trim().slice(0, 512);
+    }
+
+    function trayItemKey(item) {
+        const itemId = trayItemId(item);
+        if (!itemId)
+            return "";
+        if (typeof item === "string")
+            return itemId;
+
+        const title = trayItemTitle(item);
+        // Ayatana applications may expose a new random alphanumeric Id on
+        // every launch. Their application title remains stable, so use it as
+        // the persistent identity. Normal SNI ids stay authoritative.
+        const ephemeralId = /^[A-Za-z0-9]{8,16}$/.test(itemId)
+            && title && title !== itemId;
+        return ephemeralId ? "title:" + title : "id:" + itemId;
+    }
+
+    function trayItemAliases(item) {
+        const aliases = [];
+        const itemId = trayItemId(item);
+        const title = trayItemTitle(item);
+        const key = trayItemKey(item);
+        for (const alias of [key, itemId,
+                itemId ? "id:" + itemId : "",
+                title ? "title:" + title : ""]) {
+            if (alias && aliases.indexOf(alias) < 0)
+                aliases.push(alias);
+        }
+        return aliases;
+    }
+
+    function trayItemListIndex(list, item) {
+        for (const alias of trayItemAliases(item)) {
+            const index = list.indexOf(alias);
+            if (index >= 0)
+                return index;
+        }
+        return -1;
+    }
+
+    function trayItemPinned(item) {
+        return trayItemListIndex(pinnedTrayItemIds, item) >= 0;
+    }
+
+    function setTrayItemPinned(item, pinned) {
+        const key = trayItemKey(item);
         if (!key)
             return;
 
         const next = pinnedTrayItemIds.slice();
-        const index = next.indexOf(key);
-        if (pinned && index < 0)
-            next.push(key);
-        else if (!pinned && index >= 0)
+        const aliases = trayItemAliases(item);
+        let firstIndex = next.length;
+        let found = false;
+        for (let index = next.length - 1; index >= 0; --index) {
+            if (aliases.indexOf(next[index]) < 0)
+                continue;
+            firstIndex = Math.min(firstIndex, index);
             next.splice(index, 1);
-        else
+            found = true;
+        }
+        if (pinned)
+            next.splice(found ? firstIndex : next.length, 0, key);
+        if (found === pinned
+                && JSON.stringify(next)
+                    === JSON.stringify(pinnedTrayItemIds))
             return;
         pinnedTrayItemIds = sanitizedTrayItemIds(next);
     }
 
-    function toggleTrayItemPinned(itemId) {
-        setTrayItemPinned(itemId, !trayItemPinned(itemId));
+    function toggleTrayItemPinned(item) {
+        setTrayItemPinned(item, !trayItemPinned(item));
+    }
+
+    function orderedTrayItems(items) {
+        const values = items?.slice ? items.slice() : [];
+        const nativeOrder = values.slice();
+        values.sort((left, right) => {
+            const leftIndex = trayItemListIndex(trayItemOrderKeys, left);
+            const rightIndex = trayItemListIndex(trayItemOrderKeys, right);
+            if (leftIndex >= 0 && rightIndex >= 0)
+                return leftIndex - rightIndex;
+            if (leftIndex >= 0)
+                return -1;
+            if (rightIndex >= 0)
+                return 1;
+            return nativeOrder.indexOf(left) - nativeOrder.indexOf(right);
+        });
+        return values;
+    }
+
+    function setTrayItemOrder(items) {
+        if (!items?.slice)
+            return;
+        const activeKeys = [];
+        for (const item of items) {
+            const key = trayItemKey(item);
+            if (key && activeKeys.indexOf(key) < 0)
+                activeKeys.push(key);
+        }
+        const inactiveKeys = trayItemOrderKeys.filter(savedKey =>
+            activeKeys.indexOf(savedKey) < 0
+            && !items.some(item =>
+                trayItemAliases(item).indexOf(savedKey) >= 0));
+        const next = sanitizedTrayItemIds(
+            activeKeys.concat(inactiveKeys));
+        if (JSON.stringify(next) !== JSON.stringify(trayItemOrderKeys))
+            trayItemOrderKeys = next;
+    }
+
+    function moveTrayItem(items, sourceIndex, targetIndex) {
+        const ordered = orderedTrayItems(items);
+        if (sourceIndex < 0 || sourceIndex >= ordered.length
+                || targetIndex < 0 || targetIndex >= ordered.length
+                || sourceIndex === targetIndex)
+            return;
+        const moved = ordered.splice(sourceIndex, 1)[0];
+        ordered.splice(targetIndex, 0, moved);
+        setTrayItemOrder(ordered);
+    }
+
+    function reconcileTrayItems(items) {
+        if (!items?.slice)
+            return;
+        const values = items.slice();
+
+        function canonicalized(list) {
+            const next = list.slice();
+            for (const item of values) {
+                const key = trayItemKey(item);
+                const aliases = trayItemAliases(item);
+                let firstIndex = next.length;
+                let found = false;
+                for (let index = next.length - 1; index >= 0; --index) {
+                    if (aliases.indexOf(next[index]) < 0)
+                        continue;
+                    firstIndex = Math.min(firstIndex, index);
+                    next.splice(index, 1);
+                    found = true;
+                }
+                if (found)
+                    next.splice(firstIndex, 0, key);
+            }
+            return sanitizedTrayItemIds(next);
+        }
+
+        const pinned = canonicalized(pinnedTrayItemIds);
+        if (JSON.stringify(pinned)
+                !== JSON.stringify(pinnedTrayItemIds))
+            pinnedTrayItemIds = pinned;
+
+        let order = canonicalized(trayItemOrderKeys);
+        if (order.length === 0 && values.length > 0)
+            order = values.map(item => trayItemKey(item));
+        order = sanitizedTrayItemIds(order);
+        if (JSON.stringify(order) !== JSON.stringify(trayItemOrderKeys))
+            trayItemOrderKeys = order;
     }
 
     function scheduleSave() {
@@ -170,7 +316,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 27,
+            version: 28,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             workspaceIndicatorStyle: workspaceIndicatorStyle,
@@ -211,6 +357,7 @@ Singleton {
             showMemoryUsage: showMemoryUsage,
             showCpuTemperature: showCpuTemperature,
             pinnedTrayItemIds: pinnedTrayItemIds,
+            trayItemOrderKeys: trayItemOrderKeys,
             userAvatarPath: userAvatarPath,
             weatherLocationName: weatherLocationName,
             weatherLatitude: weatherLatitude,
@@ -224,7 +371,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 27)
+            if (state.version !== 28)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -416,6 +563,18 @@ Singleton {
                 pinnedTrayItemIds = [];
                 needsMigration = true;
             }
+            if (Array.isArray(state.trayItemOrderKeys)) {
+                const sanitizedOrder = sanitizedTrayItemIds(
+                    state.trayItemOrderKeys);
+                trayItemOrderKeys = sanitizedOrder;
+                if (JSON.stringify(state.trayItemOrderKeys)
+                        !== JSON.stringify(sanitizedOrder)) {
+                    needsMigration = true;
+                }
+            } else {
+                trayItemOrderKeys = [];
+                needsMigration = true;
+            }
             if (typeof state.userAvatarPath === "string")
                 userAvatarPath = stripFileProtocol(state.userAvatarPath);
             else
@@ -497,6 +656,7 @@ Singleton {
         showMemoryUsage = true;
         showCpuTemperature = false;
         pinnedTrayItemIds = [];
+        trayItemOrderKeys = [];
         userAvatarPath = "";
         weatherLocationName = "上海";
         weatherLatitude = 31.2304;
@@ -549,6 +709,7 @@ Singleton {
     onShowMemoryUsageChanged: scheduleSave()
     onShowCpuTemperatureChanged: scheduleSave()
     onPinnedTrayItemIdsChanged: scheduleSave()
+    onTrayItemOrderKeysChanged: scheduleSave()
     onUserAvatarPathChanged: scheduleSave()
     onWeatherLocationNameChanged: scheduleSave()
     onWeatherLatitudeChanged: scheduleSave()
@@ -735,6 +896,7 @@ Singleton {
                 showMemoryUsage: root.showMemoryUsage,
                 showCpuTemperature: root.showCpuTemperature,
                 pinnedTrayItemIds: root.pinnedTrayItemIds,
+                trayItemOrderKeys: root.trayItemOrderKeys,
                 userAvatarPath: root.userAvatarPath,
                 weatherLocationName: root.weatherLocationName,
                 weatherLatitude: root.weatherLatitude,
