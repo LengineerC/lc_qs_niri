@@ -10,6 +10,7 @@ Item {
     property string outputName: ""
     property Item activeItem: null
     property Item hoverItem: null
+    property Item pressedItem: null
     property bool wheelLocked: false
     property Item draggedItem: null
     property int dragSourcePosition: -1
@@ -257,6 +258,8 @@ Item {
     }
 
     TapHandler {
+        id: overviewTap
+
         acceptedButtons: Qt.RightButton
         gesturePolicy: TapHandler.ReleaseWithinBounds
         onTapped: NiriService.toggleOverview()
@@ -272,6 +275,15 @@ Item {
         color: Appearance.barLayer1
         border.width: 1
         border.color: Appearance.barLayer0Border
+        scale: (root.pressedItem !== null || overviewTap.pressed)
+                && root.draggedItem === null ? 0.94 : 1
+
+        Behavior on scale {
+            NumberAnimation {
+                duration: Appearance.fastDuration
+                easing.type: Easing.OutCubic
+            }
+        }
     }
 
     Item {
@@ -423,6 +435,10 @@ Item {
                     onOnThisOutputChanged: activeRefresh.restart()
                     onShouldShowChanged: activeRefresh.restart()
                     Component.onCompleted: activeRefresh.restart()
+                    Component.onDestruction: {
+                        if (root.pressedItem === workspaceDelegate)
+                            root.pressedItem = null;
+                    }
 
                     Rectangle {
                         id: dragBackground
@@ -520,9 +536,19 @@ Item {
                     }
 
                     TapHandler {
+                        id: workspaceTap
+
                         enabled: workspaceDelegate.onThisOutput
                         acceptedButtons: Qt.LeftButton
                         gesturePolicy: TapHandler.ReleaseWithinBounds
+                        onPressedChanged: {
+                            if (pressed) {
+                                root.pressedItem = workspaceDelegate;
+                            } else if (root.pressedItem
+                                    === workspaceDelegate) {
+                                root.pressedItem = null;
+                            }
+                        }
                         onTapped: {
                             NiriService.focusWorkspaceById(
                                 workspaceDelegate.model.id);

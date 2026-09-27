@@ -44,10 +44,18 @@ MouseArea {
             ? Appearance.barLayer1Hover : Appearance.barLayer1
         border.width: 1
         border.color: Appearance.barLayer0Border
+        scale: root.pressed ? 0.94 : 1
 
         Behavior on color {
             enabled: !Theme.paletteTransitionRunning
             ColorAnimation { duration: Appearance.fastDuration }
+        }
+
+        Behavior on scale {
+            NumberAnimation {
+                duration: Appearance.fastDuration
+                easing.type: Easing.OutCubic
+            }
         }
     }
 
