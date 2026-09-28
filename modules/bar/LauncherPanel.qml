@@ -320,9 +320,19 @@ Item {
                             PanelText {
                                 Layout.fillWidth: true
                                 text: applicationEntry.modelData.name
-                                color: Appearance.barLayer0Text
+                                color: applicationEntry.ListView.isCurrentItem
+                                        || entryArea.containsMouse
+                                    ? Appearance.barPrimaryContainerText
+                                    : Appearance.barLayer0Text
                                 elide: Text.ElideRight
                                 font.weight: Font.DemiBold
+
+                                Behavior on color {
+                                    enabled: !Theme.paletteTransitionRunning
+                                    ColorAnimation {
+                                        duration: Appearance.fastDuration
+                                    }
+                                }
                             }
 
                             PanelText {
@@ -330,9 +340,21 @@ Item {
                                 text: applicationEntry.modelData.comment
                                     || applicationEntry.modelData.genericName
                                     || applicationEntry.modelData.id
-                                color: Appearance.barSubtext
+                                color: applicationEntry.ListView.isCurrentItem
+                                        || entryArea.containsMouse
+                                    ? Appearance.withAlpha(
+                                        Appearance.barPrimaryContainerText,
+                                        0.72)
+                                    : Appearance.barSubtext
                                 elide: Text.ElideRight
                                 font.pixelSize: Appearance.smallFontSize
+
+                                Behavior on color {
+                                    enabled: !Theme.paletteTransitionRunning
+                                    ColorAnimation {
+                                        duration: Appearance.fastDuration
+                                    }
+                                }
                             }
                         }
 

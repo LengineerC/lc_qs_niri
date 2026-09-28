@@ -70,7 +70,15 @@ WlSessionLockSurface {
         color: ShellSettings.barFrostedGlass
             ? "#5c000000"
             : Appearance.withAlpha(
-                Theme.palette.m3scrim, 0.48)
+                Theme.palette.m3scrim,
+                Theme.darkMode ? 0.48 : 0.28)
+
+        Behavior on color {
+            enabled: !Theme.paletteTransitionRunning
+            ColorAnimation {
+                duration: Appearance.fastDuration
+            }
+        }
     }
 
     MouseArea {
