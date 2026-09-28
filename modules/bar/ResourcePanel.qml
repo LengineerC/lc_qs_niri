@@ -826,12 +826,14 @@ Item {
                                     modelData.name)
                             readonly property bool expanded:
                                 root.expandedPid === modelData.pid
+                            property real expansionProgress:
+                                expanded ? 1 : 0
 
                             width: ListView.view.width
                                 - Appearance.px(7)
-                            height: expanded
-                                ? Appearance.px(116)
-                                : Appearance.px(52)
+                            height: Appearance.px(52)
+                                + Appearance.px(64)
+                                    * expansionProgress
                             radius: Appearance.px(11)
                             color: processArea.containsMouse
                                 || expanded
@@ -863,15 +865,18 @@ Item {
                                 }
                             }
 
-                            ColumnLayout {
+                            Column {
                                 anchors {
-                                    fill: parent
+                                    top: parent.top
+                                    left: parent.left
+                                    right: parent.right
                                     margins: Appearance.spacingSmall
                                 }
                                 spacing: Appearance.px(6)
 
                                 RowLayout {
-                                    Layout.fillWidth: true
+                                    width: parent.width
+                                    height: Appearance.px(28)
                                     spacing: Appearance.spacingSmall
 
                                     Item {
@@ -969,9 +974,12 @@ Item {
                                 }
 
                                 Rectangle {
-                                    visible: processEntry.expanded
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
+                                    visible:
+                                        processEntry.expansionProgress > 0.001
+                                    width: parent.width
+                                    height: Appearance.px(66)
+                                    opacity:
+                                        processEntry.expansionProgress
                                     radius: Appearance.px(8)
                                     color: panelPalette.layer2
 
@@ -1050,7 +1058,7 @@ Item {
                                 }
                             }
 
-                            Behavior on height {
+                            Behavior on expansionProgress {
                                 NumberAnimation {
                                     duration: Appearance.fastDuration
                                     easing.type: Easing.OutCubic
