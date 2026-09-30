@@ -451,6 +451,25 @@ Item {
                                 ? "" : "audioInput";
                     }
                 }
+
+                SummaryCard {
+                    Layout.columnSpan: 2
+                    enabled: SystemService.locationAvailable
+                        && !SystemService.locationBusy
+                    opacity: SystemService.locationAvailable ? 1 : 0.55
+                    icon: "󰍎"
+                    title: I18n.tr("locationServices")
+                    subtitle: SystemService.locationBusy
+                        ? I18n.tr("loading") + "…"
+                        : !SystemService.locationAvailable
+                            ? I18n.tr("locationUnavailable")
+                            : SystemService.locationEnabled
+                                ? I18n.tr("locationEnabled")
+                                : I18n.tr("locationDisabled")
+                    active: SystemService.locationEnabled
+                    onIconClicked: SystemService.toggleLocation()
+                    onBodyClicked: SystemService.toggleLocation()
+                }
             }
 
             Rectangle {

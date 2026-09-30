@@ -72,6 +72,18 @@ MouseArea {
         }
 
         AppText {
+            visible: SystemService.locationAvailable
+                && SystemService.locationEnabled
+            text: "󰍎"
+            color: Appearance.barLayer0Text
+            font {
+                family: Appearance.iconFontFamily
+                weight: Font.Normal
+                pixelSize: Appearance.fontSize + Appearance.px(3)
+            }
+        }
+
+        AppText {
             visible: SystemService.sinkReady
             text: SystemService.volumeIcon()
             color: SystemService.muted

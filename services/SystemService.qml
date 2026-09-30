@@ -26,6 +26,9 @@ Singleton {
     property string wifiDetailsQuerySsid: ""
     property string wifiDetailsPendingSsid: ""
     property string statusMessage: ""
+    property bool locationAvailable: false
+    property bool locationEnabled: false
+    property bool locationBusy: false
 
     readonly property var bluetoothAdapter: Bluetooth.defaultAdapter
     readonly property bool bluetoothAvailable: bluetoothAdapter !== null
@@ -165,6 +168,27 @@ Singleton {
 
     function toggleWifi() {
         setWifiEnabled(!wifiEnabled);
+    }
+
+    function refreshLocation() {
+        if (!locationStateProcess.running)
+            locationStateProcess.exec([
+                "gsettings", "get", "org.gnome.system.location", "enabled"
+            ]);
+    }
+
+    function setLocationEnabled(enabled) {
+        if (!locationAvailable || locationToggleProcess.running)
+            return;
+        locationBusy = true;
+        locationToggleProcess.exec([
+            "gsettings", "set", "org.gnome.system.location", "enabled",
+            enabled ? "true" : "false"
+        ]);
+    }
+
+    function toggleLocation() {
+        setLocationEnabled(!locationEnabled);
     }
 
     function connectWifi(ssid, password = "") {
@@ -328,7 +352,10 @@ Singleton {
         // handled by Component.onCompleted so startup does not launch duplicates.
     }
 
-    Component.onCompleted: refreshWifi(false)
+    Component.onCompleted: {
+        refreshWifi(false);
+        refreshLocation();
+    }
 
     PwObjectTracker {
         objects: [
@@ -343,7 +370,10 @@ Singleton {
         interval: 5000
         running: true
         repeat: true
-        onTriggered: root.refreshWifi(false)
+        onTriggered: {
+            root.refreshWifi(false);
+            root.refreshLocation();
+        }
     }
 
     Timer {
@@ -368,6 +398,36 @@ Singleton {
                     root.wifiNetworks = [];
                 }
             }
+        }
+    }
+
+    Process {
+        id: locationStateProcess
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const state = text.trim();
+                if (state === "true" || state === "false") {
+                    root.locationAvailable = true;
+                    root.locationEnabled = state === "true";
+                }
+            }
+        }
+
+        onExited: exitCode => {
+            if (exitCode !== 0) {
+                root.locationAvailable = false;
+                root.locationEnabled = false;
+            }
+        }
+    }
+
+    Process {
+        id: locationToggleProcess
+
+        onExited: {
+            root.locationBusy = false;
+            root.refreshLocation();
         }
     }
 
