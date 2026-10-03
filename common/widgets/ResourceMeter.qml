@@ -79,7 +79,7 @@ Item {
         MeterLabel {
             width: root.width
             height: root.height
-            ink: root.warning ? palette.onError : SettingsPalette.glassMode ? palette.onPrimary : palette.layer1Active
+            ink: root.warning ? palette.layer1Active : SettingsPalette.glassMode ? palette.onPrimary : palette.layer1Active
         }
     }
 }
