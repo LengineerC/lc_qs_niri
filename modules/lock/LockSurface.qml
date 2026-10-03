@@ -28,7 +28,8 @@ WlSessionLockSurface {
     readonly property real compactRadius: compactSize / 4
     readonly property real panelRadius: Appearance.px(42)
 
-    color: Appearance.barLayer0
+    // Keep an opaque fallback if the wallpaper is missing or fails to load.
+    color: "#080a0d"
 
     function focusAuth() {
         lockContent.forceAuthFocus();
@@ -50,7 +51,8 @@ WlSessionLockSurface {
         source: WallpaperService.fileUrl(
             WallpaperService.currentPath)
         fillMode: Image.PreserveAspectCrop
-        asynchronous: true
+        // Decode the local wallpaper before presenting the lock surface.
+        asynchronous: false
         cache: false
         smooth: true
         mipmap: true
