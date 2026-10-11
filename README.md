@@ -121,7 +121,12 @@ Symbols Nerd Font
 > 模块已经存在，不需要重新构建，如需自己构建需自行修改路径并下拉Caelestia仓库
 
 `Caelestia/Blobs/` 已包含 x86-64 原生插件，因此普通 x86-64 Arch 环境通常
-不需要额外构建。若架构或 Qt ABI 不一致，需要准备：
+不需要额外构建。Bar 通过 `Quickshell.shellPath()` 动态定位并加载
+`native/caelestia-blobs/BarBlobSurface.qml`，由这个真实文件使用相对路径
+导入插件，避开 `qs:` 虚拟路径对原生插件查找的限制。移动配置目录或更换
+用户名无需修改导入路径，也无需额外设置 `QML_IMPORT_PATH` 来加载 Blob 插件。
+
+若架构或 Qt ABI 不一致，需要准备：
 
 ```text
 cmake、ninja、C++20 编译器、Qt 6 Core/Qml/Quick/ShaderTools

@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
-import "file:///home/lengineerc/.config/quickshell/lc_qs_niri/Caelestia/Blobs" as Blobs
 import qs.common
 import qs.common.widgets
 import qs.services
@@ -201,53 +200,39 @@ Item {
             shadowVerticalOffset: Math.round(ShellSettings.shadowOffsetY * Appearance.scale)
         }
 
-        Blobs.BlobGroup {
-            id: barBlobGroup
-
-            color: Appearance.barSurfaceBaseColor
-            smoothing: Appearance.px(20)
-        }
-
         Behavior on opacity {
             NumberAnimation {
                 duration: Appearance.fastDuration
             }
         }
 
-        Blobs.BlobRect {
-            id: barBackground
+        Loader {
+            id: blobSurface
 
-            x: 0
-            y: 0
-            width: parent.width
-            height: Appearance.barHeight
-            group: barBlobGroup
-            radius: 0
-            deformScale: 0
+            anchors.fill: parent
+            // Native plugins need a real file URL, not Quickshell's qs: VFS.
+            // Encode each segment so spaces, # and non-ASCII paths also work.
+            source: "file://" + Quickshell.shellPath(
+                "native/caelestia-blobs/BarBlobSurface.qml")
+                .split("/").map(encodeURIComponent).join("/")
+            asynchronous: false
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: root.closeOverlays()
+            readonly property color surfaceColor: Appearance.barSurfaceBaseColor
+            readonly property real smoothing: Appearance.px(20)
+            readonly property real barHeight: Appearance.barHeight
+            readonly property bool popupVisible: popup.revealProgress > 0
+            readonly property real popupX: popup.x
+            readonly property real popupWidth: popup.width
+            readonly property real popupHeight: popup.height
+            readonly property real popupRadius: Appearance.normalRadius
+            // Keep a single continuous silhouette without stacking glass tints.
+            readonly property real overlapHeight: ShellSettings.barFrostedGlass
+                ? Appearance.px(2) : popup.height * 0.2
+
+            Connections {
+                target: blobSurface.item
+                function onBackgroundClicked() { root.closeOverlays(); }
             }
-        }
-
-        Blobs.BlobRect {
-            id: popupBackground
-
-            // The old 20% overlap could reach more than 100 px into the Bar
-            // for tall panels. That is invisible with an opaque fill but
-            // becomes a clearly brighter double layer with glass. A tiny
-            // overlap is enough for BlobGroup to keep one continuous shape.
-            readonly property real overlapHeight: ShellSettings.barFrostedGlass ? Appearance.px(2) : popup.height * 0.2
-
-            visible: popup.revealProgress > 0
-            group: barBlobGroup
-            x: popup.x
-            y: Appearance.barHeight - overlapHeight
-            width: visible ? popup.width : 0
-            height: visible ? popup.height + overlapHeight : 0
-            radius: Appearance.normalRadius
-            deformScale: 0.000002
         }
 
         // In glass mode the connector corners must be captured by the same
@@ -612,7 +597,7 @@ Item {
         id: popup
         z: 10
         outputName: root.outputName
-        deformMatrix: popupBackground.deformMatrix
+        deformMatrix: blobSurface.item?.deformMatrix ?? Qt.matrix4x4()
     }
 
     Connections {
