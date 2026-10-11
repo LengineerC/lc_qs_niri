@@ -22,6 +22,8 @@ Singleton {
     property bool persistenceDirectoryReady: false
     property bool persistenceStateReady: false
     property bool persistenceWritePending: false
+    property int recoveryAttempt: 0
+    property string recoveryTarget: ""
 
     readonly property bool persistenceReady:
         persistenceDirectoryReady && persistenceStateReady
@@ -36,6 +38,8 @@ Singleton {
 
     readonly property int enabledCount:
         outputs.filter(output => output.enabled).length
+    readonly property bool recovering: recoveryProcess.running
+        || recoveryRetryTimer.running
 
     signal applyFinished(bool success, string message)
 
@@ -174,14 +178,29 @@ Singleton {
     function parseOutputs(text) {
         try {
             const payload = JSON.parse(text);
-            outputs = Object.keys(payload)
+            const nextOutputs = Object.keys(payload)
                 .map(name => normalizeOutput(payload[name]))
                 .sort((first, second) => {
                     if (first.enabled !== second.enabled)
                         return first.enabled ? -1 : 1;
                     return first.name.localeCompare(second.name);
                 });
-            errorMessage = "";
+            // Preserve delegates and unsaved settings during background polling.
+            if (JSON.stringify(outputs) !== JSON.stringify(nextOutputs))
+                outputs = nextOutputs;
+            if (enabledCount > 0) {
+                recoveryAttempt = 0;
+                const recovered = outputs.find(output =>
+                    output.name === recoveryTarget && output.enabled);
+                if (recovered && !recoveryProcess.running && persistenceReady) {
+                    persistOutput(outputRecord(recovered));
+                    recoveryTarget = "";
+                }
+            } else if (!outputs.length) {
+                recoveryAttempt = 0;
+                recoveryTarget = "";
+            }
+            ensureEnabledOutput();
         } catch (error) {
             errorMessage = I18n.tr("displayReadFailed")
                 + ": " + error;
@@ -191,6 +210,45 @@ Singleton {
 
     function clampedScale(value) {
         return Math.max(0.5, Math.min(4, Number(value) || 1));
+    }
+
+    function ensureEnabledOutput() {
+        if (!outputs.length || enabledCount > 0 || applying
+                || recoveryProcess.running || recoveryRetryTimer.running)
+            return;
+        const candidate = outputs[recoveryAttempt % outputs.length];
+        const fallback = recoveryAttempt >= outputs.length;
+        recoveryAttempt++;
+        recoveryTarget = candidate.name;
+        // Try the saved setup first; retry with a safe mode if it cannot light up.
+        recoveryProcess.exec(fallback ? [
+            "sh", "-c",
+            'niri msg output "$1" mode auto; '
+                + 'niri msg output "$1" scale 1; '
+                + 'niri msg output "$1" transform normal; '
+                + 'niri msg output "$1" position auto; '
+                + 'niri msg output "$1" vrr off; '
+                + 'niri msg output "$1" max-bpc 8; '
+                + 'niri msg output "$1" on',
+            "qs-output-recovery", candidate.name
+        ] : ["niri", "msg", "output", candidate.name, "on"]);
+    }
+
+    function moveOutput(name, x, y) {
+        const output = outputs.find(item => item.name === name);
+        if (!output?.enabled || applying || recovering
+                || !Number.isFinite(x) || !Number.isFinite(y))
+            return;
+        errorMessage = "";
+        operationOutput = name;
+        pendingPersistentOutput = outputRecord(output,
+            undefined, undefined, undefined, undefined, false, x, y);
+        commandQueue = [[
+            "niri", "msg", "output", name, "position", "set",
+            String(Math.round(x)), String(Math.round(y))
+        ]];
+        applying = true;
+        runNextCommand();
     }
 
     function stableOutputName(output) {
@@ -389,7 +447,7 @@ Singleton {
     function applyOutput(name, enabled, mode, scale,
             transform, automaticPosition, x, y, vrrEnabled, maxBpc) {
         const current = outputs.find(output => output.name === name);
-        if (!current || applying)
+        if (!current || applying || recovering)
             return;
 
         if (!enabled && current.enabled && enabledCount <= 1) {
@@ -468,8 +526,37 @@ Singleton {
     }
 
     Component.onCompleted: {
+        // This must survive a Qt/Wayland crash when the last output disappears.
+        Quickshell.execDetached([
+            "python3", stripFileProtocol(
+                Qt.resolvedUrl("../scripts/output_guard.py"))
+        ]);
         persistenceDirectoryProcess.running = true;
         refresh();
+    }
+
+    Timer {
+        // Remains active when settings are closed and when all screens vanish.
+        interval: 2000
+        running: true
+        repeat: true
+        onTriggered: root.refresh()
+    }
+
+    Connections {
+        target: Quickshell
+        function onScreensChanged() { root.refresh(); }
+    }
+
+    Process {
+        id: recoveryProcess
+        onExited: recoveryRetryTimer.restart()
+    }
+
+    Timer {
+        id: recoveryRetryTimer
+        interval: 1000
+        onTriggered: root.refresh()
     }
 
     Timer {

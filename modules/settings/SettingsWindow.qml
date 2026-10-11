@@ -18,9 +18,9 @@ ApplicationWindow {
     title: "QuickShell " + I18n.tr("settings")
     color: SettingsPalette.glassMode
         ? "transparent" : SettingsPalette.layer0
-    width: Math.min(screen?.width * 0.86 ?? Appearance.px(980),
+    width: Math.min((screen?.width || Appearance.px(980) / 0.86) * 0.86,
         Appearance.px(980))
-    height: Math.min(screen?.height * 0.92 ?? Appearance.px(920),
+    height: Math.min((screen?.height || Appearance.px(920) / 0.92) * 0.92,
         Appearance.px(920))
     minimumWidth: Appearance.px(760)
     minimumHeight: Appearance.px(620)

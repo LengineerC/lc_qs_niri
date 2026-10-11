@@ -35,6 +35,7 @@ Scope {
         }
 
         screen: modelData
+        visible: !!modelData?.name
         color: "black"
         exclusiveZone: -1
 
@@ -59,7 +60,7 @@ Scope {
 
         function configureTransition(path) {
             transitionName = WallpaperService.transitionFor(path);
-            const outputName = modelData.name;
+            const outputName = modelData?.name ?? "";
             wipeDirection = Math.floor(
                 WallpaperService.seededValue(outputName, 1) * 4);
             stripeCount = 7 + Math.floor(
@@ -254,7 +255,7 @@ Scope {
 
     // Workspace background: Niri scales one clear copy with each workspace.
     Variants {
-        model: Quickshell.screens
+        model: Quickshell.screens.filter(screen => screen && screen.name)
 
         WallpaperWindow {
             overviewBackdrop: false
@@ -263,7 +264,7 @@ Scope {
 
     // Overview backdrop: Niri keeps this blurred copy stationary.
     Variants {
-        model: Quickshell.screens
+        model: Quickshell.screens.filter(screen => screen && screen.name)
 
         WallpaperWindow {
             overviewBackdrop: true

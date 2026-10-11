@@ -6,13 +6,13 @@ import Quickshell.Wayland
 import qs.common
 
 Variants {
-    model: Quickshell.screens
+    model: Quickshell.screens.filter(screen => screen && screen.name)
 
     PanelWindow {
         required property ShellScreen modelData
 
         screen: modelData
-        visible: ShellSettings.screenCornersEnabled
+        visible: !!modelData?.name && ShellSettings.screenCornersEnabled
         color: "transparent"
         exclusiveZone: -1
         WlrLayershell.layer: WlrLayer.Overlay
@@ -27,7 +27,7 @@ Variants {
         }
 
         ScreenCorners {
-            outputName: modelData.name
+            outputName: (modelData?.name ?? "")
         }
 
         mask: Region {

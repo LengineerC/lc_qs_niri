@@ -286,6 +286,10 @@ Item {
                     width: parent.width
                     spacing: Appearance.spacingMedium
 
+                    DisplayArrangement {
+                        Layout.fillWidth: true
+                    }
+
                     Repeater {
                         model: OutputService.outputs
 
@@ -420,6 +424,10 @@ Item {
                                         useBarPalette: SettingsPalette.glassMode
                                         checked: outputCard.draftEnabled
                                         enabled: !OutputService.applying
+                                            && !OutputService.recovering
+                                            && !(outputCard.modelData.enabled
+                                                && OutputService.enabledCount <= 1
+                                                && outputCard.draftEnabled)
                                         onToggled: checked =>
                                             outputCard.draftEnabled = checked
                                     }
@@ -607,73 +615,6 @@ Item {
                                     opacity: enabled ? 1 : 0.45
 
                                     ColumnLayout {
-                                        spacing: Appearance.spacingTiny
-
-                                        PanelText {
-                                            text: I18n.tr("positionX")
-                                            color: SettingsPalette.subtext
-                                            font.pixelSize:
-                                                Appearance.smallFontSize
-                                        }
-
-                                        NumberField {
-                                            text: String(
-                                                outputCard.draftX)
-                                            enabled:
-                                                !outputCard.automaticPosition
-                                            onTextEdited:
-                                                outputCard.draftX
-                                                    = Number(text) || 0
-                                        }
-                                    }
-
-                                    ColumnLayout {
-                                        spacing: Appearance.spacingTiny
-
-                                        PanelText {
-                                            text: I18n.tr("positionY")
-                                            color: SettingsPalette.subtext
-                                            font.pixelSize:
-                                                Appearance.smallFontSize
-                                        }
-
-                                        NumberField {
-                                            text: String(
-                                                outputCard.draftY)
-                                            enabled:
-                                                !outputCard.automaticPosition
-                                            onTextEdited:
-                                                outputCard.draftY
-                                                    = Number(text) || 0
-                                        }
-                                    }
-
-                                    ColumnLayout {
-                                        Layout.preferredWidth:
-                                            Appearance.px(105)
-                                        spacing: Appearance.spacingSmall
-
-                                        PanelText {
-                                            text: I18n.tr(
-                                                "automaticPosition")
-                                            color: SettingsPalette.subtext
-                                            font.pixelSize:
-                                                Appearance.smallFontSize
-                                        }
-
-                                        SettingSwitch {
-
-                                            useBarPalette: SettingsPalette.glassMode
-                                            checked: outputCard
-                                                .automaticPosition
-                                            onToggled: checked =>
-                                                outputCard
-                                                    .automaticPosition
-                                                        = checked
-                                        }
-                                    }
-
-                                    ColumnLayout {
                                         visible: outputCard.modelData
                                             .vrrSupported
                                         Layout.preferredWidth:
@@ -757,6 +698,7 @@ Item {
                                             ? I18n.tr("applying")
                                             : I18n.tr("apply")
                                         enabled: !OutputService.applying
+                                            && !OutputService.recovering
                                             && !OutputService.refreshing
                                             && OutputService
                                                 .persistenceReady

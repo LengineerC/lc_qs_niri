@@ -66,9 +66,9 @@ Scope {
         id: clipboardWindow
 
         title: "QuickShell " + I18n.tr("clipboard")
-        width: Math.min(screen?.width * 0.72 ?? Appearance.px(560),
+        width: Math.min((screen?.width || Appearance.px(560) / 0.72) * 0.72,
             Appearance.px(560))
-        height: Math.min(screen?.height * 0.82 ?? Appearance.px(640),
+        height: Math.min((screen?.height || Appearance.px(640) / 0.82) * 0.82,
             Appearance.px(640))
         minimumWidth: Appearance.px(430)
         minimumHeight: Appearance.px(400)
@@ -111,9 +111,9 @@ Scope {
         id: systemMonitorWindow
 
         title: "QuickShell " + I18n.tr("systemMonitor")
-        width: Math.min(screen?.width * 0.88 ?? Appearance.px(900),
+        width: Math.min((screen?.width || Appearance.px(900) / 0.88) * 0.88,
             Appearance.px(900))
-        height: Math.min(screen?.height * 0.9 ?? Appearance.px(780),
+        height: Math.min((screen?.height || Appearance.px(780) / 0.9) * 0.9,
             Appearance.px(780))
         minimumWidth: Appearance.px(720)
         minimumHeight: Appearance.px(560)

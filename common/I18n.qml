@@ -257,6 +257,8 @@ Singleton {
         orientationFlipped180: ["垂直翻转", "Flipped vertically"],
         orientationFlipped270: ["翻转并旋转 270°", "Flipped 270°"],
         displayPosition: ["显示器位置", "Display position"],
+        displayDragHint: ["拖动屏幕调整排列，松开后自动吸附并保存。关闭的屏幕不参与排列。",
+            "Drag displays to rearrange. Release to snap and save. Disabled displays are excluded."],
         automaticPosition: ["自动排列", "Automatic"],
         positionX: ["横向位置 X", "Position X"],
         positionY: ["纵向位置 Y", "Position Y"],

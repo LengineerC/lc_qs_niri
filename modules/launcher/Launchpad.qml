@@ -160,7 +160,7 @@ Scope {
     }
 
     Variants {
-        model: Quickshell.screens
+        model: Quickshell.screens.filter(screen => screen && screen.name)
 
         PanelWindow {
             id: launchpadWindow
@@ -168,11 +168,12 @@ Scope {
             required property ShellScreen modelData
             property real revealProgress: 0
             readonly property bool targetShown: root.shown
-                && root.targetOutputName === modelData.name
+                && root.targetOutputName === (modelData?.name ?? "")
                 && !ShellSettings.launcherUseSpotlight
 
             screen: modelData
-            visible: targetShown || revealProgress > 0.001
+            visible: !!modelData?.name
+                && (targetShown || revealProgress > 0.001)
             color: "transparent"
             exclusiveZone: -1
             exclusionMode: ExclusionMode.Ignore
@@ -205,7 +206,7 @@ Scope {
             }
 
             onRevealProgressChanged: {
-                if (root.targetOutputName === modelData.name)
+                if (root.targetOutputName === (modelData?.name ?? ""))
                     NiriService.launchpadProgress = revealProgress;
             }
 
@@ -302,7 +303,7 @@ Scope {
     }
 
     Variants {
-        model: Quickshell.screens
+        model: Quickshell.screens.filter(screen => screen && screen.name)
 
         // A centered layer-shell surface behaves like a frameless utility
         // window: Niri cannot tile or drag it, and no client-side title bar is
@@ -318,16 +319,17 @@ Scope {
             readonly property int resultsTop: surfaceMargin
                 + searchHeight + surfaceGap
             readonly property bool targetShown: root.shown
-                && root.targetOutputName === modelData.name
+                && root.targetOutputName === (modelData?.name ?? "")
                 && ShellSettings.launcherUseSpotlight
 
             screen: modelData
-            visible: targetShown || revealProgress > 0.001
+            visible: !!modelData?.name
+                && (targetShown || revealProgress > 0.001)
             color: "transparent"
-            implicitWidth: Math.min(Appearance.px(640),
-                modelData.width - Appearance.px(48))
-            implicitHeight: Math.min(Appearance.px(480),
-                modelData.height - Appearance.px(100))
+            implicitWidth: Math.max(1, Math.min(Appearance.px(640),
+                (modelData?.width ?? 0) - Appearance.px(48)))
+            implicitHeight: Math.max(1, Math.min(Appearance.px(480),
+                (modelData?.height ?? 0) - Appearance.px(100)))
             exclusiveZone: -1
             exclusionMode: ExclusionMode.Ignore
 

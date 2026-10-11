@@ -52,7 +52,7 @@ Scope {
     }
 
     Variants {
-        model: Quickshell.screens
+        model: Quickshell.screens.filter(screen => screen && screen.name)
 
         PanelWindow {
             id: barWindow
@@ -78,6 +78,7 @@ Scope {
                     && NiriService.barRetractionProgress < 0.999
 
             screen: modelData
+            visible: !!modelData?.name
 
             anchors {
                 top: true
@@ -85,7 +86,9 @@ Scope {
                 right: true
             }
 
-            implicitHeight: modelData.height
+            // A removed output may clear modelData before Variants destroys us.
+            // Layer-shell surfaces without opposite anchors need a nonzero size.
+            implicitHeight: Math.max(1, modelData?.height ?? 1)
             // Keep the layer-shell geometry stable while overview animates.
             // Resizing the exclusive zone mid-animation can expose an
             // unpainted compositor frame.
@@ -186,7 +189,7 @@ Scope {
                             && !barContent.popupContainsMouse
                             && NotificationService
                                 .panelFocusProxyOutputName
-                                !== barWindow.modelData.name) {
+                                !== (barWindow.modelData?.name ?? "")) {
                         barContent.closePopup();
                     }
                 }
@@ -206,7 +209,7 @@ Scope {
                     // bindings have settled for keyboard/touch activation.
                     focusDismissTimer.stop();
                     if (NotificationService.panelFocusProxyOutputName
-                            === barWindow.modelData.name) {
+                            === (barWindow.modelData?.name ?? "")) {
                         return;
                     }
                     barContent.requestHostWindowFocus();
@@ -220,7 +223,7 @@ Scope {
                     } else if (barContent.popupShown
                             && NotificationService
                                 .panelFocusProxyOutputName
-                                !== barWindow.modelData.name) {
+                                !== (barWindow.modelData?.name ?? "")) {
                         focusDismissTimer.restart();
                     }
                 }
@@ -232,7 +235,7 @@ Scope {
                             && !barContent.hostWindowActive
                             && NotificationService
                                 .panelFocusProxyOutputName
-                                !== barWindow.modelData.name) {
+                                !== (barWindow.modelData?.name ?? "")) {
                         focusDismissTimer.restart();
                     }
                 }
@@ -252,7 +255,7 @@ Scope {
                 BarContent {
                     id: barContent
 
-                    outputName: modelData.name
+                    outputName: (modelData?.name ?? "")
                     effectsOpacity:
                         1 - NiriService.barRetractionProgress
                     anchors {
@@ -347,7 +350,7 @@ Scope {
     // IPC request. Map only this tiny, non-interactive surface so the bar and
     // its popup keep their existing geometry and animation state.
     Variants {
-        model: Quickshell.screens
+        model: Quickshell.screens.filter(screen => screen && screen.name)
 
         PanelWindow {
             id: notificationFocusWindow
@@ -356,9 +359,9 @@ Scope {
             property bool acquiredFocus: false
 
             screen: modelData
-            visible: NotificationService.panelVisible
+            visible: !!modelData?.name && NotificationService.panelVisible
                 && NotificationService.panelFocusProxyOutputName
-                    === modelData.name
+                    === (modelData?.name ?? "")
             implicitWidth: 2
             implicitHeight: 2
 
@@ -414,9 +417,9 @@ Scope {
                     }
 
                     if (NotificationService.panelHostFocusOutputName
-                            === notificationFocusWindow.modelData.name) {
+                            === (notificationFocusWindow.modelData?.name ?? "")) {
                         NotificationService.releasePanelFocusProxy(
-                            notificationFocusWindow.modelData.name);
+                            (notificationFocusWindow.modelData?.name ?? ""));
                     } else {
                         NotificationService.closePanel();
                     }
@@ -430,7 +433,7 @@ Scope {
     // through Quickshell IPC. The always-mapped bar surface cannot trigger
     // that compositor behaviour by changing an Item's visibility alone.
     Variants {
-        model: Quickshell.screens
+        model: Quickshell.screens.filter(screen => screen && screen.name)
 
         PanelWindow {
             id: sidebarWindow
@@ -439,12 +442,13 @@ Scope {
             readonly property real sidebarWidth:
                 Math.min(Appearance.px(390),
                     Math.max(Appearance.px(320),
-                        modelData.width * 0.32))
+                        (modelData?.width ?? 0) * 0.32))
             property bool mappingEnabled: true
             property bool acquiredFocus: false
 
             screen: modelData
-            visible: mappingEnabled && leftSidebar.surfaceVisible
+            visible: !!modelData?.name
+                && mappingEnabled && leftSidebar.surfaceVisible
             implicitWidth: sidebarWidth + Appearance.px(24)
 
             anchors {
@@ -539,7 +543,7 @@ Scope {
             LeftSidebar {
                 id: leftSidebar
 
-                outputName: modelData.name
+                outputName: (modelData?.name ?? "")
                 width: sidebarWindow.sidebarWidth
                 y: Appearance.px(5)
                 height: Math.max(0,

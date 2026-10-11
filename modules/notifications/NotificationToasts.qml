@@ -7,7 +7,7 @@ import qs.common
 import qs.services
 
 Variants {
-    model: Quickshell.screens
+    model: Quickshell.screens.filter(screen => screen && screen.name)
 
     PanelWindow {
         id: toastWindow
@@ -18,7 +18,8 @@ Variants {
         readonly property int verticalOffset: -Appearance.px(40)
 
         screen: modelData
-        visible: NotificationService.popupEntries.length > 0
+        visible: !!modelData?.name
+            && NotificationService.popupEntries.length > 0
             && !NotificationService.doNotDisturb
         color: "transparent"
         implicitWidth: Appearance.px(435)
@@ -153,7 +154,7 @@ Variants {
                     required property var modelData
                     width: toastColumn.width
                     notificationEntry: modelData
-                    presentationScreen: toastWindow.modelData.name
+                    presentationScreen: toastWindow.modelData?.name ?? ""
                 }
             }
         }
