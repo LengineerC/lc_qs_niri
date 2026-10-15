@@ -28,6 +28,10 @@ Singleton {
             "以居中的无边框窗口搜索并启动应用，关闭后保留全屏启动台",
             "Search and launch apps in a centered borderless window; turn off to keep the full-screen Launchpad"],
         spotlightResults: ["应用程序", "Applications"],
+        spotlightSearchPlaceholder: ["搜索应用或输入算式…", "Search apps or enter a calculation…"],
+        spotlightCalculator: ["计算器", "Calculator"],
+        spotlightCopyHint: ["回车  复制结果", "Enter  Copy result"],
+        spotlightCopied: ["已复制结果", "Result copied"],
         spotlightResultCount: ["%1 个结果", "%1 results"],
         performanceMonitor: ["性能监控", "Performance monitor"],
         performanceMonitorHint: [

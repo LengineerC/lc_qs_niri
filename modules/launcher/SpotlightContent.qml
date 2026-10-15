@@ -7,6 +7,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.common
 import qs.common.widgets
+import "Calculator.js" as Calculator
 
 Item {
     id: root
@@ -77,6 +78,13 @@ Item {
                     second.entry.name, I18n.language);
             }).map(result => result.entry);
     }
+    readonly property var calculation: Calculator.calculate(searchInput.text)
+    property bool resultCopied: false
+    readonly property var results: calculation === null ? filteredApplications
+        : [{ isCalculator: true, name: calculation,
+            genericName: searchInput.text.trim() + "  ·  "
+                + I18n.tr(resultCopied ? "spotlightCopied" : "spotlightCopyHint") }]
+            .concat(filteredApplications)
 
     function searchableText(entry) {
         return [
@@ -112,6 +120,12 @@ Item {
     function launch(entry) {
         if (!entry)
             return;
+        if (entry.isCalculator === true) {
+            Quickshell.clipboardText = entry.name;
+            resultCopied = true;
+            focusSearch();
+            return;
+        }
         closeRequested();
         entry.execute();
     }
@@ -120,7 +134,7 @@ Item {
         if (resultList.count <= 0)
             return;
         const index = Math.max(0, resultList.currentIndex);
-        launch(filteredApplications[index]);
+        launch(results[index]);
     }
 
     function moveSelection(offset) {
@@ -138,7 +152,7 @@ Item {
     }
 
     function resetSelection() {
-        resultList.currentIndex = filteredApplications.length > 0 ? 0 : -1;
+        resultList.currentIndex = results.length > 0 ? 0 : -1;
         resultList.positionViewAtBeginning();
     }
 
@@ -249,7 +263,7 @@ Item {
 
                 Layout.fillWidth: true
                 padding: 0
-                placeholderText: I18n.tr("searchApplications")
+                placeholderText: I18n.tr("spotlightSearchPlaceholder")
                 color: root.primaryText
                 placeholderTextColor: root.secondaryText
                 selectionColor: root.textSelectionColor
@@ -262,7 +276,10 @@ Item {
                     weight: Font.Medium
                 }
                 Keys.priority: Keys.BeforeItem
-                onTextChanged: Qt.callLater(root.resetSelection)
+                onTextChanged: {
+                    root.resultCopied = false;
+                    Qt.callLater(root.resetSelection);
+                }
 
                 Keys.onPressed: event => {
                     if (event.key === Qt.Key_Down) {
@@ -347,7 +364,8 @@ Item {
                 Layout.rightMargin: Appearance.px(20)
 
                 AppText {
-                    text: I18n.tr("spotlightResults")
+                    text: I18n.tr(root.calculation !== null
+                        ? "spotlightCalculator" : "spotlightResults")
                     color: root.primaryText
                     font {
                         family: Appearance.fontFamily
@@ -360,7 +378,7 @@ Item {
 
                 AppText {
                     text: I18n.tr("spotlightResultCount")
-                        .arg(root.filteredApplications.length)
+                        .arg(root.results.length)
                     color: root.secondaryText
                     font {
                         family: Appearance.fontFamily
@@ -381,7 +399,7 @@ Item {
                     anchors.fill: parent
                     visible: count > 0
                     clip: true
-                    model: root.filteredApplications
+                    model: root.results
                     currentIndex: count > 0 ? 0 : -1
                     spacing: Appearance.px(3)
                     boundsBehavior: Flickable.StopAtBounds
@@ -407,7 +425,7 @@ Item {
                         width: resultList.width
                             - (resultList.contentHeight > resultList.height
                                 ? Appearance.px(8) : 0)
-                        height: Appearance.px(54)
+                        height: Appearance.px(modelData.isCalculator === true ? 86 : 54)
                         radius: Appearance.px(13)
                         color: selected ? root.selectedColor
                             : resultArea.containsMouse
@@ -430,10 +448,21 @@ Item {
                             spacing: Appearance.px(12)
 
                             LauncherIcon {
+                                visible: resultDelegate.modelData.isCalculator !== true
                                 iconSize: Appearance.px(38)
-                                iconName: resultDelegate.modelData.icon
+                                iconName: resultDelegate.modelData.icon || ""
                                 hovered: resultArea.containsMouse
                                 pressed: resultArea.pressed
+                            }
+
+                            AppText {
+                                visible: resultDelegate.modelData.isCalculator === true
+                                Layout.preferredWidth: Appearance.px(38)
+                                horizontalAlignment: Text.AlignHCenter
+                                text: "="
+                                color: resultDelegate.highlighted
+                                    ? root.selectedTextColor : root.accentColor
+                                font.pixelSize: Appearance.px(32)
                             }
 
                             ColumnLayout {
@@ -450,7 +479,8 @@ Item {
                                     elide: Text.ElideRight
                                     font {
                                         family: Appearance.fontFamily
-                                        pixelSize: Appearance.fontSize
+                                        pixelSize: resultDelegate.modelData.isCalculator === true
+                                            ? Appearance.px(28) : Appearance.fontSize
                                         weight: Font.DemiBold
                                     }
                                 }
@@ -551,7 +581,8 @@ Item {
 
                 AppText {
                     text: I18n.tr("launcherNavigateHint") + "   "
-                        + I18n.tr("launcherOpenHint") + "   "
+                        + I18n.tr(root.results[resultList.currentIndex]?.isCalculator === true
+                            ? "spotlightCopyHint" : "launcherOpenHint") + "   "
                         + I18n.tr("launcherCloseHint")
                     color: root.secondaryText
                     font {
