@@ -23,6 +23,8 @@ Singleton {
     property string locationSearchStatus: ""
     property string locationSearchError: ""
     property bool refreshAgain: false
+    property int retryCount: 0
+    readonly property int maxRetries: 5
 
     readonly property string locationName:
         ShellSettings.weatherLocationName
@@ -169,6 +171,8 @@ Singleton {
     }
 
     function invalidateForecast() {
+        forecastRetryDelay.stop();
+        retryCount = 0;
         ready = false;
         loading = true;
         current = ({});
@@ -273,10 +277,12 @@ Singleton {
             ready = true;
             error = "";
             lastUpdated = new Date();
+            return true;
         } catch (exception) {
             error = String(exception);
             console.warn("WeatherService: cannot parse forecast:",
                 exception);
+            return false;
         }
     }
 
@@ -306,7 +312,7 @@ Singleton {
             + "&timezone=auto&forecast_days=7";
     }
 
-    function refresh() {
+    function refresh(isRetry = false) {
         /*
          * ShellSettings 使用 FileView 异步恢复。它就绪前的坐标只是
          * 默认值，不能据此发起启动请求。
@@ -321,6 +327,10 @@ Singleton {
             return;
         }
 
+        forecastRetryDelay.stop();
+        if (!isRetry)
+            retryCount = 0;
+
         const latitude = Number(ShellSettings.weatherLatitude);
         const longitude = Number(ShellSettings.weatherLongitude);
         const requestLocationKey = coordinateKey(latitude, longitude);
@@ -329,6 +339,7 @@ Singleton {
 
         loading = true;
         error = "";
+        forecastProcess.responseText = "";
         forecastProcess.locationKey = requestLocationKey;
         forecastProcess.command = [
             "curl", "-fsSL", "--max-time", "20",
@@ -433,6 +444,11 @@ Singleton {
     }
 
     Timer {
+        id: forecastRetryDelay
+        onTriggered: root.refresh(true)
+    }
+
+    Timer {
         id: locationRefreshDelay
         interval: 250
         onTriggered: root.refresh()
@@ -442,10 +458,11 @@ Singleton {
         id: forecastProcess
 
         property string locationKey: ""
+        property string responseText: ""
 
         stdout: StdioCollector {
             onStreamFinished:
-                root.parseForecast(text, forecastProcess.locationKey)
+                forecastProcess.responseText = text
         }
         stderr: StdioCollector {
             onStreamFinished: {
@@ -460,6 +477,9 @@ Singleton {
             const responseMatchesLocation =
                 forecastProcess.locationKey
                     === root.configuredLocationKey();
+            const succeeded = exitCode === 0 && responseMatchesLocation
+                && root.parseForecast(forecastProcess.responseText,
+                    forecastProcess.locationKey);
 
             /*
              * 旧地点响应退出或已有下一次刷新排队时维持加载态，
@@ -473,6 +493,14 @@ Singleton {
             if (root.refreshAgain) {
                 root.refreshAgain = false;
                 Qt.callLater(() => root.refresh());
+            } else if (responseMatchesLocation && !succeeded
+                    && root.retryCount < root.maxRetries) {
+                forecastRetryDelay.interval = 2000 * Math.pow(2, root.retryCount);
+                root.retryCount++;
+                root.loading = true;
+                forecastRetryDelay.restart();
+            } else if (succeeded) {
+                root.retryCount = 0;
             }
         }
     }
