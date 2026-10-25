@@ -5,6 +5,7 @@ import QtCore
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Services.SystemTray
 
 Singleton {
     id: root
@@ -156,27 +157,32 @@ Singleton {
         if (typeof item === "string")
             return itemId;
 
+        // Neither Id nor Title is guaranteed to be unique across applications.
+        // Keep both fields and never match another application's partial key.
+        return "item:" + JSON.stringify([itemId, trayItemTitle(item)]);
+    }
+
+    function legacyTrayItemAliases(item) {
+        const itemId = trayItemId(item);
         const title = trayItemTitle(item);
-        // Ayatana applications may expose a new random alphanumeric Id on
-        // every launch. Their application title remains stable, so use it as
-        // the persistent identity. Normal SNI ids stay authoritative.
-        const ephemeralId = /^[A-Za-z0-9]{8,16}$/.test(itemId)
-            && title && title !== itemId;
-        return ephemeralId ? "title:" + title : "id:" + itemId;
+        return [itemId, itemId ? "id:" + itemId : "",
+            title ? "title:" + title : ""].filter(value => value);
     }
 
     function trayItemAliases(item) {
-        const aliases = [];
-        const itemId = trayItemId(item);
-        const title = trayItemTitle(item);
         const key = trayItemKey(item);
-        for (const alias of [key, itemId,
-                itemId ? "id:" + itemId : "",
-                title ? "title:" + title : ""]) {
-            if (alias && aliases.indexOf(alias) < 0)
-                aliases.push(alias);
-        }
-        return aliases;
+        if (!key)
+            return [];
+        if (typeof item === "string")
+            return [key];
+
+        // Migrate old settings only when an alias has one active owner.
+        // Ambiguous legacy state cannot tell which application was intended.
+        const items = SystemTray.items.values;
+        const aliases = legacyTrayItemAliases(item).filter(alias =>
+            !items.some(other => trayItemKey(other) !== key
+                && legacyTrayItemAliases(other).indexOf(alias) >= 0));
+        return [key].concat(aliases);
     }
 
     function trayItemListIndex(list, item) {
@@ -274,7 +280,11 @@ Singleton {
         const values = items.slice();
 
         function canonicalized(list) {
-            const next = list.slice();
+            const next = list.filter(savedKey => {
+                const owners = values.filter(item =>
+                    legacyTrayItemAliases(item).indexOf(savedKey) >= 0);
+                return new Set(owners.map(item => trayItemKey(item))).size <= 1;
+            });
             for (const item of values) {
                 const key = trayItemKey(item);
                 const aliases = trayItemAliases(item);
