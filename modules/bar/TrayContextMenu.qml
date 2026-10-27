@@ -43,8 +43,10 @@ PopupWindow {
 
     anchor {
         item: root.anchorItem
-        edges: Edges.Bottom
-        gravity: Edges.Bottom
+        edges: ShellSettings.barPosition === "bottom" ? Edges.Top
+            : ShellSettings.barPosition === "left" ? Edges.Right
+            : ShellSettings.barPosition === "right" ? Edges.Left : Edges.Bottom
+        gravity: root.anchor.edges
         adjustment: PopupAdjustment.SlideX
             | PopupAdjustment.ResizeY
     }

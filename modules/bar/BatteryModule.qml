@@ -8,13 +8,15 @@ import qs.services
 MouseArea {
     id: root
 
+    property bool vertical: false
+
     signal activated
 
     visible: BatteryService.available
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
-    implicitWidth: batteryRow.implicitWidth + Appearance.px(18)
-    implicitHeight: Appearance.barHeight
+    implicitWidth: vertical ? Appearance.barHeight : batteryRow.implicitWidth + Appearance.px(18)
+    implicitHeight: vertical ? batteryRow.implicitHeight + Appearance.px(12) : Appearance.barHeight
     onClicked: activated()
 
     Rectangle {
@@ -44,13 +46,17 @@ MouseArea {
         }
     }
 
-    RowLayout {
+    GridLayout {
         id: batteryRow
+        columns: root.vertical ? 1 : -1
+        rows: root.vertical ? -1 : 1
+        rowSpacing: Appearance.px(2)
+        columnSpacing: Appearance.px(5)
 
         anchors.centerIn: parent
-        spacing: Appearance.px(5)
 
         AppText {
+            Layout.alignment: Qt.AlignHCenter
             text: BatteryService.powerIcon()
             color: BatteryService.low
                 ? Appearance.barError
@@ -64,6 +70,7 @@ MouseArea {
         }
 
         AppText {
+            Layout.alignment: Qt.AlignHCenter
             visible: BatteryService.hasBattery
             text: BatteryService.percent + "%"
             color: BatteryService.low
@@ -75,17 +82,19 @@ MouseArea {
         }
 
         Rectangle {
+            Layout.alignment: Qt.AlignHCenter
             visible: BatteryService.showPowerStatus
-            implicitWidth: powerStatus.implicitWidth + Appearance.px(12)
-            implicitHeight: Appearance.px(22)
+            implicitWidth: Math.min(Appearance.barHeight - Appearance.px(8), powerStatus.implicitWidth + Appearance.px(12))
+            implicitHeight: root.vertical ? powerStatus.implicitHeight + Appearance.px(8) : Appearance.px(22)
             radius: Appearance.fullRadius
             color: Appearance.barPrimaryContainer
 
             AppText {
+            Layout.alignment: Qt.AlignHCenter
                 id: powerStatus
 
                 anchors.centerIn: parent
-                text: BatteryService.barStatusText
+                text: root.vertical ? Array.from(BatteryService.barStatusText).join("\n") : BatteryService.barStatusText
                 color: Appearance.barPrimaryContainerText
                 font {
                     family: Appearance.fontFamily

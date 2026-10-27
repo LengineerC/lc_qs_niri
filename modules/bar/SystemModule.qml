@@ -9,12 +9,14 @@ MouseArea {
     id: root
 
     property bool compact: false
+    property bool vertical: false
+
     signal activated
 
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
-    implicitWidth: iconRow.implicitWidth + Appearance.px(20)
-    implicitHeight: Appearance.barHeight
+    implicitWidth: vertical ? Appearance.barHeight : iconRow.implicitWidth + Appearance.px(20)
+    implicitHeight: vertical ? iconRow.implicitHeight + Appearance.px(12) : Appearance.barHeight
     onClicked: activated()
 
     Rectangle {
@@ -42,13 +44,17 @@ MouseArea {
         }
     }
 
-    RowLayout {
+    GridLayout {
         id: iconRow
+        columns: root.vertical ? 1 : -1
+        rows: root.vertical ? -1 : 1
+        rowSpacing: Appearance.px(2)
 
         anchors.centerIn: parent
-        spacing: Appearance.px(root.compact ? 8 : 13)
+        columnSpacing: Appearance.px(root.compact ? 8 : 13)
 
         AppText {
+            Layout.alignment: Qt.AlignHCenter
             visible: SystemService.wifiEnabled
             text: SystemService.wifiIcon()
             color: Appearance.barLayer0Text
@@ -60,6 +66,7 @@ MouseArea {
         }
 
         AppText {
+            Layout.alignment: Qt.AlignHCenter
             visible: SystemService.bluetoothEnabled
             text: SystemService.connectedBluetoothDevices.length > 0
                 ? "󰂱" : "󰂯"
@@ -72,6 +79,7 @@ MouseArea {
         }
 
         AppText {
+            Layout.alignment: Qt.AlignHCenter
             visible: SystemService.locationAvailable
                 && SystemService.locationEnabled
             text: "󰍎"
@@ -84,6 +92,7 @@ MouseArea {
         }
 
         AppText {
+            Layout.alignment: Qt.AlignHCenter
             visible: SystemService.sinkReady
             text: SystemService.volumeIcon()
             color: SystemService.muted
@@ -96,6 +105,7 @@ MouseArea {
         }
 
         AppText {
+            Layout.alignment: Qt.AlignHCenter
             visible: SystemService.sourceReady
                 && !SystemService.microphoneMuted
             text: SystemService.microphoneIcon()

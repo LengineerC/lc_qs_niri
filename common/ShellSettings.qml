@@ -39,6 +39,8 @@ Singleton {
     property string dateFormat: "MMM dd ddd"
     // "group" centers the complete middle row; "clock" pins the clock's
     // midpoint to the Bar midpoint.
+    property string barPosition: "top"
+    readonly property bool barVertical: barPosition === "left" || barPosition === "right"
     property string barCenterAlignment: "group"
     // -1 follows the active locale; 0/1/6 use JS weekday numbering.
     property int calendarWeekStart: -1
@@ -326,7 +328,7 @@ Singleton {
             return;
 
         settingsStorage.setText(JSON.stringify({
-            version: 28,
+            version: 29,
             showActiveWindowIcon: showActiveWindowIcon,
             showEmptyWorkspaces: showEmptyWorkspaces,
             workspaceIndicatorStyle: workspaceIndicatorStyle,
@@ -351,6 +353,7 @@ Singleton {
             language: language,
             timeFormat: timeFormat,
             dateFormat: dateFormat,
+            barPosition: barPosition,
             barCenterAlignment: barCenterAlignment,
             calendarWeekStart: calendarWeekStart,
             clipboardMaxEntryMb: clipboardMaxEntryMb,
@@ -381,7 +384,7 @@ Singleton {
         let needsMigration = false;
         try {
             const state = JSON.parse(data);
-            if (state.version !== 28)
+            if (state.version !== 29)
                 needsMigration = true;
             if (typeof state.showActiveWindowIcon === "boolean")
                 showActiveWindowIcon = state.showActiveWindowIcon;
@@ -478,6 +481,10 @@ Singleton {
             if (typeof state.dateFormat === "string"
                     && state.dateFormat.trim())
                 dateFormat = state.dateFormat.trim().slice(0, 64);
+            else
+                needsMigration = true;
+            if (["top", "bottom", "left", "right"].indexOf(state.barPosition) >= 0)
+                barPosition = state.barPosition;
             else
                 needsMigration = true;
             if (["group", "clock"].indexOf(
@@ -650,6 +657,7 @@ Singleton {
         language = "zh_CN";
         timeFormat = "HH:mm";
         dateFormat = "MMM dd ddd";
+        barPosition = "top";
         barCenterAlignment = "group";
         calendarWeekStart = -1;
         clipboardMaxEntryMb = 10;
@@ -703,6 +711,7 @@ Singleton {
     onLanguageChanged: scheduleSave()
     onTimeFormatChanged: scheduleSave()
     onDateFormatChanged: scheduleSave()
+    onBarPositionChanged: scheduleSave()
     onBarCenterAlignmentChanged: scheduleSave()
     onCalendarWeekStartChanged: scheduleSave()
     onClipboardMaxEntryMbChanged: scheduleSave()
@@ -779,6 +788,11 @@ Singleton {
             const value = format.trim();
             if (value)
                 root.dateFormat = value.slice(0, 64);
+        }
+
+        function setBarPosition(position: string): void {
+            if (["top", "bottom", "left", "right"].indexOf(position) >= 0)
+                root.barPosition = position;
         }
 
         function setBarCenterAlignment(mode: string): void {
@@ -890,6 +904,7 @@ Singleton {
                 language: root.language,
                 timeFormat: root.timeFormat,
                 dateFormat: root.dateFormat,
+                barPosition: root.barPosition,
                 barCenterAlignment: root.barCenterAlignment,
                 calendarWeekStart: root.calendarWeekStart,
                 clipboardMaxEntryMb: root.clipboardMaxEntryMb,

@@ -8,13 +8,15 @@ import qs.services
 MouseArea {
     id: root
 
+    property int verticalTextLimit: 6
+    property bool vertical: false
     property bool compact: false
     signal activated
 
-    implicitWidth: Math.min(
+    implicitWidth: vertical ? Appearance.barHeight : Math.min(
         mediaRow.implicitWidth + Appearance.px(18),
         Appearance.px(compact ? 270 : 350))
-    implicitHeight: Appearance.barHeight
+    implicitHeight: vertical ? Appearance.px(44 + verticalTextLimit * 16) : Appearance.barHeight
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.MiddleButton
@@ -61,6 +63,7 @@ MouseArea {
 
     RowLayout {
         id: mediaRow
+        visible: !root.vertical
 
         anchors {
             left: parent.left
@@ -142,6 +145,35 @@ MouseArea {
             font {
                 family: Appearance.fontFamily
                 pixelSize: Appearance.smallFontSize
+            }
+        }
+    }
+    Column {
+        visible: root.vertical
+        anchors.centerIn: parent
+        spacing: Appearance.px(3)
+        AppText {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: MediaService.isPlaying ? "󰏤" : "󰝚"
+            color: Appearance.barPrimary
+            font.family: Appearance.iconFontFamily
+            font.pixelSize: Appearance.px(14)
+        }
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: Appearance.px(2)
+            Repeater {
+                model: [MediaService.cleanTitle(MediaService.activePlayer?.trackTitle)
+                    || I18n.tr("noMedia"), MediaService.activePlayer?.trackArtist || ""]
+                delegate: AppText {
+                    required property string modelData
+                    visible: modelData !== ""
+                    text: Array.from(modelData).slice(0, root.verticalTextLimit).join("\n")
+                        + (Array.from(modelData).length > root.verticalTextLimit ? "\n…" : "")
+                    horizontalAlignment: Text.AlignHCenter
+                    color: Appearance.barLayer0Text
+                    font.pixelSize: Appearance.px(11)
+                }
             }
         }
     }

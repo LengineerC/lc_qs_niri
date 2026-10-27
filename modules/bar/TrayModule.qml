@@ -13,6 +13,7 @@ Item {
     signal activated
     signal closeRequested
 
+    property bool vertical: false
     property bool expanded: false
     readonly property bool hostWindowActive: Window.active
     readonly property bool menuOpen: contextMenu.visible
@@ -26,7 +27,7 @@ Item {
             item?.status === Status.NeedsAttention)
 
     implicitWidth: trayRow.implicitWidth
-    implicitHeight: Appearance.barHeight
+    implicitHeight: vertical ? trayRow.implicitHeight : Appearance.barHeight
 
     onTrayItemsChanged: reconcileTimer.restart()
 
@@ -98,18 +99,18 @@ Item {
         }
     }
 
-    Row {
+    Grid {
         id: trayRow
+        columns: root.vertical ? 1 : Math.max(1, root.pinnedItems.length + 1)
 
         anchors.verticalCenter: parent.verticalCenter
-        height: parent.height
         spacing: Appearance.px(2)
 
         MouseArea {
             id: trayToggle
 
             width: Appearance.px(30)
-            height: root.height
+            height: root.vertical ? Appearance.px(30) : root.height
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: {
@@ -131,7 +132,10 @@ Item {
                 AppText {
                     anchors.centerIn: parent
                     text: ""
-                    rotation: root.expanded ? 180 : 0
+                    rotation: (ShellSettings.barPosition === "bottom" ? 180
+                        : ShellSettings.barPosition === "left" ? -90
+                        : ShellSettings.barPosition === "right" ? 90 : 0)
+                        + (root.expanded ? 180 : 0)
                     color: root.needsAttention
                         ? Appearance.barPrimary
                         : Appearance.barLayer0Text
@@ -191,7 +195,7 @@ Item {
                 required property SystemTrayItem modelData
 
                 width: Appearance.px(30)
-                height: root.height
+                height: root.vertical ? Appearance.px(30) : root.height
                 hoverEnabled: true
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 cursorShape: Qt.PointingHandCursor

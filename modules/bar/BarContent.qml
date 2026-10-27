@@ -11,6 +11,15 @@ import qs.services
 Item {
     id: root
 
+    readonly property bool vertical: ShellSettings.barVertical
+    readonly property string edge: ShellSettings.barPosition
+    readonly property real surfaceWidth: vertical ? height : width
+    readonly property real surfaceHeight: vertical ? width : height
+    readonly property real surfaceRotation: edge === "bottom" ? 180 : edge === "left" ? -90 : edge === "right" ? 90 : 0
+    readonly property real surfaceX: edge === "bottom" || edge === "right" ? width : 0
+    readonly property real surfaceY: edge === "bottom" || edge === "left" ? height : 0
+    readonly property real barX: edge === "right" ? width - Appearance.barHeight : 0
+    readonly property real barY: edge === "bottom" ? height - Appearance.barHeight : 0
     implicitHeight: Appearance.barHeight
     readonly property Item barMask: barInputRegion
     readonly property Item leftCornerBlurBounds: leftConnectorBlurBounds
@@ -18,7 +27,7 @@ Item {
     readonly property Item rightCornerBlurBounds: rightConnectorBlurBounds
     readonly property Item rightCornerBlurCutout: rightConnectorBlurCutout
     readonly property Item popupMask: popup.popupMaskItem
-    readonly property bool barContainsMouse: barHover.hovered && barHover.point.position.y >= 0 && barHover.point.position.y < Appearance.barHeight
+    readonly property bool barContainsMouse: barHover.hovered && (vertical ? barHover.point.position.x >= barX && barHover.point.position.x < barX + Appearance.barHeight : barHover.point.position.y >= barY && barHover.point.position.y < barY + Appearance.barHeight)
     readonly property bool popupShown: popup.shown
     readonly property bool popupContainsMouse: popup.pointerInside
     readonly property bool notificationPanelShown: popup.shown && popup.page === "notifications"
@@ -44,11 +53,13 @@ Item {
     function closeOverlays() {
         popup.close();
         trayModule.closeContextMenu();
+        verticalContent.closeContextMenu();
         LeftSidebarService.close();
     }
 
     function showPopup(target, pageName) {
         trayModule.closeContextMenu();
+        verticalContent.closeContextMenu();
         LeftSidebarService.close();
         popup.showFor(target, pageName);
     }
@@ -67,7 +78,7 @@ Item {
         } else {
             NotificationService.requestPanelFocusProxy(root.outputName, root.hostWindowActive);
             if (!root.notificationPanelShown)
-                root.showPopup(notificationModule, "notifications");
+                root.showPopup(root.vertical ? verticalContent.notificationAnchor : notificationModule, "notifications");
         }
     }
 
@@ -108,46 +119,58 @@ Item {
     Item {
         id: barInputRegion
 
-        width: root.width
-        height: Appearance.barHeight
-    }
-
-    // Geometry used to construct the two concave connector blur regions.
-    // These items never receive input or draw pixels.
-    Item {
-        id: leftConnectorBlurBounds
-
-        x: 0
-        y: root.connectorTop
-        width: Appearance.cornerSize
-        height: Appearance.cornerSize
+        x: root.barX
+        y: root.barY
+        width: root.vertical ? Appearance.barHeight : root.width
+        height: root.vertical ? root.height : Appearance.barHeight
     }
 
     Item {
-        id: leftConnectorBlurCutout
+        x: root.surfaceX
+        y: root.surfaceY
+        width: root.surfaceWidth
+        height: root.surfaceHeight
+        rotation: root.surfaceRotation
+        transformOrigin: Item.TopLeft
 
-        x: 0
-        y: root.connectorTop
-        width: Appearance.cornerSize * 2
-        height: Appearance.cornerSize * 2
-    }
+        // Geometry used to construct the two concave connector blur regions.
+        // These items never receive input or draw pixels.
+        Item {
+            id: leftConnectorBlurBounds
 
-    Item {
-        id: rightConnectorBlurBounds
+            x: 0
+            y: root.connectorTop
+            width: Appearance.cornerSize
+            height: Appearance.cornerSize
+        }
 
-        x: root.width - Appearance.cornerSize
-        y: root.connectorTop
-        width: Appearance.cornerSize
-        height: Appearance.cornerSize
-    }
+        Item {
+            id: leftConnectorBlurCutout
 
-    Item {
-        id: rightConnectorBlurCutout
+            x: 0
+            y: root.connectorTop
+            width: Appearance.cornerSize * 2
+            height: Appearance.cornerSize * 2
+        }
 
-        x: root.width - Appearance.cornerSize * 2
-        y: root.connectorTop
-        width: Appearance.cornerSize * 2
-        height: Appearance.cornerSize * 2
+        Item {
+            id: rightConnectorBlurBounds
+
+            x: root.surfaceWidth - Appearance.cornerSize
+            y: root.connectorTop
+            width: Appearance.cornerSize
+            height: Appearance.cornerSize
+        }
+
+        Item {
+            id: rightConnectorBlurCutout
+
+            x: root.surfaceWidth - Appearance.cornerSize * 2
+            y: root.connectorTop
+            width: Appearance.cornerSize * 2
+            height: Appearance.cornerSize * 2
+        }
+
     }
 
     // This handler belongs to the common ancestor of every bar control, so
@@ -163,10 +186,10 @@ Item {
 
         z: -3
 
-        x: 0
-        y: 0
-        width: root.width
-        height: Appearance.barHeight
+        x: root.barX
+        y: root.barY
+        width: root.vertical ? Appearance.barHeight : root.width
+        height: root.vertical ? root.height : Appearance.barHeight
 
         // The Blob surface below is sufficient in glass mode. Keeping this
         // fallback visible would stack two tints and make the bar opaque.
@@ -184,8 +207,14 @@ Item {
         id: shadowSurface
 
         z: -2
-        width: root.width
-        height: Math.max(Appearance.barHeight, popup.y + popup.height) + Math.ceil((ShellSettings.shadowBlurRadius + Math.abs(ShellSettings.shadowOffsetY) + 4) * Appearance.scale)
+        readonly property real normalExtent: Math.min(root.vertical ? root.width : root.height,
+            Appearance.barHeight + (root.vertical ? popup.width : popup.height)
+            + Math.max(Appearance.cornerSize, Math.ceil((ShellSettings.shadowBlurRadius
+                + Math.abs(ShellSettings.shadowOffsetY) + 4) * Appearance.scale)))
+        x: root.edge === "right" ? root.width - normalExtent : 0
+        y: root.edge === "bottom" ? root.height - normalExtent : 0
+        width: root.vertical ? normalExtent : root.width
+        height: root.vertical ? root.height : normalExtent
         // Apply opacity to the rendered Blob layer itself. The native Blob
         // material does not otherwise give us a separate tint-opacity stage.
         opacity: ShellSettings.barFrostedGlass ? Appearance.barGlassTintOpacity : 1
@@ -197,7 +226,10 @@ Item {
             shadowBlur: 1
             blurMax: Math.max(1, Math.round(ShellSettings.shadowBlurRadius * Appearance.scale))
             shadowColor: Appearance.withAlpha(Appearance.barShadow, ShellSettings.shadowOpacity * Math.max(0, Math.min(1, root.effectsOpacity)))
-            shadowVerticalOffset: Math.round(ShellSettings.shadowOffsetY * Appearance.scale)
+            shadowHorizontalOffset: root.vertical
+                ? Math.round(ShellSettings.shadowOffsetY * Appearance.scale) * (root.edge === "left" ? 1 : -1) : 0
+            shadowVerticalOffset: root.vertical ? 0
+                : Math.round(ShellSettings.shadowOffsetY * Appearance.scale) * (root.edge === "bottom" ? -1 : 1)
         }
 
         Behavior on opacity {
@@ -219,15 +251,19 @@ Item {
 
             readonly property color surfaceColor: Appearance.barSurfaceBaseColor
             readonly property real smoothing: Appearance.px(20)
-            readonly property real barHeight: Appearance.barHeight
+            readonly property string edge: root.edge
+            readonly property real barX: root.barX - shadowSurface.x
+            readonly property real barY: root.barY - shadowSurface.y
+            readonly property real barWidth: root.vertical ? Appearance.barHeight : root.width
+            readonly property real barHeight: root.vertical ? root.height : Appearance.barHeight
             readonly property bool popupVisible: popup.revealProgress > 0
-            readonly property real popupX: popup.x
+            readonly property real popupX: popup.x - shadowSurface.x
+            readonly property real popupY: popup.y - shadowSurface.y
             readonly property real popupWidth: popup.width
             readonly property real popupHeight: popup.height
             readonly property real popupRadius: Appearance.normalRadius
-            // Keep a single continuous silhouette without stacking glass tints.
             readonly property real overlapHeight: ShellSettings.barFrostedGlass
-                ? Appearance.px(2) : popup.height * 0.2
+                ? Appearance.px(2) : (root.vertical ? popup.width : popup.height) * 0.2
 
             Connections {
                 target: blobSurface.item
@@ -235,93 +271,59 @@ Item {
             }
         }
 
-        // In glass mode the connector corners must be captured by the same
-        // layer as the Bar. Parent opacity and the shadow are then applied
-        // once to the combined silhouette, avoiding a second blend over the
-        // shadow beneath the Bar edge.
-        RoundCorner {
-            x: 0
-            y: root.connectorTop
-            visible: ShellSettings.screenCornersEnabled && ShellSettings.barFrostedGlass
-            implicitSize: Appearance.cornerSize
-            layerEnabled: false
-            color: Appearance.barSurfaceBaseColor
-            corner: RoundCorner.CornerEnum.TopLeft
-        }
+        Item {
+            x: root.surfaceX - shadowSurface.x
+            y: root.surfaceY - shadowSurface.y
+            width: root.surfaceWidth
+            height: root.surfaceHeight
+            rotation: root.surfaceRotation
+            transformOrigin: Item.TopLeft
+            // In glass mode the connector corners must be captured by the same
+            // layer as the Bar. Parent opacity and the shadow are then applied
+            // once to the combined silhouette, avoiding a second blend over the
+            // shadow beneath the Bar edge.
+            RoundCorner {
+                x: 0
+                y: root.connectorTop
+                visible: ShellSettings.screenCornersEnabled && ShellSettings.barFrostedGlass
+                implicitSize: Appearance.cornerSize
+                layerEnabled: false
+                color: Appearance.barSurfaceBaseColor
+                corner: RoundCorner.CornerEnum.TopLeft
+            }
 
-        RoundCorner {
-            x: parent.width - width
-            y: root.connectorTop
-            visible: ShellSettings.screenCornersEnabled && ShellSettings.barFrostedGlass
-            implicitSize: Appearance.cornerSize
-            layerEnabled: false
-            color: Appearance.barSurfaceBaseColor
-            corner: RoundCorner.CornerEnum.TopRight
+            RoundCorner {
+                x: parent.width - width
+                y: root.connectorTop
+                visible: ShellSettings.screenCornersEnabled && ShellSettings.barFrostedGlass
+                implicitSize: Appearance.cornerSize
+                layerEnabled: false
+                color: Appearance.barSurfaceBaseColor
+                corner: RoundCorner.CornerEnum.TopRight
+            }
         }
     }
 
     Item {
         id: leftArea
+        visible: !root.vertical
+        y: root.barY
         anchors {
-            top: parent.top
             left: parent.left
             right: middleSection.left
         }
         height: Appearance.barHeight
 
-        MouseArea {
+        LauncherButton {
             id: launcherControl
             x: root.edgeMargin
             width: Appearance.px(30)
             height: parent.height
-            hoverEnabled: true
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            cursorShape: Qt.PointingHandCursor
-            onClicked: event => {
-                if (event.button === Qt.RightButton) {
-                    popup.close();
-                    // This Bar already knows its output. Avoid the async
-                    // focused-output query, whose stale result could reopen
-                    // the sidebar after a rapid close.
-                    LeftSidebarService.toggleOnOutput(root.outputName);
-                } else {
-                    root.showPopup(launcherControl, "launcher");
-                }
-            }
-
-            Rectangle {
-                id: launcherPill
-                width: Appearance.px(30)
-                height: Appearance.px(30)
-                anchors.verticalCenter: parent.verticalCenter
-                radius: Appearance.fullRadius
-                color: launcherControl.containsMouse || popup.shown && popup.anchorItem === launcherControl || root.sidebarShown ? Appearance.barSecondaryContainer : Appearance.withAlpha(Appearance.barSecondaryContainer, 0)
-                scale: launcherControl.pressed ? 0.88 : 1
-
-                AppText {
-                    anchors.centerIn: parent
-                    text: "✦"
-                    color: Appearance.barLayer0Text
-                    font {
-                        family: Appearance.iconFontFamily
-                        weight: Font.Normal
-                        pixelSize: Appearance.px(21)
-                    }
-                }
-
-                Behavior on color {
-                    enabled: !Theme.paletteTransitionRunning
-                    ColorAnimation {
-                        duration: Appearance.fastDuration
-                    }
-                }
-
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: Appearance.fastDuration
-                        easing.type: Easing.OutCubic
-                    }
-                }
+            active: popup.shown && popup.anchorItem === launcherControl || root.sidebarShown
+            onActivated: root.showPopup(launcherControl, "launcher")
+            onSidebarRequested: {
+                popup.close();
+                LeftSidebarService.toggleOnOutput(root.outputName);
             }
         }
 
@@ -394,6 +396,8 @@ Item {
 
     Row {
         id: middleSection
+        visible: !root.vertical
+        y: root.barY
 
         readonly property real clockCenterInRow: workspaceSwitcher.width + spacing + weatherModule.width + spacing + timeModule.width / 2
 
@@ -405,9 +409,6 @@ Item {
             return Math.round(barCenter - implicitWidth / 2);
         }
         width: implicitWidth
-        anchors {
-            top: parent.top
-        }
         height: Appearance.barHeight
         spacing: Appearance.spacingTiny
 
@@ -445,8 +446,9 @@ Item {
 
     Item {
         id: rightArea
+        visible: !root.vertical
+        y: root.barY
         anchors {
-            top: parent.top
             left: middleSection.right
             right: parent.right
         }
@@ -516,7 +518,7 @@ Item {
                 rightMargin: Appearance.px(3)
                 verticalCenter: parent.verticalCenter
             }
-            onActivated: root.showPopup(notificationModule, "notifications")
+            onActivated: root.showPopup(root.vertical ? verticalContent.notificationAnchor : notificationModule, "notifications")
         }
 
         Connections {
@@ -554,6 +556,7 @@ Item {
             cursorShape: Qt.PointingHandCursor
             onClicked: {
                 trayModule.closeContextMenu();
+        verticalContent.closeContextMenu();
                 SettingsLauncher.open();
             }
 
@@ -591,6 +594,27 @@ Item {
                 }
             }
         }
+    }
+
+    VerticalBarContent {
+        id: verticalContent
+        visible: root.vertical
+        x: root.barX
+        width: Appearance.barHeight
+        height: root.height
+        outputName: root.outputName
+        launcherExpanded: popup.shown && popup.anchorItem === verticalContent.launcherAnchor
+        trayExpanded: popup.shown && popup.page === "tray"
+        onPopupRequested: (target, page) => root.showPopup(target, page)
+        onSidebarRequested: {
+            popup.close();
+            LeftSidebarService.toggleOnOutput(root.outputName);
+        }
+    }
+
+    Connections {
+        target: ShellSettings
+        function onBarPositionChanged() { root.closeOverlays(); }
     }
 
     StyledPopup {

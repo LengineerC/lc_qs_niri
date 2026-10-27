@@ -19,12 +19,22 @@ Item {
     readonly property var moveCurve: ShellSettings.popupBezierCurve
     readonly property bool geometryAnimationRunning:
         popupWidthAnimation.running || popupHeightAnimation.running
+    readonly property bool vertical: ShellSettings.barVertical
+    readonly property string edge: ShellSettings.barPosition
+    // The original animation runs in bar-relative axes: parallel (old X)
+    // and inward (old Y). Only map those axes to the selected screen edge.
+    property real parallelPosition: targetX
+    property real parallelExtent: vertical ? popupHeight : popupWidth
+    property real depthExtent: vertical ? popupWidth : popupHeight
     readonly property real targetX: {
-        const screenWidth = parent?.width ?? popupWidth;
-        const center = Number.isFinite(anchorCenterX)
-            ? anchorCenterX : screenWidth / 2;
-        const rawX = center - popupWidth / 2;
-        const remaining = screenWidth - Math.floor(rawX + popupWidth);
+        const screenWidth = (vertical ? parent?.height : parent?.width)
+            ?? (vertical ? popupHeight : popupWidth);
+        const anchorCenter = vertical ? anchorCenterY : anchorCenterX;
+        const extent = vertical ? popupHeight : popupWidth;
+        const center = Number.isFinite(anchorCenter)
+            ? anchorCenter : screenWidth / 2;
+        const rawX = center - extent / 2;
+        const remaining = screenWidth - Math.floor(rawX + extent);
 
         if (remaining < 0)
             return rawX + remaining;
@@ -36,6 +46,7 @@ Item {
     // modules (especially media metadata) may resize or move without dragging
     // an already visible panel along with them.
     property real anchorCenterX: NaN
+    property real anchorCenterY: NaN
     property string outputName: ""
     property string page: ""
     property bool shown: false
@@ -120,10 +131,14 @@ Item {
         return popupLayout.implicitHeight + Appearance.px(36);
     }
 
-    x: targetX
-    y: Appearance.barHeight
-    width: popupWidth
-    height: popupContent.height * revealProgress
+    x: !vertical ? parallelPosition
+        : edge === "left" ? Appearance.barHeight
+        : (parent?.width ?? 0) - Appearance.barHeight - width
+    y: vertical ? parallelPosition
+        : edge === "top" ? Appearance.barHeight
+        : (parent?.height ?? 0) - Appearance.barHeight - height
+    width: vertical ? depthExtent * revealProgress : parallelExtent
+    height: vertical ? parallelExtent : depthExtent * revealProgress
     visible: width > 0 && revealProgress > 0
     clip: true
 
@@ -353,11 +368,14 @@ Item {
         anchorItem = target;
         if (target && parent) {
             const mappedCenter = target.mapToItem(
-                parent, target.width / 2, 0).x;
-            anchorCenterX = Number.isFinite(mappedCenter)
-                ? mappedCenter : parent.width / 2;
+                parent, target.width / 2, target.height / 2);
+            anchorCenterX = Number.isFinite(mappedCenter.x)
+                ? mappedCenter.x : parent.width / 2;
+            anchorCenterY = Number.isFinite(mappedCenter.y)
+                ? mappedCenter.y : parent.height / 2;
         } else {
             anchorCenterX = (parent?.width ?? popupWidth) / 2;
+            anchorCenterY = (parent?.height ?? popupHeight) / 2;
         }
         shown = true;
     }
@@ -383,7 +401,7 @@ Item {
         }
     }
 
-    Behavior on x {
+    Behavior on parallelPosition {
         enabled: root.revealProgress > 0
         NumberAnimation {
             duration: root.moveDuration
@@ -392,7 +410,7 @@ Item {
         }
     }
 
-    Behavior on width {
+    Behavior on parallelExtent {
         enabled: root.revealProgress > 0
         NumberAnimation {
             id: popupWidthAnimation
@@ -403,26 +421,29 @@ Item {
         }
     }
 
+    Behavior on depthExtent {
+        enabled: root.revealProgress > 0
+        NumberAnimation {
+            id: popupHeightAnimation
+
+            duration: root.moveDuration
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: root.moveCurve
+        }
+    }
+
     Item {
         id: popupContent
 
-        width: root.width
-        height: root.popupHeight
-        y: (-height - 5) * (1 - root.revealProgress)
+        width: root.vertical ? root.depthExtent : root.parallelExtent
+        height: root.vertical ? root.parallelExtent : root.depthExtent
+        x: root.edge === "left" ? (-width - 5) * (1 - root.revealProgress)
+            : root.edge === "right" ? 5 * (1 - root.revealProgress) : 0
+        y: root.edge === "top" ? (-height - 5) * (1 - root.revealProgress)
+            : root.edge === "bottom" ? 5 * (1 - root.revealProgress) : 0
         opacity: root.revealProgress
         transform: Matrix4x4 {
             matrix: root.deformMatrix
-        }
-
-        Behavior on height {
-            enabled: root.revealProgress > 0
-            NumberAnimation {
-                id: popupHeightAnimation
-
-                duration: root.moveDuration
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: root.moveCurve
-            }
         }
 
         Rectangle {
@@ -430,8 +451,8 @@ Item {
 
             x: 7
             y: 7
-            width: parent.width - 14
-            height: root.popupHeight - 14
+            width: root.vertical ? root.popupWidth - 14 : parent.width - 14
+            height: root.vertical ? parent.height - 14 : root.popupHeight - 14
             radius: Appearance.smallRadius
             color: Appearance.popupSurfaceColor
             opacity: ShellSettings.barFrostedGlass

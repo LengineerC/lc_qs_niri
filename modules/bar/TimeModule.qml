@@ -3,12 +3,14 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import qs.common
+import "BarDateTime.js" as BarDateTime
 
 MouseArea {
     id: root
 
     signal activated
 
+    property bool vertical: false
     property bool showDate: true
 
     readonly property color firstDigitColor: ShellSettings.barFrostedGlass
@@ -47,8 +49,8 @@ MouseArea {
 
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
-    implicitWidth: timeRow.implicitWidth + Appearance.px(18)
-    implicitHeight: Appearance.barHeight
+    implicitWidth: vertical ? Appearance.barHeight : timeRow.implicitWidth + Appearance.px(18)
+    implicitHeight: vertical ? verticalTime.implicitHeight + Appearance.px(12) : Appearance.barHeight
     onClicked: activated()
 
     Rectangle {
@@ -81,6 +83,7 @@ MouseArea {
 
     RowLayout {
         id: timeRow
+        visible: !root.vertical
 
         anchors.centerIn: parent
         spacing: Appearance.px(1)
@@ -152,6 +155,59 @@ MouseArea {
             font {
                 family: Appearance.fontFamily
                 pixelSize: Appearance.fontSize
+            }
+        }
+    }
+
+    Column {
+        id: verticalTime
+        visible: root.vertical
+        anchors.centerIn: parent
+        spacing: Appearance.px(2)
+        Repeater {
+            model: BarDateTime.fieldFormats(ShellSettings.timeFormat, false)
+            delegate: Row {
+                id: timePair
+                required property string modelData
+                readonly property string digits: I18n.locale.toString(root.now, modelData)
+                scale: Math.min(1, (root.width - Appearance.px(6)) / Math.max(1, implicitWidth))
+                anchors.horizontalCenter: parent.horizontalCenter
+                Repeater {
+                    model: timePair.digits.length
+                    delegate: Item {
+                        id: timeCharacter
+                        required property int index
+                        readonly property string character: timePair.digits.charAt(index)
+                        readonly property bool isDigit: /[0-9]/.test(character)
+                        width: isDigit ? root.digitWidth : literal.implicitWidth
+                        height: root.digitHeight
+                        AnimatedDigit {
+                            anchors.fill: parent
+                            visible: timeCharacter.isDigit
+                            value: timeCharacter.character
+                            fillColor: timeCharacter.index % 2 === 0 ? root.firstDigitColor : root.secondDigitColor
+                        }
+                        AppText {
+                            id: literal
+                            anchors.centerIn: parent
+                            visible: !timeCharacter.isDigit
+                            text: timeCharacter.character
+                            color: root.firstDigitColor
+                            font.pixelSize: root.clockFontSize
+                        }
+                    }
+                }
+            }
+        }
+        Repeater {
+            model: root.showDate ? BarDateTime.fieldFormats(ShellSettings.dateFormat, true) : []
+            delegate: AppText {
+                required property string modelData
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: I18n.locale.toString(root.now, modelData)
+                scale: Math.min(1, (root.width - Appearance.px(6)) / Math.max(1, implicitWidth))
+                color: Appearance.barLayer1Text
+                font.pixelSize: Appearance.px(10)
             }
         }
     }

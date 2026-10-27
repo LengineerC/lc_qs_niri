@@ -8,10 +8,12 @@ import qs.services
 MouseArea {
     id: root
 
+    property bool vertical: false
+
     signal activated
 
-    implicitWidth: weatherRow.implicitWidth + Appearance.px(18)
-    implicitHeight: Appearance.barHeight
+    implicitWidth: vertical ? Appearance.barHeight : weatherRow.implicitWidth + Appearance.px(18)
+    implicitHeight: vertical ? weatherRow.implicitHeight + Appearance.px(12) : Appearance.barHeight
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     onClicked: activated()
@@ -41,12 +43,16 @@ MouseArea {
         }
     }
 
-    RowLayout {
+    GridLayout {
         id: weatherRow
+        columns: root.vertical ? 1 : -1
+        rows: root.vertical ? -1 : 1
+        rowSpacing: Appearance.px(2)
+        columnSpacing: Appearance.px(5)
         anchors.centerIn: parent
-        spacing: Appearance.px(5)
 
         Item {
+            Layout.alignment: Qt.AlignHCenter
             implicitWidth: Appearance.px(20)
             implicitHeight: Appearance.px(20)
 
@@ -90,6 +96,7 @@ MouseArea {
         }
 
         AppText {
+            Layout.alignment: Qt.AlignHCenter
             text: WeatherService.currentTemperature
             color: Appearance.barLayer0Text
             font {

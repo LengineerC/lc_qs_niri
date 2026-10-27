@@ -81,13 +81,15 @@ Scope {
             visible: !!modelData?.name
 
             anchors {
-                top: true
-                left: true
-                right: true
+                top: ShellSettings.barPosition !== "bottom"
+                bottom: ShellSettings.barPosition !== "top"
+                left: ShellSettings.barPosition !== "right"
+                right: ShellSettings.barPosition !== "left"
             }
 
             // A removed output may clear modelData before Variants destroys us.
             // Layer-shell surfaces without opposite anchors need a nonzero size.
+            implicitWidth: Math.max(1, modelData?.width ?? 1)
             implicitHeight: Math.max(1, modelData?.height ?? 1)
             // Keep the layer-shell geometry stable while overview animates.
             // Resizing the exclusive zone mid-animation can expose an
@@ -154,10 +156,10 @@ Scope {
                     // Keep the bar hit region in window coordinates. Using an
                     // item below the animated barSurface can leave the
                     // layer-shell input region at its overview offset.
-                    x: 0
-                    y: 0
-                    width: barWindow.width
-                    height: Appearance.barHeight
+                    x: barContent.barX
+                    y: barContent.barY
+                    width: ShellSettings.barVertical ? Appearance.barHeight : barWindow.width
+                    height: ShellSettings.barVertical ? barWindow.height : Appearance.barHeight
                 }
                 Region {
                     item: barContent.popupMask
@@ -249,8 +251,14 @@ Scope {
                 // ancestor chain large enough for Qt Quick to route pointer
                 // events to content drawn below the bar.
                 height: parent.height
-                y: barWindow.hiddenOffset
-                    * NiriService.barRetractionProgress
+                x: ShellSettings.barPosition === "left"
+                    ? barWindow.hiddenOffset * NiriService.barRetractionProgress
+                    : ShellSettings.barPosition === "right"
+                    ? -barWindow.hiddenOffset * NiriService.barRetractionProgress : 0
+                y: ShellSettings.barPosition === "top"
+                    ? barWindow.hiddenOffset * NiriService.barRetractionProgress
+                    : ShellSettings.barPosition === "bottom"
+                    ? -barWindow.hiddenOffset * NiriService.barRetractionProgress : 0
 
                 BarContent {
                     id: barContent
@@ -271,17 +279,19 @@ Scope {
                     // spill over an open panel. The visible corner fill is
                     // drawn again in the foreground strip below.
                     z: -1
-                    x: 0
-                    y: Appearance.barHeight
-                        - (ShellSettings.barFrostedGlass ? 0 : 1)
-                    width: parent.width
-                    height: Appearance.cornerSize
+                    x: barContent.surfaceX
+                    y: barContent.surfaceY
+                    width: barContent.surfaceWidth
+                    height: barContent.surfaceHeight
+                    rotation: barContent.surfaceRotation
+                    transformOrigin: Item.TopLeft
                     visible: ShellSettings.screenCornersEnabled
                         && !ShellSettings.barFrostedGlass
 
                     BarConnectorCorner {
                         anchors {
                             top: parent.top
+                            topMargin: Appearance.barHeight - 1
                             left: parent.left
                         }
                         corner: RoundCorner.CornerEnum.TopLeft
@@ -291,6 +301,7 @@ Scope {
                     BarConnectorCorner {
                         anchors {
                             top: parent.top
+                            topMargin: Appearance.barHeight - 1
                             right: parent.right
                         }
                         corner: RoundCorner.CornerEnum.TopRight
@@ -303,17 +314,19 @@ Scope {
                     // They cover the bar's bottom-edge shadow without putting
                     // the connector's own shadow on top of the panel.
                     z: 1
-                    x: 0
-                    y: Appearance.barHeight
-                        - (ShellSettings.barFrostedGlass ? 0 : 1)
-                    width: parent.width
-                    height: Appearance.cornerSize
+                    x: barContent.surfaceX
+                    y: barContent.surfaceY
+                    width: barContent.surfaceWidth
+                    height: barContent.surfaceHeight
+                    rotation: barContent.surfaceRotation
+                    transformOrigin: Item.TopLeft
                     visible: ShellSettings.screenCornersEnabled
                         && !ShellSettings.barFrostedGlass
 
                     RoundCorner {
                         anchors {
                             top: parent.top
+                            topMargin: Appearance.barHeight - 1
                             left: parent.left
                         }
                         implicitSize: Appearance.cornerSize
@@ -325,6 +338,7 @@ Scope {
                     RoundCorner {
                         anchors {
                             top: parent.top
+                            topMargin: Appearance.barHeight - 1
                             right: parent.right
                         }
                         implicitSize: Appearance.cornerSize
@@ -457,7 +471,9 @@ Scope {
                 left: true
             }
 
-            margins.top: Appearance.barHeight
+            margins.top: ShellSettings.barPosition === "top" ? Appearance.barHeight : 0
+            margins.bottom: ShellSettings.barPosition === "bottom" ? Appearance.barHeight : 0
+            margins.left: ShellSettings.barPosition === "left" ? Appearance.barHeight : 0
             exclusionMode: ExclusionMode.Ignore
             color: "transparent"
 
@@ -560,6 +576,7 @@ Scope {
                 x: 0
                 y: ShellSettings.barFrostedGlass ? 0 : -1
                 visible: leftSidebar.surfaceVisible
+                    && ShellSettings.barPosition === "top"
                     && ShellSettings.screenCornersEnabled
                     && !ShellSettings.barFrostedGlass
                 implicitSize: Appearance.cornerSize

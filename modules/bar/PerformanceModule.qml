@@ -8,6 +8,8 @@ import qs.services
 MouseArea {
     id: root
 
+    property bool vertical: false
+
     signal activated
 
     readonly property int percentageTextWidth:
@@ -54,8 +56,8 @@ MouseArea {
 
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
-    implicitWidth: performanceRow.implicitWidth + Appearance.px(18)
-    implicitHeight: Appearance.barHeight
+    implicitWidth: vertical ? Appearance.barHeight : performanceRow.implicitWidth + Appearance.px(18)
+    implicitHeight: vertical ? performanceRow.implicitHeight + Appearance.px(12) : Appearance.barHeight
     onClicked: activated()
 
     function textWidthFor(resourceKey) {
@@ -111,11 +113,14 @@ MouseArea {
         }
     }
 
-    RowLayout {
+    GridLayout {
         id: performanceRow
+        columns: root.vertical ? 1 : -1
+        rows: root.vertical ? -1 : 1
+        rowSpacing: Appearance.px(2)
+        columnSpacing: Appearance.px(root.vertical ? 2 : 7)
 
         anchors.centerIn: parent
-        spacing: Appearance.px(7)
 
         AppText {
             visible: root.shownResources.length === 0
@@ -132,6 +137,7 @@ MouseArea {
             model: root.shownResources
 
             delegate: RowLayout {
+                Layout.alignment: Qt.AlignHCenter
                 required property var modelData
                 spacing: Appearance.px(3)
 
@@ -142,6 +148,7 @@ MouseArea {
                 }
 
                 AppText {
+                    visible: !root.vertical
                     readonly property int reservedWidth:
                         root.textWidthFor(parent.modelData.key)
 

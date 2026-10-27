@@ -69,7 +69,8 @@ Item {
 
         ScreenCorner {
             corner: RoundCorner.CornerEnum.TopLeft
-            showShadow: false
+            showShadow: ShellSettings.barPosition !== "top"
+                && ShellSettings.barPosition !== "left"
             anchors {
                 left: parent.left
                 top: parent.top
@@ -78,7 +79,8 @@ Item {
 
         ScreenCorner {
             corner: RoundCorner.CornerEnum.TopRight
-            showShadow: false
+            showShadow: ShellSettings.barPosition !== "top"
+                && ShellSettings.barPosition !== "right"
             anchors {
                 right: parent.right
                 top: parent.top
@@ -88,6 +90,7 @@ Item {
 
     ScreenCorner {
         corner: RoundCorner.CornerEnum.BottomLeft
+        showShadow: ShellSettings.barPosition !== "bottom" && ShellSettings.barPosition !== "left"
         anchors {
             left: parent.left
             bottom: parent.bottom
@@ -96,6 +99,7 @@ Item {
 
     ScreenCorner {
         corner: RoundCorner.CornerEnum.BottomRight
+        showShadow: ShellSettings.barPosition !== "bottom" && ShellSettings.barPosition !== "right"
         anchors {
             right: parent.right
             bottom: parent.bottom

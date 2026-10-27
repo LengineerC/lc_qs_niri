@@ -7,6 +7,7 @@ import qs.services
 Item {
     id: root
 
+    property bool verticalPresentation: false
     property string outputName: ""
     property Item activeItem: null
     property Item hoverItem: null
@@ -502,6 +503,7 @@ Item {
                     AppText {
                         anchors.centerIn: parent
                         visible: !root.dotIndicator
+                        rotation: root.verticalPresentation ? -90 : 0
                         text: model.name || model.index
                         color: workspaceDelegate.selected
                             ? Appearance.barSecondaryContainerText
