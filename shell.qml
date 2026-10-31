@@ -7,6 +7,7 @@ import qs.modules.bar
 import qs.modules.ScreenCorners
 import qs.modules.notifications
 import qs.modules.settings
+import qs.modules.desktop
 import qs.modules.wallpaper
 import qs.modules.lock
 import "modules/launcher" as LauncherModule
@@ -35,6 +36,9 @@ ShellRoot {
     }
 
     WallpaperBackground {
+    }
+
+    Desktop {
     }
 
     LauncherModule.Launchpad {
