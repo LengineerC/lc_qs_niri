@@ -238,6 +238,7 @@ Item {
 
     Flickable {
         id: scroll
+        property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: scroll; }
         anchors.fill: parent
         contentWidth: width
         contentHeight: panelColumn.implicitHeight + Appearance.px(24)
@@ -1043,7 +1044,12 @@ Item {
                     Repeater {
                         model: SystemService.bluetoothDevices.slice(0, 8)
                         delegate: Rectangle {
+                            id: bluetoothDeviceRow
                             required property var modelData
+                            readonly property real batteryLevel: SystemService.bluetoothBatteryLevel(modelData)
+                            readonly property bool hasBattery: batteryLevel >= 0
+                            readonly property int batteryPercent: hasBattery
+                                ? Math.round(batteryLevel * 100) : 0
                             Layout.fillWidth: true
                             implicitHeight: Appearance.px(52)
                             radius: Appearance.controlRadius
@@ -1083,6 +1089,20 @@ Item {
                                                     : I18n.tr("availableToConnect")
                                         color: panelPalette.subtext
                                         font.pixelSize: Appearance.smallFontSize
+                                    }
+                                }
+                                RowLayout {
+                                    visible: bluetoothDeviceRow.hasBattery
+                                    spacing: Appearance.px(4)
+                                    AppText {
+                                        text: "󰁹"
+                                        font.family: Appearance.iconFontFamily
+                                        font.pixelSize: Appearance.px(18)
+                                        color: panelPalette.subtext
+                                    }
+                                    PanelText {
+                                        text: bluetoothDeviceRow.batteryPercent + "%"
+                                        color: panelPalette.subtext
                                     }
                                 }
                                 PanelText {

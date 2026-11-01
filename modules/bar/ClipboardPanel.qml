@@ -289,6 +289,7 @@ Item {
 
             ListView {
                 id: historyList
+                property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: historyList; }
 
                 anchors.fill: parent
                 clip: true

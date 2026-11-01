@@ -7,6 +7,7 @@ import Qt.labs.folderlistmodel
 import Quickshell
 import Quickshell.Io
 import qs.common
+import qs.common.widgets
 
 Rectangle {
     id: root
@@ -1498,6 +1499,7 @@ Rectangle {
 
                 contentItem: ListView {
                     id: noteSelectorList
+                    property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: noteSelectorList; }
 
                     readonly property real rowHeight:
                         Appearance.px(42)
@@ -1658,6 +1660,7 @@ Rectangle {
 
                 Flickable {
                     id: editorFlickable
+                    property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: editorFlickable; }
 
                     anchors.fill: parent
                     visible: !root.previewMode
@@ -1761,6 +1764,7 @@ Rectangle {
 
                 Flickable {
                     id: previewFlickable
+                    property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: previewFlickable; }
 
                     anchors.fill: parent
                     visible: root.previewMode

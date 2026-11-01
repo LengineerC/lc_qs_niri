@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Bluetooth
 import Quickshell.Io
 import Quickshell.Services.Pipewire
+import Quickshell.Services.UPower
 import qs.common
 
 Singleton {
@@ -41,6 +42,27 @@ Singleton {
         bluetoothDevices.filter(device => device.connected)
     readonly property string connectedBluetoothName:
         connectedBluetoothDevices[0]?.name ?? ""
+
+    function bluetoothBatteryLevel(device) {
+        if (!device || !device.connected)
+            return -1;
+        if (device.batteryAvailable && Number.isFinite(device.battery))
+            return Math.max(0, Math.min(1, device.battery));
+        // HID batteries (including Magic Trackpad) may be exposed by UPower
+        // instead of BlueZ Battery1. Match addresses, never display names.
+        const address = String(device.address || "").toLowerCase();
+        if (!/^(?:[0-9a-f]{2}:){5}[0-9a-f]{2}$/.test(address))
+            return -1;
+        for (const battery of UPower.devices.values) {
+            if (!battery.ready || battery.powerSupply)
+                continue;
+            const path = String(battery.nativePath || "").toLowerCase().replace(/_/g, ":");
+            const addresses = path.match(/(?:[0-9a-f]{2}:){5}[0-9a-f]{2}/g) || [];
+            if (addresses.includes(address) && Number.isFinite(battery.percentage))
+                return Math.max(0, Math.min(1, battery.percentage));
+        }
+        return -1;
+    }
 
     readonly property PwNode sink: Pipewire.defaultAudioSink
     readonly property PwNode source: Pipewire.defaultAudioSource

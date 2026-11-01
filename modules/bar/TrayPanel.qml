@@ -238,6 +238,7 @@ Item {
 
             Flickable {
                 id: trayFlickable
+                property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: trayFlickable; }
 
                 anchors.fill: parent
                 visible: root.itemCount > 0

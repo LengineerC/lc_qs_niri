@@ -328,6 +328,7 @@ Item {
 
             GridView {
                 id: applicationGrid
+                property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: applicationGrid; }
 
                 anchors.fill: parent
                 visible: count > 0

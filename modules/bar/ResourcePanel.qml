@@ -773,6 +773,7 @@ Item {
 
                     ListView {
                         id: processList
+                        property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: processList; }
 
                         property real retainedScrollOffset: 0
 

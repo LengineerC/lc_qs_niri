@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
 import qs.common
+import qs.common.widgets
 import qs.services
 
 Item {
@@ -48,6 +49,7 @@ Item {
     // when it cannot fit, so many pinned tray icons cannot displace the clock.
     Flickable {
         id: topGroup
+        property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: topGroup; }
         y: root.edgeMargin
         width: parent.width
         height: Math.min(topContents.implicitHeight, root.topMaximumHeight)
@@ -112,6 +114,7 @@ Item {
 
     Flickable {
         id: middleGroup
+        property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: middleGroup; }
         y: Math.max(topGroup.y + topGroup.height + root.groupSpacing,
             Math.min(root.desiredMiddleY, bottomGroup.y - root.groupSpacing - height))
         width: parent.width
@@ -164,6 +167,8 @@ Item {
         height: Math.min(bottomContents.implicitHeight + Appearance.px(30) + root.groupSpacing,
             root.height * 0.45)
         Flickable {
+            id: bottomScroll
+            property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: bottomScroll; }
             width: parent.width
             height: Math.max(0, parent.height - Appearance.px(30) - root.groupSpacing)
             contentWidth: width

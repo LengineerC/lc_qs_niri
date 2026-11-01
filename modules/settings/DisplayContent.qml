@@ -138,6 +138,8 @@ Item {
             padding: Appearance.px(4)
 
             contentItem: ListView {
+                id: optionList
+                property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: optionList; }
                 clip: true
                 implicitHeight: contentHeight
                 model: control.popup.visible
@@ -273,6 +275,8 @@ Item {
             Layout.fillHeight: true
 
             Flickable {
+                id: displayScroll
+                property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: displayScroll; }
                 anchors.fill: parent
                 visible: OutputService.outputs.length > 0
                 contentWidth: width

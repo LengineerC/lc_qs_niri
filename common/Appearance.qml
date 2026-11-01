@@ -7,6 +7,9 @@ import Quickshell
 Singleton {
     id: root
 
+    readonly property real wheelScrollMultiplier: 2.5
+    readonly property real touchpadScrollMultiplier: 2.5
+
     // Derived from the mutable Material 3 palette in Theme.qml.
     property color barBgColor: Theme.palette.m3background
     readonly property color barGlassBaseColor: "#080a0d"

@@ -60,6 +60,8 @@ Item {
             Layout.fillHeight: true
 
             Flickable {
+                id: mediaScroll
+                property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: mediaScroll; }
                 anchors.fill: parent
                 visible: MediaService.players.length > 0
                 contentWidth: width

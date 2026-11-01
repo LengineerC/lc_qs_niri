@@ -21,6 +21,8 @@ Item {
         onCloseClicked: root.closeRequested()
     }
     ScrollView {
+        id: orbitScroll
+        property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: orbitScroll.contentItem; allowNonInteractive: true; }
         anchors.top: header.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left

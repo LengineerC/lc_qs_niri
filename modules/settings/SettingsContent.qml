@@ -357,6 +357,7 @@ Item {
 
             contentItem: ListView {
                 id: fontList
+                property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: fontList; }
 
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
@@ -677,6 +678,7 @@ Item {
 
         Flickable {
             id: flickable
+            property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: flickable; }
             anchors {
                 top: pageHeader.bottom
                 left: parent.left

@@ -186,6 +186,7 @@ Item {
 
         Flickable {
             id: styleFlickable
+            property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: styleFlickable; }
 
             anchors {
                 top: stylePageHeader.bottom
@@ -549,6 +550,7 @@ Item {
 
         GridView {
             id: wallpaperGrid
+            property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: wallpaperGrid; }
 
             readonly property int columnCount:
                 width >= Appearance.px(660) ? 3 : 2

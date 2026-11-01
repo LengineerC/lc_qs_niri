@@ -142,6 +142,7 @@ Rectangle {
 
         ListView {
             id: taskList
+            property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: taskList; }
 
             Layout.fillWidth: true
             Layout.fillHeight: true

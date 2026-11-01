@@ -341,6 +341,7 @@ Item {
 
             Controls.ScrollView {
                 id: moduleScroll
+                property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: moduleScroll.contentItem; allowNonInteractive: true; }
 
                 anchors.fill: parent
                 clip: false

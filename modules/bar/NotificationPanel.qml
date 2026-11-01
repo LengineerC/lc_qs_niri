@@ -82,6 +82,7 @@ Item {
 
         ListView {
             id: notificationList
+            property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: notificationList; }
 
             Layout.fillWidth: true
             Layout.fillHeight: true

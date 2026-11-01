@@ -419,6 +419,8 @@ PopupWindow {
             }
 
             Flickable {
+                id: menuScroll
+                property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: menuScroll; }
                 anchors.fill: parent
                 contentWidth: width
                 contentHeight: menuColumn.implicitHeight

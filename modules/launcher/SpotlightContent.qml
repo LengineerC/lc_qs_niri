@@ -395,6 +395,7 @@ Item {
 
                 ListView {
                     id: resultList
+                    property ScrollWheelHandler scrollWheel: ScrollWheelHandler { flickable: resultList; }
 
                     anchors.fill: parent
                     visible: count > 0
