@@ -134,6 +134,8 @@ Singleton {
         desktopCancel: ["取消", "Cancel"],
         desktopOpenFailed: ["无法打开文件，请检查默认应用关联", "Unable to open file. Check the default application."],
         orbitWebsites: ["常用网站", "Websites"],
+        orbitSearchPlaceholder: ["搜索或提问…", "Search or ask…"],
+        orbitSwitchSearchEngine: ["Tab 切换搜索引擎", "Tab to switch search engines"],
         orbitCommands: ["系统工具与命令", "Tools & commands"],
         orbitWebsitesSummary: ["管理常用链接与网站名称", "Manage links and website names"],
         orbitCommandsSummary: ["管理内置工具与自定义 Shell 命令", "Manage tools and custom shell commands"],

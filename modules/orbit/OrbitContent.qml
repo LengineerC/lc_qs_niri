@@ -318,7 +318,7 @@ FocusScope {
             x: 18; y: 10; width: parent.width - 36
             color: Appearance.layer0Text
             background: Item {}
-            placeholderText: "Search or ask…"
+            placeholderText: I18n.tr("orbitSearchPlaceholder")
             font.pixelSize: Appearance.px(18)
             onAccepted: root.search()
             Keys.onEscapePressed: root.back()
@@ -327,7 +327,7 @@ FocusScope {
         }
         AppText {
             x: 22; anchors.bottom: parent.bottom; anchors.bottomMargin: 12
-            text: root.engines[root.engineIndex].name + "   ·   Tab 切换搜索引擎"
+            text: root.engines[root.engineIndex].name + "   ·   " + I18n.tr("orbitSwitchSearchEngine")
             color: root.accent; font.pixelSize: Appearance.px(12)
         }
     }
