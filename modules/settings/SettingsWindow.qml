@@ -30,6 +30,7 @@ ApplicationWindow {
         case 1: return systemPageComponent;
         case 2: return stylePageComponent;
         case 3: return displayPageComponent;
+        case 4: return orbitPageComponent;
         default: return settingsPageComponent;
         }
     }
@@ -93,6 +94,14 @@ ApplicationWindow {
         }
     }
 
+    Component {
+        id: orbitPageComponent
+        OrbitSettings {
+            anchors.fill: parent
+            onCloseRequested: root.closeWindow()
+        }
+    }
+
     Connections {
         target: SettingsLauncher
 
@@ -140,6 +149,11 @@ ApplicationWindow {
 
         function style(): void {
             root.currentPage = 2;
+            root.openWindow();
+        }
+
+        function orbit(): void {
+            root.currentPage = 4;
             root.openWindow();
         }
 
@@ -486,6 +500,66 @@ ApplicationWindow {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: root.currentPage = 2
+                        }
+                    }
+
+                    Rectangle {
+                        id: orbitTab
+
+                        Layout.fillWidth: true
+                        implicitHeight: Appearance.largeControlHeight
+                        radius: Appearance.cardRadius
+                        color: root.currentPage === 4
+                            ? SettingsPalette.secondaryContainer
+                            : orbitMouse.containsMouse
+                                ? SettingsPalette.layer1Hover
+                                : root.idleTabColor
+
+                        Behavior on color {
+                            enabled: !Theme.paletteTransitionRunning
+                            ColorAnimation { duration: Appearance.fastDuration }
+                        }
+
+                        RowLayout {
+                            anchors {
+                                fill: parent
+                                leftMargin: Appearance.px(12)
+                                rightMargin: Appearance.px(12)
+                            }
+                            spacing: Appearance.spacingMedium
+
+                            AppText {
+                                text: "󰘳"
+                                color: root.currentPage === 4
+                                    ? SettingsPalette.secondaryContainerText
+                                    : SettingsPalette.layer1Text
+                                font {
+                                    family: Appearance.iconFontFamily
+                                    weight: Font.Normal
+                                    pixelSize: Appearance.px(18)
+                                }
+                            }
+
+                            AppText {
+                                Layout.fillWidth: true
+                                text: "Orbit"
+                                color: root.currentPage === 4
+                                    ? SettingsPalette.secondaryContainerText
+                                    : SettingsPalette.layer1Text
+                                font {
+                                    family: Appearance.fontFamily
+                                    pixelSize: Appearance.fontSize
+                                    weight: Font.DemiBold
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            id: orbitMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.currentPage = 4
                         }
                     }
 

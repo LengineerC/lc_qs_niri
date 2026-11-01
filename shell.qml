@@ -7,6 +7,7 @@ import qs.modules.bar
 import qs.modules.ScreenCorners
 import qs.modules.notifications
 import qs.modules.settings
+import qs.modules.orbit
 import qs.modules.desktop
 import qs.modules.wallpaper
 import qs.modules.lock
@@ -36,6 +37,9 @@ ShellRoot {
     }
 
     WallpaperBackground {
+    }
+
+    Orbit {
     }
 
     Desktop {

@@ -66,7 +66,8 @@ Scope {
                     const toggle = modifiers & Qt.ControlModifier;
                     if (toggle)
                         selected = selected.includes(name) ? selected.filter(n => n !== name) : selected.concat([name]);
-                    else
+                    // Keep the group until release distinguishes a click from a drag.
+                    else if (!selected.includes(name))
                         selected = [name];
                 }
                 function beginMove() {
@@ -243,7 +244,7 @@ Scope {
                             width: Appearance.px(60)
                             height: width
                             visible: thumbnail.status !== Image.Ready
-                            source: Quickshell.iconPath(icon.modelData.icon || "text-x-generic", true)
+                            source: icon.modelData.iconUrl || Quickshell.iconPath(icon.modelData.icon || "text-x-generic", true)
                                 || Qt.resolvedUrl("icons/" + (icon.modelData.kind || "file") + ".svg")
                             sourceSize.width: width
                             sourceSize.height: height
@@ -279,7 +280,7 @@ Scope {
                             anchors.topMargin: Appearance.px(76)
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: parent.width - Appearance.px(8)
-                            text: icon.modelData.name
+                            text: icon.modelData.displayName || icon.modelData.name
                             visible: surface.renameName !== icon.modelData.name
                             horizontalAlignment: Text.AlignHCenter
                             wrapMode: Text.WrapAnywhere
@@ -347,12 +348,12 @@ Scope {
                             StyledToolTip {
                                 visible: pointer.containsMouse && !pointer.pressed && !surface.moving
                                     && !selectionMouse.selecting && !entryMenu.visible && !surface.renameName
-                                text: icon.modelData.name
+                                text: icon.modelData.displayName || icon.modelData.name
                                 delay: 650
                                 width: Math.min(implicitWidth, Appearance.px(360), surface.width)
                                 showBelow: icon.y + icon.height + height + gap < surface.height
                                 contentItem: AppText {
-                                    text: icon.modelData.name
+                                    text: icon.modelData.displayName || icon.modelData.name
                                     color: Appearance.layer0Text
                                     font.pixelSize: Appearance.px(14)
                                     wrapMode: Text.WrapAnywhere
@@ -436,12 +437,16 @@ Scope {
                     }
                     DesktopMenuItem {
                         text: I18n.tr("desktopRemoveLink")
-                        enabled: surface.contextEntries.length > 0 && surface.contextEntries.every(entry => entry.link)
+                        enabled: surface.contextEntries.length > 0 && surface.contextEntries.every(entry => entry.removable)
                         onTriggered: DesktopService.removeLinks(surface.contextEntries.map(entry => entry.name))
                     }
                 }
                 DesktopMenu {
                     id: desktopMenu
+                    DesktopMenuItem {
+                        text: I18n.tr("desktopOrbit")
+                        onTriggered: OrbitService.openOnOutput(window.modelData.name, -1, -1)
+                    }
                     DesktopMenuItem {
                         text: I18n.tr("desktopAddFiles")
                         onTriggered: files.open()

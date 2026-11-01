@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Desktop entries and positions; importing a file only creates a symlink."""
+"""Desktop entries: copy application launchers, link ordinary files/folders."""
+import configparser
 import json
 import math
 import mimetypes
@@ -40,6 +41,53 @@ def file_icon(path):
         if mime.startswith(category + '/'):
             return category, category + '-x-generic'
     return 'file', 'text-x-generic'
+
+
+def launcher_metadata(path):
+    """Read presentation metadata only; GIO handles Exec/field codes at launch."""
+    parser = configparser.ConfigParser(interpolation=None, strict=False)
+    parser.optionxform = str
+    try:
+        with path.open(encoding='utf-8-sig') as stream:
+            parser.read_file(stream)
+        section = parser['Desktop Entry']
+        if section.get('Type') != 'Application':
+            raise ValueError('Desktop entry is not an application')
+        if not section.get('Exec', '').strip() and section.get('DBusActivatable', '').lower() != 'true':
+            raise ValueError('Desktop entry has no application command')
+        language = os.environ.get('LC_ALL') or os.environ.get('LC_MESSAGES') or os.environ.get('LANG', '')
+        preferences = os.environ.get('LANGUAGE', '').split(':') + [language]
+        localized = []
+        for preference in preferences:
+            locale = preference.split('.')[0]
+            if locale and locale not in ('C', 'POSIX'):
+                localized.extend([locale, locale.split('@')[0], locale.split('_')[0].split('@')[0]])
+        name = next((section.get('Name[' + loc + ']') for loc in localized if section.get('Name[' + loc + ']')),
+                    section.get('Name', path.stem))
+        icon = section.get('Icon', '').strip()
+        icon_url = Path(icon).as_uri() if os.path.isabs(icon) and Path(icon).is_file() else ''
+        return dict(displayName=name, icon=icon if icon and not os.path.isabs(icon) else 'application-x-executable',
+                    iconUrl=icon_url)
+    except (configparser.Error, KeyError, UnicodeError) as error:
+        raise ValueError('Invalid desktop application file: ' + str(path)) from error
+
+
+def is_launcher(path):
+    return path.suffix.lower() == '.desktop' and path.is_file()
+
+
+def copy_launcher(source, destination):
+    # Publish a complete copy atomically without overwriting a name, including
+    # a dangling symlink. Keep the original application file untouched.
+    fd, temporary = tempfile.mkstemp(prefix='.launcher-', dir=destination.parent)
+    try:
+        with os.fdopen(fd, 'wb') as output, source.open('rb') as input_file:
+            shutil.copyfileobj(input_file, output)
+            output.flush()
+            os.fsync(output.fileno())
+        os.link(temporary, destination)
+    finally:
+        os.unlink(temporary)
 
 
 class Desktop:
@@ -89,17 +137,26 @@ class Desktop:
             preview = ""
             parent_url = path.parent.as_uri()
             kind, icon = file_icon(path)
+            launcher = False
+            metadata = dict(displayName=path.name, iconUrl="")
             try:
                 target = path.resolve(strict=True)
                 parent_url = target.parent.as_uri()
                 kind, icon = file_icon(target)
+                if is_launcher(target):
+                    metadata = launcher_metadata(target)
+                    icon = metadata.pop('icon')
+                    kind = 'application'
+                    launcher = True
                 mime = mimetypes.guess_type(str(target))[0] or ""
                 if target.is_file() and mime.startswith('image/'):
                     info = target.stat()
                     preview = target.as_uri() + f'?v={info.st_mtime_ns}-{info.st_size}'
-            except (OSError, RuntimeError):
+            except (OSError, RuntimeError, ValueError):
                 pass
             entries.append(dict(name=path.name, url=path.as_uri(), parentUrl=parent_url, preview=preview, kind=kind, icon=icon,
+                                **metadata, launcher=launcher,
+                                removable=path.is_symlink() or launcher,
                                 directory=path.is_dir(), link=path.is_symlink(),
                                 broken=path.is_symlink() and not path.exists()))
         # Reconcile against directory entries, not target existence: a broken
@@ -136,14 +193,22 @@ class Desktop:
             raise ValueError('File does not exist: ' + str(source))
         if source.parent == self.directory:
             return source.name
+        application = is_launcher(source)
+        if application:
+            launcher_metadata(source)  # Reject malformed launchers before copying.
         destination = self.directory / source.name
         index = 1
         while True:
             try:
-                destination.symlink_to(source, target_is_directory=source.is_dir())
+                if application:
+                    copy_launcher(source, destination)
+                else:
+                    destination.symlink_to(source, target_is_directory=source.is_dir())
                 return destination.name
             except FileExistsError:
                 if destination.is_symlink() and destination.resolve() == source.resolve():
+                    return destination.name
+                if application and not destination.is_symlink() and destination.is_file() and destination.read_bytes() == source.read_bytes():
                     return destination.name
                 index += 1
                 destination = self.directory / f'{source.stem} ({index}){source.suffix}'
@@ -171,13 +236,13 @@ class Desktop:
             self.rename_many(command['items'])
         elif action == 'unlinkMany':
             names = list(dict.fromkeys(command['names']))
-            if any(not self.entry(name).is_symlink() for name in names):
+            if any(not (self.entry(name).is_symlink() or is_launcher(self.entry(name))) for name in names):
                 raise ValueError('Only shortcuts can be removed here')
             for name in names:
                 self.handle(dict(action='unlink', name=name))
         elif action == 'unlink':
             path = self.entry(command['name'])
-            if not path.is_symlink():
+            if not (path.is_symlink() or is_launcher(path)):
                 raise ValueError('Only shortcuts can be removed here')
             path.unlink()
             for positions in self.positions.values():
@@ -261,7 +326,7 @@ def serve(desktop):
                 previous = snapshot
         except OSError as error:
             print(json.dumps(dict(error=str(error))), flush=True)
-        for key, _ in selector.select(timeout=2):
+        for key, _ in selector.select(timeout=5):
             data = os.read(key.fd, 65536)
             if not data:
                 return
@@ -284,7 +349,13 @@ def open_file(value):
     elif '://' in value:
         raise ValueError('Only local files can be opened')
     target = Path(value).expanduser().resolve(strict=True)
-    command = ['gio', 'open', str(target)] if shutil.which('gio') else ['xdg-open', str(target)]
+    if is_launcher(target):
+        launcher_metadata(target)
+        if not shutil.which('gio'):
+            raise ValueError('Launching desktop applications requires gio')
+        command = ['gio', 'launch', str(target)]
+    else:
+        command = ['gio', 'open', str(target)] if shutil.which('gio') else ['xdg-open', str(target)]
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode:
         raise ValueError(result.stderr.strip() or 'Unable to open file: ' + str(target))

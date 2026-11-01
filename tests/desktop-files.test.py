@@ -196,6 +196,59 @@ class DesktopTests(unittest.TestCase):
         self.assertEqual(entries[name]['parentUrl'], self.source.parent.as_uri())
         self.assertEqual(entries[local.name]['parentUrl'], self.desktop.directory.as_uri())
 
+    def write_launcher(self, name='sample.desktop', icon='sample-icon'):
+        source = self.root / name
+        source.write_text('[Desktop Entry]\nType=Application\nName=Sample App\nName[zh_CN]=示例应用\n'
+                          'Exec=sample-app --flag %U\nIcon=' + icon + '\nTerminal=false\n')
+        return source
+
+    def test_desktop_import_copies_and_reads_metadata(self):
+        source = self.write_launcher()
+        name = self.desktop.link(source.as_uri())
+        imported = self.desktop.directory / name
+        self.assertFalse(imported.is_symlink())
+        self.assertEqual(imported.read_bytes(), source.read_bytes())
+        self.assertEqual(self.desktop.link(source.as_uri()), name)
+        with patch.dict(module.os.environ, {'LC_ALL': 'zh_CN.UTF-8', 'LANGUAGE': ''}):
+            entry = self.desktop.snapshot()['entries'][0]
+        self.assertTrue(entry['launcher'])
+        self.assertTrue(entry['removable'])
+        self.assertEqual(entry['displayName'], '示例应用')
+        self.assertEqual(entry['icon'], 'sample-icon')
+        self.desktop.handle(dict(action='unlinkMany', names=[name]))
+        self.assertTrue(source.exists())
+
+    def test_desktop_existing_link_and_absolute_icon(self):
+        image = self.root / '图标 # %.png'
+        image.write_bytes(b'image fixture')
+        source = self.write_launcher(icon=str(image))
+        link = self.desktop.directory / 'old.desktop'
+        link.symlink_to(source)
+        entry = self.desktop.snapshot()['entries'][0]
+        self.assertTrue(entry['launcher'])
+        self.assertTrue(entry['link'])
+        self.assertEqual(entry['iconUrl'], image.as_uri())
+        with patch.object(module.shutil, 'which', return_value='/usr/bin/gio'), \
+             patch.object(module.subprocess, 'run') as run:
+            run.return_value = subprocess.CompletedProcess([], 0, '', '')
+            module.open_file(link.as_uri())
+            self.assertEqual(run.call_args.args[0], ['gio', 'launch', str(source)])
+
+    def test_desktop_collision_and_invalid_entry(self):
+        source = self.write_launcher()
+        existing = self.desktop.directory / source.name
+        existing.write_text('do not replace')
+        name = self.desktop.link(str(source))
+        self.assertNotEqual(name, existing.name)
+        self.assertEqual(existing.read_text(), 'do not replace')
+        self.assertFalse((self.desktop.directory / name).is_symlink())
+        invalid = self.root / 'invalid.desktop'
+        invalid.write_text('[Desktop Entry]\nType=Application\nName=Bad\n')
+        with self.assertRaises(ValueError):
+            self.desktop.link(str(invalid))
+        self.assertFalse((self.desktop.directory / invalid.name).exists())
+        self.assertFalse(any(p.name.startswith('.launcher-') for p in self.desktop.directory.iterdir()))
+
     def test_daemon_handles_queued_commands(self):
         commands = [dict(action='link', sources=[self.source.as_uri()]),
                     dict(action='move', name=self.source.name, screen='DP-1', x=71, y=99)]
