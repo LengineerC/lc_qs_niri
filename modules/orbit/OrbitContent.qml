@@ -34,16 +34,30 @@ FocusScope {
     property real requestedX: -1
     property real requestedY: -1
     property bool anchorPending: false
-    readonly property real centerX: Math.max(400 * fit,
-        Math.min(width - 400 * fit, requestedX < 0 ? width / 2 : requestedX))
-    readonly property real centerY: Math.max(330 * fit,
-        Math.min(height - 330 * fit, requestedY < 0 ? height / 2 : requestedY))
+    // Reserve the largest configured tier, so entering a submenu does not
+    // move the center. Include hover travel, capsule half-size and a small gap.
+    readonly property real placementRadius: maximumTierRadius(OrbitService.items)
+    readonly property real edgeInsetX: (placementRadius + 16 + 142 + 12) * fit
+    readonly property real edgeInsetY: (placementRadius + 16 + 27 + 12) * fit
+    readonly property real centerX: Math.max(edgeInsetX,
+        Math.min(width - edgeInsetX, requestedX < 0 ? width / 2 : requestedX))
+    readonly property real centerY: Math.max(edgeInsetY,
+        Math.min(height - edgeInsetY, requestedY < 0 ? height / 2 : requestedY))
     readonly property real unit: Appearance.px(1)
     readonly property real fit: Math.min(unit, width / 800, height / 660)
     readonly property real radius: Math.max(168, 120 + items.length * 12)
     readonly property real progress: { frame; return Math.max(0, Math.min(1, entry.current)); }
     readonly property color accent: Appearance.primary
     signal finished()
+
+    function maximumTierRadius(entries) {
+        let extent = Math.max(168, 120 + entries.length * 12);
+        for (const item of entries) {
+            if (item.children)
+                extent = Math.max(extent, maximumTierRadius(item.children));
+        }
+        return extent;
+    }
 
     function wake() { animating = true; }
     function tier(next, entering) {
