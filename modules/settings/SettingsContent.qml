@@ -1467,6 +1467,27 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
+                        PanelText {
+                            text: I18n.tr("barPosition")
+                            Layout.fillWidth: true
+                        }
+                        Repeater {
+                            model: ["top", "bottom", "left", "right"]
+                            delegate: ChoiceChip {
+                                required property string modelData
+                                useBarPalette: SettingsPalette.glassMode
+                                Layout.minimumWidth: Appearance.px(56)
+                                Layout.preferredWidth: Appearance.px(76)
+                                Layout.fillWidth: false
+                                label: I18n.tr("bar" + modelData.charAt(0).toUpperCase() + modelData.slice(1))
+                                selected: ShellSettings.barPosition === modelData
+                                onChosen: ShellSettings.barPosition = modelData
+                            }
+                        }
+                    }
+ 
+                    RowLayout {
+                        Layout.fillWidth: true
 
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -2125,27 +2146,6 @@ Item {
                                             modelData;
                                     }
                                 }
-                            }
-                        }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        PanelText {
-                            text: I18n.tr("barPosition")
-                            Layout.fillWidth: true
-                        }
-                        Repeater {
-                            model: ["top", "bottom", "left", "right"]
-                            delegate: ChoiceChip {
-                                required property string modelData
-                                useBarPalette: SettingsPalette.glassMode
-                                Layout.minimumWidth: Appearance.px(56)
-                                Layout.preferredWidth: Appearance.px(76)
-                                Layout.fillWidth: false
-                                label: I18n.tr("bar" + modelData.charAt(0).toUpperCase() + modelData.slice(1))
-                                selected: ShellSettings.barPosition === modelData
-                                onChosen: ShellSettings.barPosition = modelData
                             }
                         }
                     }
