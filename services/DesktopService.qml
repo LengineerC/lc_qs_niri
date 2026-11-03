@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.common
+import "DesktopOpenGate.js" as OpenGate
 
 Singleton {
     id: root
@@ -16,6 +17,8 @@ Singleton {
     property bool ready: false
     property var pending: []
     property var openQueue: []
+    property var openGate: OpenGate.createState()
+    readonly property int openCooldownMs: 1200
     readonly property string scriptPath: decodeURIComponent(String(Qt.resolvedUrl(
         "../scripts/desktop_files.py")).replace(/^file:\/\//, ""))
 
@@ -40,25 +43,32 @@ Singleton {
     function removeLink(name) { send({action: "unlink", name: name}); }
     function open(url) {
         error = "";
-        openQueue.push(String(url));
+        const key = String(url);
+        if (!OpenGate.tryAcquire(openGate, key, Date.now(), openCooldownMs))
+            return;
+        openQueue.push({url: key, key: key});
         startOpen();
     }
     function startOpen() {
         if (opener.running || openQueue.length === 0)
             return;
-        opener.url = openQueue.shift();
+        const request = openQueue.shift();
+        opener.url = request.url;
+        opener.key = request.key;
         opener.diagnostics = "";
         opener.running = true;
     }
     Process {
         id: opener
         property string url: ""
+        property string key: ""
         property string diagnostics: ""
         command: ["python3", root.scriptPath, "--open", url]
         stderr: SplitParser { onRead: line => opener.diagnostics += line + "\n" }
         onExited: (exitCode, exitStatus) => {
             if (exitCode !== 0)
                 root.error = opener.diagnostics.trim() || I18n.tr("desktopOpenFailed");
+            OpenGate.release(root.openGate, opener.key, Date.now());
             Qt.callLater(root.startOpen);
         }
     }
